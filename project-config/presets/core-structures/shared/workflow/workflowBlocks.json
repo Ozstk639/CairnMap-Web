@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "cairnmap.workflow-blocks.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "id": "fieldInput",
+      "label": "标准字段直灌",
+      "runtimeStatus": "active",
+      "params": [
+        "title",
+        "field",
+        "valueType",
+        "persistInSession"
+      ],
+      "category": "standard",
+      "componentKey": "textInput",
+      "description": "Direct field input. The block writes the value to a target field."
+    },
+    {
+      "id": "runtimeValue",
+      "label": "公共值",
+      "runtimeStatus": "active",
+      "params": [
+        "key",
+        "title",
+        "valueType",
+        "persistInSession"
+      ],
+      "category": "standard",
+      "componentKey": "runtimeValueInput",
+      "description": "Workflow-scoped public value used by later output assembly."
+    },
+    {
+      "id": "relationSearch",
+      "label": "通用关系搜索框",
+      "runtimeStatus": "active",
+      "params": [
+        "title",
+        "targetClassScope",
+        "searchFields",
+        "returnField",
+        "displayField",
+        "outputPath",
+        "enableJump"
+      ],
+      "category": "relation",
+      "componentKey": "workflowRelationSearch",
+      "relationActionKey": "genericFeatureJump",
+      "description": "Search and return values from a target class scope."
+    },
+    {
+      "id": "classificationPicker",
+      "label": "三元分类选项",
+      "runtimeStatus": "active",
+      "params": [
+        "classCode",
+        "kindScope",
+        "skindScope",
+        "skind2Scope"
+      ],
+      "category": "classification",
+      "componentKey": "classificationPicker",
+      "description": "Kind/SKind/SKind2 selection block."
+    },
+    {
+      "id": "component",
+      "label": "通用/专有部件组装区",
+      "runtimeStatus": "active",
+      "params": [
+        "componentKey",
+        "dataPath",
+        "outputPath",
+        "props"
+      ],
+      "category": "component",
+      "componentKey": "dynamicWorkflowComponent",
+      "description": "Generic wrapper for registered workflow components."
+    },
+    {
+      "id": "review",
+      "label": "检查与提交页块",
+      "runtimeStatus": "active",
+      "params": [
+        "summaryPaths"
+      ],
+      "category": "review",
+      "componentKey": "reviewPanel",
+      "description": "Review and submit summary block."
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "cairnmap.format-special-formatters.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "registry",
+  "items": [
+    {
+      "key": "tradePointFormatter",
+      "classCodes": [
+        "TRP"
+      ],
+      "runtimeStatus": "configPrimary",
+      "description": "TRP nested trade structure formatter. Config owns fields/groups; TS executes nested trade transform."
+    },
+    {
+      "key": "stationFormatter",
+      "classCodes": [
+        "STA"
+      ],
+      "runtimeStatus": "configPrimary",
+      "description": "Station platforms and station relation formatter."
+    },
+    {
+      "key": "platformFormatter",
+      "classCodes": [
+        "PLF"
+      ],
+      "runtimeStatus": "configPrimary",
+      "description": "Platform relation formatter."
+    },
+    {
+      "key": "railLineFormatter",
+      "classCodes": [
+        "RLE"
+      ],
+      "runtimeStatus": "configPrimary",
+      "description": "Rail line PLpoints and station/platform relation formatter."
+    },
+    {
+      "key": "platformFootprintFormatter",
+      "classCodes": [
+        "PFB"
+      ],
+      "runtimeStatus": "configPrimary",
+      "description": "Platform footprint polygon formatter."
+    },
+    {
+      "key": "stationBuildingFormatter",
+      "classCodes": [
+        "STB"
+      ],
+      "runtimeStatus": "configPrimary",
+      "description": "Station building floors and relation formatter."
+    },
+    {
+      "key": "stationBuildingPointFormatter",
+      "classCodes": [
+        "SBP"
+      ],
+      "runtimeStatus": "configPrimary",
+      "description": "Station building point formatter."
+    },
+    {
+      "key": "stationFloorFormatter",
+      "classCodes": [
+        "STF"
+      ],
+      "runtimeStatus": "configPrimary",
+      "description": "Station floor formatter."
+    }
+  ]
+}

@@ -1,0 +1,278 @@
+{
+  "schemaVersion": "cairnmap.class.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "active",
+  "classCode": "SBP",
+  "classKey": "stationBuildingPoint",
+  "sourceFeatureKey": "车站建筑点",
+  "label": {
+    "zh-CN": "车站建筑点",
+    "en": "Station Building Point"
+  },
+  "description": "车站建筑点 class config-primary config. Runtime facade now resolves from preset Class config.",
+  "data": {
+    "typeField": "Type",
+    "classField": "Class",
+    "worldField": "World",
+    "defaultType": "Points",
+    "defaultClass": "SBP"
+  },
+  "geometry": {
+    "type": "Point",
+    "sourceField": "coordinate",
+    "axisOrder": "x,z,y",
+    "required": true
+  },
+  "identity": {
+    "idField": "ID",
+    "nameField": "Name",
+    "displayNameField": "Name"
+  },
+  "classification": {
+    "kindField": "Kind",
+    "skindField": "SKind",
+    "skind2Field": "SKind2",
+    "required": false,
+    "options": []
+  },
+  "fields": [
+    {
+      "key": "ID",
+      "label": {
+        "zh-CN": "车站建筑点ID"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "ID",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "Name",
+      "label": {
+        "zh-CN": "车站建筑名"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Name",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "elevation",
+      "label": {
+        "zh-CN": "高度(y)"
+      },
+      "type": "number",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "elevation",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    }
+  ],
+  "groups": [
+    {
+      "key": "Floors",
+      "label": {
+        "zh-CN": "包含楼层 Floors"
+      },
+      "type": "array",
+      "optional": true,
+      "minItems": 0,
+      "addButtonText": "添加楼层条目",
+      "fields": [
+        {
+          "key": "ID",
+          "label": {
+            "zh-CN": "楼层ID"
+          },
+          "type": "text",
+          "required": true,
+          "optional": false,
+          "sourceRuntimeField": "ID",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": true
+          }
+        },
+        {
+          "key": "Group",
+          "label": {
+            "zh-CN": "分组(Group)"
+          },
+          "type": "text",
+          "required": false,
+          "optional": true,
+          "sourceRuntimeField": "Group",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        }
+      ]
+    },
+    {
+      "key": "stations",
+      "label": {
+        "zh-CN": "包含站台 stations"
+      },
+      "type": "array",
+      "optional": false,
+      "minItems": 1,
+      "addButtonText": "添加站台条目",
+      "fields": [
+        {
+          "key": "ID",
+          "label": {
+            "zh-CN": "车站ID"
+          },
+          "type": "text",
+          "required": true,
+          "optional": false,
+          "sourceRuntimeField": "ID",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": true
+          }
+        }
+      ]
+    }
+  ],
+  "tags": {
+    "enabled": true,
+    "allowOther": true,
+    "items": [
+      {
+        "key": "category",
+        "label": {
+          "zh-CN": "分类(category)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "level",
+        "label": {
+          "zh-CN": "等级(level)"
+        },
+        "type": "number"
+      },
+      {
+        "key": "status",
+        "label": {
+          "zh-CN": "状态(status)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "source",
+        "label": {
+          "zh-CN": "来源(source)"
+        },
+        "type": "text"
+      }
+    ]
+  },
+  "extensions": {
+    "enabled": true,
+    "allowOtherNamespaces": true,
+    "namespaces": []
+  },
+  "display": {
+    "runtimeStatus": "active",
+    "sourceRuntimeFile": "src/components/Rules/rendering/featureRenderRules.ts",
+    "rules": [
+      {
+        "id": "SBP-station-building-point",
+        "runtimeStatus": "active",
+        "match": {
+          "classCode": "SBP"
+        },
+        "profile": "poiPoint",
+        "displayTier": "poi",
+        "geometry": {
+          "render": "none"
+        },
+        "label": {
+          "enabled": true,
+          "source": "Name",
+          "styleKey": "bubble-dark-label-14"
+        },
+        "specialLogic": [
+          {
+            "key": "stationBuildingPointFallback",
+            "mode": "optional"
+          },
+          {
+            "key": "hideIfSameIdExistsInClasses",
+            "mode": "optional",
+            "targetClasses": [
+              "STB"
+            ]
+          }
+        ],
+        "notes": "Config rule metadata. Rendering behavior is executed by featureRenderRules.ts.",
+        "algorithms": [
+          {
+            "key": "buildingFloorBinding",
+            "mode": "registry"
+          }
+        ]
+      }
+    ]
+  },
+  "card": {
+    "runtimeStatus": "active",
+    "layoutId": "standard-feature-card",
+    "sections": [
+      {
+        "id": "main",
+        "title": "主要信息",
+        "slot": "mainRows"
+      },
+      {
+        "id": "other",
+        "title": "其他信息",
+        "slot": "otherRows",
+        "collapsedByDefault": true
+      }
+    ],
+    "fields": [],
+    "relations": [],
+    "enhancements": [
+      {
+        "key": "genericRelationLinks",
+        "componentKey": "relationRows",
+        "runtimeStatus": "active"
+      }
+    ]
+  },
+  "workflowBindings": [
+    {
+      "workflowId": "rail-station-building-point-workflow",
+      "default": true,
+      "runtimeStatus": "active",
+      "runtimeMode": "specialComponentPrimary"
+    }
+  ]
+}

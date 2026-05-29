@@ -1,10 +1,15 @@
 import type React from 'react';
-import { Building2, Leaf, Map, Home, Train, Zap, ShoppingCart, Route } from 'lucide-react';
+import type { CairnMapRuleButtonBehavior, CairnMapRuleButtonCriteria } from '../../../core/project/environmentTypes';
+import { getOpenRIAMapRuleButtonsConfig } from '../../../core/project/openriamapRiaEnvironment';
+import { resolveRuleButtonIcon } from './ruleButtonIconRegistry';
 
 /**
- * 规则图层“分组开关”配置
- * - 修改这里即可增删按钮/规则
- * - 每个按钮的 criteria 默认使用 AND 逻辑：同时满足所有字段约束才会命中
+ * 规则图层“分组开关”运行配置 adapter。
+ *
+ * CM_CFG_1B 起：按钮定义主源为
+ * project-config/packages/openriamap-ria/environment/ruleButtons.json。
+ *
+ * 这里保持旧导出 API 不变，供 RuleButtonPanel / ruleButtonFilter / ruleButtonState 继续使用。
  */
 
 export type RuleButtonCriteria = {
@@ -24,102 +29,105 @@ export type RuleButtonCriteria = {
   SKind2?: string[];
 };
 
+export type RuleButtonTone = 'blue' | 'green' | 'cyan' | 'purple' | 'gray' | 'orange' | 'slate';
 
 export type RuleButtonDef = {
   id: string;
   label: string;
   /** ToolIconButton 的 tone */
-  tone: 'blue' | 'green' | 'cyan' | 'purple' | 'gray' | 'orange' | 'slate';
+  tone: RuleButtonTone;
   icon: React.ReactNode;
   criteria: RuleButtonCriteria;
 
   /**
-   * 互斥规则（预备结构）：当开启本按钮时，若这些按钮当前为开启状态，则会被强制关闭。
+   * 互斥规则：当开启本按钮时，若这些按钮当前为开启状态，则会被强制关闭。
    * - 只需要在一侧声明即可（非必须对称）
    */
   exclusiveWith?: string[];
+
+  /**
+   * CairnMap JSON 侧行为扩展。
+   * - CM_CFG_1B 仅轻量接入，不改变当前默认行为。
+   */
+  behavior?: CairnMapRuleButtonBehavior;
+
+  /** 配置层默认是否开启；实际 fallback 仍优先使用 defaults.fallback。 */
+  defaultEnabled?: boolean;
 };
 
-/**
- * 预设按钮：与当前“铁路/地标/玩家”相同的按钮风格与尺寸（ToolIconButton）
- */
-export const RULE_BUTTON_DEFS: RuleButtonDef[] = [
-  {
-    id: 'railway_new',
-    label: '铁路-新',
-    tone: 'blue',
-    icon: <Train className="w-5 h-5" />,
-    criteria: { Class: ['RLE','STA', 'STB', 'PLF', 'PFB', 'SBP', 'STF'] },
-  },
-  {
-    id: 'road',
-    label: '道路',
-    tone: 'orange',
-    icon: <Route className="w-5 h-5" />,
-    criteria: { Class: ['ROD'] },
-  },
-  {
-    id: 'natural_geo',
-    label: '自然地理',
-    tone: 'green',
-    icon: <Leaf className="w-5 h-5" />,
-    // 覆盖自然要素：面（ISG）+ 线（ISL）。
-    // - 需要让 SearchBar 能对 NGF-WTR 等线要素自动打开对应开关并触发信息卡。
-    criteria: { Class: ['ISG', 'ISL'], Kind: ['NGF'] },
-  },
-  {
-    id: 'settlement',
-    label: '聚落',
-    tone: 'cyan',
-    icon: <Home className="w-5 h-5" />,
-    criteria: { Kind: ['ADM'], SKind: ['DBZ', 'DBP'] },
-  },
-  {
-    id: 'planning',
-    label: '规划',
-    tone: 'slate',
-    icon: <Map className="w-5 h-5" />,
-    criteria: { Kind: ['ADM'], SKind: ['PLP'] },
-  },
-  {
-    id: 'teleport_point',
-    label: '传送点',
-    tone: 'cyan',
-    icon: <Zap className="w-5 h-5" />,
-    criteria: { Class: ['TPP','WRP'] },
-  },
-  {
-    id: 'trade_point',
-    label: '交易点',
-    tone: 'green',
-    icon: <ShoppingCart className="w-5 h-5" />,
-    criteria: { Class: ['TRP'] },
-  },
-  {
-    id: 'building',
-    label: '建筑',
-    tone: 'purple',
-    icon: <Building2 className="w-5 h-5" />,
-    criteria: { Class: ['BUD', 'FLR', 'STB', 'STF'] },
-  },
-];
+function asStringArray(values: string[] | undefined): string[] | undefined {
+  if (!Array.isArray(values)) return undefined;
+  const out = values.map((value) => String(value ?? '').trim()).filter(Boolean);
+  return out.length > 0 ? out : undefined;
+}
+
+function toLegacyCriteria(criteria: CairnMapRuleButtonCriteria | undefined): RuleButtonCriteria {
+  return {
+    Class: asStringArray(criteria?.classCode),
+    Kind: asStringArray(criteria?.kind),
+    SKind: asStringArray(criteria?.skind),
+    SKind2: asStringArray(criteria?.skind2),
+  };
+}
+
+const ruleButtonsConfig = getOpenRIAMapRuleButtonsConfig();
 
 /**
- * 全局开关策略（预备结构）
+ * 预设按钮：与当前“铁路/地标/玩家”相同的按钮风格与尺寸（ToolIconButton）。
  */
+export const RULE_BUTTON_DEFS: RuleButtonDef[] = ruleButtonsConfig.items.map((item) => {
+  const behavior = item.behavior ?? {};
+  return {
+    id: item.id,
+    label: item.label,
+    tone: item.tone,
+    icon: resolveRuleButtonIcon(item.iconKey),
+    criteria: toLegacyCriteria(item.criteria),
+    exclusiveWith: asStringArray(behavior.exclusiveWith),
+    behavior,
+    defaultEnabled: item.defaultEnabled,
+  };
+});
+
+/** 全局开关策略。 */
 export const RULE_BUTTON_POLICY = {
   /** 同时开启的最大按钮数（<=0 视为不限制） */
-  maxActive: 0,
+  maxActive: Number(ruleButtonsConfig.policy?.maxActive ?? 0),
 };
 
-/**
- * 每个世界的默认开启状态：
- * - 为了避免“全规则要素”过多，这里默认只启用上述五类
- * - 你可以按 worldId 覆盖（例如某些 world 想默认多开/少开）
- */
-export const DEFAULT_ACTIVE_RULE_BUTTONS_BY_WORLD: Record<string, string[] | undefined> = {
-  // e.g. 'ZTH': ['railway_new', 'settlement'],
-  // fallback: undefined
-};
+/** localStorage 新 key。 */
+export const RULE_BUTTON_STATE_STORAGE_KEY =
+  String(ruleButtonsConfig.storageKey ?? '').trim() || 'cairnmap_rule_button_state_v1';
 
-export const DEFAULT_ACTIVE_RULE_BUTTONS_FALLBACK: string[] = RULE_BUTTON_DEFS.map((d) => d.id);
+/** localStorage 旧 key，用于从 OpenRIAMap/RIA 迁移到 CairnMap。 */
+export const RULE_BUTTON_STATE_LEGACY_STORAGE_KEYS: string[] = Array.isArray(ruleButtonsConfig.legacyStorageKeys)
+  ? ruleButtonsConfig.legacyStorageKeys.map((key) => String(key ?? '').trim()).filter(Boolean)
+  : [];
+
+function uniqueKnownIds(ids: string[] | undefined): string[] {
+  const known = new Set(RULE_BUTTON_DEFS.map((def) => def.id));
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const id of ids ?? []) {
+    const key = String(id ?? '').trim();
+    if (!key || seen.has(key) || !known.has(key)) continue;
+    seen.add(key);
+    out.push(key);
+  }
+  return out;
+}
+
+const inferredDefaultEnabledIds = RULE_BUTTON_DEFS
+  .filter((def) => def.defaultEnabled !== false)
+  .map((def) => def.id);
+
+/** 每个世界的默认开启状态。 */
+export const DEFAULT_ACTIVE_RULE_BUTTONS_BY_WORLD: Record<string, string[] | undefined> = Object.fromEntries(
+  Object.entries(ruleButtonsConfig.defaults?.byWorld ?? {}).map(([worldId, ids]) => [worldId, uniqueKnownIds(ids)]),
+);
+
+/** fallback 默认开启状态；优先使用 JSON defaults.fallback。 */
+export const DEFAULT_ACTIVE_RULE_BUTTONS_FALLBACK: string[] =
+  uniqueKnownIds(ruleButtonsConfig.defaults?.fallback).length > 0
+    ? uniqueKnownIds(ruleButtonsConfig.defaults?.fallback)
+    : uniqueKnownIds(inferredDefaultEnabledIds);

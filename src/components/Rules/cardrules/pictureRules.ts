@@ -1,3 +1,5 @@
+// CairnMap LEGACY CLEANUP: media/card executor helpers only.
+// Project media rules should be config-driven.
 /**
  * 图片目录规则（信息卡 - 照片报幕）。
  *

@@ -1,0 +1,347 @@
+{
+  "schemaVersion": "cairnmap.class.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "active",
+  "classCode": "TPP",
+  "classKey": "teleportPoint",
+  "sourceFeatureKey": "传送点",
+  "label": {
+    "zh-CN": "传送点",
+    "en": "Teleport Point"
+  },
+  "description": "传送点 class config-primary config. Runtime facade now resolves from preset Class config.",
+  "data": {
+    "typeField": "Type",
+    "classField": "Class",
+    "worldField": "World",
+    "defaultType": "Points",
+    "defaultClass": "TPP"
+  },
+  "geometry": {
+    "type": "Point",
+    "sourceField": "coordinate",
+    "axisOrder": "x,z,y",
+    "required": true
+  },
+  "identity": {
+    "idField": "ID",
+    "nameField": "Name",
+    "displayNameField": "Name"
+  },
+  "classification": {
+    "kindField": "Kind",
+    "skindField": "SKind",
+    "skind2Field": "SKind2",
+    "required": false,
+    "options": [
+      {
+        "kind": "NOM",
+        "skind": "NOM",
+        "skind2": "",
+        "drawMode": "point",
+        "geom": "点",
+        "label": {
+          "zh-CN": "默认"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "SPE",
+        "skind": "SPE",
+        "skind2": "",
+        "drawMode": "point",
+        "geom": "点",
+        "label": {
+          "zh-CN": "特殊"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      }
+    ]
+  },
+  "fields": [
+    {
+      "key": "ID",
+      "label": {
+        "zh-CN": "传送点ID"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "ID",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "Name",
+      "label": {
+        "zh-CN": "传送点名"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Name",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "Kind",
+      "label": {
+        "zh-CN": "类型(Kind)"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Kind",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "SKind",
+      "label": {
+        "zh-CN": "子类型(SKind)"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "SKind",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "SKind2",
+      "label": {
+        "zh-CN": "三级子类型(SKind2)"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "SKind2",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "hub",
+      "label": {
+        "zh-CN": "枢纽(hub)"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "hub",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "TGTWarp",
+      "label": {
+        "zh-CN": "目标Warp(TGTWarp)"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "TGTWarp",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "TGT_x",
+      "label": {
+        "zh-CN": "目标点X(TGT_x)"
+      },
+      "type": "number",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "TGT_x",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "TGT_z",
+      "label": {
+        "zh-CN": "目标点Z(TGT_z)"
+      },
+      "type": "number",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "TGT_z",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "elevation",
+      "label": {
+        "zh-CN": "传送点高度(y)"
+      },
+      "type": "number",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "elevation",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "TGTelevation",
+      "label": {
+        "zh-CN": "目标点高度(TGTelevation)"
+      },
+      "type": "number",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "TGTelevation",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    }
+  ],
+  "groups": [],
+  "tags": {
+    "enabled": true,
+    "allowOther": true,
+    "items": [
+      {
+        "key": "category",
+        "label": {
+          "zh-CN": "分类(category)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "level",
+        "label": {
+          "zh-CN": "等级(level)"
+        },
+        "type": "number"
+      },
+      {
+        "key": "status",
+        "label": {
+          "zh-CN": "状态(status)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "source",
+        "label": {
+          "zh-CN": "来源(source)"
+        },
+        "type": "text"
+      }
+    ]
+  },
+  "extensions": {
+    "enabled": true,
+    "allowOtherNamespaces": true,
+    "namespaces": []
+  },
+  "display": {
+    "runtimeStatus": "active",
+    "sourceRuntimeFile": "src/components/Rules/rendering/featureRenderRules.ts",
+    "rules": [
+      {
+        "id": "TPP-teleport-point",
+        "runtimeStatus": "active",
+        "match": {
+          "classCode": "TPP"
+        },
+        "profile": "poiPoint",
+        "displayTier": "poi",
+        "geometry": {
+          "render": "none"
+        },
+        "label": {
+          "enabled": true,
+          "source": "Name",
+          "styleKey": "bubble-dark-label-14"
+        },
+        "specialLogic": [
+          {
+            "key": "teleportPointBinding",
+            "mode": "optional"
+          }
+        ],
+        "notes": "Config rule metadata. Rendering behavior is executed by featureRenderRules.ts."
+      }
+    ]
+  },
+  "card": {
+    "runtimeStatus": "active",
+    "layoutId": "teleport-point-card",
+    "sections": [
+      {
+        "id": "main",
+        "title": "主要信息",
+        "slot": "mainRows"
+      },
+      {
+        "id": "other",
+        "title": "其他信息",
+        "slot": "otherRows",
+        "collapsedByDefault": true
+      }
+    ],
+    "fields": [],
+    "relations": [],
+    "enhancements": []
+  },
+  "workflowBindings": [
+    {
+      "workflowId": "teleport-workflow",
+      "default": true,
+      "runtimeStatus": "active",
+      "runtimeMode": "configPrimary"
+    }
+  ]
+}

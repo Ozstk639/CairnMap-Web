@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "cairnmap.workflow.v1",
+  "projectId": "openriamap-ria",
+  "id": "rail-line-workflow",
+  "label": "Rail line workflow",
+  "runtimeStatus": "active",
+  "targetClass": "RLE",
+  "targetGeometry": "LineString",
+  "runtimeMode": "componentExecutor",
+  "componentKey": "railwayWorkflow",
+  "legacyWorkflowKey": "铁路",
+  "blockRunnerReady": false,
+  "futureBlockTemplateRef": "basic-line-3step",
+  "executorDispatch": "configComponentKey",
+  "legacyFallback": true,
+  "notes": "Current runtime dispatches this workflow to a registered TS component executor. Fine-grained block/page assembly is intentionally not stored in the active workflow JSON."
+}

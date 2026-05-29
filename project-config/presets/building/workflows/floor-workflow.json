@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "cairnmap.workflow.v1",
+  "projectId": "openriamap-ria",
+  "id": "floor-workflow",
+  "label": "Floor unit workflow",
+  "runtimeStatus": "active",
+  "targetClass": "FLR",
+  "targetGeometry": "Polygon",
+  "runtimeMode": "componentExecutor",
+  "componentKey": "floorUnitWorkflow",
+  "legacyWorkflowKey": "建筑楼层",
+  "blockRunnerReady": false,
+  "futureBlockTemplateRef": "basic-polygon-4step",
+  "executorDispatch": "configComponentKey",
+  "legacyFallback": true,
+  "notes": "Current runtime dispatches this workflow to a registered TS component executor. Fine-grained block/page assembly is intentionally not stored in the active workflow JSON."
+}

@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "cairnmap.field-controls.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "id": "text",
+      "componentKey": "textInput",
+      "label": "Text input"
+    },
+    {
+      "id": "textarea",
+      "componentKey": "textareaInput",
+      "label": "Textarea input"
+    },
+    {
+      "id": "number",
+      "componentKey": "numberInput",
+      "label": "Number input"
+    },
+    {
+      "id": "select",
+      "componentKey": "selectInput",
+      "label": "Select input"
+    },
+    {
+      "id": "featureIdSelect",
+      "componentKey": "featureSearchSelect",
+      "label": "Feature ID select"
+    },
+    {
+      "id": "coordinatePicker",
+      "componentKey": "mapCoordinatePicker",
+      "label": "Map coordinate picker"
+    },
+    {
+      "id": "classificationPicker",
+      "componentKey": "classificationPicker",
+      "label": "Classification picker"
+    },
+    {
+      "id": "arrayEditor",
+      "componentKey": "arrayFieldEditor",
+      "label": "Array field editor"
+    },
+    {
+      "id": "special-trp-trade-editor",
+      "componentKey": "trpTradeEditor",
+      "label": "TRP trade editor"
+    },
+    {
+      "id": "special-rail-platform-binding",
+      "componentKey": "railPlatformBindingEditor",
+      "label": "Rail platform binding editor"
+    },
+    {
+      "id": "runtimeValue",
+      "componentKey": "runtimeValueInput",
+      "label": "Runtime value input"
+    },
+    {
+      "id": "relationSearch",
+      "componentKey": "workflowRelationSearch",
+      "label": "Relation search"
+    },
+    {
+      "id": "briefExtensionEditor",
+      "componentKey": "briefExtensionEditor",
+      "label": "Brief extension editor"
+    },
+    {
+      "id": "tagsEditor",
+      "componentKey": "tagsEditor",
+      "label": "Tags editor"
+    },
+    {
+      "id": "geometryDraftStatus",
+      "componentKey": "geometryDraftStatus",
+      "label": "Geometry draft status"
+    },
+    {
+      "id": "roadSpecificOptions",
+      "componentKey": "roadSpecificOptions",
+      "label": "Road specific options"
+    },
+    {
+      "id": "travelModeAllowlist",
+      "componentKey": "travelModeAllowlist",
+      "label": "Travel mode allowlist"
+    },
+    {
+      "id": "explicitConnectionEditor",
+      "componentKey": "explicitConnectionEditor",
+      "label": "Explicit connection editor"
+    },
+    {
+      "id": "blacklistEditor",
+      "componentKey": "blacklistEditor",
+      "label": "Blacklist editor"
+    },
+    {
+      "id": "trpTradeEditor",
+      "componentKey": "trpTradeEditor",
+      "label": "TRP trade editor"
+    },
+    {
+      "id": "railPlatformBindingEditor",
+      "componentKey": "railPlatformBindingEditor",
+      "label": "Rail platform binding editor"
+    },
+    {
+      "id": "railStationBindingEditor",
+      "componentKey": "railStationBindingEditor",
+      "label": "Rail station binding editor"
+    }
+  ]
+}

@@ -187,5 +187,15 @@ export function buildCardEnhancement(
     ];
   }
   if (key === 'railColorChip') return [railColorChip(ctx)];
+  if (key === 'tradePointCard') {
+    const raw = (ctx.featureInfo as any)?.TradeJSON;
+    return [{ label: '交易列表', value: raw || '详见交易卡片', usedPaths: ['TradeJSON'] }];
+  }
+  if (key === 'floorViewRelation') {
+    return [{ label: '楼层视图', value: '已启用通用楼层关系', usedPaths: [] }];
+  }
+  if (key === 'genericRelationLinks') {
+    return [];
+  }
   return [];
 }

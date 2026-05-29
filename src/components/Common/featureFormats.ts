@@ -1,30 +1,22 @@
+// CairnMap FINAL CLEANUP: legacy format facade + special formatter executor bridge only.
+// Do not add Class/field/display/workflow definitions here. Runtime definitions belong in project-config presets.
+import { getClassConfigWorkflowCatalogEntries } from '../../core/project/classCatalogAdapter';
+import {
+  getClassConfigTagRegistryEntriesAsLegacyRecord,
+  listClassConfigs,
+  resolveCairnMapLocalizedLabel,
+} from '../../core/project/classMetadata';
+import { getClassSchema, getClassSchemaByFeatureKey } from '../../core/project/schemaMetadata';
+import type { CairnMapClassConfig, CairnMapClassFieldConfig, CairnMapClassGroupConfig } from '../../core/project/classTypes';
 import { stringifyFeatureJsonArray } from './featureJsonSerializer';
-
-// ============================
-// Workflow Feature Catalog（工作流地物注册表）
-//
-// 背景：通用地物工作流依赖“地物点/线/面”三类通用要素，并通过 Kind / SKind / SKind2
-// 进行具体类型划分与后续显示差分。
-//
-// 目标：提供一个与 Feature 表组合类似、可维护的注册表，用于：
-// - 在工作流 UI 中驱动下拉选择（例如：NGF + LAD 下的全部 SKind2）
-// - 在后续功能中统一引用（导入校验、统计、渲染差分等）
-//
-// 说明：
-// - 注册表字段刻意保持扁平，避免在 UI/导入中引入复杂依赖。
-// - classCode/drawMode 在此处显式写入，避免依赖下方 FORMAT_REGISTRY 的声明顺序。
-// ============================
+import { buildWorldCodeMapFromConfig } from './buildDataToolSchema';
 
 export type WorkflowCatalogGeom = '点' | '线' | '面';
 
 export type WorkflowFeatureCatalogEntry = {
-  /** 对应现有 FeatureKey（地物点/线/面） */
-  classKey: '地物点' | '地物线' | '地物面' | '建筑' | '建筑楼层' | '道路' | '传送点' | 'Warp点' | '交易点';
-  /** 对应 JSON Class（三字码） */
-  classCode: 'ISP' | 'ISL' | 'ISG' | 'BUD' | 'FLR' | 'ROD' | 'TPP' | 'WRP' | 'TRP';
-  /** 对应绘制模式 */
+  classKey: '地物点' | '地物线' | '地物面' | '建筑' | '建筑楼层' | '道路' | '传送点' | 'Warp点' | '交易点' | string;
+  classCode: 'ISP' | 'ISL' | 'ISG' | 'BUD' | 'FLR' | 'ROD' | 'TPP' | 'WRP' | 'TRP' | string;
   drawMode: 'point' | 'polyline' | 'polygon';
-
   kind: string;
   skind: string;
   skind2: string;
@@ -32,84 +24,10 @@ export type WorkflowFeatureCatalogEntry = {
   geom: WorkflowCatalogGeom;
 };
 
-/**
- * 初次添加目录（来自：地物测绘要素第一次添加目录.xlsx）
- * 约束：此处仅作为“注册与下拉驱动”；不对业务逻辑做强约束。
- */
-export const WORKFLOW_FEATURE_CATALOG: WorkflowFeatureCatalogEntry[] = [
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'NGF', skind: 'LAD', skind2: 'CON', name: '大陆', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'NGF', skind: 'LAD', skind2: 'ISD', name: '岛屿', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'NGF', skind: 'LAD', skind2: 'SBC', name: '次级大陆分区', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'NGF', skind: 'LAD', skind2: 'RGC', name: '三级大陆分区', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'NGF', skind: 'LAD', skind2: 'PEN', name: '半岛', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'NGF', skind: 'LAD', skind2: 'IST', name: '地峡', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'NGF', skind: 'LIS', skind2: 'MTN', name: '山区', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'NGF', skind: 'LIS', skind2: 'BSN', name: '盆地', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'NGF', skind: 'LIS', skind2: 'PLN', name: '平原', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'NGF', skind: 'WTB', skind2: 'SEA', name: '海洋', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'NGF', skind: 'WTB', skind2: 'LKE', name: '湖泊', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'NGF', skind: 'WTB', skind2: 'STR', name: '海峡', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'NGF', skind: 'WTB', skind2: 'EST', name: '河口', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'ADM', skind: 'DBZ', skind2: 'L1', name: '一级行政区', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'ADM', skind: 'DBZ', skind2: 'L2', name: '二级行政区', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'ADM', skind: 'DBZ', skind2: 'L3', name: '三级行政区', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'ADM', skind: 'PLZ', skind2: 'L1', name: '一级规划行政区', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'ADM', skind: 'PLZ', skind2: 'L2', name: '二级规划行政区', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'ADM', skind: 'PLZ', skind2: 'L3', name: '三级规划行政区', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'ADM', skind: 'PLZ', skind2: 'UP', name: '未定规划区', geom: '面' },
-  { classKey: '地物面', classCode: 'ISG', drawMode: 'polygon', kind: 'ADM', skind: 'PLZ', skind2: 'UC', name: '未定建设区', geom: '面' },
-  { classKey: '地物线', classCode: 'ISL', drawMode: 'polyline', kind: 'NGF', skind: 'WTR', skind2: 'RVR', name: '河道', geom: '线' },
-  { classKey: '地物线', classCode: 'ISL', drawMode: 'polyline', kind: 'NGF', skind: 'WTR', skind2: 'CAN', name: '运河', geom: '线' },
-  { classKey: '地物线', classCode: 'ISL', drawMode: 'polyline', kind: 'NGF', skind: 'BOD', skind2: 'BDY', name: '特定自然地理边界线', geom: '线' },
-  { classKey: '地物线', classCode: 'ISL', drawMode: 'polyline', kind: 'NGF', skind: 'BOD', skind2: 'STC', name: '海峡中线', geom: '线' },
-  { classKey: '地物线', classCode: 'ISL', drawMode: 'polyline', kind: 'ADM', skind: 'DBL', skind2: 'LBD', name: '行政区边界', geom: '线' },
-  { classKey: '地物线', classCode: 'ISL', drawMode: 'polyline', kind: 'ADM', skind: 'PLL', skind2: 'CBD', name: '规划区边界', geom: '线' },
-  { classKey: '地物点', classCode: 'ISP', drawMode: 'point', kind: 'NGF', skind: 'SCP', skind2: 'SPP', name: '特定自然要素点', geom: '点' },
-  { classKey: '地物点', classCode: 'ISP', drawMode: 'point', kind: 'ADM', skind: 'DBP', skind2: 'LIP', name: '特定地标点', geom: '点' },
-  { classKey: '地物点', classCode: 'ISP', drawMode: 'point', kind: 'ADM', skind: 'PLP', skind2: 'PLP', name: '规划点', geom: '点' },
-  { classKey: '地物点', classCode: 'ISP', drawMode: 'point', kind: 'ADM', skind: 'PLP', skind2: 'COP', name: '建设点', geom: '点' },
-  { classKey: '地物点', classCode: 'ISP', drawMode: 'point', kind: 'ADM', skind: 'DBP', skind2: 'SHR', name: '地标点', geom: '点' },
-  // ===== 建筑 / 建筑楼层（BUD/FLR）=====
-  { classKey: '建筑', classCode: 'BUD', drawMode: 'polygon', kind: 'NOM', skind: 'NOM', skind2: '', name: '默认', geom: '面' },
-  { classKey: '建筑', classCode: 'BUD', drawMode: 'polygon', kind: 'SPE', skind: 'SPE', skind2: '', name: '特殊', geom: '面' },
+export const WORKFLOW_FEATURE_CATALOG: WorkflowFeatureCatalogEntry[] = getClassConfigWorkflowCatalogEntries() as WorkflowFeatureCatalogEntry[];
 
+const getRuntimeWorkflowFeatureCatalog = (): WorkflowFeatureCatalogEntry[] => WORKFLOW_FEATURE_CATALOG;
 
-  
-  { classKey: '建筑楼层', classCode: 'FLR', drawMode: 'polygon', kind: 'NOM', skind: 'NOM', skind2: '', name: '默认', geom: '面' },
-  { classKey: '建筑楼层', classCode: 'FLR', drawMode: 'polygon', kind: 'SPE', skind: 'SPE', skind2: '', name: '特殊', geom: '面' },
-
-
-  // ===== 道路 Road（ROD） =====
-  // 说明：Road 的 Kind/SKind 目前仅区分 NOM/SPE 两类（与你提供的索引表一致）。
-  { classKey: '道路', classCode: 'ROD', drawMode: 'polyline', kind: 'NOM', skind: '', skind2: '', name: '通用', geom: '线' },
-  { classKey: '道路', classCode: 'ROD', drawMode: 'polyline', kind: 'TUK', skind: '', skind2: '', name: '重要干线', geom: '线' },
-  { classKey: '道路', classCode: 'ROD', drawMode: 'polyline', kind: 'PRI', skind: '', skind2: '', name: '主干线', geom: '线' },
-  { classKey: '道路', classCode: 'ROD', drawMode: 'polyline', kind: 'SEC', skind: '', skind2: '', name: '次干线', geom: '线' },
-  { classKey: '道路', classCode: 'ROD', drawMode: 'polyline', kind: 'SEC', skind: '', skind2: '', name: '支路', geom: '线' },
-  { classKey: '道路', classCode: 'ROD', drawMode: 'polyline', kind: 'RES', skind: '', skind2: '', name: '小区域道路', geom: '线' },
-  { classKey: '道路', classCode: 'ROD', drawMode: 'polyline', kind: 'SVS', skind: '', skind2: '', name: '匝道', geom: '线' },
-  { classKey: '道路', classCode: 'ROD', drawMode: 'polyline', kind: 'IDR', skind: '', skind2: '', name: '室内道路', geom: '线' },
-  { classKey: '道路', classCode: 'ROD', drawMode: 'polyline', kind: 'SPE', skind: '', skind2: '', name: '特殊', geom: '线' },
-
-
-  // ===== 传送点 Teleport Point（TPP）=====
-  { classKey: '传送点', classCode: 'TPP', drawMode: 'point', kind: 'NOM', skind: 'NOM', skind2: '', name: '默认', geom: '点' },
-  { classKey: '传送点', classCode: 'TPP', drawMode: 'point', kind: 'SPE', skind: 'SPE', skind2: '', name: '特殊', geom: '点' },
-
-  // ===== Warp点 Warp Point（WRP）=====
-  { classKey: 'Warp点', classCode: 'WRP', drawMode: 'point', kind: 'NOM', skind: 'NOM', skind2: '', name: '默认', geom: '点' },
-  { classKey: 'Warp点', classCode: 'WRP', drawMode: 'point', kind: 'SPE', skind: 'SPE', skind2: '', name: '特殊', geom: '点' },
-
-  // ===== 交易点 Trade Point（TRP）=====
-  { classKey: '交易点', classCode: 'TRP', drawMode: 'point', kind: 'NOM', skind: 'NOM', skind2: '', name: '默认', geom: '点' },
-  { classKey: '交易点', classCode: 'TRP', drawMode: 'point', kind: 'SPE', skind: 'SPE', skind2: '', name: '特殊', geom: '点' },
-
-];
-
-/**
- * 获取某一 Kind/SKind（可选 geom）下的 SKind2 候选项。
- * - label: `${name}（${skind2}）`
- */
 export function listCatalogSKind2Options(args: {
   kind: string;
   skind: string;
@@ -119,7 +37,7 @@ export function listCatalogSKind2Options(args: {
   const skind = String(args.skind ?? '').trim();
   const geom = args.geom;
 
-  return WORKFLOW_FEATURE_CATALOG
+  return getRuntimeWorkflowFeatureCatalog()
     .filter((e) => e.kind === kind && e.skind === skind && (geom ? e.geom === geom : true))
     .map((e) => ({
       skind2: e.skind2,
@@ -130,16 +48,11 @@ export function listCatalogSKind2Options(args: {
     .sort((a, b) => a.label.localeCompare(b.label, 'zh-Hans-CN'));
 }
 
-/**
- * 获取某一 Kind（可选 geom）下的候选项（含 SKind 与 SKind2）。
- * - label: `${name}（${skind}/${skind2}）`
- * 用于“Kind 下所有点/线/面要素”的工作流选择。
- */
 export function listCatalogKindOptions(args: { kind: string; geom?: WorkflowCatalogGeom }) {
   const kind = String(args.kind ?? '').trim();
   const geom = args.geom;
 
-  return WORKFLOW_FEATURE_CATALOG
+  return getRuntimeWorkflowFeatureCatalog()
     .filter((e) => e.kind === kind && (geom ? e.geom === geom : true))
     .map((e) => ({
       skind: e.skind,
@@ -151,17 +64,11 @@ export function listCatalogKindOptions(args: { kind: string; geom?: WorkflowCata
     .sort((a, b) => a.label.localeCompare(b.label, 'zh-Hans-CN'));
 }
 
-
-/**
- * 获取某一 Class（三字码，如 BUD/FLR）（可选 geom）下的候选项（含 Kind 与 SKind）。
- * - label: `${name}（${kind}/${skind}）`
- * 用于“按 Class（非地物点/线/面体系）”的工作流选择。
- */
 export function listCatalogClassOptions(args: { classCode: string; geom?: WorkflowCatalogGeom }) {
   const classCode = String(args.classCode ?? '').trim().toUpperCase();
   const geom = args.geom;
 
-  return WORKFLOW_FEATURE_CATALOG
+  return getRuntimeWorkflowFeatureCatalog()
     .filter((e) => String(e.classCode ?? '').toUpperCase() === classCode && (geom ? e.geom === geom : true))
     .map((e) => ({
       kind: e.kind,
@@ -172,19 +79,6 @@ export function listCatalogClassOptions(args: { classCode: string; geom?: Workfl
     }))
     .sort((a, b) => a.label.localeCompare(b.label, 'zh-Hans-CN'));
 }
-
-
-// src/components/mapping/featureFormats.ts
-
-// ============================
-// Tag Registry（软词典）
-// - tags：轻量筛选/渲染差分（支持规则显式路径：tags.xxx）
-// - extensions：仅记录信息（不参与规则/渲染差分）
-//
-// 设计约束（为大众贡献与维护简化）：
-// 1) tags 的 value 仅允许 primitive（string/number/bool/null），避免深层结构带来导入与渲染复杂度。
-// 2) registry 仅用于“推荐键/类型提示/导入轻校验”；未登记的键允许存在（通过 UI 的“其他”录入）。
-// ============================
 
 export type TagPrimitive = string | number | boolean | null;
 
@@ -208,7 +102,7 @@ export type ExtValueType =
   | typeof EXT_VALUE_TYPE_BOOL
   | typeof EXT_VALUE_TYPE_NULL;
 
-  export type DrawMode = 'point' | 'polyline' | 'polygon';
+export type DrawMode = 'point' | 'polyline' | 'polygon';
 export type BuildOp = 'create' | 'edit' | 'import';
 
 export type FeatureKey =
@@ -228,29 +122,14 @@ export type FeatureKey =
   | '地物线'
   | '地物面'
   | '建筑'
-  | '建筑楼层'
-
+  | '建筑楼层';
 
 export type ImportFormat =
   | '点'
   | '线'
   | '面'
   | '批量'
-  | '车站'
-  | '铁路'
-  | '站台'
-  | '站台轮廓'
-  | '车站建筑'
-  | '车站建筑点'
-  | '车站建筑楼层'
-  | '传送点'
-  | 'Warp点'
-  | '交易点'
-  | '地物点'
-  | '地物线'
-  | '地物面'
-  | '建筑'
-  | '建筑楼层';
+  | Exclude<FeatureKey, '默认'>;
 
 export const EXT_VALUE_TYPE_OPTIONS: Array<{ label: string; value: ExtValueType }> = [
   { label: '文本', value: EXT_VALUE_TYPE_TEXT },
@@ -259,17 +138,16 @@ export const EXT_VALUE_TYPE_OPTIONS: Array<{ label: string; value: ExtValueType 
   { label: '空(null)', value: EXT_VALUE_TYPE_NULL },
 ];
 
-// ✅ 你可以在此处集中维护 tags 软词典（放在文件顶部便于修改）
-// 说明：
-// - key：tags 中的字段名
-// - type：用于 UI 提示与导入轻校验（不会强制阻止未知 key）
-// - options：仅当 type='select' 时使用
-export const TAG_REGISTRY: Record<string, TagRegistryEntry> = {
-  // 通用
+const LEGACY_TAG_REGISTRY: Record<string, TagRegistryEntry> = {
   category: { key: 'category', label: '分类(category)', type: 'text' },
   level: { key: 'level', label: '等级(level)', type: 'number' },
   status: { key: 'status', label: '状态(status)', type: 'text' },
   source: { key: 'source', label: '来源(source)', type: 'text' },
+};
+
+export const TAG_REGISTRY: Record<string, TagRegistryEntry> = {
+  ...getClassConfigTagRegistryEntriesAsLegacyRecord(),
+  ...LEGACY_TAG_REGISTRY,
 };
 
 export const TAG_KEY_OPTIONS: Array<{ label: string; value: string }> = (() => {
@@ -280,25 +158,17 @@ export const TAG_KEY_OPTIONS: Array<{ label: string; value: string }> = (() => {
   return opts;
 })();
 
-const isTagPrimitive = (v: any): v is TagPrimitive => {
-  return v === null || ['string', 'number', 'boolean'].includes(typeof v);
-};
+const isTagPrimitive = (v: unknown): v is TagPrimitive => v === null || ['string', 'number', 'boolean'].includes(typeof v);
 
-const coerceTagPrimitive = (key: string, raw: any): TagPrimitive | undefined => {
+const coerceTagPrimitive = (key: string, raw: unknown): TagPrimitive | undefined => {
   if (raw === undefined) return undefined;
-
-  // null 允许
   if (raw === null) return null;
-
-  const def = TAG_REGISTRY[key];
-  const t = def?.type;
-
+  const t = TAG_REGISTRY[key]?.type;
   if (t === 'number') {
     if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
     const n = Number(String(raw).trim());
     return Number.isFinite(n) ? n : String(raw);
   }
-
   if (t === 'bool') {
     if (typeof raw === 'boolean') return raw;
     const s = String(raw).trim().toLowerCase();
@@ -306,24 +176,16 @@ const coerceTagPrimitive = (key: string, raw: any): TagPrimitive | undefined => 
     if (s === 'false') return false;
     return String(raw);
   }
-
-  // text/select：统一存 string（保持可读性）
-  if (typeof raw === 'string') return raw;
-  return String(raw);
+  return typeof raw === 'string' ? raw : String(raw);
 };
 
-const validateTagsObjectSoft = (tags: any): string | null => {
+const validateTagsObjectSoft = (tags: unknown): string | null => {
   if (tags === undefined || tags === null) return null;
   if (!tags || typeof tags !== 'object' || Array.isArray(tags)) return 'tags 必须是对象';
-
   for (const [k, v] of Object.entries(tags)) {
-    // 未登记键允许存在，但 value 必须是 primitive（避免嵌套结构）
     if (!isTagPrimitive(v)) return `tags.${k} 必须是 string/number/bool/null`;
-
     const def = TAG_REGISTRY[k];
     if (!def) continue;
-
-    // 轻校验：类型不匹配时不直接阻断（仍返回错误信息以提示维护者）
     if (def.type === 'number' && typeof v !== 'number') {
       const n = Number(String(v).trim());
       if (!Number.isFinite(n)) return `tags.${k} 期望 number`;
@@ -332,55 +194,44 @@ const validateTagsObjectSoft = (tags: any): string | null => {
       const s = String(v).trim().toLowerCase();
       if (s !== 'true' && s !== 'false') return `tags.${k} 期望 bool`;
     }
-    if (def.type === 'select' && typeof v !== 'string') {
-      return `tags.${k} 期望 string`;
-    }
+    if (def.type === 'select' && typeof v !== 'string') return `tags.${k} 期望 string`;
   }
   return null;
 };
 
-
-const validateExtensionsObjectSoft = (ext: any): string | null => {
+const validateExtensionsObjectSoft = (ext: unknown): string | null => {
   if (ext === undefined || ext === null) return null;
   if (!ext || typeof ext !== 'object' || Array.isArray(ext)) return 'extensions 必须是对象';
-
-  // 允许两层：extensions.<group>.<key> = primitive
   for (const [g, v] of Object.entries(ext)) {
-    if (!v || typeof v !== 'object' || Array.isArray(v)) return `extensions.${g} 必须是对象`; 
-    for (const [k, vv] of Object.entries(v as any)) {
-      // 为了保持导入简单：仅允许 primitive（不做深层嵌套）
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return `extensions.${g} 必须是对象`;
+    for (const [k, vv] of Object.entries(v as Record<string, unknown>)) {
       if (!isTagPrimitive(vv)) return `extensions.${g}.${k} 必须是 string/number/bool/null`;
     }
   }
   return null;
 };
 
-const buildTagsFromGroupItems = (items: any[]): Record<string, TagPrimitive> => {
+const buildTagsFromGroupItems = (items: unknown[]): Record<string, TagPrimitive> => {
   const out: Record<string, TagPrimitive> = {};
   for (const it of items ?? []) {
-    const keyRaw = String(it?.tagKey ?? '').trim();
-    const key = keyRaw === TAG_KEY_OTHER ? String(it?.tagKeyOther ?? '').trim() : keyRaw;
+    const row = it as Record<string, unknown>;
+    const keyRaw = String(row?.tagKey ?? '').trim();
+    const key = keyRaw === TAG_KEY_OTHER ? String(row?.tagKeyOther ?? '').trim() : keyRaw;
     if (!key) continue;
-
-    const rawVal = it?.tagValue;
+    const rawVal = row?.tagValue;
     const sval = String(rawVal ?? '').trim();
     if (!sval && rawVal !== 0 && rawVal !== false) continue;
-
     const coerced = coerceTagPrimitive(key, rawVal);
-    if (coerced === undefined) continue;
-    out[key] = coerced;
+    if (coerced !== undefined) out[key] = coerced;
   }
   return out;
 };
 
-const flattenTagsToGroupItems = (tags: any): any[] => {
+const flattenTagsToGroupItems = (tags: unknown): Record<string, unknown>[] => {
   if (!tags || typeof tags !== 'object' || Array.isArray(tags)) return [];
-  const out: any[] = [];
+  const out: Record<string, unknown>[] = [];
   for (const [k, v] of Object.entries(tags)) {
     if (!isTagPrimitive(v)) continue;
-    // 若 tags key 不在 registry 中，为了让 UI 回显清晰：
-    // - 字段名选择“其他”
-    // - 其他字段名填写真实 key
     const known = Boolean(TAG_REGISTRY[k]);
     out.push({
       tagKey: known ? k : TAG_KEY_OTHER,
@@ -391,110 +242,74 @@ const flattenTagsToGroupItems = (tags: any): any[] => {
   return out;
 };
 
-const buildExtensionsFromGroupItems = (items: any[]): Record<string, Record<string, TagPrimitive>> => {
+const buildExtensionsFromGroupItems = (items: unknown[]): Record<string, Record<string, TagPrimitive>> => {
   const out: Record<string, Record<string, TagPrimitive>> = {};
   for (const it of items ?? []) {
-    const g = String(it?.extGroup ?? '').trim();
-    const k = String(it?.extKey ?? '').trim();
-    const t = (it?.extType ?? EXT_VALUE_TYPE_TEXT) as ExtValueType;
-    const rawVal = it?.extValue;
-
+    const row = it as Record<string, unknown>;
+    const g = String(row?.extGroup ?? '').trim();
+    const k = String(row?.extKey ?? '').trim();
+    const t = (row?.extType ?? EXT_VALUE_TYPE_TEXT) as ExtValueType;
+    const rawVal = row?.extValue;
     if (!g || !k) continue;
-
-    // null 类型不要求填写值
     if (t === EXT_VALUE_TYPE_NULL) {
       (out[g] ??= {})[k] = null;
       continue;
     }
-
     const sval = String(rawVal ?? '').trim();
     if (!sval && rawVal !== 0 && rawVal !== false) continue;
-
-    let coerced: TagPrimitive | undefined;
+    let coerced: TagPrimitive;
     if (t === EXT_VALUE_TYPE_NUMBER) {
-      if (typeof rawVal === 'number' && Number.isFinite(rawVal)) coerced = rawVal;
-      else {
-        const n = Number(String(rawVal).trim());
-        coerced = Number.isFinite(n) ? n : String(rawVal);
-      }
+      const n = Number(String(rawVal).trim());
+      coerced = Number.isFinite(n) ? n : String(rawVal);
     } else if (t === EXT_VALUE_TYPE_BOOL) {
-      if (typeof rawVal === 'boolean') coerced = rawVal;
-      else {
-        const s = String(rawVal).trim().toLowerCase();
-        if (s === 'true') coerced = true;
-        else if (s === 'false') coerced = false;
-        else coerced = String(rawVal);
-      }
+      const s = String(rawVal).trim().toLowerCase();
+      coerced = s === 'true' ? true : s === 'false' ? false : String(rawVal);
     } else {
-      // text
       coerced = typeof rawVal === 'string' ? rawVal : String(rawVal);
     }
-
-    if (coerced === undefined) continue;
     (out[g] ??= {})[k] = coerced;
   }
   return out;
 };
 
-const flattenExtensionsToGroupItems = (ext: any): any[] => {
+const flattenExtensionsToGroupItems = (ext: unknown): Record<string, unknown>[] => {
   if (!ext || typeof ext !== 'object' || Array.isArray(ext)) return [];
-  const out: any[] = [];
+  const out: Record<string, unknown>[] = [];
   for (const [g, v] of Object.entries(ext)) {
     if (!v || typeof v !== 'object' || Array.isArray(v)) continue;
-    for (const [k, vv] of Object.entries(v as any)) {
+    for (const [k, vv] of Object.entries(v as Record<string, unknown>)) {
       if (!isTagPrimitive(vv)) continue;
-      const extType: ExtValueType =
-        vv === null ? EXT_VALUE_TYPE_NULL
-        : typeof vv === 'number' ? EXT_VALUE_TYPE_NUMBER
-        : typeof vv === 'boolean' ? EXT_VALUE_TYPE_BOOL
-        : EXT_VALUE_TYPE_TEXT;
-      out.push({
-        extGroup: g,
-        extKey: k,
-        extType,
-        // null 类型下，value 输入框可留空
-        extValue: vv === null ? '' : String(vv),
-      });
+      const extType: ExtValueType = vv === null
+        ? EXT_VALUE_TYPE_NULL
+        : typeof vv === 'number'
+          ? EXT_VALUE_TYPE_NUMBER
+          : typeof vv === 'boolean'
+            ? EXT_VALUE_TYPE_BOOL
+            : EXT_VALUE_TYPE_TEXT;
+      out.push({ extGroup: g, extKey: k, extType, extValue: vv === null ? '' : String(vv) });
     }
   }
   return out;
 };
 
-
 export type Coord2D = { x: number; z: number; y?: number };
-
 export type FieldType = 'text' | 'number' | 'select' | 'bool';
 
 export type FieldDef = {
   key: string;
   label: string;
   type: FieldType;
-  /**
-   * 对应新 JSON 规范中的 [非必填]：optional=true
-   * 对应新 JSON 规范中的 [必填]：optional=false/undefined
-   */
   optional?: boolean;
   placeholder?: string;
   options?: Array<{ label: string; value: any }>;
-  /**
-   * 用于组条目新增时的默认值（尤其是 bool 的 True/False 默认）
-   */
-  defaultValue?: any;
+  defaultValue?: unknown;
 };
 
 export type GroupDef = {
-  key: string;                 // groups[key] -> Array<Record<string, any>>
+  key: string;
   label: string;
   addButtonText?: string;
-  /**
-   * 对应新 JSON 规范中的 [非必填]：optional=true
-   * 对应新 JSON 规范中的 [必填]：optional=false/undefined
-   */
   optional?: boolean;
-  /**
-   * 当 group 为必填时，通常需要至少 1 条；默认 1
-   * - optional=true 时该值不会生效
-   */
   minItems?: number;
   fields: FieldDef[];
 };
@@ -502,51 +317,26 @@ export type GroupDef = {
 export type FormatDef = {
   key: FeatureKey;
   label: string;
-  modes: DrawMode[];           // 允许在哪个 drawMode 下出现
-  hideTempOutput?: boolean;    // 非“默认”时隐藏临时输出（按你之前要求）
-  /**
-   * 新 JSON 规范的 Class（索引表对照）。
-   * - “默认/占位 subtype”可以不填。
-   */
+  modes: DrawMode[];
+  hideTempOutput?: boolean;
   classCode?: string;
   fields: FieldDef[];
   groups?: GroupDef[];
-
-  // 把 values/groups + coords 注入成最终可导出的 featureInfo（只要改这里即可改变 JSON 结构）
   buildFeatureInfo: (args: {
     op: BuildOp;
     mode: DrawMode;
     coords: Coord2D[];
-    values: Record<string, any>;
-    groups: Record<string, any[]>;
+    values: Record<string, unknown>;
+    groups: Record<string, unknown[]>;
     worldId?: string;
     editorId?: string;
-    prevFeatureInfo?: any;
+    prevFeatureInfo?: Record<string, unknown>;
     now?: Date;
-  }) => any;
-
-  // 从 featureInfo 回填 values/groups（编辑时用）
-  hydrate: (featureInfo: any) => {
-    values: Record<string, any>;
-    groups: Record<string, any[]>;
-  };
-
-  // 导入 JSON 时：从 item 得到 coords（用于画图）
-  coordsFromFeatureInfo: (featureInfo: any) => Coord2D[];
-
-  // 导入 JSON 时：校验 item，返回错误信息（undefined=通过）
-  validateImportItem?: (item: any) => string | undefined;
+  }) => Record<string, unknown>;
+  hydrate: (featureInfo: unknown) => { values: Record<string, unknown>; groups: Record<string, unknown[]> };
+  coordsFromFeatureInfo: (featureInfo: unknown) => Coord2D[];
+  validateImportItem?: (item: unknown) => string | undefined;
 };
-
-
-
-// ============================
-// Optional tags/extensions (Backwards compatible)
-// - Apply to all non-default formats so every feature type can optionally carry:
-//   - tags: lightweight primitives for filtering / render rules
-//   - extensions: arbitrary metadata (not used by rules)
-// - Implemented once and injected into every FormatDef to avoid duplication.
-// ============================
 
 const OPTIONAL_TAGS_GROUP_DEF: GroupDef = {
   key: 'tags',
@@ -581,67 +371,13 @@ const ensureOptionalTagExtGroups = (groups?: GroupDef[]): GroupDef[] => {
   return base;
 };
 
-const injectOptionalTagsExtensions = (out: any, groups: any) => {
-  if (!out || typeof out !== 'object') return out;
-  const tags = buildTagsFromGroupItems(groups?.tags);
-  const exts = buildExtensionsFromGroupItems(groups?.extensions);
-  if (out.tags === undefined && Object.keys(tags).length > 0) out.tags = tags;
-  if (out.extensions === undefined && Object.keys(exts).length > 0) out.extensions = exts;
-  return out;
-};
-
-const hydrateOptionalTagExtGroups = (featureInfo: any) => {
-  return {
-    tags: flattenTagsToGroupItems(featureInfo?.tags),
-    extensions: flattenExtensionsToGroupItems(featureInfo?.extensions),
-  } as Record<string, any[]>;
-};
-
-const validateOptionalTagExtSoft = (item: any): string | undefined => {
-  const terr = validateTagsObjectSoft(item?.tags);
-  if (terr) return terr;
-  const eerr = validateExtensionsObjectSoft(item?.extensions);
-  if (eerr) return eerr;
-  return;
-};
-
-// ---------- 新规范：系统字段（自动填充） ----------
 const TYPE_NAME_BY_MODE: Record<DrawMode, 'Points' | 'Polyline' | 'Polygon'> = {
   point: 'Points',
   polyline: 'Polyline',
   polygon: 'Polygon',
 };
 
-// 索引表（来自你上传的“索引表.md”）
-// 若后续要扩展，仅在此处增补即可。
-const CLASS_CODE_BY_FEATURE: Partial<Record<FeatureKey, string>> = {
-  车站: 'STA',
-  站台: 'PLF',
-  铁路: 'RLE',
-  车站建筑: 'STB',
-  车站建筑楼层: 'STF',
-  站台轮廓:'PFB',
-  车站建筑点: 'SBP',
-  道路: 'ROD',
-  传送点: 'TPP',
-  Warp点: 'WRP',
-  交易点: 'TRP',
-  地物点: 'ISP',
-  地物线: 'ISL',
-  地物面: 'ISG',
-  建筑: 'BUD',
-  建筑楼层: 'FLR',
-};
-
-// World：按 MapContainer 的 currentWorld id 映射到新规范的整数
-export const WORLD_CODE_BY_WORLD_ID: Record<string, number> = {
-  zth: 0,
-  naraku: 1,
-  houtu: 2,
-  eden: 3,
-  laputa: 4,
-  yunduan: 5,
-};
+export const WORLD_CODE_BY_WORLD_ID: Record<string, number> = buildWorldCodeMapFromConfig();
 
 const formatYYYYMMDD = (d: Date) => {
   const y = d.getFullYear();
@@ -650,56 +386,136 @@ const formatYYYYMMDD = (d: Date) => {
   return `${y}${m}${day}`;
 };
 
-const resolveWorldCode = (worldId?: string, fallback?: any) => {
+const resolveWorldCode = (worldId?: string, fallback?: unknown) => {
   if (worldId && Number.isFinite(WORLD_CODE_BY_WORLD_ID[worldId])) return WORLD_CODE_BY_WORLD_ID[worldId];
-  if (fallback && Number.isFinite(Number(fallback))) return Number(fallback);
+  if (fallback !== undefined && Number.isFinite(Number(fallback))) return Number(fallback);
   return WORLD_CODE_BY_WORLD_ID.zth;
 };
 
-const pruneUndefinedDeep = (input: any): any => {
-  if (Array.isArray(input)) {
-    return input.map((item) => pruneUndefinedDeep(item));
-  }
+const pruneUndefinedDeep = (input: unknown): unknown => {
+  if (Array.isArray(input)) return input.map((item) => pruneUndefinedDeep(item));
   if (!input || typeof input !== 'object') return input;
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(input)) {
-    if (value === undefined) continue;
-    out[key] = pruneUndefinedDeep(value);
+    if (value !== undefined) out[key] = pruneUndefinedDeep(value);
   }
   return out;
 };
 
-const withSystemFields = (def: FormatDef, base: any, args: {
+const isObject = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+
+const geometryToDrawMode = (type: CairnMapClassConfig['geometry']['type']): DrawMode => {
+  if (type === 'Point') return 'point';
+  if (type === 'LineString') return 'polyline';
+  return 'polygon';
+};
+
+const mapFieldType = (type: CairnMapClassFieldConfig['type']): FieldType => {
+  if (type === 'number') return 'number';
+  if (type === 'select') return 'select';
+  if (type === 'bool' || type === 'boolean') return 'bool';
+  return 'text';
+};
+
+const mapField = (field: CairnMapClassFieldConfig): FieldDef => ({
+  key: field.key,
+  label: resolveCairnMapLocalizedLabel(field.label, 'zh-CN', field.key),
+  type: mapFieldType(field.type),
+  optional: field.optional ?? field.required === false,
+  placeholder: field.placeholder,
+  options: field.options,
+  defaultValue: field.defaultValue,
+});
+
+const mapGroup = (group: CairnMapClassGroupConfig): GroupDef => ({
+  key: group.key,
+  label: resolveCairnMapLocalizedLabel(group.label, 'zh-CN', group.key),
+  addButtonText: group.addButtonText,
+  optional: group.optional,
+  minItems: group.minItems,
+  fields: group.fields.map(mapField),
+});
+
+const buildCoordinateArray = (coords: Coord2D[]): Array<[number, number] | [number, number, number]> => coords.map((coord) => {
+  const x = Number(coord.x);
+  const z = Number(coord.z);
+  if (Number.isFinite(Number(coord.y))) return [x, Number(coord.y), z];
+  return [x, z];
+});
+
+const readPointCoordinate = (value: unknown): Coord2D[] => {
+  if (!isObject(value)) return [];
+  const x = Number(value.x);
+  const z = Number(value.z);
+  if (!Number.isFinite(x) || !Number.isFinite(z)) return [];
+  const y = Number(value.y);
+  return [Number.isFinite(y) ? { x, z, y } : { x, z }];
+};
+
+const readCoordinateArray = (value: unknown): Coord2D[] => {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      if (!Array.isArray(item)) return null;
+      const x = Number(item[0]);
+      const z = item.length >= 3 ? Number(item[2]) : Number(item[1]);
+      if (!Number.isFinite(x) || !Number.isFinite(z)) return null;
+      const y = item.length >= 3 ? Number(item[1]) : Number.NaN;
+      return Number.isFinite(y) ? { x, z, y } : { x, z };
+    })
+    .filter((item): item is Coord2D => Boolean(item));
+};
+
+const buildBaseFields = (fields: FieldDef[], values: Record<string, unknown>): Record<string, unknown> => {
+  const out: Record<string, unknown> = {};
+  for (const field of fields) {
+    const value = values[field.key];
+    if (value === undefined && field.optional) continue;
+    out[field.key] = value;
+  }
+  return out;
+};
+
+const injectGroups = (out: Record<string, unknown>, groups: Record<string, unknown[]>): Record<string, unknown> => {
+  for (const [key, items] of Object.entries(groups ?? {})) {
+    if (key === 'tags' || key === 'extensions') continue;
+    if (Array.isArray(items) && items.length > 0) out[key] = items;
+  }
+  const tags = buildTagsFromGroupItems(groups?.tags ?? []);
+  const exts = buildExtensionsFromGroupItems(groups?.extensions ?? []);
+  if (out.tags === undefined && Object.keys(tags).length > 0) out.tags = tags;
+  if (out.extensions === undefined && Object.keys(exts).length > 0) out.extensions = exts;
+  return out;
+};
+
+const withSystemFields = (def: FormatDef, base: Record<string, unknown>, args: {
   op: BuildOp;
   mode: DrawMode;
   worldId?: string;
   editorId?: string;
-  prevFeatureInfo?: any;
+  prevFeatureInfo?: Record<string, unknown>;
   now?: Date;
-}) => {
+}): Record<string, unknown> => {
   const now = args.now ?? new Date();
   const prev = args.prevFeatureInfo ?? {};
-  const editor = (args.editorId ?? '').trim();
-
+  const editor = String(args.editorId ?? '').trim();
   const Type = TYPE_NAME_BY_MODE[args.mode];
-  const Class = def.classCode ?? CLASS_CODE_BY_FEATURE[def.key] ?? prev?.Class;
-  const World = resolveWorldCode(args.worldId, prev?.World);
+  const Class = def.classCode ?? prev.Class;
+  const World = resolveWorldCode(args.worldId, prev.World);
 
-  // import：尽量保留原有系统字段，不强行写入 Create/Modifity
   if (args.op === 'import') {
     return pruneUndefinedDeep({
       ...base,
-      Type: prev?.Type ?? Type,
-      Class: prev?.Class ?? Class,
-      World: prev?.World ?? World,
-      ...(prev?.CreateTime ? { CreateTime: prev.CreateTime } : {}),
-      ...(prev?.CreateBy ? { CreateBy: prev.CreateBy } : {}),
-      ...(prev?.ModifityTime ? { ModifityTime: prev.ModifityTime } : {}),
-      ...(prev?.ModifityBy ? { ModifityBy: prev.ModifityBy } : {}),
-    });
+      Type: prev.Type ?? Type,
+      Class: prev.Class ?? Class,
+      World: prev.World ?? World,
+      ...(prev.CreateTime ? { CreateTime: prev.CreateTime } : {}),
+      ...(prev.CreateBy ? { CreateBy: prev.CreateBy } : {}),
+      ...(prev.ModifityTime ? { ModifityTime: prev.ModifityTime } : {}),
+      ...(prev.ModifityBy ? { ModifityBy: prev.ModifityBy } : {}),
+    }) as Record<string, unknown>;
   }
 
-  // create：写入 Create*，不写入 Modifity*
   if (args.op === 'create') {
     return pruneUndefinedDeep({
       ...base,
@@ -708,120 +524,139 @@ const withSystemFields = (def: FormatDef, base: any, args: {
       World,
       CreateTime: formatYYYYMMDD(now),
       ...(editor ? { CreateBy: editor } : {}),
-    });
+    }) as Record<string, unknown>;
   }
 
-  // edit：保留 Create*，写入 Modifity*
   return pruneUndefinedDeep({
     ...base,
-    Type: prev?.Type ?? Type,
-    Class: prev?.Class ?? Class,
-    World: prev?.World ?? World,
-    CreateTime: prev?.CreateTime ?? formatYYYYMMDD(now),
-    ...(prev?.CreateBy ? { CreateBy: prev.CreateBy } : (editor ? { CreateBy: editor } : {})),
+    Type: prev.Type ?? Type,
+    Class: prev.Class ?? Class,
+    World: prev.World ?? World,
+    CreateTime: prev.CreateTime ?? formatYYYYMMDD(now),
+    ...(prev.CreateBy ? { CreateBy: prev.CreateBy } : (editor ? { CreateBy: editor } : {})),
     ModifityTime: formatYYYYMMDD(now),
-    ...(editor ? { ModifityBy: editor } : (prev?.ModifityBy ? { ModifityBy: prev.ModifityBy } : {})),
-  });
+    ...(editor ? { ModifityBy: editor } : (prev.ModifityBy ? { ModifityBy: prev.ModifityBy } : {})),
+  }) as Record<string, unknown>;
 };
 
-// ---------- 通用工具 ----------
-const isFiniteNum = (v: any) => Number.isFinite(Number(v));
-
-// 点要素坐标新规范：coordinate 允许携带 y（非必填），同时保留 elevation 兼容旧数据。
-// - build：优先使用点坐标 p0.y；否则回退到 values.elevation
-// - read：优先读取 featureInfo.coordinate.y；否则回退到 featureInfo.elevation
-const pickPointYFromCoordsOrElevation = (p0: any, values: any): number | undefined => {
-  const y0 = Number(p0?.y);
-  if (Number.isFinite(y0)) return y0;
-  const ev = values?.elevation;
-  const y1 = Number(ev);
-  if (Number.isFinite(y1)) return y1;
-  return undefined;
-};
-
-const buildPointCoordinateXYZ = (p0: any, values: any) => {
-  const out: any = { x: p0?.x ?? 0, z: p0?.z ?? 0 };
-  const y = pickPointYFromCoordsOrElevation(p0, values);
-  if (Number.isFinite(y as any)) out.y = y;
-  return out;
-};
-
-const readPointYFromFeatureInfo = (featureInfo: any): number | undefined => {
-  const cy = Number(featureInfo?.coordinate?.y);
-  if (Number.isFinite(cy)) return cy;
-  const ev = Number(featureInfo?.elevation);
-  if (Number.isFinite(ev)) return ev;
-  return undefined;
-};
-
-const pickByFields = (values: Record<string, any>, fields: FieldDef[]) => {
-  const out: Record<string, any> = {};
-  for (const f of fields) {
-    const v = values[f.key];
-    if (v === undefined || v === '' || v === null) {
-      if (!f.optional) out[f.key] = v; // 保留空值以便导出时能看见缺啥
-      continue;
-    }
-    if (f.type === 'number') out[f.key] = Number(v);
-    else if (f.type === 'bool') out[f.key] = Boolean(v);
-    else out[f.key] = v;
-  }
-  return out;
-};
-
-const isEmptyRequired = (field: FieldDef, v: any) => {
+const isFiniteNum = (v: unknown) => Number.isFinite(Number(v));
+const isEmptyRequired = (field: FieldDef, value: unknown) => {
   if (field.optional) return false;
-  if (v === undefined || v === null) return true;
-  if (field.type === 'text') return String(v).trim().length === 0;
-  if (field.type === 'number') return String(v).trim().length === 0 || !Number.isFinite(Number(v));
-  if (field.type === 'select') return String(v).trim().length === 0;
-  // bool：通常都有默认值；不因 false 判空
-  return false;
+  if (value === undefined || value === null) return true;
+  if (field.type === 'number') return !isFiniteNum(value);
+  if (field.type === 'bool') return false;
+  return String(value).trim().length === 0;
 };
 
-/**
- * 保存时必填校验：
- * - 若缺少必填字段，返回 false
- * - 否则返回 true
- */
-export const validateRequiredOnSave = (
-  def: FormatDef,
-  values: Record<string, any>,
-  groups: Record<string, any[]>
-): boolean => {
-  // 默认/占位 subtype：不做校验
-  if (def.key === '默认' || !def.classCode) return true;
+const createFormatDefFromClassConfig = (config: CairnMapClassConfig): FormatDef => {
+  const key = (config.sourceFeatureKey ?? config.classKey) as FeatureKey;
+  const mode = geometryToDrawMode(config.geometry.type);
+  const fields = config.fields.map(mapField);
+  const groups = ensureOptionalTagExtGroups((config.groups ?? []).map(mapGroup));
 
-  // 1) 顶层 fields
-  for (const f of def.fields ?? []) {
-    if (isEmptyRequired(f, values?.[f.key])) return false;
-  }
-
-  // 2) groups
-  for (const g of def.groups ?? []) {
-    const items = (groups?.[g.key] ?? []) as any[];
-    const min = g.optional ? 0 : (g.minItems ?? 1);
-    if (items.length < min) return false;
-
-    for (const it of items) {
-      for (const f of g.fields ?? []) {
-        if (isEmptyRequired(f, it?.[f.key])) return false;
-      }
-
-      // tags：当字段名选择“其他”时，要求填写 tagKeyOther（仅当该 group 具备对应字段时生效）
-      if (g.key === 'tags' && it?.tagKey === TAG_KEY_OTHER) {
-        const other = String(it?.tagKeyOther ?? '').trim();
-        if (!other) return false;
-      }
+  const buildFeatureInfo: FormatDef['buildFeatureInfo'] = ({ op, coords, values, groups: groupValues, worldId, editorId, prevFeatureInfo, now }) => {
+    const out = buildBaseFields(fields, values);
+    injectGroups(out, groupValues);
+    if (config.geometry.type === 'Point') {
+      const coord = coords[0];
+      out[config.geometry.sourceField] = {
+        x: Number(coord?.x ?? 0),
+        z: Number(coord?.z ?? 0),
+        ...(Number.isFinite(Number(coord?.y)) ? { y: Number(coord?.y) } : {}),
+      };
+    } else {
+      out[config.geometry.sourceField] = buildCoordinateArray(coords);
     }
-  }
+    return withSystemFields({ ...FORMAT_REGISTRY['默认'], key, classCode: config.classCode, fields, groups, label: resolveCairnMapLocalizedLabel(config.label, 'zh-CN', key), modes: [mode] }, out, {
+      op,
+      mode,
+      worldId,
+      editorId,
+      prevFeatureInfo,
+      now,
+    });
+  };
 
-  return true;
+  const hydrate: FormatDef['hydrate'] = (featureInfo) => {
+    const info = isObject(featureInfo) ? featureInfo : {};
+    const values: Record<string, unknown> = {};
+    for (const field of fields) values[field.key] = info[field.key];
+    const hydratedGroups: Record<string, unknown[]> = {};
+    for (const group of groups) {
+      if (group.key === 'tags') hydratedGroups[group.key] = flattenTagsToGroupItems(info.tags);
+      else if (group.key === 'extensions') hydratedGroups[group.key] = flattenExtensionsToGroupItems(info.extensions);
+      else hydratedGroups[group.key] = Array.isArray(info[group.key]) ? info[group.key] as unknown[] : [];
+    }
+    return { values, groups: hydratedGroups };
+  };
+
+  const coordsFromFeatureInfo: FormatDef['coordsFromFeatureInfo'] = (featureInfo) => {
+    const info = isObject(featureInfo) ? featureInfo : {};
+    const value = info[config.geometry.sourceField];
+    return config.geometry.type === 'Point' ? readPointCoordinate(value) : readCoordinateArray(value);
+  };
+
+  const validateImportItem = (item: unknown): string | undefined => {
+    const info = isObject(item) ? item : {};
+    const terr = validateTagsObjectSoft(info.tags);
+    if (terr) return terr;
+    const eerr = validateExtensionsObjectSoft(info.extensions);
+    if (eerr) return eerr;
+    return undefined;
+  };
+
+  return {
+    key,
+    label: resolveCairnMapLocalizedLabel(config.label, 'zh-CN', key),
+    modes: [mode],
+    hideTempOutput: key !== '默认',
+    classCode: config.classCode,
+    fields,
+    groups,
+    buildFeatureInfo,
+    hydrate,
+    coordsFromFeatureInfo,
+    validateImportItem,
+  };
 };
 
-// ============================
-// 必填校验（详细结果）
-// ============================
+const createDefaultFormatDef = (): FormatDef => ({
+  key: '默认',
+  label: '默认',
+  modes: ['point', 'polyline', 'polygon'],
+  fields: [],
+  groups: [],
+  buildFeatureInfo: ({ op, mode, coords, worldId, editorId, prevFeatureInfo, now }) => {
+    const out: Record<string, unknown> = {};
+    if (mode === 'point') {
+      const coord = coords[0];
+      out.coordinate = {
+        x: Number(coord?.x ?? 0),
+        z: Number(coord?.z ?? 0),
+        ...(Number.isFinite(Number(coord?.y)) ? { y: Number(coord?.y) } : {}),
+      };
+    } else {
+      out.Conpoints = buildCoordinateArray(coords);
+    }
+    return withSystemFields(FORMAT_REGISTRY['默认'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
+  },
+  hydrate: () => ({ values: {}, groups: {} }),
+  coordsFromFeatureInfo: (featureInfo) => {
+    const info = isObject(featureInfo) ? featureInfo : {};
+    return readPointCoordinate(info.coordinate).length > 0 ? readPointCoordinate(info.coordinate) : readCoordinateArray(info.Conpoints);
+  },
+});
+
+const createRuntimeFormatRegistry = (): Record<FeatureKey, FormatDef> => {
+  const registry: Partial<Record<FeatureKey, FormatDef>> = { 默认: createDefaultFormatDef() };
+  for (const config of listClassConfigs()) {
+    const def = createFormatDefFromClassConfig(config);
+    registry[def.key] = def;
+  }
+  return registry as Record<FeatureKey, FormatDef>;
+};
+
+export const FORMAT_REGISTRY: Record<FeatureKey, FormatDef> = createRuntimeFormatRegistry();
 
 export type MissingEntry =
   | { kind: 'field'; key: string; label: string }
@@ -831,64 +666,31 @@ export type MissingEntry =
 
 export type DetailedValidationResult = { ok: boolean; missing: MissingEntry[] };
 
-/**
- * 返回“缺失项清单”，用于 UI 在保存/导入失败时指明缺少的字段及分组条目。
- */
 export const validateRequiredDetailed = (
   def: FormatDef,
-  values: Record<string, any>,
-  groups: Record<string, any[]>
+  values: Record<string, unknown>,
+  groups: Record<string, unknown[]>
 ): DetailedValidationResult => {
-  // 默认/占位 subtype：不做校验
   if (def.key === '默认' || !def.classCode) return { ok: true, missing: [] };
-
   const missing: MissingEntry[] = [];
 
-  // fields
   for (const f of def.fields ?? []) {
-    if (isEmptyRequired(f, values?.[f.key])) {
-      missing.push({ kind: 'field', key: f.key, label: f.label });
-    }
+    if (isEmptyRequired(f, values?.[f.key])) missing.push({ kind: 'field', key: f.key, label: f.label });
   }
 
-  // groups
   for (const g of def.groups ?? []) {
-    const items = (groups?.[g.key] ?? []) as any[];
+    const items = (groups?.[g.key] ?? []) as Record<string, unknown>[];
     const min = g.optional ? 0 : (g.minItems ?? 1);
-
-    if (items.length < min) {
-      missing.push({ kind: 'group', groupKey: g.key, groupLabel: g.label, minItems: min });
-      // group 不满足 minItems 时不强制终止；仍检查已有条目
-    }
-
+    if (items.length < min) missing.push({ kind: 'group', groupKey: g.key, groupLabel: g.label, minItems: min });
     for (let idx = 0; idx < items.length; idx++) {
       const it = items[idx];
       for (const f of g.fields ?? []) {
         if (isEmptyRequired(f, it?.[f.key])) {
-          missing.push({
-            kind: 'groupItemField',
-            groupKey: g.key,
-            groupLabel: g.label,
-            index: idx,
-            key: f.key,
-            label: f.label,
-          });
+          missing.push({ kind: 'groupItemField', groupKey: g.key, groupLabel: g.label, index: idx, key: f.key, label: f.label });
         }
       }
-
-      // tags：当字段名选择“其他”时，要求填写 tagKeyOther（仅当该 group 具备对应字段时生效）
-      if (g.key === 'tags' && it?.tagKey === TAG_KEY_OTHER) {
-        const other = String(it?.tagKeyOther ?? '').trim();
-        if (!other) {
-          missing.push({
-            kind: 'groupItemField',
-            groupKey: g.key,
-            groupLabel: g.label,
-            index: idx,
-            key: 'tagKeyOther',
-            label: '其他字段名(tagKeyOther)',
-          });
-        }
+      if (g.key === 'tags' && it?.tagKey === TAG_KEY_OTHER && !String(it?.tagKeyOther ?? '').trim()) {
+        missing.push({ kind: 'groupItemField', groupKey: g.key, groupLabel: g.label, index: idx, key: 'tagKeyOther', label: '其他字段名(tagKeyOther)' });
       }
     }
   }
@@ -907,16 +709,8 @@ export const formatMissingEntries = (missing: MissingEntry[]): string => {
   return lines.join('\n');
 };
 
-// ============================
-// 导入校验（结构 + 必填 + 几何）
-// ============================
-
 export type ImportValidationContext = {
   worldId?: string;
-  /**
-   * true：导入 JSON 必须显式包含 Type/Class/World，且不允许为空
-   * false：允许缺省（由系统生成/覆盖），但若提供且不一致仍可报错（见下方逻辑）
-   */
   strictSystemFields?: boolean;
 };
 
@@ -926,94 +720,57 @@ export type ImportValidationResult = {
   structuralErrors: string[];
   mode: DrawMode;
   coords: Coord2D[];
-  hydrated: { values: Record<string, any>; groups: Record<string, any[]> } | null;
+  hydrated: { values: Record<string, unknown>; groups: Record<string, unknown[]> } | null;
 };
 
-
 const validateGeometryForMode = (mode: DrawMode, coords: Coord2D[]): MissingEntry[] => {
-  if (mode === 'point' && coords.length !== 1) {
-    return [{ kind: 'geometry', detail: '点模式需要 1 个点（coordinate.x / coordinate.z）' }];
-  }
-  if (mode === 'polyline' && coords.length < 2) {
-    return [{ kind: 'geometry', detail: '线模式至少需要 2 个点（coordinates[]）' }];
-  }
-  if (mode === 'polygon' && coords.length < 3) {
-    return [{ kind: 'geometry', detail: '面模式至少需要 3 个点（coordinates[]）' }];
-  }
+  if (mode === 'point' && coords.length !== 1) return [{ kind: 'geometry', detail: '点模式需要 1 个点（coordinate.x / coordinate.z）' }];
+  if (mode === 'polyline' && coords.length < 2) return [{ kind: 'geometry', detail: '线模式至少需要 2 个点（coordinates[]）' }];
+  if (mode === 'polygon' && coords.length < 3) return [{ kind: 'geometry', detail: '面模式至少需要 3 个点（coordinates[]）' }];
   return [];
 };
 
-/**
- * JSON 导入使用的“统一校验器”：
- * - def.validateImportItem：结构/类型检查
- * - validateRequiredDetailed：必填字段/分组条目检查
- * - validateGeometryForMode：几何点数量检查
- */
 export const validateImportItemDetailed = (
   def: FormatDef,
-  item: any,
+  item: unknown,
   ctx: ImportValidationContext = {}
 ): ImportValidationResult => {
   const structuralErrors: string[] = [];
-
   const err = def.validateImportItem?.(item);
   if (err) structuralErrors.push(err);
-
   const mode = (def.modes?.[0] ?? 'point') as DrawMode;
   const coords = def.coordsFromFeatureInfo(item);
-
   const missing: MissingEntry[] = [];
-
-  // 几何校验
   missing.push(...validateGeometryForMode(mode, coords));
 
-  // ---- 系统字段校验：World / Type / Class（仅新规范启用）----
+  const source = isObject(item) ? item : {};
   if (def.key !== '默认' && def.classCode) {
     const strict = Boolean(ctx.strictSystemFields);
-
-    // worldId 映射必须存在：避免默默回落到 zth
     if (ctx.worldId && WORLD_CODE_BY_WORLD_ID[ctx.worldId] === undefined) {
-      structuralErrors.push(`World 映射表缺少 worldId="${ctx.worldId}"（请补充 WORLD_CODE_BY_WORLD_ID）`);
+      structuralErrors.push(`World 映射表缺少 worldId="${ctx.worldId}"（请补充 environment/worlds.json）`);
     }
-
     const expectedType = TYPE_NAME_BY_MODE[mode];
     const expectedClass = def.classCode;
-    const expectedWorld = resolveWorldCode(ctx.worldId); // 只根据当前页面 worldId 取期望值
-
-    const hasNonEmpty = (v: any) => v !== null && v !== undefined && String(v).trim() !== '';
-
-    // strict 模式：必须显式提供且不为空
+    const expectedWorld = resolveWorldCode(ctx.worldId);
+    const hasNonEmpty = (v: unknown) => v !== null && v !== undefined && String(v).trim() !== '';
     if (strict) {
-      if (!hasNonEmpty(item?.Type)) missing.push({ kind: 'field', key: 'Type', label: '要素类型(Type)' });
-      if (!hasNonEmpty(item?.Class)) missing.push({ kind: 'field', key: 'Class', label: '要素种类(Class)' });
-      if (!isFiniteNum(item?.World)) missing.push({ kind: 'field', key: 'World', label: '所属时间(World)' });
+      if (!hasNonEmpty(source.Type)) missing.push({ kind: 'field', key: 'Type', label: '要素类型(Type)' });
+      if (!hasNonEmpty(source.Class)) missing.push({ kind: 'field', key: 'Class', label: '要素种类(Class)' });
+      if (!isFiniteNum(source.World)) missing.push({ kind: 'field', key: 'World', label: '所属世界(World)' });
     }
-
-    // 若提供了值，则必须与期望一致（不管 strict 与否）
-    if (hasNonEmpty(item?.Type) && String(item.Type).trim() !== expectedType) {
-      structuralErrors.push(`Type 不匹配：期望 "${expectedType}"，输入 "${String(item.Type).trim()}"`);
-    }
-
-    if (hasNonEmpty(item?.Class) && String(item.Class).trim() !== expectedClass) {
-      structuralErrors.push(`Class 不匹配：期望 "${expectedClass}"，输入 "${String(item.Class).trim()}"`);
-    }
-
-    if (hasNonEmpty(item?.World)) {
-      const n = Number(item.World);
-      if (!Number.isFinite(n)) {
-        structuralErrors.push(`World 不是有效数字：输入 "${String(item.World).trim()}"`);
-      } else if (expectedWorld !== undefined && n !== expectedWorld) {
-        structuralErrors.push(`World 与当前页面不一致：期望 ${expectedWorld}（来自 currentWorldId="${ctx.worldId ?? 'zth'}"），输入 ${n}`);
-      }
+    if (hasNonEmpty(source.Type) && String(source.Type).trim() !== expectedType) structuralErrors.push(`Type 不匹配：期望 "${expectedType}"，输入 "${String(source.Type).trim()}"`);
+    if (hasNonEmpty(source.Class) && String(source.Class).trim() !== expectedClass) structuralErrors.push(`Class 不匹配：期望 "${expectedClass}"，输入 "${String(source.Class).trim()}"`);
+    if (hasNonEmpty(source.World)) {
+      const n = Number(source.World);
+      if (!Number.isFinite(n)) structuralErrors.push(`World 不是有效数字：输入 "${String(source.World).trim()}"`);
+      else if (expectedWorld !== undefined && n !== expectedWorld) structuralErrors.push(`World 与当前页面不一致：期望 ${expectedWorld}（来自 currentWorldId="${ctx.worldId ?? 'zth'}"），输入 ${n}`);
     }
   }
 
-  // ---- 附加信息（fields/groups）必填校验 ----
-  let hydrated: { values: Record<string, any>; groups: Record<string, any[]> } | null = null;
+  let hydrated: { values: Record<string, unknown>; groups: Record<string, unknown[]> } | null = null;
   try {
     hydrated = def.hydrate(item);
-    const req = validateRequiredDetailed(def, hydrated.values ?? {}, hydrated.groups ?? {});
-    missing.push(...req.missing);
+    missing.push(...validateRequiredDetailed(def, hydrated.values ?? {}, hydrated.groups ?? {}).missing);
   } catch {
     hydrated = null;
     structuralErrors.push('hydrate 失败：无法解析附加信息结构');
@@ -1023,1721 +780,35 @@ export const validateImportItemDetailed = (
   return { ok, missing, structuralErrors, mode, coords, hydrated };
 };
 
-
-
-export const FORMAT_REGISTRY: Record<FeatureKey, FormatDef> = {
-  // ===== 默认（点/线/面）=====
-  默认: {
-    key: '默认',
-    label: '默认',
-    modes: ['point', 'polyline', 'polygon'],
-    hideTempOutput: false,
-    fields: [],
-    groups: [],
-    buildFeatureInfo: ({ mode, coords }) => {
-      // 最小通用结构（不参与新 JSON 规范）
-      return {
-        type: mode,
-        coords: coords.map(p => (p.y === undefined ? ({ x: p.x, z: p.z }) : ({ x: p.x, z: p.z, y: p.y }))),
-      };
-    },
-    hydrate: (_featureInfo) => ({ values: {}, groups: {} }),
-    coordsFromFeatureInfo: (featureInfo) => {
-      const arr = featureInfo?.coords;
-      if (!Array.isArray(arr)) return [];
-      return arr
-        .map((p: any) => {
-          const x = Number(p?.x);
-          const z = Number(p?.z);
-          const y = Number(p?.y);
-          return Number.isFinite(y) ? ({ x, z, y }) : ({ x, z });
-        })
-        .filter((p: any) => isFiniteNum(p.x) && isFiniteNum(p.z));
-    },
-  },
-
-
-  // ===== 车站 Station =====
-  车站: {
-    key: '车站',
-    label: '车站',
-    modes: ['point'],
-    hideTempOutput: true,
-    classCode: CLASS_CODE_BY_FEATURE['车站'],
-    fields: [
-      { key: 'ID', label: '车站ID', type: 'text' },                // [必填]
-      { key: 'Name', label: '车站名', type: 'text' },              // [必填]
-      { key: 'STBuilding', label: '车站所属车站建体(STBuilding)', type: 'text' }, // [必填]（过渡期：导入允许缺省）
-      { key: 'elevation', label: '高度(y)', type: 'number', optional: true }, // [非必填]
-    ],
-    groups: [
-      {
-        key: 'platforms',
-        label: '包含站台 platforms',
-        addButtonText: '添加站台条目',
-        optional: false,          // [必填]
-        minItems: 1,
-        fields: [
-          { key: 'ID', label: '站台ID', type: 'text' }, // [必填]
-        ],
-      },
-    ],
-    buildFeatureInfo: ({ op, mode, coords, values, groups, worldId, editorId, prevFeatureInfo, now }) => {
-      const base = pickByFields(values, FORMAT_REGISTRY['车站'].fields);
-      const p0 = coords[0];
-
-      const platforms = Array.isArray(groups.platforms)
-        ? groups.platforms.map((it: any) => ({
-            ID: String(it?.ID ?? '').trim(),
-          }))
-        : [];
-
-      const out = {
-        ...base,
-        coordinate: buildPointCoordinateXYZ(p0, values),
-        platforms,
-      };
-
-      return withSystemFields(FORMAT_REGISTRY['车站'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-    },
-    hydrate: (featureInfo) => ({
-      values: {
-        ID: featureInfo?.ID ?? '',
-        Name: featureInfo?.Name ?? '',
-        // 新规范：车站归属车站建体（STB/SBP 的 ID）。兼容旧字段/缺失。
-        STBuilding:
-          featureInfo?.STBuilding ??
-          featureInfo?.StBuilding ??
-          featureInfo?.stBuilding ??
-          featureInfo?.stationBuilding ??
-          featureInfo?.stationBuildingId ??
-          '',
-        elevation: (featureInfo?.coordinate?.y ?? featureInfo?.elevation) ?? '',
-      },
-      groups: {
-        platforms: Array.isArray(featureInfo?.platforms)
-          ? featureInfo.platforms.map((p: any) => ({ ID: p?.ID ?? '' }))
-          : [],
-      },
-    }),
-    coordsFromFeatureInfo: (featureInfo) => {
-      const c = featureInfo?.coordinate;
-      if (!c) return [];
-      const x = Number(c.x);
-      const z = Number(c.z);
-      const y = readPointYFromFeatureInfo(featureInfo);
-      if (!isFiniteNum(x) || !isFiniteNum(z)) return [];
-      return [Number.isFinite(y as any) ? ({ x, z, y } as any) : ({ x, z } as any)];
-    },
-    validateImportItem: (item) => {
-      if (!item || typeof item !== 'object') return '不是对象';
-            if (!String((item as any).ID ?? '').trim()) return '缺少 ID';
-      if (!String((item as any).Name ?? '').trim()) return '缺少 Name';
-      if (!item.coordinate || !isFiniteNum(item.coordinate.x) || !isFiniteNum(item.coordinate.z)) return '缺少合法 coordinate.x / coordinate.z';
-      if (!Array.isArray(item.platforms)) return 'platforms 必须是数组';
-      return;
-    },
-  },
-
-  // ===== 站台 Platform =====
-  站台: {
-    key: '站台',
-    label: '站台',
-    modes: ['point'],
-    hideTempOutput: true,
-    classCode: CLASS_CODE_BY_FEATURE['站台'],
-    fields: [
-      { key: 'ID', label: '站台ID', type: 'text' },                 // [必填]
-      { key: 'Name', label: '站台名称', type: 'text' },             // [必填]
-      { key: 'elevation', label: '高度(y)', type: 'number', optional: true },  // [非必填]
-
-      // === 新增：站台状态字段（顶层 fields）===
-      { key: 'Situation', label: '站台是否启用(Situation)', type: 'bool', defaultValue: true }, // [必填] 默认 true
-      { key: 'Connect', label: '外部连接功能(Connect)', type: 'bool', defaultValue: true },    // [必填] 默认 true
-    ],
-    groups: [
-      {
-        key: 'lines',
-        label: '经行线路 lines',
-        addButtonText: '添加线路条目',
-        optional: false,          // [必填]
-        minItems: 1,
-        fields: [
-          { key: 'ID', label: '线路ID', type: 'text' },
-          { key: 'stationCode', label: '站台编号(可选)', type: 'number', optional: true },
-          { key: 'stationDistance', label: '线路距离(可选)', type: 'number', optional: true },
-          { key: 'Avaliable', label: '可使用性(Avaliable)', type: 'bool', defaultValue: true },
-          { key: 'Overtaking', label: '越行(Overtaking)', type: 'bool', defaultValue: false },
-          { key: 'getin', label: '可上车(getin)', type: 'bool', defaultValue: true },
-          { key: 'getout', label: '可下车(getout)', type: 'bool', defaultValue: true },
-          { key: 'NextOT', label: '下一站越行(NextOT)', type: 'bool', defaultValue: false },
-        ],
-      },
-    ],
-    buildFeatureInfo: ({ op, mode, coords, values, groups, worldId, editorId, prevFeatureInfo, now }) => {
-      // pickByFields 会自动把 bool 转成 boolean 并输出
-      const base = pickByFields(values, FORMAT_REGISTRY['站台'].fields);
-      const p0 = coords[0];
-
-      const lines = Array.isArray(groups.lines)
-        ? groups.lines.map((it: any) => ({
-            ID: String(it?.ID ?? '').trim(),
-            stationCode: it?.stationCode === '' || it?.stationCode === undefined ? undefined : Number(it.stationCode),
-            stationDistance: it?.stationDistance === '' || it?.stationDistance === undefined ? undefined : Number(it.stationDistance),
-            Avaliable: it?.Avaliable === undefined ? true : Boolean(it.Avaliable),
-            Overtaking: it?.Overtaking === undefined ? false : Boolean(it.Overtaking),
-            getin: it?.getin === undefined ? true : Boolean(it.getin),
-            getout: it?.getout === undefined ? true : Boolean(it.getout),
-            NextOT: it?.NextOT === undefined ? false : Boolean(it.NextOT),
-          }))
-        : [];
-
-      const out = {
-        ...base,
-        coordinate: buildPointCoordinateXYZ(p0, values),
-        lines,
-      };
-
-      return withSystemFields(FORMAT_REGISTRY['站台'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-    },
-    hydrate: (featureInfo) => ({
-      values: {
-        ID: featureInfo?.ID ?? '',
-        Name: featureInfo?.Name ?? '',
-        elevation: (featureInfo?.coordinate?.y ?? featureInfo?.elevation) ?? '',
-
-        // === 新增：默认 true（保证新建时直接满足“必填 bool”）===
-        Situation: featureInfo?.Situation ?? true,
-        Connect: featureInfo?.Connect ?? true,
-      },
-      groups: {
-        lines: Array.isArray(featureInfo?.lines)
-          ? featureInfo.lines.map((l: any) => ({
-              ID: l?.ID ?? '',
-              stationCode: l?.stationCode ?? '',
-              stationDistance: l?.stationDistance ?? '',
-              Avaliable: l?.Avaliable ?? true,
-              Overtaking: l?.Overtaking ?? false,
-              getin: l?.getin ?? true,
-              getout: l?.getout ?? true,
-              NextOT: l?.NextOT ?? false,
-            }))
-          : [],
-      },
-    }),
-    coordsFromFeatureInfo: (featureInfo) => {
-      const c = featureInfo?.coordinate;
-      if (!c) return [];
-      const x = Number(c.x);
-      const z = Number(c.z);
-      const y = readPointYFromFeatureInfo(featureInfo);
-      if (!isFiniteNum(x) || !isFiniteNum(z)) return [];
-      return [Number.isFinite(y as any) ? ({ x, z, y } as any) : ({ x, z } as any)];
-    },
-    validateImportItem: (item) => {
-      if (!item || typeof item !== 'object') return '不是对象';
-            if (!String((item as any).ID ?? '').trim()) return '缺少 ID';
-      if (!String((item as any).Name ?? '').trim()) return '缺少 Name';
-      if (!item.coordinate || !isFiniteNum(item.coordinate.x) || !isFiniteNum(item.coordinate.z)) return '缺少合法 coordinate.x / coordinate.z';
-      if (!Array.isArray(item.lines)) return 'lines 必须是数组';
-if (typeof item.Situation !== 'boolean') return '缺少或非法 Situation（boolean）';
-if (typeof item.Connect !== 'boolean') return '缺少或非法 Connect（boolean）';
-
-      return;
-    },
-  },
-
-  // ===== 铁路 Line =====
-  铁路: {
-    key: '铁路',
-    label: '铁路',
-    modes: ['polyline'],
-    hideTempOutput: true,
-    classCode: CLASS_CODE_BY_FEATURE['铁路'],
-    fields: [
-      { key: 'ID', label: '线路ID', type: 'text' },             // [必填]
-      { key: 'Name', label: '线路名', type: 'text' },           // [必填]
-      { key: 'bureau', label: '路局代码', type: 'text', optional: true }, // [非必填]
-      { key: 'line', label: '线路编号', type: 'text', optional: true },   // [非必填]
-      { key: 'color', label: '标准色号(color)', type: 'text' },     // [必填]
-      {
-        key: 'direction',
-        label: '方向(direction)',
-        type: 'select',
-        options: [0, 1, 2, 3, 4].map(v => ({ label: String(v), value: v })),
-      },
-      { key: 'startplf', label: '起点站台名(startplf)', type: 'text' }, // [必填]
-      { key: 'endplf', label: '终点站台名(endplf)', type: 'text' },     // [必填]
-    ],
-    groups: [],
-    buildFeatureInfo: ({ op, mode, coords, values, worldId, editorId, prevFeatureInfo, now }) => {
-      const base = pickByFields(values, FORMAT_REGISTRY['铁路'].fields);
-      // 新规范：y 默认 -64（若 coords 内已有 y，则保留）
-      const PLpoints = coords.map(p => [p.x, (Number.isFinite(p.y as any) ? (p.y as number) : -64), p.z] as [number, number, number]);
-      const out = { ...base, PLpoints };
-      return withSystemFields(FORMAT_REGISTRY['铁路'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-    },
-    hydrate: (featureInfo) => ({
-      values: {
-        ID: featureInfo?.ID ?? '',
-        Name: featureInfo?.Name ?? '',
-        bureau: featureInfo?.bureau ?? '',
-        line: featureInfo?.line ?? '',
-        color: featureInfo?.color ?? '',
-        direction: featureInfo?.direction ?? 2,
-        startplf: featureInfo?.startplf ?? '',
-        endplf: featureInfo?.endplf ?? '',
-      },
-      groups: {},
-    }),
-    coordsFromFeatureInfo: (featureInfo) => {
-      const pts = featureInfo?.PLpoints;
-      if (!Array.isArray(pts)) return [];
-      return pts
-        .map((p: any) => {
-          const x = Number(p?.[0]);
-          const y = Number(p?.[1]);
-          const z = Number(p?.[2]);
-          return Number.isFinite(y) ? ({ x, z, y }) : ({ x, z });
-        })
-        .filter((p: any) => isFiniteNum(p.x) && isFiniteNum(p.z));
-    },
-    validateImportItem: (item) => {
-      if (!item || typeof item !== 'object') return '不是对象';
-      if (!String((item as any).ID ?? '').trim()) return '缺少 ID';
-      if (!String((item as any).Name ?? '').trim()) return '缺少 Name';
-      if (!item.color) return '缺少 color';
-      if (!Array.isArray(item.PLpoints) || item.PLpoints.length < 2) return 'PLpoints 必须是数组且至少 2 点';
-      return;
-    },
-  },
-
- // ===== 站台轮廓 Platform Round =====
-  站台轮廓: {
-    key: '站台轮廓',
-    label: '站台轮廓',
-    modes: ['polygon'],
-    hideTempOutput: true,
-    // 新 JSON：Class 建议填写“站台轮廓”（与该 subtype 名称一致）
-    classCode: CLASS_CODE_BY_FEATURE['站台轮廓'],
-    fields: [
-      { key: 'ID', label: '站台轮廓ID', type: 'text' },          // [必填]
-      { key: 'Name', label: '站台轮廓名', type: 'text' },      // [必填]
-      { key: 'LineID', label: '线路ID(LineID)', type: 'text' },                     // [必填]
-      { key: 'elevation', label: '高度(y)', type: 'number', optional: true },       // [非必填]
-      { key: 'height', label: '高度(height)', type: 'number', optional: true },     // [非必填]
-    ],
-    groups: [],
-    buildFeatureInfo: ({ op, mode, coords, values, worldId, editorId, prevFeatureInfo, now }) => {
-      const base = pickByFields(values, FORMAT_REGISTRY['站台轮廓'].fields);
-
-      // Flrpoints: [x,y,z]；y 若缺失按 -63
-      const Flrpoints = coords.map((p) => [
-        p.x,
-        (Number.isFinite(p.y as any) ? (p.y as number) : -63),
-        p.z,
-      ] as [number, number, number]);
-
-      const out = { ...base, Flrpoints };
-      return withSystemFields(FORMAT_REGISTRY['站台轮廓'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-    },
-    hydrate: (featureInfo) => ({
-      values: {
-        ID: featureInfo?.ID ?? '',
-        Name: featureInfo?.Name ?? '',
-        LineID: featureInfo?.LineID ?? '',
-        elevation: featureInfo?.elevation ?? '',
-        height: featureInfo?.height ?? '',
-      },
-      groups: {},
-    }),
-    coordsFromFeatureInfo: (featureInfo) => {
-  const pts = featureInfo?.Flrpoints;
-  if (!Array.isArray(pts)) return [];
-
-  const out: Coord2D[] = [];
-  for (const p of pts) {
-    const x = Number(p?.[0]);
-    const y = Number(p?.[1]);
-    const z = Number(p?.[2]);
-
-    if (!isFiniteNum(x) || !isFiniteNum(z)) continue;
-
-    out.push({
-      x,
-      z,
-      // y 缺失时按你规范默认 -63
-      y: Number.isFinite(y) ? y : -63,
-    });
-  }
-  return out;
-},
-    validateImportItem: (item) => {
-      if (!item || typeof item !== 'object') return '不是对象';
-      if (!String((item as any).ID ?? '').trim()) return '缺少 ID';
-      if (!String((item as any).Name ?? '').trim()) return '缺少 Name';
-      if (!String((item as any).ID ?? '').trim()) return '缺少 ID';
-      if (!Array.isArray(item.Flrpoints) || item.Flrpoints.length < 3) return 'Flrpoints 必须是数组且至少 3 点';
-      return;
-    },
-  },
-
-  // ===== 车站建筑 Station Building =====
-  车站建筑: {
-    key: '车站建筑',
-    label: '车站建筑',
-    modes: ['polygon'],
-    hideTempOutput: true,
-    classCode: CLASS_CODE_BY_FEATURE['车站建筑'],
-    fields: [
-      { key: 'ID', label: '车站建筑ID', type: 'text' },
-      { key: 'Name', label: '车站建筑名', type: 'text' },
-      { key: 'elevation', label: '高度(y)', type: 'number', optional: true },
-      { key: 'height', label: '建筑高度(height)', type: 'number', optional: true },
-    ],
-    groups: [
-      {
-        key: 'Floors',
-        label: '包含楼层 Floors',
-        addButtonText: '添加楼层条目',
-        optional: true, // 新规范为 [非必填]
-        fields: [
-          { key: 'ID', label: '楼层ID', type: 'text', optional: true },
-          { key: 'Group', label: '分组(Group)', type: 'text', optional: true },
-        ],
-      },
-    ],
-    buildFeatureInfo: ({ op, mode, coords, values, groups, worldId, editorId, prevFeatureInfo, now }) => {
-      const base = pickByFields(values, FORMAT_REGISTRY['车站建筑'].fields);
-      // 新规范：y 默认 -63（若 coords 内已有 y，则保留）
-      const Conpoints = coords.map(p => [p.x, (Number.isFinite(p.y as any) ? (p.y as number) : -63), p.z] as [number, number, number]);
-
-      const Floors = Array.isArray(groups.Floors)
-        ? groups.Floors.map((it: any) => {
-            const ID = String(it?.ID ?? '').trim();
-            const Group = String(it?.Group ?? '').trim();
-            const o: any = { ID };
-            if (Group) o.Group = Group;
-            return o;
-          })
-        : [];
-
-      // 注意：STB 不再包含 Stations 分组（STA -> STB 的归属已改为 STA.STBuilding 单向指向）
-      const out = { ...base, Conpoints, Floors };
-      return withSystemFields(FORMAT_REGISTRY['车站建筑'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-    },
-    hydrate: (featureInfo) => ({
-      values: {
-        ID: featureInfo?.ID ?? '',
-        Name: featureInfo?.Name ?? '',
-        elevation: featureInfo?.elevation ?? '',
-        height: featureInfo?.height ?? '',
-      },
-      groups: {
-        Floors: Array.isArray(featureInfo?.Floors)
-          ? featureInfo.Floors.map((f: any) => ({
-              ID: f?.ID ?? '',
-              Group: f?.Group ?? '',
-            }))
-          : [],
-      },
-    }),
-    coordsFromFeatureInfo: (featureInfo) => {
-      const pts = featureInfo?.Conpoints;
-      if (!Array.isArray(pts)) return [];
-      return pts
-        .map((p: any) => {
-          const x = Number(p?.[0]);
-          const y = Number(p?.[1]);
-          const z = Number(p?.[2]);
-          return Number.isFinite(y) ? ({ x, z, y }) : ({ x, z });
-        })
-        .filter((p: any) => isFiniteNum(p.x) && isFiniteNum(p.z));
-    },
-    validateImportItem: (item) => {
-      if (!item || typeof item !== 'object') return '不是对象';
-            if (!String((item as any).ID ?? '').trim()) return '缺少 ID';
-      if (!String((item as any).Name ?? '').trim()) return '缺少 Name';
-      if (!Array.isArray(item.Conpoints) || item.Conpoints.length < 3) return 'Conpoints 必须是数组且至少 3 点';
-
-      // Stations 可选：若提供则必须为数组
-      if (item.Stations !== undefined && !Array.isArray(item.Stations)) return 'Stations 必须是数组';
-
-      return;
-    },
-  },
-
-  // ===== 车站建筑点 Station Building Point =====
-  车站建筑点: {
-    key: '车站建筑点',
-    label: '车站建筑点',
-    modes: ['point'],
-    hideTempOutput: true,
-    classCode: CLASS_CODE_BY_FEATURE['车站建筑点'], // SBP
-    fields: [
-      { key: 'ID', label: '车站建筑点ID', type: 'text' },   // [必填]
-      { key: 'Name', label: '车站建筑名', type: 'text' }, // [必填]
-      { key: 'elevation', label: '高度(y)', type: 'number', optional: true }, // [非必填]
-    ],
-    groups: [
-
-{
-  key: 'Floors',
-  label: '包含楼层 Floors',
-  addButtonText: '添加楼层条目',
-  optional: true, // [非必填]
-  fields: [
-    { key: 'ID', label: '楼层ID', type: 'text' },
-    { key: 'Group', label: '分组(Group)', type: 'text', optional: true },
-  ],
-},
-
-      {
-        key: 'stations',
-        label: '包含站台 stations',
-        addButtonText: '添加站台条目',
-        optional: false, // [必填]
-        minItems: 1,
-        fields: [
-          { key: 'ID', label: '车站ID', type: 'text' }, // [必填]
-        ],
-      },
-    ],
-    buildFeatureInfo: ({ op, mode, coords, values, groups, worldId, editorId, prevFeatureInfo, now }) => {
-      const base = pickByFields(values, FORMAT_REGISTRY['车站建筑点'].fields);
-      const p0 = coords[0];
-
-      const stations = Array.isArray(groups.stations)
-        ? groups.stations.map((it: any) => ({
-            ID: String(it?.ID ?? '').trim(),
-          }))
-        : [];
-
-      const Floors = Array.isArray(groups.Floors)
-        ? groups.Floors.map((it: any) => {
-            const ID = String(it?.ID ?? '').trim();
-            const Group = String(it?.Group ?? '').trim();
-            const o: any = { ID };
-            if (Group) o.Group = Group;
-            return o;
-          })
-        : [];
-
-      const out: any = {
-        ...base,
-        coordinate: buildPointCoordinateXYZ(p0, values),
-        stations,
-      };
-
-      // Floors 为可选：仅在存在条目时输出
-      if (Floors.length) out.Floors = Floors;
-
-      return withSystemFields(FORMAT_REGISTRY['车站建筑点'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-    },
-    hydrate: (featureInfo) => ({
-      values: {        ID: featureInfo?.ID ?? '',
-        Name: featureInfo?.Name ?? '',
-        elevation: (featureInfo?.coordinate?.y ?? featureInfo?.elevation) ?? '',
-      },
-      groups: {
-        Floors: Array.isArray(featureInfo?.Floors)
-          ? featureInfo.Floors.map((f: any) => ({
-              ID: f?.ID ?? '',
-              Group: f?.Group ?? '',
-            }))
-          : (Array.isArray(featureInfo?.floors)
-            ? featureInfo.floors.map((f: any) => ({
-                ID: f?.ID ?? f?.id ?? '',
-                Group: f?.Group ?? f?.group ?? '',
-              }))
-            : []),
-
-        stations: Array.isArray(featureInfo?.stations)
-          ? featureInfo.stations.map((s: any) => ({ ID: s?.ID ?? s?.id ?? '' }))
-          : (Array.isArray(featureInfo?.Stations)
-            ? featureInfo.Stations.map((s: any) => ({ ID: s?.ID ?? s?.id ?? '' }))
-            : []),
-      },
-    }),
-    coordsFromFeatureInfo: (featureInfo) => {
-      const c = featureInfo?.coordinate;
-      if (!c) return [];
-      const x = Number(c.x);
-      const z = Number(c.z);
-      const y = readPointYFromFeatureInfo(featureInfo);
-      if (!isFiniteNum(x) || !isFiniteNum(z)) return [];
-      return [Number.isFinite(y as any) ? ({ x, z, y } as any) : ({ x, z } as any)];
-    },
-    validateImportItem: (item) => {
-      if (!item || typeof item !== 'object') return '不是对象';
-      const id = String((item as any).ID ?? '').trim();
-      if (!id) return '缺少 ID';
-
-      const name = String((item as any).Name ?? '').trim();
-      if (!name) return '缺少 Name';
-
-      if (!item.coordinate || !isFiniteNum((item as any).coordinate.x) || !isFiniteNum((item as any).coordinate.z)) return '缺少合法 coordinate.x / coordinate.z';
-
-      const sts = (item as any).stations ?? (item as any).Stations;
-      if (!Array.isArray(sts)) return 'stations 必须是数组';
-
-      const fls = (item as any).Floors ?? (item as any).floors;
-      if (fls !== undefined && !Array.isArray(fls)) return 'Floors 必须是数组';
-      
-      return;
-    },
-  },
-
-  
-
-  // ===== 车站建筑楼层 Station Building Floor =====
-  车站建筑楼层: {
-    key: '车站建筑楼层',
-    label: '车站建筑楼层',
-    modes: ['polygon'],
-    hideTempOutput: true,
-    classCode: CLASS_CODE_BY_FEATURE['车站建筑楼层'],
-    fields: [
-      { key: 'ID', label: '楼层ID', type: 'text' },
-      { key: 'Name', label: '楼层名', type: 'text' },
-      { key: 'NofFloor', label: '楼层名(NofFloor)', type: 'text' },
-      { key: 'staBuildingID', label: '所属车站建筑(staBuildingID)', type: 'text' },
-      { key: 'Situation', label: '状态(Situation)', type: 'text', optional: true },
-      { key: 'elevation', label: '高度(y)', type: 'number', optional: true },
-      { key: 'height', label: '层高(height)', type: 'number', optional: true },
-    ],
-    groups: [],
-    buildFeatureInfo: ({ op, mode, coords, values, worldId, editorId, prevFeatureInfo, now }) => {
-      const base = pickByFields(values, FORMAT_REGISTRY['车站建筑楼层'].fields);
-      // 新规范：y 默认 -63（若 coords 内已有 y，则保留）
-      const Flrpoints = coords.map(p => [p.x, (Number.isFinite(p.y as any) ? (p.y as number) : -63), p.z] as [number, number, number]);
-      const out = { ...base, Flrpoints };
-      return withSystemFields(FORMAT_REGISTRY['车站建筑楼层'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-    },
-    hydrate: (featureInfo) => ({
-      values: {        ID: featureInfo?.ID ?? '',
-        Name: featureInfo?.Name ?? '',
-        NofFloor: featureInfo?.NofFloor ?? '',
-        staBuildingID: featureInfo?.staBuildingID ?? featureInfo?.staBuildingID ?? featureInfo?.STBuilding ?? featureInfo?.BuildingID ?? '',
-        Situation: featureInfo?.Situation ?? '',
-        elevation: featureInfo?.elevation ?? '',
-        height: featureInfo?.height ?? '',
-      },
-      groups: {},
-    }),
-    coordsFromFeatureInfo: (featureInfo) => {
-      const pts = featureInfo?.Flrpoints;
-      if (!Array.isArray(pts)) return [];
-      return pts
-        .map((p: any) => {
-          const x = Number(p?.[0]);
-          const y = Number(p?.[1]);
-          const z = Number(p?.[2]);
-          return Number.isFinite(y) ? ({ x, z, y }) : ({ x, z });
-        })
-        .filter((p: any) => isFiniteNum(p.x) && isFiniteNum(p.z));
-    },
-    validateImportItem: (item) => {
-      if (!item || typeof item !== 'object') return '不是对象';
-      const id = String((item as any).ID ?? '').trim();
-      if (!id) return '缺少 ID';
-
-      const name = String((item as any).Name ?? '').trim();
-      if (!name) return '缺少 Name';
-
-      if (!String((item as any).NofFloor ?? '').trim()) return '缺少 NofFloor';
-
-            if (!Array.isArray((item as any).Flrpoints) || (item as any).Flrpoints.length < 3) return 'Flrpoints 必须是数组且至少 3 点';
-      return;
-    },
-  },
-
-
-  // ===== 道路 Road（ROD） =====
-  // 说明：用于道路导航与通用工作流。
-  // - Linepoints: [[x,y,z], ...]（y 若缺省，导入时默认 -64；编辑/新建保留输入 y）
-  // - Level: 同层级道路可相交打断，不同层级视为立交（导航构图使用）
-  // - Oneway/Speed: 目前道路导航可选择是否使用；格式层先完整保留
-  // - Enter/Exit: [可选] 是否可进入/可离开；默认 true。
-  //   仅作用于导航的起点/终点接驳（“上下车/乘降”），不阻断道路之间的连接关系。
-  // - ConnectL: [可选] 显式连接关系（[{mode,tgt}]）。用于在复杂立交/叠层场景下稳定指定连接。
-  // - SelfJunction: [可选] 是否允许自身自交建点；默认 false（仅影响导航构图）。
-  道路: {
-    key: '道路',
-    label: '道路',
-    modes: ['polyline'],
-    hideTempOutput: true,
-    classCode: CLASS_CODE_BY_FEATURE['道路'], // ROD
-    fields: [
-      { key: 'ID', label: '道路ID', type: 'text' },
-      { key: 'Name', label: '道路名', type: 'text' },
-      { key: 'Kind', label: '类型(Kind)', type: 'text' },
-      { key: 'SKind', label: '子类型(SKind)', type: 'text', optional: true },
-      { key: 'SKind2', label: '三级子类型(SKind2)', type: 'text', optional: true },
-      { key: 'Level', label: '道路层级(Level)', type: 'number' },
-      { key: 'Oneway', label: '是否单向(Oneway)', type: 'bool' },
-      { key: 'Enter', label: '是否可进入(Enter)', type: 'bool', optional: true },
-      { key: 'Exit', label: '是否可离开(Exit)', type: 'bool', optional: true },
-      { key: 'SelfJunction', label: '是否允许自交(SelfJunction)', type: 'bool', optional: true },
-      { key: 'Speed', label: '道路速度(Speed)', type: 'number', optional: true },
-      { key: 'Situation', label: '状态(Situation)', type: 'text', optional: true },
-    ],
-    // tags/extensions：通用字段（与其他要素一致）
-    // 说明：本项目的 featureFormats 未提供 getGroupsWithTagExt 之类的辅助函数。
-    // 若后续需要在编辑器表单中显式呈现 tags/extensions 的分组，可参考其它要素的实现方式扩展 groups。
-    groups: [
-      {
-        key: 'ConnectL',
-        label: '显式连接关系(ConnectL)',
-        optional: true,
-        fields: [
-          {
-            key: 'mode',
-            label: '连接方式(mode)',
-            type: 'select',
-            options: [
-              { label: '端点(endpoint)', value: 'endpoint' },
-              { label: '中段(middle)', value: 'middle' },
-            ],
-          },
-          { key: 'tgt', label: '目标道路ID(tgt)', type: 'text' },
-        ],
-      },
-      {
-        key: 'Blacklist',
-        label: '黑名单(Blacklist)',
-        optional: true,
-        fields: [{ key: 'tgt', label: '目标道路ID(tgt)', type: 'text' }],
-      },
-      {
-        key: 'Mode',
-        label: '允许出行方式(Mode)',
-        optional: true,
-        fields: [{ key: 'code', label: '出行方式编码(code)', type: 'text' }],
-      },
-    ],
-    buildFeatureInfo: ({ op, mode, coords, values, groups, worldId, editorId, prevFeatureInfo, now }) => {
-      const base = pickByFields(values, FORMAT_REGISTRY['道路'].fields);
-      // 新规范：y 默认 -64（若 coords 内已有 y，则保留）
-      const Linepoints = coords.map(p => [p.x, (Number.isFinite(p.y as any) ? (p.y as number) : -64), p.z] as [number, number, number]);
-      const out0 = injectOptionalTagsExtensions({ ...base, Linepoints }, groups);
-
-      // ConnectL：允许从 groups.ConnectL 写入；仅保留合法条目
-      const rawCL = (groups as any)?.ConnectL;
-      const list = Array.isArray(rawCL) ? rawCL : [];
-      const ConnectL = list
-        .map((it: any) => {
-          const modeRaw = String(it?.mode ?? it?.Lot ?? '').trim();
-          const tgtRaw = String(it?.tgt ?? it?.Tgt ?? '').trim();
-          if (!tgtRaw) return null;
-          if (modeRaw !== 'endpoint' && modeRaw !== 'middle') return null;
-          return { mode: modeRaw, tgt: tgtRaw };
-        })
-        .filter(Boolean);
-
-      const out: any = { ...out0 };
-      if (ConnectL.length) out.ConnectL = ConnectL;
-
-      // Blacklist：允许从 groups.Blacklist 写入；输出为 [[ID], ...]；仅保留非空字符串
-      const rawBL = (groups as any)?.Blacklist;
-      const blList = Array.isArray(rawBL) ? rawBL : [];
-      const Blacklist = blList
-        .map((it: any) => {
-          const v = it?.tgt;
-          if (Array.isArray(v)) return String(v?.[0] ?? '').trim();
-          return String(v ?? it?.ID ?? it?.id ?? '').trim();
-        })
-        .filter((s: string) => !!s);
-      if (Blacklist.length) out.Blacklist = Blacklist.map((id: string) => [id]);
-
-      // Mode：允许从 groups.Mode 写入；输出为 [[code], ...]；仅保留非空字符串
-      const rawMode = (groups as any)?.Mode;
-      const mList = Array.isArray(rawMode) ? rawMode : [];
-      const Mode = mList
-        .map((it: any) => {
-          const v = it?.code ?? it?.tgt;
-          if (Array.isArray(v)) return String(v?.[0] ?? '').trim();
-          return String(v ?? it?.ID ?? it?.id ?? '').trim();
-        })
-        .filter((s: string) => !!s);
-      if (Mode.length) out.Mode = Array.from(new Set(Mode)).map((c: string) => [c]);
-
-      return withSystemFields(FORMAT_REGISTRY['道路'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-    },
-    hydrate: (featureInfo) => ({
-      values: {
-        ID: featureInfo?.ID ?? '',
-        Name: featureInfo?.Name ?? '',
-        Kind: featureInfo?.Kind ?? 'NOM',
-        SKind: featureInfo?.SKind ?? '',
-        SKind2: featureInfo?.SKind2 ?? '',
-        Level: Number.isFinite(Number(featureInfo?.Level)) ? Number(featureInfo.Level) : 0,
-        Oneway: Boolean(featureInfo?.Oneway),
-        // Enter 缺省视为 true
-        Enter: typeof featureInfo?.Enter === 'boolean' ? Boolean(featureInfo.Enter) : true,
-        // Exit 缺省视为 true
-        Exit: typeof featureInfo?.Exit === 'boolean' ? Boolean(featureInfo.Exit) : true,
-        // SelfJunction 缺省视为 false
-        SelfJunction: typeof (featureInfo as any)?.SelfJunction === 'boolean' ? Boolean((featureInfo as any).SelfJunction) : false,
-        Speed: featureInfo?.Speed ?? '',
-        Situation: featureInfo?.Situation ?? '',
-      },
-      groups: {
-        ...hydrateOptionalTagExtGroups(featureInfo),
-        // ConnectL：兼容 ConnectL / connectL；兼容旧键 Lot/Tgt
-        ConnectL: (() => {
-          const raw = (featureInfo as any)?.ConnectL ?? (featureInfo as any)?.connectL;
-          if (!Array.isArray(raw)) return [];
-          return raw
-            .map((it: any) => {
-              const modeRaw = String(it?.mode ?? it?.Lot ?? '').trim();
-              const tgtRaw = String(it?.tgt ?? it?.Tgt ?? '').trim();
-              if (!tgtRaw) return null;
-              if (modeRaw !== 'endpoint' && modeRaw !== 'middle') return null;
-              return { mode: modeRaw, tgt: tgtRaw };
-            })
-            .filter(Boolean);
-        })(),
-        // Blacklist：兼容 [[ID]] / [ID]
-        Blacklist: (() => {
-          const raw = (featureInfo as any)?.Blacklist ?? (featureInfo as any)?.blacklist;
-          if (!Array.isArray(raw)) return [];
-          const ids = raw
-            .map((it: any) => {
-              if (typeof it === 'string') return it.trim();
-              if (Array.isArray(it)) return String(it?.[0] ?? '').trim();
-              if (it && typeof it === 'object') return String(it?.tgt ?? it?.ID ?? it?.id ?? '').trim();
-              return '';
-            })
-            .filter((s: string) => !!s);
-          return ids.map((tgt: string) => ({ tgt }));
-        })(),
-        // Mode：兼容 [[code]] / [code]
-        Mode: (() => {
-          const raw = (featureInfo as any)?.Mode ?? (featureInfo as any)?.mode;
-          if (!Array.isArray(raw)) return [];
-          const codes = raw
-            .map((it: any) => {
-              if (typeof it === 'string') return it.trim();
-              if (Array.isArray(it)) return String(it?.[0] ?? '').trim();
-              if (it && typeof it === 'object') return String(it?.code ?? it?.tgt ?? it?.ID ?? it?.id ?? '').trim();
-              return '';
-            })
-            .filter((s: string) => !!s);
-          return codes.map((code: string) => ({ code }));
-        })(),
-      },
-    }),
-    coordsFromFeatureInfo: (featureInfo) => {
-      const pts = featureInfo?.Linepoints;
-      if (!Array.isArray(pts)) return [];
-      return pts
-        .map((p: any) => {
-          const x = Number(p?.[0]);
-          const y = Number(p?.[1]);
-          const z = Number(p?.[2]);
-          return Number.isFinite(y) ? ({ x, z, y }) : ({ x, z });
-        })
-        .filter((p: any) => isFiniteNum(p.x) && isFiniteNum(p.z));
-    },
-    validateImportItem: (item) => {
-      if (!item || typeof item !== 'object') return '不是对象';
-      if (!String((item as any).ID ?? '').trim()) return '缺少 ID';
-      if (!String((item as any).Name ?? '').trim()) return '缺少 Name';
-      if (!isFiniteNum((item as any).World)) return '缺少 World 或 World 不是数字';
-      if (!String((item as any).Kind ?? '').trim()) return '缺少 Kind';
-      if (!Number.isFinite(Number((item as any).Level))) return '缺少 Level 或 Level 不是数字';
-      if (typeof (item as any).Oneway !== 'boolean') return '缺少 Oneway 或 Oneway 不是 boolean';
-      if (typeof (item as any).Enter !== 'undefined' && typeof (item as any).Enter !== 'boolean') return 'Enter 必须是 boolean（或缺省）';
-      if (typeof (item as any).Exit !== 'undefined' && typeof (item as any).Exit !== 'boolean') return 'Exit 必须是 boolean（或缺省）';
-      if (typeof (item as any).SelfJunction !== 'undefined' && typeof (item as any).SelfJunction !== 'boolean') return 'SelfJunction 必须是 boolean（或缺省）';
-
-      // Mode（可选）：[[code]] / [code]
-      const rawMode = (item as any).Mode ?? (item as any).mode;
-      if (typeof rawMode !== 'undefined') {
-        if (!Array.isArray(rawMode)) return 'Mode 必须是数组（或缺省）';
-      }
-
-      // ConnectL（可选）：[{mode,tgt}]，兼容 Lot/Tgt
-      const rawCL = (item as any).ConnectL ?? (item as any).connectL;
-      if (typeof rawCL !== 'undefined') {
-        if (!Array.isArray(rawCL)) return 'ConnectL 必须是数组（或缺省）';
-        for (const it of rawCL) {
-          if (!it || typeof it !== 'object') return 'ConnectL 条目必须是对象';
-          const modeRaw = String((it as any).mode ?? (it as any).Lot ?? '').trim();
-          const tgtRaw = String((it as any).tgt ?? (it as any).Tgt ?? '').trim();
-          if (!tgtRaw) return 'ConnectL.tgt 不能为空';
-          if (modeRaw !== 'endpoint' && modeRaw !== 'middle') return 'ConnectL.mode 必须是 endpoint 或 middle';
-        }
-      }
-
-      // Blacklist（可选）：[[ID]] 或 [ID]
-      const rawBL = (item as any).Blacklist ?? (item as any).blacklist;
-      if (typeof rawBL !== 'undefined') {
-        if (!Array.isArray(rawBL)) return 'Blacklist 必须是数组（或缺省）';
-        for (const it of rawBL) {
-          const id = (typeof it === 'string')
-            ? it.trim()
-            : (Array.isArray(it) ? String(it?.[0] ?? '').trim() : (it && typeof it === 'object' ? String((it as any)?.tgt ?? '').trim() : ''));
-          if (!id) return 'Blacklist 条目不能为空';
-        }
-      }
-      if (!Array.isArray((item as any).Linepoints) || (item as any).Linepoints.length < 2) return 'Linepoints 必须是数组且至少 2 点';
-      const terr = validateOptionalTagExtSoft(item);
-      if (terr) return terr;
-      return;
-    },
-  },
-
-  // ===== 传送点 Teleport Point (TPP) =====
-  传送点: {
-    key: '传送点',
-    label: '传送点',
-    modes: ['point'],
-    hideTempOutput: true,
-    classCode: CLASS_CODE_BY_FEATURE['传送点'], // TPP
-    fields: [
-      { key: 'ID', label: '传送点ID', type: 'text' },
-      { key: 'Name', label: '传送点名', type: 'text' },
-      { key: 'Kind', label: '类型(Kind)', type: 'text' },
-      { key: 'SKind', label: '子类型(SKind)', type: 'text', optional: true },
-      { key: 'SKind2', label: '三级子类型(SKind2)', type: 'text', optional: true },
-
-      { key: 'hub', label: '枢纽(hub)', type: 'text', optional: true },
-
-      // 目标坐标：用表单两个字段录入，buildFeatureInfo 组装为 TGTcoordinate
-      { key: 'TGTWarp', label: '目标Warp(TGTWarp)', type: 'text', optional: true },
-
-      // 目标坐标：用表单两个字段录入，buildFeatureInfo 组装为 TGTcoordinate
-      { key: 'TGT_x', label: '目标点X(TGT_x)', type: 'number', optional: true },
-      { key: 'TGT_z', label: '目标点Z(TGT_z)', type: 'number', optional: true },
-
-      { key: 'elevation', label: '传送点高度(y)', type: 'number', optional: true },
-      { key: 'TGTelevation', label: '目标点高度(TGTelevation)', type: 'number', optional: true },
-    ],
-    groups: [],
-    buildFeatureInfo: ({ op, mode, coords, values, groups, worldId, editorId, prevFeatureInfo, now }) => {
-      const base = pickByFields(values, FORMAT_REGISTRY['传送点'].fields);
-      const p0 = coords[0];
-
-      const tags = buildTagsFromGroupItems(groups?.tags);
-      const extensions = buildExtensionsFromGroupItems(groups?.extensions);
-
-      const TGTWarp = String((values as any).TGTWarp ?? '').trim();
-      const TGT_x = isFiniteNum((values as any).TGT_x) ? Number((values as any).TGT_x) : undefined;
-      const TGT_z = isFiniteNum((values as any).TGT_z) ? Number((values as any).TGT_z) : undefined;
-      const TGT_y = isFiniteNum((values as any).TGTelevation) ? Number((values as any).TGTelevation) : undefined;
-
-      if (!TGTWarp && !(Number.isFinite(TGT_x as any) && Number.isFinite(TGT_z as any))) {
-        throw new Error('缺少目标Warp或目标点坐标');
-      }
-
-      const out: any = {
-        ...base,
-        // 坐标
-        coordinate: buildPointCoordinateXYZ(p0, values),
-        // 目标：优先 Warp（仅记录 ID；实际坐标可在导航层解析）
-        ...(TGTWarp ? { TGTWarp } : {}),
-        // 目标坐标（可选；当未填写 Warp 时必须提供）
-        ...(Number.isFinite(TGT_x as any) && Number.isFinite(TGT_z as any)
-          ? { TGTcoordinate: Number.isFinite(TGT_y as any) ? { x: TGT_x, z: TGT_z, y: TGT_y } : { x: TGT_x, z: TGT_z } }
-          : {}),
-        // 可选字段
-        elevation: isFiniteNum((values as any).elevation) ? Number((values as any).elevation) : undefined,
-        TGTelevation: isFiniteNum((values as any).TGTelevation) ? Number((values as any).TGTelevation) : undefined,
-        hub: String((values as any).hub ?? '').trim() || undefined,
-        tags,
-        extensions,
-      };
-
-      // 清理表单临时字段
-      delete out.TGT_x;
-      delete out.TGT_z;
-      if (!String((out as any).TGTWarp ?? '').trim()) delete (out as any).TGTWarp;
-
-      return withSystemFields(FORMAT_REGISTRY['传送点'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-    },
-    hydrate: (featureInfo) => {
-      const tgt = featureInfo?.TGTcoordinate ?? featureInfo?.tgtCoordinate ?? featureInfo?.targetCoordinate;
-      const hub = featureInfo?.hub ?? featureInfo?.tags?.hub ?? '';
-      return {
-        values: {
-          ID: featureInfo?.ID ?? '',
-          Name: featureInfo?.Name ?? '',
-          Kind: featureInfo?.Kind ?? '',
-          SKind: featureInfo?.SKind ?? '',
-          SKind2: featureInfo?.SKind2 ?? '',
-          hub: hub ?? '',
-          TGTWarp: featureInfo?.TGTWarp ?? featureInfo?.tgtWarp ?? '',
-          TGT_x: isFiniteNum(tgt?.x) ? Number(tgt.x) : '',
-          TGT_z: isFiniteNum(tgt?.z) ? Number(tgt.z) : '',
-          elevation: (featureInfo?.coordinate?.y ?? featureInfo?.elevation) ?? '',
-          TGTelevation: (featureInfo?.TGTelevation ?? (isFiniteNum(tgt?.y) ? Number(tgt?.y) : '')) ?? '',
-        },
-        groups: {
-          tags: flattenTagsToGroupItems(featureInfo?.tags),
-          extensions: flattenExtensionsToGroupItems(featureInfo?.extensions),
-        },
-      };
-    },
-    coordsFromFeatureInfo: (featureInfo) => {
-      const c = featureInfo?.coordinate;
-      if (!c) return [];
-      const x = Number(c.x);
-      const z = Number(c.z);
-      const y = readPointYFromFeatureInfo(featureInfo);
-      if (!isFiniteNum(x) || !isFiniteNum(z)) return [];
-      return [Number.isFinite(y as any) ? ({ x, z, y } as any) : ({ x, z } as any)];
-    },
-    validateImportItem: (item) => {
-      if (!item || typeof item !== 'object') return '不是对象';
-      const id = String((item as any).ID ?? '').trim();
-      if (!id) return '缺少 ID';
-      const name = String((item as any).Name ?? '').trim();
-      if (!name) return '缺少 Name';
-      if (!String((item as any).Kind ?? '').trim()) return '缺少 Kind';
-      if (!(item as any).coordinate || !isFiniteNum((item as any).coordinate.x) || !isFiniteNum((item as any).coordinate.z)) {
-        return '缺少合法 coordinate.x / coordinate.z';
-      }
-      const warp = String((item as any).TGTWarp ?? (item as any).tgtWarp ?? '').trim();
-      const tgt = (item as any).TGTcoordinate ?? (item as any).tgtCoordinate ?? (item as any).targetCoordinate;
-      const hasTgtCoord = !!tgt && isFiniteNum(tgt.x) && isFiniteNum(tgt.z);
-      if (!warp && !hasTgtCoord) {
-        return '缺少 TGTWarp 或合法 TGTcoordinate.x / TGTcoordinate.z';
-      }
-      return validateOptionalTagExtSoft(item);
-    },
-  },
-
-
-  // ===== Warp点 Warp Point (WRP) =====
-  Warp点: {
-    key: 'Warp点',
-    label: 'Warp点',
-    modes: ['point'],
-    hideTempOutput: true,
-    classCode: CLASS_CODE_BY_FEATURE['Warp点'], // WRP
-    fields: [
-      { key: 'ID', label: 'Warp点ID', type: 'text' },
-      { key: 'WRPointI2D', label: 'Warp点游戏内ID(WRPointI2D)', type: 'text' },
-      { key: 'Name', label: 'Warp点名', type: 'text' },
-      { key: 'Kind', label: '类型(Kind)', type: 'text' },
-      { key: 'SKind', label: '子类型(SKind)', type: 'text', optional: true },
-      { key: 'SKind2', label: '三级子类型(SKind2)', type: 'text', optional: true },
-      { key: 'hub', label: '枢纽(hub)', type: 'text', optional: true },
-      { key: 'elevation', label: '高度(y)', type: 'number', optional: true },
-    ],
-    groups: [],
-    buildFeatureInfo: ({ op, mode, coords, values, groups, worldId, editorId, prevFeatureInfo, now }) => {
-      const base = pickByFields(values, FORMAT_REGISTRY['Warp点'].fields);
-      const p0 = coords[0];
-
-      const tags = buildTagsFromGroupItems(groups?.tags);
-      const extensions = buildExtensionsFromGroupItems(groups?.extensions);
-
-      const out: any = {
-        ...base,
-        coordinate: buildPointCoordinateXYZ(p0, values),
-        elevation: isFiniteNum((values as any).elevation) ? Number((values as any).elevation) : undefined,
-        hub: String((values as any).hub ?? '').trim() || undefined,
-        tags,
-        extensions,
-      };
-
-      return withSystemFields(FORMAT_REGISTRY['Warp点'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-    },
-    hydrate: (featureInfo) => {
-      const hub = featureInfo?.hub ?? featureInfo?.tags?.hub ?? '';
-      return {
-        values: {
-          ID: featureInfo?.ID ?? '',
-          WRPointI2D: featureInfo?.WRPointI2D ?? featureInfo?.wrPointI2D ?? '',
-          Name: featureInfo?.Name ?? '',
-          Kind: featureInfo?.Kind ?? '',
-          SKind: featureInfo?.SKind ?? '',
-          SKind2: featureInfo?.SKind2 ?? '',
-          hub: hub ?? '',
-          elevation: (featureInfo?.coordinate?.y ?? featureInfo?.elevation) ?? '',
-        },
-        groups: {
-          tags: flattenTagsToGroupItems(featureInfo?.tags),
-          extensions: flattenExtensionsToGroupItems(featureInfo?.extensions),
-        },
-      };
-    },
-    coordsFromFeatureInfo: (featureInfo) => {
-      const c = featureInfo?.coordinate;
-      if (!c) return [];
-      const x = Number(c.x);
-      const z = Number(c.z);
-      const y = readPointYFromFeatureInfo(featureInfo);
-      if (!isFiniteNum(x) || !isFiniteNum(z)) return [];
-      return [Number.isFinite(y as any) ? ({ x, z, y } as any) : ({ x, z } as any)];
-    },
-    validateImportItem: (item) => {
-      if (!item || typeof item !== 'object') return '不是对象';
-      const id = String((item as any).ID ?? '').trim();
-      if (!id) return '缺少 ID';
-      const i2d = String((item as any).WRPointI2D ?? (item as any).wrPointI2D ?? '').trim();
-      if (!i2d) return '缺少 WRPointI2D';
-      const name = String((item as any).Name ?? '').trim();
-      if (!name) return '缺少 Name';
-      if (!String((item as any).Kind ?? '').trim()) return '缺少 Kind';
-      if (!(item as any).coordinate || !isFiniteNum((item as any).coordinate.x) || !isFiniteNum((item as any).coordinate.z)) {
-        return '缺少合法 coordinate.x / coordinate.z';
-      }
-      return validateOptionalTagExtSoft(item);
-    },
-  },
-
-
-  // ===== 交易点 Trade Point (TRP) =====
-  交易点: {
-    key: '交易点',
-    label: '交易点',
-    modes: ['point'],
-    hideTempOutput: true,
-    classCode: CLASS_CODE_BY_FEATURE['交易点'], // TRP
-    fields: [
-      { key: 'ID', label: '交易点ID', type: 'text' },
-      { key: 'Name', label: '交易点名', type: 'text' },
-      { key: 'Kind', label: '类型(Kind)', type: 'text' },
-      { key: 'SKind', label: '子类型(SKind)', type: 'text', optional: true },
-      { key: 'SKind2', label: '三级子类型(SKind2)', type: 'text', optional: true },
-
-      { key: 'Interaction', label: '交互模式(Interaction)', type: 'text', optional: true },
-      { key: 'Situation', label: '启用状况(Situation)', type: 'text', optional: true },
-
-      // 为避免引入复杂的嵌套编辑器，这里先用“整段 JSON 文本”承载交易表。
-      // - 运行时仍以 featureInfo.Trade（数组）解析显示。
-      // - 后续若你实现专用 Trade 编辑器，可替换此字段。
-      { key: 'TradeJSON', label: '交易列表(Trade) JSON', type: 'text', optional: true },
-
-      { key: 'elevation', label: '高度(y)', type: 'number', optional: true },
-    ],
-    groups: [
-      {
-        key: 'tags',
-        label: 'tags（可选：用于筛选/渲染差分）',
-        optional: true,
-        addButtonText: '添加 tag',
-        fields: [
-          { key: 'tagKey', label: '字段名', type: 'select', options: TAG_KEY_OPTIONS },
-          { key: 'tagKeyOther', label: '其他字段名（当字段名=其他时填写）', type: 'text', optional: true },
-          { key: 'tagValue', label: '值', type: 'text' },
-        ],
-      },
-      {
-        key: 'extensions',
-        label: 'extensions（可选：仅记录信息，不参与规则）',
-        optional: true,
-        addButtonText: '添加扩展',
-        fields: [
-          { key: 'extGroup', label: '组/命名空间(extGroup)', type: 'text' },
-          { key: 'extKey', label: '字段名(extKey)', type: 'text' },
-          { key: 'extType', label: '值类型', type: 'select', options: EXT_VALUE_TYPE_OPTIONS, defaultValue: EXT_VALUE_TYPE_TEXT },
-          { key: 'extValue', label: '值(extValue)', type: 'text' },
-        ],
-      },
-    ],
-    buildFeatureInfo: ({ op, mode, coords, values, groups, worldId, editorId, prevFeatureInfo, now }) => {
-      const base = pickByFields(values, FORMAT_REGISTRY['交易点'].fields);
-      const p0 = coords[0];
-
-      const tags = buildTagsFromGroupItems(groups?.tags);
-      const extensions = buildExtensionsFromGroupItems(groups?.extensions);
-
-      // Trade：
-      // 1) 工作流会直接提交 values.Trade（数组）
-      // 2) 通用编辑器场景仍允许填写 TradeJSON（文本）
-      // 3) 编辑兼容：若表单未提供则沿用 prevFeatureInfo.Trade
-      let Trade: any[] | undefined;
-      const tradeArr = (values as any).Trade;
-      if (Array.isArray(tradeArr)) {
-        Trade = tradeArr;
-      } else {
-        const tradeJsonText = String((values as any).TradeJSON ?? '').trim();
-        if (tradeJsonText) {
-          try {
-            const parsed = JSON.parse(tradeJsonText);
-            if (Array.isArray(parsed)) Trade = parsed;
-            else throw new Error('TradeJSON 必须是数组');
-          } catch (e: any) {
-            throw new Error(`TradeJSON 解析失败：${e?.message ?? '未知错误'}`);
-          }
-        } else if (Array.isArray(prevFeatureInfo?.Trade)) {
-          Trade = prevFeatureInfo.Trade;
-        }
-      }
-
-      if (op === 'create' && (!Trade || Trade.length === 0)) {
-        throw new Error('缺少交易列表 Trade（请填写交易列表或导入包含 Trade 的 JSON）');
-      }
-
-      const out: any = {
-        ...base,
-        coordinate: buildPointCoordinateXYZ(p0, values),
-        elevation: isFiniteNum((values as any).elevation) ? Number((values as any).elevation) : undefined,
-        ...(Trade ? { Trade } : {}),
-        tags,
-        extensions,
-      };
-
-      // 清理表单临时字段
-      delete out.TradeJSON;
-
-      return withSystemFields(FORMAT_REGISTRY['交易点'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-    },
-    hydrate: (featureInfo) => {
-      const trade = featureInfo?.Trade ?? featureInfo?.trade;
-      return {
-        values: {
-          ID: featureInfo?.ID ?? '',
-          Name: featureInfo?.Name ?? '',
-          Kind: featureInfo?.Kind ?? '',
-          SKind: featureInfo?.SKind ?? '',
-          SKind2: featureInfo?.SKind2 ?? '',
-          Interaction: featureInfo?.Interaction ?? featureInfo?.interaction ?? '',
-          Situation: featureInfo?.Situation ?? featureInfo?.situation ?? '',
-          Trade: Array.isArray(trade) ? trade : undefined,
-          TradeJSON: Array.isArray(trade) ? JSON.stringify(trade, null, 2) : '',
-          elevation: (featureInfo?.coordinate?.y ?? featureInfo?.elevation) ?? '',
-        },
-        groups: {
-          ...hydrateOptionalTagExtGroups(featureInfo),
-        },
-      };
-    },
-    coordsFromFeatureInfo: (featureInfo) => {
-      const c = featureInfo?.coordinate;
-      if (!c) return [];
-      const x = Number(c.x);
-      const z = Number(c.z);
-      const y = readPointYFromFeatureInfo(featureInfo);
-      if (!isFiniteNum(x) || !isFiniteNum(z)) return [];
-      return [Number.isFinite(y as any) ? ({ x, z, y } as any) : ({ x, z } as any)];
-    },
-    validateImportItem: (item) => {
-      if (!item || typeof item !== 'object') return '不是对象';
-      const id = String((item as any).ID ?? '').trim();
-      if (!id) return '缺少 ID';
-      const name = String((item as any).Name ?? '').trim();
-      if (!name) return '缺少 Name';
-      if (!String((item as any).Kind ?? '').trim()) return '缺少 Kind';
-      if (!(item as any).coordinate || !isFiniteNum((item as any).coordinate.x) || !isFiniteNum((item as any).coordinate.z)) {
-        return '缺少合法 coordinate.x / coordinate.z';
-      }
-      // 交易列表：允许不同历史结构，但至少应存在数组形式的 Trade。
-      const trade = (item as any).Trade ?? (item as any).trade;
-      if (!Array.isArray(trade)) return 'Trade 必须是数组';
-      return validateOptionalTagExtSoft(item);
-    },
-  },
-
-// ===== 地物点 / 线 / 面 & 建筑 / 建筑楼层（新增） =====
-地物点: {
-  key: '地物点',
-  label: '地物点',
-  modes: ['point'],
-  hideTempOutput: true,
-  classCode: CLASS_CODE_BY_FEATURE['地物点'], // ISP
-  fields: [
-    { key: 'ID', label: '要素点ID', type: 'text' },
-    { key: 'Name', label: '要素点名', type: 'text' },
-
-    // 仍保留为“硬字段”（便于大众贡献者理解）；同时会自动镜像到 tags 中，供 rules 使用
-    { key: 'Kind', label: '要素类型(Kind)', type: 'text' },
-    { key: 'SKind', label: '要素子类型(SKind)', type: 'text' },
-    { key: 'SKind2', label: '要素三级子类型(SKind2)', type: 'text', optional: true },
-
-    { key: 'Situation', label: '状态(Situation)', type: 'text', optional: true },
-    { key: 'elevation', label: '高度(y)', type: 'number', optional: true },
-  ],
-  groups: [
-    {
-      key: 'tags',
-      label: 'tags（可选：用于筛选/渲染差分）',
-      optional: true,
-      addButtonText: '添加 tag',
-      fields: [
-        { key: 'tagKey', label: '字段名', type: 'select', options: TAG_KEY_OPTIONS },
-        { key: 'tagKeyOther', label: '其他字段名（当字段名=其他时填写）', type: 'text', optional: true },
-        { key: 'tagValue', label: '值', type: 'text' },
-      ],
-    },
-    {
-      key: 'extensions',
-      label: 'extensions（可选：仅记录信息，不参与规则）',
-      optional: true,
-      addButtonText: '添加扩展',
-      fields: [
-        { key: 'extGroup', label: '组/命名空间(extGroup)', type: 'text' },
-        { key: 'extKey', label: '字段名(extKey)', type: 'text' },
-        { key: 'extType', label: '值类型', type: 'select', options: EXT_VALUE_TYPE_OPTIONS, defaultValue: EXT_VALUE_TYPE_TEXT },
-        { key: 'extValue', label: '值(extValue)', type: 'text' },
-      ],
-    },
-  ],
-  buildFeatureInfo: ({ op, mode, coords, values, groups, worldId, editorId, prevFeatureInfo, now }) => {
-    const base = pickByFields(values, FORMAT_REGISTRY['地物点'].fields);
-    const p0 = coords[0];
-
-    // tags 仅记录“用户显式添加”的轻量字段；不自动把主干字段镜像到 tags
-    // （避免出现用户删 registry 后仍被强行写入 tags 的情况，且保持导入/编辑语义清晰）
-    const tags = buildTagsFromGroupItems(groups?.tags);
-
-    const extensions = buildExtensionsFromGroupItems(groups?.extensions);
-
-    const out: any = {
-      ...base,
-      coordinate: buildPointCoordinateXYZ(p0, values),
-    };
-    if (Object.keys(tags).length > 0) out.tags = tags;
-    if (Object.keys(extensions).length > 0) out.extensions = extensions;
-
-    return withSystemFields(FORMAT_REGISTRY['地物点'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-  },
-  hydrate: (featureInfo) => ({
-    values: {
-      ID: featureInfo?.ID ?? '',
-      Name: featureInfo?.Name ?? '',
-      Kind: featureInfo?.Kind ?? '',
-      SKind: featureInfo?.SKind ?? '',
-      SKind2: featureInfo?.SKind2 ?? '',
-      Situation: featureInfo?.Situation ?? featureInfo?.tags?.Situation ?? '',
-      elevation: (featureInfo?.coordinate?.y ?? featureInfo?.elevation) ?? '',
-    },
-    groups: {
-      tags: flattenTagsToGroupItems(featureInfo?.tags),
-      extensions: flattenExtensionsToGroupItems(featureInfo?.extensions),
-    },
-  }),
-  coordsFromFeatureInfo: (featureInfo) => {
-    const c = featureInfo?.coordinate;
-    if (!c) return [];
-    const x = Number(c.x);
-    const z = Number(c.z);
-    const y = readPointYFromFeatureInfo(featureInfo);
-    if (!isFiniteNum(x) || !isFiniteNum(z)) return [];
-    return [Number.isFinite(y as any) ? ({ x, z, y } as any) : ({ x, z } as any)];
-  },
-  validateImportItem: (item) => {
-    if (!item || typeof item !== 'object') return '不是对象';
-        if (!String((item as any).ID ?? '').trim()) return '缺少 ID';
-      if (!String((item as any).Name ?? '').trim()) return '缺少 Name';
-    if (!String((item as any).Kind ?? '').trim()) return '缺少 Kind';
-    if (!String((item as any).SKind ?? '').trim()) return '缺少 SKind';
-    if (!item.coordinate || !isFiniteNum((item as any).coordinate.x) || !isFiniteNum((item as any).coordinate.z)) return '缺少合法 coordinate.x / coordinate.z';
-
-    const terr = validateTagsObjectSoft((item as any).tags);
-    if (terr) return terr;
-    const eerr = validateExtensionsObjectSoft((item as any).extensions);
-    if (eerr) return eerr;
-    return;
-  },
-},
-
-地物线: {
-  key: '地物线',
-  label: '地物线',
-  modes: ['polyline'],
-  hideTempOutput: true,
-  classCode: CLASS_CODE_BY_FEATURE['地物线'], // ISL
-  fields: [
-    { key: 'ID', label: '线要素ID', type: 'text' },
-    { key: 'Name', label: '线要素名', type: 'text' },
-
-    { key: 'Kind', label: '线要素类型(Kind)', type: 'text' },
-    { key: 'SKind', label: '线要素子类型(SKind)', type: 'text' },
-    { key: 'SKind2', label: '线要素三级子类型(SKind2)', type: 'text', optional: true },
-
-    { key: 'Situation', label: '状态(Situation)', type: 'text', optional: true },
-  ],
-  groups: [
-    {
-      key: 'tags',
-      label: 'tags（可选：用于筛选/渲染差分）',
-      optional: true,
-      addButtonText: '添加 tag',
-      fields: [
-        { key: 'tagKey', label: '字段名', type: 'select', options: TAG_KEY_OPTIONS },
-        { key: 'tagKeyOther', label: '其他字段名（当字段名=其他时填写）', type: 'text', optional: true },
-        { key: 'tagValue', label: '值', type: 'text' },
-      ],
-    },
-    {
-      key: 'extensions',
-      label: 'extensions（可选：仅记录信息，不参与规则）',
-      optional: true,
-      addButtonText: '添加扩展',
-      fields: [
-        { key: 'extGroup', label: '组/命名空间(extGroup)', type: 'text' },
-        { key: 'extKey', label: '字段名(extKey)', type: 'text' },
-        { key: 'extType', label: '值类型', type: 'select', options: EXT_VALUE_TYPE_OPTIONS, defaultValue: EXT_VALUE_TYPE_TEXT },
-        { key: 'extValue', label: '值(extValue)', type: 'text' },
-      ],
-    },
-  ],
-  buildFeatureInfo: ({ op, mode, coords, values, groups, worldId, editorId, prevFeatureInfo, now }) => {
-    const base = pickByFields(values, FORMAT_REGISTRY['地物线'].fields);
-    const Linepoints = coords.map(p => [p.x, (Number.isFinite(p.y as any) ? (p.y as number) : -64), p.z] as [number, number, number]);
-
-    // tags 仅记录“用户显式添加”的轻量字段；不自动把主干字段镜像到 tags
-    const tags = buildTagsFromGroupItems(groups?.tags);
-    const extensions = buildExtensionsFromGroupItems(groups?.extensions);
-
-    const out: any = { ...base, Linepoints };
-    if (Object.keys(tags).length > 0) out.tags = tags;
-    if (Object.keys(extensions).length > 0) out.extensions = extensions;
-
-    return withSystemFields(FORMAT_REGISTRY['地物线'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-  },
-  hydrate: (featureInfo) => ({
-    values: {
-      ID: featureInfo?.ID ?? '',
-      Name: featureInfo?.Name ?? '',
-      Kind: featureInfo?.Kind ?? '',
-      SKind: featureInfo?.SKind ?? '',
-      SKind2: featureInfo?.SKind2 ?? '',
-      Situation: featureInfo?.Situation ?? featureInfo?.tags?.Situation ?? '',
-    },
-    groups: {
-      tags: flattenTagsToGroupItems(featureInfo?.tags),
-      extensions: flattenExtensionsToGroupItems(featureInfo?.extensions),
-    },
-  }),
-  coordsFromFeatureInfo: (featureInfo) => {
-    const pts = featureInfo?.Linepoints;
-    if (!Array.isArray(pts)) return [];
-    const out: Coord2D[] = [];
-    for (const p of pts) {
-      const x = Number(p?.[0]);
-      const y = Number(p?.[1]);
-      const z = Number(p?.[2]);
-      if (!isFiniteNum(x) || !isFiniteNum(z)) continue;
-      out.push({ x, z, y: Number.isFinite(y) ? y : -64 });
-    }
-    return out;
-  },
-  validateImportItem: (item) => {
-    if (!item || typeof item !== 'object') return '不是对象';
-        if (!String((item as any).ID ?? '').trim()) return '缺少 ID';
-      if (!String((item as any).Name ?? '').trim()) return '缺少 Name';
-    if (!String((item as any).Kind ?? '').trim()) return '缺少 Kind';
-    if (!String((item as any).SKind ?? '').trim()) return '缺少 SKind';
-    if (!Array.isArray((item as any).Linepoints) || (item as any).Linepoints.length < 2) return 'Linepoints 必须是数组且至少 2 点';
-
-    const terr = validateTagsObjectSoft((item as any).tags);
-    if (terr) return terr;
-    const eerr = validateExtensionsObjectSoft((item as any).extensions);
-    if (eerr) return eerr;
-    return;
-  },
-},
-
-地物面: {
-  key: '地物面',
-  label: '地物面',
-  modes: ['polygon'],
-  hideTempOutput: true,
-  classCode: CLASS_CODE_BY_FEATURE['地物面'], // ISG
-  fields: [
-    { key: 'ID', label: '地物面ID', type: 'text' },
-    { key: 'Name', label: '地物面名', type: 'text' },
-
-    { key: 'Kind', label: '地物面类型(Kind)', type: 'text' },
-    { key: 'SKind', label: '地物面子类型(SKind)', type: 'text' },
-    { key: 'SKind2', label: '地物面三级子类型(SKind2)', type: 'text', optional: true },
-
-    { key: 'Situation', label: '状态(Situation)', type: 'text', optional: true },
-  ],
-  groups: [
-    {
-      key: 'tags',
-      label: 'tags（可选：用于筛选/渲染差分）',
-      optional: true,
-      addButtonText: '添加 tag',
-      fields: [
-        { key: 'tagKey', label: '字段名', type: 'select', options: TAG_KEY_OPTIONS },
-        { key: 'tagKeyOther', label: '其他字段名（当字段名=其他时填写）', type: 'text', optional: true },
-        { key: 'tagValue', label: '值', type: 'text' },
-      ],
-    },
-    {
-      key: 'extensions',
-      label: 'extensions（可选：仅记录信息，不参与规则）',
-      optional: true,
-      addButtonText: '添加扩展',
-      fields: [
-        { key: 'extGroup', label: '组/命名空间(extGroup)', type: 'text' },
-        { key: 'extKey', label: '字段名(extKey)', type: 'text' },
-        { key: 'extType', label: '值类型', type: 'select', options: EXT_VALUE_TYPE_OPTIONS, defaultValue: EXT_VALUE_TYPE_TEXT },
-        { key: 'extValue', label: '值(extValue)', type: 'text' },
-      ],
-    },
-  ],
-  buildFeatureInfo: ({ op, mode, coords, values, groups, worldId, editorId, prevFeatureInfo, now }) => {
-    const base = pickByFields(values, FORMAT_REGISTRY['地物面'].fields);
-    const Conpoints = coords.map(p => [p.x, (Number.isFinite(p.y as any) ? (p.y as number) : -63), p.z] as [number, number, number]);
-
-    // tags 仅记录“用户显式添加”的轻量字段；不自动把主干字段镜像到 tags
-    const tags = buildTagsFromGroupItems(groups?.tags);
-    const extensions = buildExtensionsFromGroupItems(groups?.extensions);
-
-    const out: any = { ...base, Conpoints };
-    if (Object.keys(tags).length > 0) out.tags = tags;
-    if (Object.keys(extensions).length > 0) out.extensions = extensions;
-
-    return withSystemFields(FORMAT_REGISTRY['地物面'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-  },
-  hydrate: (featureInfo) => ({
-    values: {
-      ID: featureInfo?.ID ?? '',
-      Name: featureInfo?.Name ?? '',
-      Kind: featureInfo?.Kind ?? '',
-      SKind: featureInfo?.SKind ?? '',
-      SKind2: featureInfo?.SKind2 ?? '',
-      Situation: featureInfo?.Situation ?? featureInfo?.tags?.Situation ?? '',
-    },
-    groups: {
-      tags: flattenTagsToGroupItems(featureInfo?.tags),
-      extensions: flattenExtensionsToGroupItems(featureInfo?.extensions),
-    },
-  }),
-  coordsFromFeatureInfo: (featureInfo) => {
-    const pts = featureInfo?.Conpoints;
-    if (!Array.isArray(pts)) return [];
-    return pts
-      .map((p: any) => {
-        const x = Number(p?.[0]);
-        const y = Number(p?.[1]);
-        const z = Number(p?.[2]);
-        return Number.isFinite(y) ? ({ x, z, y }) : ({ x, z });
-      })
-      .filter((p: any) => isFiniteNum(p.x) && isFiniteNum(p.z));
-  },
-  validateImportItem: (item) => {
-    if (!item || typeof item !== 'object') return '不是对象';
-        if (!String((item as any).ID ?? '').trim()) return '缺少 ID';
-      if (!String((item as any).Name ?? '').trim()) return '缺少 Name';
-    if (!String((item as any).Kind ?? '').trim()) return '缺少 Kind';
-    if (!String((item as any).SKind ?? '').trim()) return '缺少 SKind';
-    if (!Array.isArray((item as any).Conpoints) || (item as any).Conpoints.length < 3) return 'Conpoints 必须是数组且至少 3 点';
-
-    const terr = validateTagsObjectSoft((item as any).tags);
-    if (terr) return terr;
-    const eerr = validateExtensionsObjectSoft((item as any).extensions);
-    if (eerr) return eerr;
-    return;
-  },
-},
-
-建筑: {
-  key: '建筑',
-  label: '建筑',
-  modes: ['polygon'],
-  hideTempOutput: true,
-  classCode: CLASS_CODE_BY_FEATURE['建筑'], // BUD
-  fields: [
-    { key: 'ID', label: '建筑ID', type: 'text' },
-    { key: 'Name', label: '建筑名', type: 'text' },
-    { key: 'Kind', label: '建筑类型(Kind)', type: 'text' },
-    { key: 'SKind', label: '建筑子类型(SKind)', type: 'text' },
-    { key: 'SKind2', label: '建筑三级子类型(SKind2)', type: 'text', optional: true },
-    { key: 'Situation', label: '状态(Situation)', type: 'text', optional: true },
-    { key: 'elevation', label: '高度(y)', type: 'number', optional: true },
-    { key: 'height', label: '高度(height)', type: 'number', optional: true },
-  ],
-  groups: ensureOptionalTagExtGroups([]),
-  buildFeatureInfo: ({ op, mode, coords, values, groups, worldId, editorId, prevFeatureInfo, now }) => {
-    const base = pickByFields(values, FORMAT_REGISTRY['建筑'].fields);
-    const Conpoints = coords.map(p => [p.x, (Number.isFinite(p.y as any) ? (p.y as number) : -63), p.z] as [number, number, number]);
-    const out = injectOptionalTagsExtensions({ ...base, Conpoints }, groups);
-    return withSystemFields(FORMAT_REGISTRY['建筑'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-  },
-  hydrate: (featureInfo) => ({
-    values: {
-      ID: featureInfo?.ID ?? '',
-      Name: featureInfo?.Name ?? '',
-      Kind: featureInfo?.Kind ?? '',
-      SKind: featureInfo?.SKind ?? '',
-      SKind2: featureInfo?.SKind2 ?? '',
-      Situation: featureInfo?.Situation ?? '',
-      elevation: featureInfo?.elevation ?? '',
-      height: featureInfo?.height ?? '',
-    },
-    groups: hydrateOptionalTagExtGroups(featureInfo),
-  }),
-  coordsFromFeatureInfo: (featureInfo) => {
-    const pts = featureInfo?.Conpoints;
-    if (!Array.isArray(pts)) return [];
-    return pts
-      .map((p: any) => {
-        const x = Number(p?.[0]);
-        const y = Number(p?.[1]);
-        const z = Number(p?.[2]);
-        return Number.isFinite(y) ? ({ x, z, y }) : ({ x, z });
-      })
-      .filter((p: any) => isFiniteNum(p.x) && isFiniteNum(p.z));
-  },
-  validateImportItem: (item) => {
-    if (!item || typeof item !== 'object') return '不是对象';
-    if (!String((item as any).ID ?? '').trim()) return '缺少 ID';
-    if (!String((item as any).Name ?? '').trim()) return '缺少 Name';
-    if (!String((item as any).Kind ?? '').trim()) return '缺少 Kind';
-    if (!String((item as any).SKind ?? '').trim()) return '缺少 SKind';
-    if (!Array.isArray((item as any).Conpoints) || (item as any).Conpoints.length < 3) return 'Conpoints 必须是数组且至少 3 点';
-    return validateOptionalTagExtSoft(item);
-  },
-},
-
-建筑楼层: {
-  key: '建筑楼层',
-  label: '建筑楼层',
-  modes: ['polygon'],
-  hideTempOutput: true,
-  classCode: CLASS_CODE_BY_FEATURE['建筑楼层'], // FLR
-  fields: [
-    { key: 'ID', label: '楼层ID', type: 'text' },
-    { key: 'Name', label: '楼层名', type: 'text' },
-    { key: 'NofFloor', label: '楼层名(NofFloor)', type: 'text' },
-    { key: 'Kind', label: '楼层类型(Kind)', type: 'text' },
-    { key: 'SKind', label: '楼层子类型(SKind)', type: 'text' },
-    { key: 'SKind2', label: '楼层三级子类型(SKind2)', type: 'text', optional: true },
-    { key: 'BuildingID', label: '所属建筑(BuildingID)', type: 'text' },
-    { key: 'Situation', label: '状态(Situation)', type: 'text', optional: true },
-    { key: 'elevation', label: '高度(y)', type: 'number', optional: true },
-    { key: 'height', label: '高度(height)', type: 'number', optional: true },
-  ],
-  groups: ensureOptionalTagExtGroups([]),
-  buildFeatureInfo: ({ op, mode, coords, values, groups, worldId, editorId, prevFeatureInfo, now }) => {
-    const base = pickByFields(values, FORMAT_REGISTRY['建筑楼层'].fields);
-    const Flrpoints = coords.map(p => [p.x, (Number.isFinite(p.y as any) ? (p.y as number) : -63), p.z] as [number, number, number]);
-    const out = injectOptionalTagsExtensions({ ...base, Flrpoints }, groups);
-    return withSystemFields(FORMAT_REGISTRY['建筑楼层'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
-  },
-  hydrate: (featureInfo) => ({
-    values: {
-      ID: featureInfo?.ID ?? '',
-      Name: featureInfo?.Name ?? '',
-      NofFloor: featureInfo?.NofFloor ?? '',
-      Kind: featureInfo?.Kind ?? '',
-      SKind: featureInfo?.SKind ?? '',
-      SKind2: featureInfo?.SKind2 ?? '',
-      BuildingID: featureInfo?.BuildingID ?? '',
-      Situation: featureInfo?.Situation ?? '',
-      elevation: featureInfo?.elevation ?? '',
-      height: featureInfo?.height ?? '',
-    },
-    groups: hydrateOptionalTagExtGroups(featureInfo),
-  }),
-  coordsFromFeatureInfo: (featureInfo) => {
-    const pts = featureInfo?.Flrpoints;
-    if (!Array.isArray(pts)) return [];
-    return pts
-      .map((p: any) => {
-        const x = Number(p?.[0]);
-        const y = Number(p?.[1]);
-        const z = Number(p?.[2]);
-        return Number.isFinite(y) ? ({ x, z, y }) : ({ x, z });
-      })
-      .filter((p: any) => isFiniteNum(p.x) && isFiniteNum(p.z));
-  },
-  validateImportItem: (item) => {
-    if (!item || typeof item !== 'object') return '不是对象';
-    if (!String((item as any).ID ?? '').trim()) return '缺少 ID';
-    if (!String((item as any).Name ?? '').trim()) return '缺少 Name';
-    if (!String((item as any).NofFloor ?? '').trim()) return '缺少 NofFloor';
-    if (!String((item as any).Kind ?? '').trim()) return '缺少 Kind';
-    if (!String((item as any).SKind ?? '').trim()) return '缺少 SKind';
-    if (!Array.isArray((item as any).Flrpoints) || (item as any).Flrpoints.length < 3) return 'Flrpoints 必须是数组且至少 3 点';
-    return validateOptionalTagExtSoft(item);
-  },
-},
+export const getRuntimeFormatSchemaMetadata = (featureKeyOrClassCode: string) => {
+  return getClassSchema(featureKeyOrClassCode) ?? getClassSchemaByFeatureKey(featureKeyOrClassCode);
 };
 
+export const getFormatDef = (key: FeatureKey): FormatDef => FORMAT_REGISTRY[key] ?? FORMAT_REGISTRY['默认'];
 
-
-// ---- Inject optional tags/extensions into every non-default FormatDef (single-source) ----
-// NOTE: Must run after FORMAT_REGISTRY is declared.
-const __OPTIONAL_TAG_EXT_ENRICHED__ = '__OPTIONAL_TAG_EXT_ENRICHED__';
-for (const def of Object.values(FORMAT_REGISTRY)) {
-  if (!def || def.key === '默认') continue;
-
-  // Prevent accidental double wrapping in dev HMR scenarios.
-  if ((def as any)[__OPTIONAL_TAG_EXT_ENRICHED__]) continue;
-  (def as any)[__OPTIONAL_TAG_EXT_ENRICHED__] = true;
-
-  def.groups = ensureOptionalTagExtGroups(def.groups);
-
-  const origBuild = def.buildFeatureInfo;
-  def.buildFeatureInfo = (args: any) => {
-    const out = origBuild(args);
-    return injectOptionalTagsExtensions(out, args?.groups);
-  };
-
-  const origHydrate = def.hydrate;
-  def.hydrate = (featureInfo: any) => {
-    const res = origHydrate(featureInfo);
-    const g = (res?.groups ?? {}) as Record<string, any[]>;
-    const opt = hydrateOptionalTagExtGroups(featureInfo);
-    return {
-      ...res,
-      groups: {
-        ...g,
-        ...(g.tags === undefined ? { tags: opt.tags } : {}),
-        ...(g.extensions === undefined ? { extensions: opt.extensions } : {}),
-      },
-    };
-  };
-
-  const origValidate = def.validateImportItem;
-  def.validateImportItem = (item: any) => {
-    const baseErr = origValidate?.(item);
-    if (baseErr) return baseErr;
-    return validateOptionalTagExtSoft(item);
-  };
-}
-
-export const getFormatDef = (key: FeatureKey): FormatDef => {
-  // FeatureKey 理论上都在 FORMAT_REGISTRY 内，但这里做兜底更稳
-  return (FORMAT_REGISTRY as any)[key] ?? FORMAT_REGISTRY['默认'];
-};
-
-
-// 供 MeasuringModule 使用：按 drawMode 获取可选 subtype
 export const getSubTypeOptions = (mode: DrawMode): FeatureKey[] => {
-  return (Object.keys(FORMAT_REGISTRY) as FeatureKey[]).filter(k => FORMAT_REGISTRY[k].modes.includes(mode));
+  return (Object.keys(FORMAT_REGISTRY) as FeatureKey[]).filter((k) => FORMAT_REGISTRY[k].modes.includes(mode));
 };
 
-// 导出时坐标统一四舍五入到指定精度步进（不影响内存中编辑精度，仅影响输出）
-// NOTE: 0.1 是当前默认；如果未来需要更精细或更粗糙，请修改此常量。
-//       该精度用于“手动/导入/输出”链路，地图交互链路仍保留 0.5 网格化。
-// 导出单图层 JSON（统一出口）
-export const layerToJsonText = (layer: { jsonInfo?: { featureInfo: any } }): string => {
+export const layerToJsonText = (layer: { jsonInfo?: { featureInfo: unknown } }): string => {
   const fi = layer.jsonInfo?.featureInfo;
   if (!fi) return '';
   return stringifyFeatureJsonArray([fi]);
 };
 
-// 点线面文本坐标解析（用于导入）
 export const parseCoordListFlexible = (raw: string): Coord2D[] | null => {
   const text = raw.trim();
   if (!text) return null;
-  const parts = text.split(';').map(s => s.trim()).filter(Boolean);
+  const parts = text.split(';').map((s) => s.trim()).filter(Boolean);
   if (!parts.length) return null;
 
   const out: Coord2D[] = [];
   for (const p of parts) {
-    const nums = p.split(',').map(s => s.trim()).filter(Boolean);
+    const nums = p.split(',').map((s) => s.trim()).filter(Boolean);
     if (nums.length !== 2 && nums.length !== 3) return null;
-
-    // 支持 "x,z" 或 "x,y,z"
     const x = Number(nums[0]);
     const z = nums.length === 2 ? Number(nums[1]) : Number(nums[2]);
-
     if (!Number.isFinite(x) || !Number.isFinite(z)) return null;
-
     if (nums.length === 3) {
       const y = Number(nums[1]);
       if (!Number.isFinite(y)) return null;
@@ -2748,4 +819,3 @@ export const parseCoordListFlexible = (raw: string): Coord2D[] | null => {
   }
   return out;
 };
-

@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "cairnmap.card-runtime-contracts.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "classCode": "ISP",
+      "layoutId": "generic-point-card",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "ISL",
+      "layoutId": "generic-line-card",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "ISG",
+      "layoutId": "generic-polygon-card",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "ROD",
+      "layoutId": "generic-line-card",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "TPP",
+      "layoutId": "teleport-point-card",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "WRP",
+      "layoutId": "warp-point-card",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "TRP",
+      "layoutId": "trade-point-card",
+      "runtimeMode": "specialCardPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "BUD",
+      "layoutId": "building-card",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "FLR",
+      "layoutId": "floor-unit-card",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "STA",
+      "layoutId": "rail-station-card",
+      "runtimeMode": "specialCardPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "PLF",
+      "layoutId": "rail-platform-card",
+      "runtimeMode": "specialCardPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "RLE",
+      "layoutId": "rail-line-card",
+      "runtimeMode": "specialCardPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "STB",
+      "layoutId": "rail-station-building-card",
+      "runtimeMode": "specialCardPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "SBP",
+      "layoutId": "standard-feature-card",
+      "runtimeMode": "specialCardPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "STF",
+      "layoutId": "station-floor-card",
+      "runtimeMode": "specialCardPrimary",
+      "legacyFallback": true
+    },
+    {
+      "classCode": "PFB",
+      "layoutId": "platform-footprint-card",
+      "runtimeMode": "specialCardPrimary",
+      "legacyFallback": true
+    }
+  ]
+}

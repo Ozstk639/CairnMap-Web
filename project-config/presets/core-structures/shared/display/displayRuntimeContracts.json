@@ -1,0 +1,140 @@
+{
+  "schemaVersion": "cairnmap.display-runtime-contracts.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "classCode": "TPP",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": false,
+      "notes": "Simple point class: display declaration is config-primary; marker and interaction runtime remain legacy-compatible.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "runtimeProfileRegistry"
+    },
+    {
+      "classCode": "WRP",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": false,
+      "notes": "Simple point class: display declaration is config-primary; marker and interaction runtime remain legacy-compatible.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "runtimeProfileRegistry"
+    },
+    {
+      "classCode": "TRP",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": false,
+      "notes": "Simple point class: display declaration is config-primary; card enhancement remains legacy-compatible.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "runtimeProfileRegistry"
+    },
+    {
+      "classCode": "ISP",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": false,
+      "notes": "Generic point class: display declaration is config-primary.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "runtimeProfileRegistry"
+    },
+    {
+      "classCode": "SBP",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": false,
+      "notes": "Station building point class: display declaration is config-primary; station-building special logic remains legacy-compatible.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "runtimeProfileRegistry"
+    },
+    {
+      "classCode": "PLF",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": false,
+      "notes": "Platform point class: display declaration is config-primary; station-platform special logic remains legacy-compatible.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "runtimeProfileRegistry"
+    },
+    {
+      "classCode": "STA",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": false,
+      "notes": "Station point class: display declaration is config-primary; station-platform relation runtime remains legacy-compatible.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "runtimeProfileRegistry"
+    },
+    {
+      "classCode": "ROD",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": true,
+      "notes": "Road line class: display declaration is config-primary; complex dynamic line label algorithm remains legacy-preserved.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "runtimeProfileRegistry"
+    },
+    {
+      "classCode": "ISL",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": true,
+      "notes": "Generic line class: display declaration is config-primary; complex dynamic line label algorithm remains legacy-preserved.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "runtimeProfileRegistry"
+    },
+    {
+      "classCode": "ISG",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": true,
+      "notes": "Generic surface class: display declaration is config-primary; polygon anchor and declutter algorithm remain legacy-preserved.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "runtimeProfileRegistry"
+    },
+    {
+      "classCode": "RLE",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": true,
+      "fallbackReason": "Advanced display algorithm is invoked through config algorithm keys and executed by TypeScript runtime registry.",
+      "notes": "Config rule is read and audited, while complex algorithm execution stays in legacy runtime.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "displayAlgorithmRegistry"
+    },
+    {
+      "classCode": "BUD",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": true,
+      "fallbackReason": "Advanced display algorithm is invoked through config algorithm keys and executed by TypeScript runtime registry.",
+      "notes": "Config rule is read and audited, while complex algorithm execution stays in legacy runtime.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "displayAlgorithmRegistry"
+    },
+    {
+      "classCode": "FLR",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": true,
+      "fallbackReason": "Advanced display algorithm is invoked through config algorithm keys and executed by TypeScript runtime registry.",
+      "notes": "Config rule is read and audited, while complex algorithm execution stays in legacy runtime.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "displayAlgorithmRegistry"
+    },
+    {
+      "classCode": "STB",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": true,
+      "fallbackReason": "Advanced display algorithm is invoked through config algorithm keys and executed by TypeScript runtime registry.",
+      "notes": "Config rule is read and audited, while complex algorithm execution stays in legacy runtime.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "displayAlgorithmRegistry"
+    },
+    {
+      "classCode": "STF",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": true,
+      "fallbackReason": "Advanced display algorithm is invoked through config algorithm keys and executed by TypeScript runtime registry.",
+      "notes": "Config rule is read and audited, while complex algorithm execution stays in legacy runtime.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "displayAlgorithmRegistry"
+    },
+    {
+      "classCode": "PFB",
+      "mode": "configPrimary",
+      "preserveLegacyDynamicLabel": true,
+      "fallbackReason": "Advanced display algorithm is invoked through config algorithm keys and executed by TypeScript runtime registry.",
+      "notes": "Config rule is read and audited, while complex algorithm execution stays in legacy runtime.",
+      "configSource": "classes/{Class}.json display.rules",
+      "algorithmExecution": "displayAlgorithmRegistry"
+    }
+  ]
+}

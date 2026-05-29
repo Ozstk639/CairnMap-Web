@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "cairnmap.label-styles.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "id": "gm-outline",
+      "label": "Google-map outline label",
+      "runtimeStatus": "active",
+      "sourceRuntimeKey": "gm-outline",
+      "family": "gm",
+      "notes": "Runtime remains in labelStyles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "gm-outline-bold",
+      "label": "Google-map bold outline label",
+      "runtimeStatus": "active",
+      "sourceRuntimeKey": "gm-outline-bold",
+      "family": "gm",
+      "notes": "Runtime remains in labelStyles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "structure-label",
+      "label": "Structure label",
+      "runtimeStatus": "active",
+      "sourceRuntimeKey": "structure-label",
+      "family": "structure",
+      "notes": "Runtime remains in labelStyles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "bubble-dark",
+      "label": "Dark bubble label",
+      "runtimeStatus": "active",
+      "sourceRuntimeKey": "bubble-dark",
+      "family": "bubble",
+      "notes": "Runtime remains in labelStyles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "gm-bw-dynamic",
+      "label": "Dynamic black-white map label",
+      "runtimeStatus": "active",
+      "sourceRuntimePattern": "gm-bw-{size}",
+      "family": "gm",
+      "notes": "Runtime remains in labelStyles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "gm-wtb-dynamic",
+      "label": "Dynamic white-to-blue map label",
+      "runtimeStatus": "active",
+      "sourceRuntimePattern": "gm-wtb-{size}",
+      "family": "gm",
+      "notes": "Runtime remains in labelStyles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "rle-line-dynamic",
+      "label": "Dynamic railway line label",
+      "runtimeStatus": "active",
+      "sourceRuntimePattern": "rle-line-{size}",
+      "family": "rail",
+      "notes": "Runtime remains in labelStyles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "rle-pill-dynamic",
+      "label": "Dynamic railway pill label",
+      "runtimeStatus": "active",
+      "sourceRuntimePattern": "rle-pill-{size}",
+      "family": "rail",
+      "notes": "Runtime remains in labelStyles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "bubble-dark-label-13",
+      "label": "Dark bubble label · 13px legacy radius",
+      "runtimeStatus": "active",
+      "sourceRuntimeKey": "bubble-dark-13",
+      "family": "bubble",
+      "fontSizePx": 13,
+      "radiusPx": 6,
+      "paddingYPx": 2,
+      "paddingXPx": 6,
+      "notes": "Config-facing alias for the original OpenRIAMap black bubble 13px label."
+    },
+    {
+      "id": "bubble-dark-label-14",
+      "label": "Dark bubble label · 14px legacy radius",
+      "runtimeStatus": "active",
+      "sourceRuntimeKey": "bubble-dark-14",
+      "family": "bubble",
+      "fontSizePx": 14,
+      "radiusPx": 6,
+      "paddingYPx": 2,
+      "paddingXPx": 6,
+      "notes": "Config-facing alias for the original OpenRIAMap black bubble 14px label."
+    }
+  ]
+}

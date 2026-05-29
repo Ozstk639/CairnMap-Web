@@ -1,0 +1,358 @@
+{
+  "schemaVersion": "cairnmap.class.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "active",
+  "classCode": "FLR",
+  "classKey": "buildingFloor",
+  "sourceFeatureKey": "建筑楼层",
+  "label": {
+    "zh-CN": "建筑楼层",
+    "en": "Building Floor"
+  },
+  "description": "建筑楼层 class config-primary config. Runtime facade now resolves from preset Class config.",
+  "data": {
+    "typeField": "Type",
+    "classField": "Class",
+    "worldField": "World",
+    "defaultType": "Polygon",
+    "defaultClass": "FLR"
+  },
+  "geometry": {
+    "type": "Polygon",
+    "sourceField": "Flrpoints",
+    "axisOrder": "x,z,y",
+    "required": true
+  },
+  "identity": {
+    "idField": "ID",
+    "nameField": "Name",
+    "displayNameField": "Name"
+  },
+  "classification": {
+    "kindField": "Kind",
+    "skindField": "SKind",
+    "skind2Field": "SKind2",
+    "required": false,
+    "options": [
+      {
+        "kind": "NOM",
+        "skind": "NOM",
+        "skind2": "",
+        "drawMode": "polygon",
+        "geom": "面",
+        "label": {
+          "zh-CN": "默认"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "SPE",
+        "skind": "SPE",
+        "skind2": "",
+        "drawMode": "polygon",
+        "geom": "面",
+        "label": {
+          "zh-CN": "特殊"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      }
+    ]
+  },
+  "fields": [
+    {
+      "key": "ID",
+      "label": {
+        "zh-CN": "楼层ID"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "ID",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "Name",
+      "label": {
+        "zh-CN": "楼层名"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Name",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "NofFloor",
+      "label": {
+        "zh-CN": "楼层名(NofFloor)"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "NofFloor",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "Kind",
+      "label": {
+        "zh-CN": "楼层类型(Kind)"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Kind",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "SKind",
+      "label": {
+        "zh-CN": "楼层子类型(SKind)"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "SKind",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "SKind2",
+      "label": {
+        "zh-CN": "楼层三级子类型(SKind2)"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "SKind2",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "BuildingID",
+      "label": {
+        "zh-CN": "所属建筑(BuildingID)"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "BuildingID",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "Situation",
+      "label": {
+        "zh-CN": "状态(Situation)"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "Situation",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "elevation",
+      "label": {
+        "zh-CN": "高度(y)"
+      },
+      "type": "number",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "elevation",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "height",
+      "label": {
+        "zh-CN": "高度(height)"
+      },
+      "type": "number",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "height",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    }
+  ],
+  "groups": [],
+  "tags": {
+    "enabled": true,
+    "allowOther": true,
+    "items": [
+      {
+        "key": "category",
+        "label": {
+          "zh-CN": "分类(category)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "level",
+        "label": {
+          "zh-CN": "等级(level)"
+        },
+        "type": "number"
+      },
+      {
+        "key": "status",
+        "label": {
+          "zh-CN": "状态(status)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "source",
+        "label": {
+          "zh-CN": "来源(source)"
+        },
+        "type": "text"
+      }
+    ]
+  },
+  "extensions": {
+    "enabled": true,
+    "allowOtherNamespaces": true,
+    "namespaces": []
+  },
+  "display": {
+    "runtimeStatus": "active",
+    "sourceRuntimeFile": "src/components/Rules/rendering/featureRenderRules.ts",
+    "rules": [
+      {
+        "id": "FLR-indoor-unit",
+        "runtimeStatus": "active",
+        "match": {
+          "classCode": "FLR"
+        },
+        "profile": "indoorUnit",
+        "displayTier": "indoor",
+        "geometry": {
+          "render": "polygonFillOutline"
+        },
+        "label": {
+          "enabled": true,
+          "source": "Name",
+          "styleKey": "bubble-dark-label-13"
+        },
+        "specialLogic": [
+          {
+            "key": "buildingFloorBinding",
+            "mode": "optional"
+          },
+          {
+            "key": "floorViewBinding",
+            "mode": "optional"
+          }
+        ],
+        "notes": "Config rule metadata. Rendering behavior is executed by featureRenderRules.ts.",
+        "algorithms": [
+          {
+            "key": "buildingFloorBinding",
+            "mode": "registry"
+          },
+          {
+            "key": "polygonCandidateAnchor",
+            "mode": "registry"
+          }
+        ]
+      }
+    ]
+  },
+  "card": {
+    "runtimeStatus": "active",
+    "layoutId": "floor-unit-card",
+    "sections": [
+      {
+        "id": "main",
+        "title": "主要信息",
+        "slot": "mainRows"
+      },
+      {
+        "id": "other",
+        "title": "其他信息",
+        "slot": "otherRows",
+        "collapsedByDefault": true
+      }
+    ],
+    "fields": [],
+    "relations": [
+      {
+        "key": "floorViewBinding",
+        "relationActionKey": "floorViewBinding",
+        "runtimeStatus": "active"
+      }
+    ],
+    "enhancements": [
+      {
+        "key": "floorViewRelation",
+        "componentKey": "relationRows",
+        "relationActionKey": "floorViewBinding",
+        "runtimeStatus": "active"
+      }
+    ]
+  },
+  "workflowBindings": [
+    {
+      "workflowId": "floor-workflow",
+      "default": true,
+      "runtimeStatus": "active",
+      "runtimeMode": "configPrimary"
+    }
+  ]
+}

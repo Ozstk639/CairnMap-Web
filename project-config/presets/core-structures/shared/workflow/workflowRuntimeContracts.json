@@ -1,0 +1,142 @@
+{
+  "schemaVersion": "cairnmap.workflow-runtime-contracts.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "classCode": "STA",
+      "workflowId": "rail-station-workflow",
+      "runtimeMode": "specialComponentPrimary",
+      "legacyFallback": true,
+      "componentKey": "legacyWorkflowComponent",
+      "componentExecutor": "stationWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "PLF",
+      "workflowId": "rail-platform-workflow",
+      "runtimeMode": "specialComponentPrimary",
+      "legacyFallback": true,
+      "componentKey": "legacyWorkflowComponent",
+      "componentExecutor": "stationWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "RLE",
+      "workflowId": "rail-line-workflow",
+      "runtimeMode": "specialComponentPrimary",
+      "legacyFallback": true,
+      "componentKey": "legacyWorkflowComponent",
+      "componentExecutor": "railwayWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "PFB",
+      "workflowId": "rail-platform-boundary-workflow",
+      "runtimeMode": "specialComponentPrimary",
+      "legacyFallback": true,
+      "componentKey": "legacyWorkflowComponent",
+      "componentExecutor": "stationWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "STB",
+      "workflowId": "rail-station-building-workflow",
+      "runtimeMode": "specialComponentPrimary",
+      "legacyFallback": true,
+      "componentKey": "legacyWorkflowComponent",
+      "componentExecutor": "stationWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "SBP",
+      "workflowId": "rail-station-building-point-workflow",
+      "runtimeMode": "specialComponentPrimary",
+      "legacyFallback": true,
+      "componentKey": "legacyWorkflowComponent",
+      "componentExecutor": "stationWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "STF",
+      "workflowId": "rail-station-building-floor-workflow",
+      "runtimeMode": "specialComponentPrimary",
+      "legacyFallback": true,
+      "componentKey": "legacyWorkflowComponent",
+      "componentExecutor": "stationWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "ROD",
+      "workflowId": "road-workflow",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true,
+      "componentExecutor": "roadWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "TPP",
+      "workflowId": "teleport-workflow",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true,
+      "componentExecutor": "teleportPointWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "WRP",
+      "workflowId": "warp-workflow",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true,
+      "componentExecutor": "warpPointWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "TRP",
+      "workflowId": "trade-point-workflow",
+      "runtimeMode": "specialComponentPrimary",
+      "legacyFallback": true,
+      "componentKey": "legacyWorkflowComponent",
+      "componentExecutor": "tradePointWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "ISP",
+      "workflowId": "generic-point-workflow",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true,
+      "componentExecutor": "specialCulturalPointWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "ISL",
+      "workflowId": "generic-line-workflow",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true,
+      "componentExecutor": "settlementBoundaryLineWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "ISG",
+      "workflowId": "generic-polygon-workflow",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true,
+      "componentExecutor": "naturalLandWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "BUD",
+      "workflowId": "building-workflow",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true,
+      "componentExecutor": "buildingWorkflow",
+      "executorDispatch": "configComponentKey"
+    },
+    {
+      "classCode": "FLR",
+      "workflowId": "floor-workflow",
+      "runtimeMode": "configPrimary",
+      "legacyFallback": true,
+      "componentExecutor": "floorUnitWorkflow",
+      "executorDispatch": "configComponentKey"
+    }
+  ]
+}

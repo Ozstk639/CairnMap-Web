@@ -1,0 +1,386 @@
+{
+  "schemaVersion": "cairnmap.class.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "active",
+  "classCode": "PLF",
+  "classKey": "platform",
+  "sourceFeatureKey": "站台",
+  "label": {
+    "zh-CN": "站台",
+    "en": "Platform"
+  },
+  "description": "站台 class config-primary config. Runtime facade now resolves from preset Class config.",
+  "data": {
+    "typeField": "Type",
+    "classField": "Class",
+    "worldField": "World",
+    "defaultType": "Points",
+    "defaultClass": "PLF"
+  },
+  "geometry": {
+    "type": "Point",
+    "sourceField": "coordinate",
+    "axisOrder": "x,z,y",
+    "required": true
+  },
+  "identity": {
+    "idField": "ID",
+    "nameField": "Name",
+    "displayNameField": "Name"
+  },
+  "classification": {
+    "kindField": "Kind",
+    "skindField": "SKind",
+    "skind2Field": "SKind2",
+    "required": false,
+    "options": []
+  },
+  "fields": [
+    {
+      "key": "ID",
+      "label": {
+        "zh-CN": "站台ID"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "ID",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "Name",
+      "label": {
+        "zh-CN": "站台名称"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Name",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "elevation",
+      "label": {
+        "zh-CN": "高度(y)"
+      },
+      "type": "number",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "elevation",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "Situation",
+      "label": {
+        "zh-CN": "站台是否启用(Situation)"
+      },
+      "type": "bool",
+      "required": true,
+      "optional": false,
+      "defaultValue": true,
+      "sourceRuntimeField": "Situation",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "Connect",
+      "label": {
+        "zh-CN": "外部连接功能(Connect)"
+      },
+      "type": "bool",
+      "required": true,
+      "optional": false,
+      "defaultValue": true,
+      "sourceRuntimeField": "Connect",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    }
+  ],
+  "groups": [
+    {
+      "key": "lines",
+      "label": {
+        "zh-CN": "经行线路 lines"
+      },
+      "type": "array",
+      "optional": false,
+      "minItems": 1,
+      "addButtonText": "添加线路条目",
+      "fields": [
+        {
+          "key": "ID",
+          "label": {
+            "zh-CN": "线路ID"
+          },
+          "type": "text",
+          "required": true,
+          "optional": false,
+          "sourceRuntimeField": "ID",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": true
+          }
+        },
+        {
+          "key": "stationCode",
+          "label": {
+            "zh-CN": "站台编号(可选)"
+          },
+          "type": "number",
+          "required": false,
+          "optional": true,
+          "sourceRuntimeField": "stationCode",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        },
+        {
+          "key": "stationDistance",
+          "label": {
+            "zh-CN": "线路距离(可选)"
+          },
+          "type": "number",
+          "required": false,
+          "optional": true,
+          "sourceRuntimeField": "stationDistance",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        },
+        {
+          "key": "Avaliable",
+          "label": {
+            "zh-CN": "可使用性(Avaliable)"
+          },
+          "type": "bool",
+          "required": true,
+          "optional": false,
+          "defaultValue": true,
+          "sourceRuntimeField": "Avaliable",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        },
+        {
+          "key": "Overtaking",
+          "label": {
+            "zh-CN": "越行(Overtaking)"
+          },
+          "type": "bool",
+          "required": true,
+          "optional": false,
+          "defaultValue": false,
+          "sourceRuntimeField": "Overtaking",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        },
+        {
+          "key": "getin",
+          "label": {
+            "zh-CN": "可上车(getin)"
+          },
+          "type": "bool",
+          "required": true,
+          "optional": false,
+          "defaultValue": true,
+          "sourceRuntimeField": "getin",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        },
+        {
+          "key": "getout",
+          "label": {
+            "zh-CN": "可下车(getout)"
+          },
+          "type": "bool",
+          "required": true,
+          "optional": false,
+          "defaultValue": true,
+          "sourceRuntimeField": "getout",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        },
+        {
+          "key": "NextOT",
+          "label": {
+            "zh-CN": "下一站越行(NextOT)"
+          },
+          "type": "bool",
+          "required": true,
+          "optional": false,
+          "defaultValue": false,
+          "sourceRuntimeField": "NextOT",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        }
+      ]
+    }
+  ],
+  "tags": {
+    "enabled": true,
+    "allowOther": true,
+    "items": [
+      {
+        "key": "category",
+        "label": {
+          "zh-CN": "分类(category)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "level",
+        "label": {
+          "zh-CN": "等级(level)"
+        },
+        "type": "number"
+      },
+      {
+        "key": "status",
+        "label": {
+          "zh-CN": "状态(status)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "source",
+        "label": {
+          "zh-CN": "来源(source)"
+        },
+        "type": "text"
+      }
+    ]
+  },
+  "extensions": {
+    "enabled": true,
+    "allowOtherNamespaces": true,
+    "namespaces": []
+  },
+  "display": {
+    "runtimeStatus": "active",
+    "sourceRuntimeFile": "src/components/Rules/rendering/featureRenderRules.ts",
+    "rules": [
+      {
+        "id": "PLF-platform-node",
+        "runtimeStatus": "active",
+        "match": {
+          "classCode": "PLF"
+        },
+        "profile": "transportNode",
+        "displayTier": "transportNode",
+        "geometry": {
+          "render": "none"
+        },
+        "label": {
+          "enabled": true,
+          "source": "Name",
+          "styleKey": "bubble-dark-label-14"
+        },
+        "specialLogic": [
+          {
+            "key": "stationPlatformVisibilityBinding",
+            "mode": "optional"
+          },
+          {
+            "key": "platformLineColorBinding",
+            "mode": "optional"
+          },
+          {
+            "key": "platformConnectVisibility",
+            "mode": "optional"
+          }
+        ],
+        "notes": "Config rule metadata. Rendering behavior is executed by featureRenderRules.ts.",
+        "algorithms": [
+          {
+            "key": "stationPlatformVisibilityBinding",
+            "mode": "registry"
+          }
+        ]
+      }
+    ]
+  },
+  "card": {
+    "runtimeStatus": "active",
+    "layoutId": "rail-platform-card",
+    "sections": [
+      {
+        "id": "main",
+        "title": "主要信息",
+        "slot": "mainRows"
+      },
+      {
+        "id": "other",
+        "title": "其他信息",
+        "slot": "otherRows",
+        "collapsedByDefault": true
+      }
+    ],
+    "fields": [],
+    "relations": [],
+    "enhancements": [
+      {
+        "key": "genericRelationLinks",
+        "componentKey": "relationRows",
+        "runtimeStatus": "active"
+      }
+    ]
+  },
+  "workflowBindings": [
+    {
+      "workflowId": "rail-platform-workflow",
+      "default": true,
+      "runtimeStatus": "active",
+      "runtimeMode": "specialComponentPrimary"
+    }
+  ]
+}

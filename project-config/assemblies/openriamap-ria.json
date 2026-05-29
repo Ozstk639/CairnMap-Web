@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "cairnmap.assembly.v1",
+  "assemblyId": "openriamap-ria",
+  "displayName": "OpenRIAMap RIA on CairnMap",
+  "description": "OpenRIAMap RIA assembled from native CairnMap presets plus project-level overrides.",
+  "loadOrder": [
+    {
+      "path": "../presets/core-structures",
+      "enabled": true,
+      "kind": "preset"
+    },
+    {
+      "path": "../presets/building",
+      "enabled": true,
+      "kind": "preset"
+    },
+    {
+      "path": "../presets/rail",
+      "enabled": true,
+      "kind": "preset"
+    },
+    {
+      "path": "../presets/road",
+      "enabled": true,
+      "kind": "preset"
+    },
+    {
+      "path": "../presets/teleport",
+      "enabled": true,
+      "kind": "preset"
+    },
+    {
+      "path": "../presets/warp",
+      "enabled": true,
+      "kind": "preset"
+    },
+    {
+      "path": "../presets/trade",
+      "enabled": true,
+      "kind": "preset"
+    },
+    {
+      "path": "../packages/openriamap-ria",
+      "enabled": true,
+      "kind": "project"
+    }
+  ],
+  "mergePolicy": {
+    "presetPriority": "low",
+    "classConflict": "nonNativeOverridesPresetWithVisibleError",
+    "sharedConflict": "lastWins",
+    "workflowConflict": "lastWins",
+    "environmentConflict": "projectOnly"
+  },
+  "runtime": {
+    "defaultPackagePath": "../packages/openriamap-ria",
+    "defaultWorldId": "zth"
+  }
+}

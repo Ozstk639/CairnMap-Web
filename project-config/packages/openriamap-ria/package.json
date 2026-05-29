@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "cairnmap.config-package.v1",
+  "packageId": "openriamap-ria",
+  "packageType": "project",
+  "displayName": "OpenRIAMap RIA",
+  "nativePreset": false,
+  "contains": {
+    "environment": true,
+    "shared": false,
+    "classes": false,
+    "workflows": false,
+    "card": false
+  },
+  "presetAssembly": {
+    "classes": "provided-by-enabled-native-presets; project package may add explicit override files in future",
+    "shared": "provided-by-enabled-native-presets; project package may add explicit override files in future",
+    "workflows": "provided-by-enabled-native-presets; project package may add explicit override files in future",
+    "environment": "project-only"
+  }
+}

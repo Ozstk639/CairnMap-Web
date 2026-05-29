@@ -1,3 +1,4 @@
+import { getOpenRIAMapDataSourcesConfig } from '../../../core/project/openriamapRiaEnvironment';
 import { readRuleWorldCache } from '@/components/Rules/data/worldRuleCache';
 import { loadWorldRuleDataset } from '@/components/Rules/data/worldRuleDatasetLoader';
 
@@ -24,31 +25,23 @@ export type WorldRuleDataSource = {
   pictureSourceMode?: 'pub' | 'dat';
 };
 
-export const RULE_DATA_SOURCES: Record<string, WorldRuleDataSource> = {
-  zth: {
-    baseUrl: '/data/JSON',
-    files: [
-      'GLLD.json', 'EXchange_build.json', 'ZRT13_01B.json', 'ZRT13_01B_D.json', 'ZRT13_01B_U.json',
-      'ZRT13_Buids.json', 'ZRT13_Stas.json', 'ZRT1_01A.json', 'ZRT1_01A_D.json', 'ZRT1_01A_U.json',
-      'ZRT1_01B.json', 'ZRT1_01B_D.json', 'ZRT1_01B_U.json', 'ZRT1_01C.json', 'ZRT1_01C_D.json',
-      'ZRT1_01C_U.json', 'ZRT1_01D.json', 'ZRT1_01D_D.json', 'ZRT1_01D_U.json', 'ZRT1_Buids.json',
-      'ZRT1_Stas.json', 'ZRT4_01A.json', 'ZRT4_01A_D.json', 'ZRT4_01A_U.json', 'ZRT4_01B.json',
-      'ZRT4_01B_D.json', 'ZRT4_01B_U.json', 'ZRT4_01C.json', 'ZRT4_01C_D.json', 'ZRT4_01C_U.json',
-      'ZRT4_Buids.json', 'ZRT4_Stas.json', 'ZRT7_01A.json', 'ZRT7_01A_D.json', 'ZRT7_01A_U.json',
-      'ZRT7_01B.json', 'ZRT7_01B_D.json', 'ZRT7_01B_U.json', 'ZRT7_01C.json', 'ZRT7_01C_D.json',
-      'ZRT7_01C_U.json', 'ZRT7_Buids.json', 'ZRT7_Stas.json', 'ZRTL1_01A.json', 'ZRTL1_01B.json',
-      'test.json', 'H7 A 海华北-会展中心 251231.json', 'ALL_20260128.json', 'Warptest.json',
-      'TPPtest.json', '传送.json', 'ZSGS.json', 'ALL_20260226.json', 'ALL_20260228_HH.json'
-    ],
-    sourceMode: 'dat',
-    pictureSourceMode: 'dat',
-  },
-  eden: { baseUrl: '/data/Mapping/eden', files: [], sourceMode: 'dat', pictureSourceMode: 'dat' },
-  naraku: { baseUrl: '/data/Mapping/naraku', files: [], sourceMode: 'dat', pictureSourceMode: 'dat' },
-  houtu: { baseUrl: '/data/Mapping/houtu', files: [], sourceMode: 'dat', pictureSourceMode: 'dat' },
-  laputa: { baseUrl: '/data/Mapping/laputa', files: [], sourceMode: 'dat', pictureSourceMode: 'dat' },
-  yunduan: { baseUrl: '/data/Mapping/yunduan', files: [], sourceMode: 'dat', pictureSourceMode: 'dat' },
-};
+function buildRuleDataSources(): Record<string, WorldRuleDataSource> {
+  const config = getOpenRIAMapDataSourcesConfig();
+  const out: Record<string, WorldRuleDataSource> = {};
+  for (const item of config.items) {
+    const worldId = String(item.worldId ?? '').trim();
+    if (!worldId) continue;
+    out[worldId] = {
+      baseUrl: item.baseUrl,
+      files: Array.isArray(item.files) ? item.files : [],
+      sourceMode: item.sourceMode,
+      pictureSourceMode: item.pictureSourceMode,
+    };
+  }
+  return out;
+}
+
+export const RULE_DATA_SOURCES: Record<string, WorldRuleDataSource> = buildRuleDataSources();
 
 
 export function normalizeRuleSourceWorldId(worldId: string): string {

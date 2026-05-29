@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "cairnmap.search-profiles.v1",
+  "projectId": "openriamap-ria",
+  "defaultProfileId": "main",
+  "items": [
+    {
+      "id": "main",
+      "blacklist": [
+        {
+          "classCode": "PFB"
+        }
+      ],
+      "priority": [
+        {
+          "classCode": "STB"
+        },
+        {
+          "classCode": "BUD"
+        }
+      ],
+      "categoryOverrides": [
+        {
+          "classCode": "STB",
+          "name": "车站"
+        },
+        {
+          "classCode": "STA",
+          "name": "站场"
+        },
+        {
+          "classCode": "PLF",
+          "name": "站台"
+        },
+        {
+          "classCode": "PFB",
+          "name": "站台轮廓"
+        },
+        {
+          "classCode": "SBP",
+          "name": "车站建筑点"
+        },
+        {
+          "classCode": "TRP",
+          "name": "交易点"
+        },
+        {
+          "classCode": "TPP",
+          "name": "传送点"
+        },
+        {
+          "classCode": "WRP",
+          "name": "Warp点"
+        }
+      ]
+    }
+  ]
+}

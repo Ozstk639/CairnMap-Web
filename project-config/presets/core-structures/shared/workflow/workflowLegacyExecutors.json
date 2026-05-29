@@ -1,0 +1,184 @@
+{
+  "schemaVersion": "cairnmap.workflow-legacy-executors.v1",
+  "projectId": "openriamap-ria",
+  "description": "Maps config workflow keys to the exact legacy workflow React component executors used as the parity source for the config-driven workflow runtime.",
+  "items": [
+    {
+      "workflowKey": "railway",
+      "componentKey": "railwayWorkflow",
+      "workflowIds": [
+        "rail-line-workflow"
+      ],
+      "label": "铁路",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "station",
+      "componentKey": "stationWorkflow",
+      "workflowIds": [
+        "rail-station-workflow",
+        "rail-platform-workflow",
+        "rail-platform-boundary-workflow",
+        "rail-station-building-workflow",
+        "rail-station-building-point-workflow",
+        "rail-station-building-floor-workflow"
+      ],
+      "label": "车站和站台",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "tpp_point",
+      "componentKey": "teleportPointWorkflow",
+      "workflowIds": [
+        "teleport-workflow"
+      ],
+      "label": "传送点",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "wrp_point",
+      "componentKey": "warpPointWorkflow",
+      "workflowIds": [
+        "warp-workflow"
+      ],
+      "label": "Warp点",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "trp_point",
+      "componentKey": "tradePointWorkflow",
+      "workflowIds": [
+        "trade-point-workflow"
+      ],
+      "label": "交易点",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "rod_road",
+      "componentKey": "roadWorkflow",
+      "workflowIds": [
+        "road-workflow"
+      ],
+      "label": "道路",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "ngf_land",
+      "componentKey": "naturalLandWorkflow",
+      "workflowIds": [
+        "generic-polygon-workflow"
+      ],
+      "label": "自然要素-陆地",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "ngf_lis",
+      "componentKey": "naturalLandSurfaceWorkflow",
+      "workflowIds": [
+        "generic-polygon-workflow"
+      ],
+      "label": "自然要素-陆面要素",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "ngf_wtb",
+      "componentKey": "naturalWaterbodyWorkflow",
+      "workflowIds": [
+        "generic-polygon-workflow"
+      ],
+      "label": "自然要素-水域",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "ngf_wtr",
+      "componentKey": "naturalWaterwayWorkflow",
+      "workflowIds": [
+        "generic-line-workflow"
+      ],
+      "label": "自然要素-河道",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "ngf_bod",
+      "componentKey": "naturalBoundaryWorkflow",
+      "workflowIds": [
+        "generic-line-workflow"
+      ],
+      "label": "自然要素-地理边界",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "adm_dbz_set",
+      "componentKey": "settlementBoundaryDeterminedWorkflow",
+      "workflowIds": [
+        "generic-polygon-workflow"
+      ],
+      "label": "聚落范围-确定范围",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "adm_plz_plan",
+      "componentKey": "settlementBoundaryPlannedWorkflow",
+      "workflowIds": [
+        "generic-polygon-workflow"
+      ],
+      "label": "聚落范围-规划范围",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "adm_line_settlement",
+      "componentKey": "settlementBoundaryLineWorkflow",
+      "workflowIds": [
+        "generic-line-workflow"
+      ],
+      "label": "聚落边界线要素",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "adm_point_special",
+      "componentKey": "specialCulturalPointWorkflow",
+      "workflowIds": [
+        "generic-point-workflow"
+      ],
+      "label": "特殊人文点要素",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "bud_building",
+      "componentKey": "buildingWorkflow",
+      "workflowIds": [
+        "building-workflow"
+      ],
+      "label": "建筑",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    },
+    {
+      "workflowKey": "flr_unit",
+      "componentKey": "floorUnitWorkflow",
+      "workflowIds": [
+        "floor-workflow"
+      ],
+      "label": "楼内单元",
+      "runtimeStatus": "active",
+      "parityMode": "legacyExact"
+    }
+  ],
+  "runtimeStatus": "completed",
+  "definitionPrimary": true
+}

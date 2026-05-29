@@ -1,4 +1,9 @@
 import {
+  getClassFieldLabelByWorkflowKey,
+  getClassGroupFieldLabelByWorkflowKey,
+  getClassGroupLabelByWorkflowKey,
+} from '../../../core/project/classMetadata';
+import {
   projectRegistryScene,
   resolveWorkflowEditorSchema,
   type ProjectedRegistryScene,
@@ -32,7 +37,7 @@ export const getWorkflowClassificationLabel = (workflowKey: string): string => {
 
 export const getWorkflowFieldLabel = (workflowKey: string, keyOrPath: string): string => {
   const field = findField(getWorkflowView(workflowKey), keyOrPath);
-  return field?.label ?? keyOrPath;
+  return field?.label ?? getClassFieldLabelByWorkflowKey(workflowKey, keyOrPath) ?? keyOrPath;
 };
 
 export const getWorkflowFieldPlaceholder = (workflowKey: string, keyOrPath: string): string | undefined => {
@@ -55,7 +60,11 @@ export const getWorkflowAuxPlaceholder = (workflowKey: string, auxKey: string): 
 export const getWorkflowGroupLabel = (workflowKey: string, groupKeyOrPath: string): string => {
   const view = getWorkflowView(workflowKey);
   const key = normalize(groupKeyOrPath);
-  return view?.groups.find((group) => group.key === key || group.path === key)?.label ?? groupKeyOrPath;
+  return (
+    view?.groups.find((group) => group.key === key || group.path === key)?.label
+    ?? getClassGroupLabelByWorkflowKey(workflowKey, groupKeyOrPath)
+    ?? groupKeyOrPath
+  );
 };
 
 export const getWorkflowGroupFieldLabel = (workflowKey: string, groupKeyOrPath: string, fieldKey: string): string => {
@@ -64,7 +73,12 @@ export const getWorkflowGroupFieldLabel = (workflowKey: string, groupKeyOrPath: 
   const key = normalize(fieldKey);
   const group = view?.groups.find((item) => item.key === groupKey || item.path === groupKey);
   const field = group?.fields.find((item) => item.key === key || item.path === key);
-  return field?.labels.workflow ?? field?.labels.default ?? fieldKey;
+  return (
+    field?.labels.workflow
+    ?? field?.labels.default
+    ?? getClassGroupFieldLabelByWorkflowKey(workflowKey, groupKeyOrPath, fieldKey)
+    ?? fieldKey
+  );
 };
 
 export const getWorkflowGroupFieldPlaceholder = (workflowKey: string, groupKeyOrPath: string, fieldKey: string): string | undefined => {

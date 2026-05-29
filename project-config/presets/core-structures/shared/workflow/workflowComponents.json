@@ -1,0 +1,342 @@
+{
+  "schemaVersion": "cairnmap.workflow-components.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "id": "briefExtensionEditor",
+      "componentKey": "briefExtensionEditor",
+      "label": "Brief extension editor",
+      "allowedClasses": [
+        "STA",
+        "PLF",
+        "RLE",
+        "PFB",
+        "STB",
+        "SBP",
+        "STF",
+        "ROD",
+        "TPP",
+        "WRP",
+        "TRP",
+        "ISP",
+        "ISL",
+        "ISG",
+        "BUD",
+        "FLR"
+      ],
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "tagsEditor",
+      "componentKey": "tagsEditor",
+      "label": "Tags editor",
+      "allowedClasses": [
+        "STA",
+        "PLF",
+        "RLE",
+        "PFB",
+        "STB",
+        "SBP",
+        "STF",
+        "ROD",
+        "TPP",
+        "WRP",
+        "TRP",
+        "ISP",
+        "ISL",
+        "ISG",
+        "BUD",
+        "FLR"
+      ],
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "geometryDraftStatus",
+      "componentKey": "geometryDraftStatus",
+      "label": "Geometry draft status",
+      "allowedClasses": [
+        "STA",
+        "PLF",
+        "RLE",
+        "PFB",
+        "STB",
+        "SBP",
+        "STF",
+        "ROD",
+        "TPP",
+        "WRP",
+        "TRP",
+        "ISP",
+        "ISL",
+        "ISG",
+        "BUD",
+        "FLR"
+      ],
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "roadSpecificOptions",
+      "componentKey": "roadSpecificOptions",
+      "label": "Road specific options",
+      "allowedClasses": [
+        "ROD"
+      ],
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "travelModeAllowlist",
+      "componentKey": "travelModeAllowlist",
+      "label": "Travel mode allowlist",
+      "allowedClasses": [
+        "ROD"
+      ],
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "explicitConnectionEditor",
+      "componentKey": "explicitConnectionEditor",
+      "label": "Explicit connection editor",
+      "allowedClasses": [
+        "ROD"
+      ],
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "blacklistEditor",
+      "componentKey": "blacklistEditor",
+      "label": "Blacklist editor",
+      "allowedClasses": [
+        "ROD"
+      ],
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "trpTradeEditor",
+      "componentKey": "trpTradeEditor",
+      "label": "TRP trade editor",
+      "allowedClasses": [
+        "TRP"
+      ],
+      "dataPath": "TradeJSON",
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "railPlatformBindingEditor",
+      "componentKey": "railPlatformBindingEditor",
+      "label": "Rail platform binding editor",
+      "allowedClasses": [
+        "PFB",
+        "PLF",
+        "RLE",
+        "STA"
+      ],
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "railStationBindingEditor",
+      "componentKey": "railStationBindingEditor",
+      "label": "Rail station binding editor",
+      "allowedClasses": [
+        "PFB",
+        "RLE",
+        "SBP",
+        "STA",
+        "STB",
+        "STF"
+      ],
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "legacyWorkflowComponent",
+      "componentKey": "legacyWorkflowComponent",
+      "label": "Legacy workflow component executor",
+      "allowedClasses": [
+        "STA",
+        "PLF",
+        "RLE",
+        "PFB",
+        "STB",
+        "SBP",
+        "STF",
+        "TRP"
+      ],
+      "runtimeStatus": "active",
+      "description": "Executes existing railway, station, station-building and trade workflow React components through workflow config contracts."
+    },
+    {
+      "id": "railwayWorkflow",
+      "componentKey": "railwayWorkflow",
+      "label": "railwayWorkflow",
+      "allowedClasses": [
+        "RLE"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "stationWorkflow",
+      "componentKey": "stationWorkflow",
+      "label": "stationWorkflow",
+      "allowedClasses": [
+        "STA",
+        "PLF",
+        "PFB",
+        "STB",
+        "SBP",
+        "STF"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "teleportPointWorkflow",
+      "componentKey": "teleportPointWorkflow",
+      "label": "teleportPointWorkflow",
+      "allowedClasses": [
+        "TPP"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "warpPointWorkflow",
+      "componentKey": "warpPointWorkflow",
+      "label": "warpPointWorkflow",
+      "allowedClasses": [
+        "WRP"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "tradePointWorkflow",
+      "componentKey": "tradePointWorkflow",
+      "label": "tradePointWorkflow",
+      "allowedClasses": [
+        "TRP"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "roadWorkflow",
+      "componentKey": "roadWorkflow",
+      "label": "roadWorkflow",
+      "allowedClasses": [
+        "ROD"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "naturalLandWorkflow",
+      "componentKey": "naturalLandWorkflow",
+      "label": "naturalLandWorkflow",
+      "allowedClasses": [
+        "ISG"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "naturalLandSurfaceWorkflow",
+      "componentKey": "naturalLandSurfaceWorkflow",
+      "label": "naturalLandSurfaceWorkflow",
+      "allowedClasses": [
+        "ISG"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "naturalWaterbodyWorkflow",
+      "componentKey": "naturalWaterbodyWorkflow",
+      "label": "naturalWaterbodyWorkflow",
+      "allowedClasses": [
+        "ISG"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "naturalWaterwayWorkflow",
+      "componentKey": "naturalWaterwayWorkflow",
+      "label": "naturalWaterwayWorkflow",
+      "allowedClasses": [
+        "ISL"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "naturalBoundaryWorkflow",
+      "componentKey": "naturalBoundaryWorkflow",
+      "label": "naturalBoundaryWorkflow",
+      "allowedClasses": [
+        "ISL"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "settlementBoundaryDeterminedWorkflow",
+      "componentKey": "settlementBoundaryDeterminedWorkflow",
+      "label": "settlementBoundaryDeterminedWorkflow",
+      "allowedClasses": [
+        "ISG"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "settlementBoundaryPlannedWorkflow",
+      "componentKey": "settlementBoundaryPlannedWorkflow",
+      "label": "settlementBoundaryPlannedWorkflow",
+      "allowedClasses": [
+        "ISG"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "settlementBoundaryLineWorkflow",
+      "componentKey": "settlementBoundaryLineWorkflow",
+      "label": "settlementBoundaryLineWorkflow",
+      "allowedClasses": [
+        "ISL"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "specialCulturalPointWorkflow",
+      "componentKey": "specialCulturalPointWorkflow",
+      "label": "specialCulturalPointWorkflow",
+      "allowedClasses": [
+        "ISP"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "buildingWorkflow",
+      "componentKey": "buildingWorkflow",
+      "label": "buildingWorkflow",
+      "allowedClasses": [
+        "BUD"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    },
+    {
+      "id": "floorUnitWorkflow",
+      "componentKey": "floorUnitWorkflow",
+      "label": "floorUnitWorkflow",
+      "allowedClasses": [
+        "FLR"
+      ],
+      "runtimeStatus": "active",
+      "executorRole": "workflowParityComponent"
+    }
+  ]
+}

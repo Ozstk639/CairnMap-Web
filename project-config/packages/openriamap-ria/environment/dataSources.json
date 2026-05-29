@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cairnmap.data-sources.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "worldId": "zth",
+      "baseUrl": "/data/JSON",
+      "files": [],
+      "sourceMode": "dat",
+      "pictureSourceMode": "dat"
+    },
+    {
+      "worldId": "eden",
+      "baseUrl": "/data/Mapping/eden",
+      "files": [],
+      "sourceMode": "dat",
+      "pictureSourceMode": "dat"
+    },
+    {
+      "worldId": "naraku",
+      "baseUrl": "/data/Mapping/naraku",
+      "files": [],
+      "sourceMode": "dat",
+      "pictureSourceMode": "dat"
+    },
+    {
+      "worldId": "houtu",
+      "baseUrl": "/data/Mapping/houtu",
+      "files": [],
+      "sourceMode": "dat",
+      "pictureSourceMode": "dat"
+    },
+    {
+      "worldId": "laputa",
+      "baseUrl": "/data/Mapping/laputa",
+      "files": [],
+      "sourceMode": "dat",
+      "pictureSourceMode": "dat"
+    },
+    {
+      "worldId": "yunduan",
+      "baseUrl": "/data/Mapping/yunduan",
+      "files": [],
+      "sourceMode": "dat",
+      "pictureSourceMode": "dat"
+    }
+  ]
+}

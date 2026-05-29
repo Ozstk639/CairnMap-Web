@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "cairnmap.workflow.v1",
+  "projectId": "openriamap-ria",
+  "id": "generic-polygon-workflow",
+  "label": "Generic polygon workflow",
+  "runtimeStatus": "active",
+  "targetClass": "ISG",
+  "targetGeometry": "Polygon",
+  "runtimeMode": "componentExecutor",
+  "componentKey": "settlementBoundaryPlannedWorkflow",
+  "legacyWorkflowKey": "地物面",
+  "blockRunnerReady": false,
+  "futureBlockTemplateRef": "basic-polygon-4step",
+  "executorDispatch": "configComponentKey",
+  "legacyFallback": true,
+  "notes": "Current runtime dispatches this workflow to a registered TS component executor. Fine-grained block/page assembly is intentionally not stored in the active workflow JSON."
+}

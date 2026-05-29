@@ -1,0 +1,9 @@
+{
+  "templateId": "cairnmap.class.surface.template.v1",
+  "description": "Reference template for creating a Polygon or MultiPolygon Class config with scripts/create-class-config.mjs.",
+  "recommendedGeometry": "Polygon",
+  "defaultType": "Polygons",
+  "defaultDisplayProfile": "largeGeoSurface",
+  "defaultCardLayout": "generic-polygon-card",
+  "requiredArguments": ["preset", "classCode", "classKey", "geometry", "labelZh"]
+}

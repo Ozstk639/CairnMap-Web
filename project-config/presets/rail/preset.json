@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "cairnmap.preset.v1",
+  "presetId": "rail",
+  "label": "CairnMap Rail Structures",
+  "version": "0.1.0",
+  "nativePreset": true,
+  "runtimeStatus": "active",
+  "description": "CairnMap Rail Structures preset extracted from OpenRIAMap RIA configuration.",
+  "providedClasses": [
+    "STA",
+    "PLF",
+    "RLE",
+    "PFB",
+    "STB",
+    "SBP",
+    "STF"
+  ],
+  "providedSharedModules": [],
+  "providedWorkflows": [
+    "rail-station-workflow",
+    "rail-platform-workflow",
+    "rail-line-workflow",
+    "rail-platform-boundary-workflow",
+    "rail-station-building-workflow",
+    "rail-station-building-point-workflow",
+    "rail-station-building-floor-workflow"
+  ],
+  "dependencies": [
+    "core-structures"
+  ]
+}

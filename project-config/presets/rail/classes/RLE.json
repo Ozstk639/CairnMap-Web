@@ -1,0 +1,294 @@
+{
+  "schemaVersion": "cairnmap.class.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "active",
+  "classCode": "RLE",
+  "classKey": "railLine",
+  "sourceFeatureKey": "铁路",
+  "label": {
+    "zh-CN": "铁路",
+    "en": "Rail Line"
+  },
+  "description": "铁路 class config-primary config. Runtime facade now resolves from preset Class config.",
+  "data": {
+    "typeField": "Type",
+    "classField": "Class",
+    "worldField": "World",
+    "defaultType": "Polyline",
+    "defaultClass": "RLE"
+  },
+  "geometry": {
+    "type": "LineString",
+    "sourceField": "PLpoints",
+    "axisOrder": "x,z,y",
+    "required": true
+  },
+  "identity": {
+    "idField": "ID",
+    "nameField": "Name",
+    "displayNameField": "Name"
+  },
+  "classification": {
+    "kindField": "Kind",
+    "skindField": "SKind",
+    "skind2Field": "SKind2",
+    "required": false,
+    "options": []
+  },
+  "fields": [
+    {
+      "key": "ID",
+      "label": {
+        "zh-CN": "线路ID"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "ID",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "Name",
+      "label": {
+        "zh-CN": "线路名"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Name",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "bureau",
+      "label": {
+        "zh-CN": "路局代码"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "bureau",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "line",
+      "label": {
+        "zh-CN": "线路编号"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "line",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "color",
+      "label": {
+        "zh-CN": "标准色号(color)"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "color",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "direction",
+      "label": {
+        "zh-CN": "方向(direction)"
+      },
+      "type": "select",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "direction",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "startplf",
+      "label": {
+        "zh-CN": "起点站台名(startplf)"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "startplf",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "endplf",
+      "label": {
+        "zh-CN": "终点站台名(endplf)"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "endplf",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    }
+  ],
+  "groups": [],
+  "tags": {
+    "enabled": true,
+    "allowOther": true,
+    "items": [
+      {
+        "key": "category",
+        "label": {
+          "zh-CN": "分类(category)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "level",
+        "label": {
+          "zh-CN": "等级(level)"
+        },
+        "type": "number"
+      },
+      {
+        "key": "status",
+        "label": {
+          "zh-CN": "状态(status)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "source",
+        "label": {
+          "zh-CN": "来源(source)"
+        },
+        "type": "text"
+      }
+    ]
+  },
+  "extensions": {
+    "enabled": true,
+    "allowOtherNamespaces": true,
+    "namespaces": []
+  },
+  "display": {
+    "runtimeStatus": "active",
+    "sourceRuntimeFile": "src/components/Rules/rendering/featureRenderRules.ts",
+    "rules": [
+      {
+        "id": "RLE-rail-network-line",
+        "runtimeStatus": "active",
+        "match": {
+          "classCode": "RLE"
+        },
+        "profile": "networkLine",
+        "displayTier": "network",
+        "geometry": {
+          "render": "polyline"
+        },
+        "label": {
+          "enabled": true,
+          "source": "Name",
+          "styleKey": "rle-line-dynamic"
+        },
+        "specialLogic": [
+          {
+            "key": "railLineColorBinding",
+            "mode": "optional"
+          },
+          {
+            "key": "railDirectionVisibility",
+            "mode": "optional"
+          },
+          {
+            "key": "lineLabelPathBinding",
+            "mode": "optional"
+          }
+        ],
+        "notes": "Config rule metadata. Rendering behavior is executed by featureRenderRules.ts.",
+        "algorithms": [
+          {
+            "key": "railLineColorBinding",
+            "mode": "registry"
+          },
+          {
+            "key": "lineLabelPathBinding",
+            "mode": "registry"
+          },
+          {
+            "key": "chainageSearchLineLabel",
+            "mode": "registry"
+          }
+        ]
+      }
+    ]
+  },
+  "card": {
+    "runtimeStatus": "active",
+    "layoutId": "rail-line-card",
+    "sections": [
+      {
+        "id": "main",
+        "title": "主要信息",
+        "slot": "mainRows"
+      },
+      {
+        "id": "other",
+        "title": "其他信息",
+        "slot": "otherRows",
+        "collapsedByDefault": true
+      }
+    ],
+    "fields": [],
+    "relations": [],
+    "enhancements": [
+      {
+        "key": "genericRelationLinks",
+        "componentKey": "relationRows",
+        "runtimeStatus": "active"
+      }
+    ]
+  },
+  "workflowBindings": [
+    {
+      "workflowId": "rail-line-workflow",
+      "default": true,
+      "runtimeStatus": "active",
+      "runtimeMode": "specialComponentPrimary"
+    }
+  ]
+}

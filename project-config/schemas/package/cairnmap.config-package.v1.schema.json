@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cairnmap.local/schemas/cairnmap.config-package.v1.schema.json",
+  "title": "CairnMap Config Package",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": {
+      "const": "cairnmap.config-package.v1"
+    },
+    "projectId": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "packageId": {
+      "type": "string"
+    },
+    "packageType": {
+      "enum": [
+        "project",
+        "preset"
+      ]
+    },
+    "displayName": {
+      "type": "string"
+    },
+    "nativePreset": {
+      "type": "boolean"
+    },
+    "contains": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "packageId",
+    "packageType",
+    "contains"
+  ]
+}

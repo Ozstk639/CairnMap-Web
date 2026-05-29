@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "cairnmap.workflow.v1",
+  "projectId": "openriamap-ria",
+  "id": "rail-station-workflow",
+  "label": "Rail station workflow",
+  "runtimeStatus": "active",
+  "targetClass": "STA",
+  "targetGeometry": "Point",
+  "runtimeMode": "componentExecutor",
+  "componentKey": "stationWorkflow",
+  "legacyWorkflowKey": "车站",
+  "blockRunnerReady": false,
+  "futureBlockTemplateRef": "basic-point-3step",
+  "executorDispatch": "configComponentKey",
+  "legacyFallback": true,
+  "notes": "Current runtime dispatches this workflow to a registered TS component executor. Fine-grained block/page assembly is intentionally not stored in the active workflow JSON."
+}

@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "cairnmap.format-runtime-contracts.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "metadata",
+  "items": [
+    {
+      "classCode": "ISP",
+      "sourceFeatureKey": "地物点",
+      "formatMode": "genericConfigPrimary"
+    },
+    {
+      "classCode": "ISL",
+      "sourceFeatureKey": "地物线",
+      "formatMode": "genericConfigPrimary"
+    },
+    {
+      "classCode": "ISG",
+      "sourceFeatureKey": "地物面",
+      "formatMode": "genericConfigPrimary"
+    },
+    {
+      "classCode": "ROD",
+      "sourceFeatureKey": "道路",
+      "formatMode": "genericConfigPrimary"
+    },
+    {
+      "classCode": "TPP",
+      "sourceFeatureKey": "传送点",
+      "formatMode": "genericConfigPrimary"
+    },
+    {
+      "classCode": "WRP",
+      "sourceFeatureKey": "Warp点",
+      "formatMode": "genericConfigPrimary"
+    },
+    {
+      "classCode": "BUD",
+      "sourceFeatureKey": "建筑",
+      "formatMode": "genericConfigPrimary"
+    },
+    {
+      "classCode": "FLR",
+      "sourceFeatureKey": "建筑楼层",
+      "formatMode": "genericConfigPrimary"
+    },
+    {
+      "classCode": "TRP",
+      "sourceFeatureKey": "交易点",
+      "formatMode": "specialFormatterConfigPrimary",
+      "formatterKey": "tradePointFormatter",
+      "fallback": "legacy",
+      "formatterRuntimeStatus": "configPrimary",
+      "notes": "Config owns schema and contract; TypeScript formatter registry executes the special transformation."
+    },
+    {
+      "classCode": "STA",
+      "sourceFeatureKey": "车站",
+      "formatMode": "specialFormatterConfigPrimary",
+      "formatterKey": "stationFormatter",
+      "fallback": "legacy",
+      "formatterRuntimeStatus": "configPrimary",
+      "notes": "Config owns schema and contract; TypeScript formatter registry executes the special transformation."
+    },
+    {
+      "classCode": "PLF",
+      "sourceFeatureKey": "站台",
+      "formatMode": "specialFormatterConfigPrimary",
+      "formatterKey": "platformFormatter",
+      "fallback": "legacy",
+      "formatterRuntimeStatus": "configPrimary",
+      "notes": "Config owns schema and contract; TypeScript formatter registry executes the special transformation."
+    },
+    {
+      "classCode": "RLE",
+      "sourceFeatureKey": "铁路",
+      "formatMode": "specialFormatterConfigPrimary",
+      "formatterKey": "railLineFormatter",
+      "fallback": "legacy",
+      "formatterRuntimeStatus": "configPrimary",
+      "notes": "Config owns schema and contract; TypeScript formatter registry executes the special transformation."
+    },
+    {
+      "classCode": "PFB",
+      "sourceFeatureKey": "站台轮廓",
+      "formatMode": "specialFormatterConfigPrimary",
+      "formatterKey": "platformFootprintFormatter",
+      "fallback": "legacy",
+      "formatterRuntimeStatus": "configPrimary",
+      "notes": "Config owns schema and contract; special formatter preserves legacy-compatible platform footprint transform."
+    },
+    {
+      "classCode": "STB",
+      "sourceFeatureKey": "车站建筑",
+      "formatMode": "specialFormatterConfigPrimary",
+      "formatterKey": "stationBuildingFormatter",
+      "fallback": "legacy",
+      "formatterRuntimeStatus": "configPrimary",
+      "notes": "Config owns schema and contract; TypeScript formatter registry executes the special transformation."
+    },
+    {
+      "classCode": "SBP",
+      "sourceFeatureKey": "车站建筑点",
+      "formatMode": "specialFormatterConfigPrimary",
+      "formatterKey": "stationBuildingPointFormatter",
+      "fallback": "legacy",
+      "formatterRuntimeStatus": "configPrimary",
+      "notes": "Config owns schema and contract; TypeScript formatter registry executes the special transformation."
+    },
+    {
+      "classCode": "STF",
+      "sourceFeatureKey": "车站建筑楼层",
+      "formatMode": "specialFormatterConfigPrimary",
+      "formatterKey": "stationFloorFormatter",
+      "fallback": "legacy",
+      "formatterRuntimeStatus": "configPrimary",
+      "notes": "Config owns schema and contract; TypeScript formatter registry executes the special transformation."
+    }
+  ]
+}

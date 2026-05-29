@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "cairnmap.preset.v1",
+  "presetId": "core-structures",
+  "label": "CairnMap Core Structures",
+  "version": "0.1.0",
+  "nativePreset": true,
+  "runtimeStatus": "active",
+  "description": "CairnMap Core Structures preset extracted from OpenRIAMap RIA configuration.",
+  "providedClasses": [
+    "ISP",
+    "ISL",
+    "ISG"
+  ],
+  "providedSharedModules": [
+    "common",
+    "display",
+    "format",
+    "relation",
+    "card",
+    "workflow"
+  ],
+  "providedWorkflows": [
+    "generic-point-workflow",
+    "generic-line-workflow",
+    "generic-polygon-workflow"
+  ],
+  "dependencies": []
+}

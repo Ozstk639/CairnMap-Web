@@ -1,3 +1,5 @@
+// CairnMap LEGACY CLEANUP: card field rendering helpers only.
+// Do not add new Class-level card layouts here.
 import type { FeatureRecord } from '@/components/Rules/rendering/renderRules';
 import { buildCardRowsFromRegistry } from './cardRegistryRows';
 import type { CardInteractiveValue } from './cardInteractions';

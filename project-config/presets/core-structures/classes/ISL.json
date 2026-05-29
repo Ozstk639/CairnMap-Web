@@ -1,0 +1,483 @@
+{
+  "schemaVersion": "cairnmap.class.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "active",
+  "classCode": "ISL",
+  "classKey": "genericLine",
+  "sourceFeatureKey": "地物线",
+  "label": {
+    "zh-CN": "地物线",
+    "en": "Generic Line"
+  },
+  "description": "地物线 class config-primary config. Runtime facade now resolves from preset Class config.",
+  "data": {
+    "typeField": "Type",
+    "classField": "Class",
+    "worldField": "World",
+    "defaultType": "Polyline",
+    "defaultClass": "ISL"
+  },
+  "geometry": {
+    "type": "LineString",
+    "sourceField": "Linepoints",
+    "axisOrder": "x,z,y",
+    "required": true
+  },
+  "identity": {
+    "idField": "ID",
+    "nameField": "Name",
+    "displayNameField": "Name"
+  },
+  "classification": {
+    "kindField": "Kind",
+    "skindField": "SKind",
+    "skind2Field": "SKind2",
+    "required": false,
+    "options": [
+      {
+        "kind": "NGF",
+        "skind": "WTR",
+        "skind2": "RVR",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "河道"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "NGF",
+        "skind": "WTR",
+        "skind2": "CAN",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "运河"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "NGF",
+        "skind": "BOD",
+        "skind2": "BDY",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "特定自然地理边界线"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "NGF",
+        "skind": "BOD",
+        "skind2": "STC",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "海峡中线"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "ADM",
+        "skind": "DBL",
+        "skind2": "LBD",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "行政区边界"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "ADM",
+        "skind": "PLL",
+        "skind2": "CBD",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "规划区边界"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      }
+    ]
+  },
+  "fields": [
+    {
+      "key": "ID",
+      "label": {
+        "zh-CN": "线要素ID"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "ID",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "Name",
+      "label": {
+        "zh-CN": "线要素名"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Name",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "Kind",
+      "label": {
+        "zh-CN": "线要素类型(Kind)"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Kind",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "SKind",
+      "label": {
+        "zh-CN": "线要素子类型(SKind)"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "SKind",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "SKind2",
+      "label": {
+        "zh-CN": "线要素三级子类型(SKind2)"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "SKind2",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "Situation",
+      "label": {
+        "zh-CN": "状态(Situation)"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "Situation",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    }
+  ],
+  "groups": [
+    {
+      "key": "tags",
+      "label": {
+        "zh-CN": "tags（可选：用于筛选/渲染差分）"
+      },
+      "type": "array",
+      "optional": true,
+      "minItems": 0,
+      "addButtonText": "添加 tag",
+      "fields": [
+        {
+          "key": "tagKey",
+          "label": {
+            "zh-CN": "字段名"
+          },
+          "type": "select",
+          "required": true,
+          "optional": false,
+          "sourceRuntimeField": "tagKey",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        },
+        {
+          "key": "tagKeyOther",
+          "label": {
+            "zh-CN": "其他字段名（当字段名=其他时填写）"
+          },
+          "type": "text",
+          "required": false,
+          "optional": true,
+          "sourceRuntimeField": "tagKeyOther",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        },
+        {
+          "key": "tagValue",
+          "label": {
+            "zh-CN": "值"
+          },
+          "type": "text",
+          "required": true,
+          "optional": false,
+          "sourceRuntimeField": "tagValue",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        }
+      ]
+    },
+    {
+      "key": "extensions",
+      "label": {
+        "zh-CN": "extensions（可选：仅记录信息，不参与规则）"
+      },
+      "type": "array",
+      "optional": true,
+      "minItems": 0,
+      "addButtonText": "添加扩展",
+      "fields": [
+        {
+          "key": "extGroup",
+          "label": {
+            "zh-CN": "组/命名空间(extGroup)"
+          },
+          "type": "text",
+          "required": true,
+          "optional": false,
+          "sourceRuntimeField": "extGroup",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        },
+        {
+          "key": "extKey",
+          "label": {
+            "zh-CN": "字段名(extKey)"
+          },
+          "type": "text",
+          "required": true,
+          "optional": false,
+          "sourceRuntimeField": "extKey",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        },
+        {
+          "key": "extType",
+          "label": {
+            "zh-CN": "值类型"
+          },
+          "type": "select",
+          "required": true,
+          "optional": false,
+          "defaultValue": "EXT_VALUE_TYPE_TEXT",
+          "sourceRuntimeField": "extType",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        },
+        {
+          "key": "extValue",
+          "label": {
+            "zh-CN": "值(extValue)"
+          },
+          "type": "text",
+          "required": true,
+          "optional": false,
+          "sourceRuntimeField": "extValue",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        }
+      ]
+    }
+  ],
+  "tags": {
+    "enabled": true,
+    "allowOther": true,
+    "items": [
+      {
+        "key": "category",
+        "label": {
+          "zh-CN": "分类(category)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "level",
+        "label": {
+          "zh-CN": "等级(level)"
+        },
+        "type": "number"
+      },
+      {
+        "key": "status",
+        "label": {
+          "zh-CN": "状态(status)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "source",
+        "label": {
+          "zh-CN": "来源(source)"
+        },
+        "type": "text"
+      }
+    ]
+  },
+  "extensions": {
+    "enabled": true,
+    "allowOtherNamespaces": true,
+    "namespaces": []
+  },
+  "display": {
+    "runtimeStatus": "active",
+    "sourceRuntimeFile": "src/components/Rules/rendering/featureRenderRules.ts",
+    "rules": [
+      {
+        "id": "ISL-generic-line",
+        "runtimeStatus": "active",
+        "match": {
+          "classCode": "ISL"
+        },
+        "profile": "networkLine",
+        "displayTier": "network",
+        "geometry": {
+          "render": "polyline"
+        },
+        "label": {
+          "enabled": true,
+          "source": "Name",
+          "styleKey": "gm-outline"
+        },
+        "specialLogic": [
+          {
+            "key": "lineLabelPathBinding",
+            "mode": "optional"
+          },
+          {
+            "key": "lineClassificationStyleBinding",
+            "mode": "optional"
+          }
+        ],
+        "notes": "Config rule metadata. Rendering behavior is executed by featureRenderRules.ts.",
+        "algorithms": [
+          {
+            "key": "lineLabelPathBinding",
+            "mode": "registry"
+          },
+          {
+            "key": "chainageSearchLineLabel",
+            "mode": "registry"
+          }
+        ]
+      }
+    ]
+  },
+  "card": {
+    "runtimeStatus": "active",
+    "layoutId": "generic-line-card",
+    "sections": [
+      {
+        "id": "main",
+        "title": "主要信息",
+        "slot": "mainRows"
+      },
+      {
+        "id": "other",
+        "title": "其他信息",
+        "slot": "otherRows",
+        "collapsedByDefault": true
+      }
+    ],
+    "fields": [],
+    "relations": [],
+    "enhancements": []
+  },
+  "workflowBindings": [
+    {
+      "workflowId": "generic-line-workflow",
+      "default": true,
+      "runtimeStatus": "active",
+      "runtimeMode": "configPrimary"
+    }
+  ]
+}

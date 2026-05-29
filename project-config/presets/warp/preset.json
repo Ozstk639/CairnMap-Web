@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "cairnmap.preset.v1",
+  "presetId": "warp",
+  "label": "CairnMap Warp Points",
+  "version": "0.1.0",
+  "nativePreset": true,
+  "runtimeStatus": "active",
+  "description": "CairnMap Warp Points preset extracted from OpenRIAMap RIA configuration.",
+  "providedClasses": [
+    "WRP"
+  ],
+  "providedSharedModules": [],
+  "providedWorkflows": [
+    "warp-workflow"
+  ],
+  "dependencies": [
+    "core-structures"
+  ]
+}

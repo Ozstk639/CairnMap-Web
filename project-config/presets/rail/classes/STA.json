@@ -1,0 +1,247 @@
+{
+  "schemaVersion": "cairnmap.class.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "active",
+  "classCode": "STA",
+  "classKey": "station",
+  "sourceFeatureKey": "车站",
+  "label": {
+    "zh-CN": "车站",
+    "en": "Station"
+  },
+  "description": "车站 class config-primary config. Runtime facade now resolves from preset Class config.",
+  "data": {
+    "typeField": "Type",
+    "classField": "Class",
+    "worldField": "World",
+    "defaultType": "Points",
+    "defaultClass": "STA"
+  },
+  "geometry": {
+    "type": "Point",
+    "sourceField": "coordinate",
+    "axisOrder": "x,z,y",
+    "required": true
+  },
+  "identity": {
+    "idField": "ID",
+    "nameField": "Name",
+    "displayNameField": "Name"
+  },
+  "classification": {
+    "kindField": "Kind",
+    "skindField": "SKind",
+    "skind2Field": "SKind2",
+    "required": false,
+    "options": []
+  },
+  "fields": [
+    {
+      "key": "ID",
+      "label": {
+        "zh-CN": "车站ID"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "ID",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "Name",
+      "label": {
+        "zh-CN": "车站名"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Name",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "STBuilding",
+      "label": {
+        "zh-CN": "车站所属车站建体(STBuilding)"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "STBuilding",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "elevation",
+      "label": {
+        "zh-CN": "高度(y)"
+      },
+      "type": "number",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "elevation",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    }
+  ],
+  "groups": [
+    {
+      "key": "platforms",
+      "label": {
+        "zh-CN": "包含站台 platforms"
+      },
+      "type": "array",
+      "optional": false,
+      "minItems": 1,
+      "addButtonText": "添加站台条目",
+      "fields": [
+        {
+          "key": "ID",
+          "label": {
+            "zh-CN": "站台ID"
+          },
+          "type": "text",
+          "required": true,
+          "optional": false,
+          "sourceRuntimeField": "ID",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": true
+          }
+        }
+      ]
+    }
+  ],
+  "tags": {
+    "enabled": true,
+    "allowOther": true,
+    "items": [
+      {
+        "key": "category",
+        "label": {
+          "zh-CN": "分类(category)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "level",
+        "label": {
+          "zh-CN": "等级(level)"
+        },
+        "type": "number"
+      },
+      {
+        "key": "status",
+        "label": {
+          "zh-CN": "状态(status)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "source",
+        "label": {
+          "zh-CN": "来源(source)"
+        },
+        "type": "text"
+      }
+    ]
+  },
+  "extensions": {
+    "enabled": true,
+    "allowOtherNamespaces": true,
+    "namespaces": []
+  },
+  "display": {
+    "runtimeStatus": "active",
+    "sourceRuntimeFile": "src/components/Rules/rendering/featureRenderRules.ts",
+    "rules": [
+      {
+        "id": "STA-station-node",
+        "runtimeStatus": "active",
+        "match": {
+          "classCode": "STA"
+        },
+        "profile": "transportNode",
+        "displayTier": "transportNode",
+        "geometry": {
+          "render": "none"
+        },
+        "label": {
+          "enabled": true,
+          "source": "Name",
+          "styleKey": "bubble-dark-label-14"
+        },
+        "specialLogic": [
+          {
+            "key": "stationPlatformVisibilityBinding",
+            "mode": "optional"
+          },
+          {
+            "key": "stationPointColorBinding",
+            "mode": "optional"
+          }
+        ],
+        "notes": "Config rule metadata. Rendering behavior is executed by featureRenderRules.ts.",
+        "algorithms": [
+          {
+            "key": "stationPlatformVisibilityBinding",
+            "mode": "registry"
+          }
+        ]
+      }
+    ]
+  },
+  "card": {
+    "runtimeStatus": "active",
+    "layoutId": "rail-station-card",
+    "sections": [
+      {
+        "id": "main",
+        "title": "主要信息",
+        "slot": "mainRows"
+      },
+      {
+        "id": "other",
+        "title": "其他信息",
+        "slot": "otherRows",
+        "collapsedByDefault": true
+      }
+    ],
+    "fields": [],
+    "relations": [],
+    "enhancements": [
+      {
+        "key": "genericRelationLinks",
+        "componentKey": "relationRows",
+        "runtimeStatus": "active"
+      }
+    ]
+  },
+  "workflowBindings": [
+    {
+      "workflowId": "rail-station-workflow",
+      "default": true,
+      "runtimeStatus": "active",
+      "runtimeMode": "specialComponentPrimary"
+    }
+  ]
+}

@@ -1,4 +1,8 @@
+// CairnMap FINAL CLEANUP: card enhancement executor/facade only. Card layout definitions live in preset Class/shared card JSON.
+// CairnMap LEGACY CLEANUP: card executor/compatibility only.
+// New card layout definitions belong in preset Class JSON and shared/card.
 import type { CardFeatureLinkTarget } from './cardInteractions';
+import { resolveCardRuntimeCardLayout } from '../../../core/project/cardRuntimeResolver';
 
 export const REGISTRY_DEFAULT_GROUP = '__registryDefault' as const;
 
@@ -8,7 +12,10 @@ export type CardEnhancementKey =
   | 'railColorChip'
   | 'platformLineChips'
   | 'stationLineChips'
-  | 'stationBuildingLineChips';
+  | 'stationBuildingLineChips'
+  | 'tradePointCard'
+  | 'floorViewRelation'
+  | 'genericRelationLinks';
 
 export type CardLayoutItem =
   | {
@@ -148,6 +155,11 @@ export const resolveCardRegistryLayout = (args: {
   const kind = normalize(args.kind);
   const skind = normalize(args.skind);
   const skind2 = normalize(args.skind2);
+
+  const runtimeLayout = resolveCardRuntimeCardLayout({ classCode });
+  if (runtimeLayout && runtimeLayout.items.length > 0) {
+    return runtimeLayout as CardRegistryLayout;
+  }
 
   for (const layout of CARD_REGISTRY_LAYOUTS) {
     if (layout.schemaKey && normalize(layout.schemaKey) === schemaKey) return layout;

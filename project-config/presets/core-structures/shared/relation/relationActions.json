@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "cairnmap.relation-actions.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "id": "genericRelationJump",
+      "actionKey": "genericRelationJump",
+      "label": "通用关系跳转",
+      "description": "Search target features by class scope and field mapping, display a selected label, and optionally jump to the target feature.",
+      "paramsSchema": {
+        "targetClassScope": "string[]",
+        "searchFields": "string[]",
+        "sourceField": "string",
+        "targetField": "string",
+        "returnField": "string",
+        "displayField": "string",
+        "enableJump": "boolean",
+        "optional": "boolean"
+      }
+    },
+    {
+      "id": "floorViewBinding",
+      "actionKey": "floorViewBinding",
+      "label": "通用楼层视图绑定",
+      "description": "Reusable relation action for parent surfaces and floor surfaces. Supports BUD/STB as parent surfaces and FLR/STF as floor surfaces.",
+      "roles": [
+        "parentSurface",
+        "floorSurface"
+      ],
+      "allowedSourceClasses": [
+        "BUD",
+        "STB",
+        "FLR",
+        "STF"
+      ],
+      "allowedTargetClasses": [
+        "BUD",
+        "STB",
+        "FLR",
+        "STF"
+      ],
+      "paramsSchema": {
+        "role": "parentSurface | floorSurface",
+        "sourceField": "string",
+        "targetField": "string",
+        "targetClassScope": "string[]",
+        "displayField": "string",
+        "returnField": "string",
+        "enableJump": "boolean"
+      }
+    },
+    {
+      "id": "hierarchicalRelationJump",
+      "actionKey": "hierarchicalRelationJump",
+      "label": "层级关系跳转",
+      "description": "Reusable relation action for rail/station/platform/building hierarchy jumps.",
+      "paramsSchema": {
+        "sourceField": "string",
+        "targetField": "string",
+        "targetClassScope": "string[]",
+        "displayField": "string",
+        "returnField": "string",
+        "enableJump": "boolean"
+      }
+    }
+  ]
+}

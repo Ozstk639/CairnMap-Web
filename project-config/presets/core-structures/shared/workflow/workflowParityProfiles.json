@@ -1,0 +1,332 @@
+{
+  "schemaVersion": "cairnmap.workflow-parity-profiles.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "active",
+  "description": "Legacy workflow page/text parity profiles. These profiles keep config workflow definitions aligned with the existing TS workflow components while config runtime replaces the definition layer.",
+  "items": [
+    {
+      "workflowId": "generic-point-workflow",
+      "legacyComponent": "SpecialCulturalPointWorkflow",
+      "pageOrder": [
+        "creator",
+        "info",
+        "draw"
+      ],
+      "pageTitles": [
+        "特殊人文点要素：填写者信息",
+        "特殊人文点要素：信息填写",
+        "特殊人文点要素：绘制（点）"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "brief-extension"
+      ]
+    },
+    {
+      "workflowId": "generic-line-workflow",
+      "legacyComponent": "SettlementBoundaryLineWorkflow",
+      "pageOrder": [
+        "creator",
+        "info",
+        "draw"
+      ],
+      "pageTitles": [
+        "聚落边界线要素：填写者信息",
+        "聚落边界线要素：信息填写",
+        "聚落边界线要素：绘制（线）"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "brief-extension"
+      ]
+    },
+    {
+      "workflowId": "generic-polygon-workflow",
+      "legacyComponent": "NaturalLandWorkflow",
+      "pageOrder": [
+        "creator",
+        "info",
+        "draw"
+      ],
+      "pageTitles": [
+        "自然要素-陆地：填写者信息",
+        "自然要素-陆地：信息填写",
+        "自然要素-陆地：绘制（面）"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "brief-extension"
+      ]
+    },
+    {
+      "workflowId": "road-workflow",
+      "legacyComponent": "RoadWorkflow",
+      "pageOrder": [
+        "creator",
+        "info",
+        "draw"
+      ],
+      "pageTitles": [
+        "道路：填写者信息",
+        "道路：信息填写",
+        "道路：绘制（线）"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "brief-extension",
+        "road-specific-options",
+        "explicit-connection-editor",
+        "blacklist-editor",
+        "travel-mode-allowlist"
+      ]
+    },
+    {
+      "workflowId": "building-workflow",
+      "legacyComponent": "BuildingWorkflow",
+      "pageOrder": [
+        "creator",
+        "info",
+        "draw"
+      ],
+      "pageTitles": [
+        "建筑：填写者信息",
+        "建筑：信息填写",
+        "建筑：绘制（面）"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "brief-extension",
+        "floor-view-binding"
+      ]
+    },
+    {
+      "workflowId": "floor-workflow",
+      "legacyComponent": "FloorUnitWorkflow",
+      "pageOrder": [
+        "creator",
+        "info",
+        "draw"
+      ],
+      "pageTitles": [
+        "楼内单元：填写者信息",
+        "楼内单元：信息填写",
+        "楼内单元：绘制（面）"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "brief-extension",
+        "floor-view-binding"
+      ]
+    },
+    {
+      "workflowId": "teleport-workflow",
+      "legacyComponent": "TeleportPointWorkflow",
+      "pageOrder": [
+        "creator",
+        "info",
+        "src",
+        "tgt"
+      ],
+      "pageTitles": [
+        "传送点：填写者信息",
+        "传送点：信息填写",
+        "传送点：起点坐标",
+        "传送点：目标点坐标"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "brief-extension"
+      ]
+    },
+    {
+      "workflowId": "warp-workflow",
+      "legacyComponent": "WarpPointWorkflow",
+      "pageOrder": [
+        "creator",
+        "info",
+        "src"
+      ],
+      "pageTitles": [
+        "Warp点：填写者信息",
+        "Warp点：信息填写",
+        "Warp点：坐标"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "brief-extension"
+      ]
+    },
+    {
+      "workflowId": "trade-point-workflow",
+      "legacyComponent": "TradePointWorkflow",
+      "pageOrder": [
+        "creator",
+        "info",
+        "trade",
+        "point"
+      ],
+      "pageTitles": [
+        "交易点：填写者信息",
+        "交易点：信息填写",
+        "交易点：交易列表",
+        "交易点：坐标"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "brief-extension",
+        "trp-trade-editor",
+        "trade-section"
+      ]
+    },
+    {
+      "workflowId": "rail-line-workflow",
+      "legacyComponent": "RailwayWorkflow",
+      "pageOrder": [
+        "creator",
+        "center",
+        "branch",
+        "info",
+        "down",
+        "up"
+      ],
+      "pageTitles": [
+        "铁路：填写者信息",
+        "铁路：中心线与方向",
+        "铁路：线别模式",
+        "铁路：信息填写",
+        "下行方向",
+        "上行方向"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "rail-platform-binding-editor",
+        "rail-line-editor"
+      ]
+    },
+    {
+      "workflowId": "rail-station-workflow",
+      "legacyComponent": "StationWorkflow",
+      "pageOrder": [
+        "creator",
+        "base",
+        "stb",
+        "pfb",
+        "plfDown",
+        "plfUp",
+        "sta"
+      ],
+      "pageTitles": [
+        "车站和站台：填写者",
+        "车站和站台：基础信息",
+        "车站和站台：车站总建筑",
+        "车站和站台：车站轮廓",
+        "车站和站台：下行站台",
+        "车站和站台：上行站台",
+        "车站和站台：站台点"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "rail-station-binding-editor",
+        "rail-platform-binding-editor"
+      ]
+    },
+    {
+      "workflowId": "rail-platform-workflow",
+      "legacyComponent": "StationWorkflow",
+      "pageOrder": [
+        "creator",
+        "base",
+        "plfDown",
+        "plfUp",
+        "sta"
+      ],
+      "pageTitles": [
+        "车站和站台：填写者",
+        "车站和站台：基础信息",
+        "车站和站台：下行站台",
+        "车站和站台：上行站台",
+        "车站和站台：站台点"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "rail-platform-binding-editor"
+      ]
+    },
+    {
+      "workflowId": "rail-platform-boundary-workflow",
+      "legacyComponent": "StationWorkflow",
+      "pageOrder": [
+        "creator",
+        "base",
+        "pfb"
+      ],
+      "pageTitles": [
+        "车站和站台：填写者",
+        "车站和站台：基础信息",
+        "车站和站台：车站轮廓"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "rail-station-binding-editor"
+      ]
+    },
+    {
+      "workflowId": "rail-station-building-workflow",
+      "legacyComponent": "StationWorkflow",
+      "pageOrder": [
+        "creator",
+        "base",
+        "stb"
+      ],
+      "pageTitles": [
+        "车站和站台：填写者",
+        "车站和站台：基础信息",
+        "车站和站台：车站总建筑"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "floor-view-binding",
+        "rail-station-binding-editor"
+      ]
+    },
+    {
+      "workflowId": "rail-station-building-point-workflow",
+      "legacyComponent": "StationWorkflow",
+      "pageOrder": [
+        "creator",
+        "base",
+        "stb",
+        "sta"
+      ],
+      "pageTitles": [
+        "车站和站台：填写者",
+        "车站和站台：基础信息",
+        "车站和站台：车站总建筑",
+        "车站和站台：站台点"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "rail-station-binding-editor"
+      ]
+    },
+    {
+      "workflowId": "rail-station-building-floor-workflow",
+      "legacyComponent": "StationWorkflow",
+      "pageOrder": [
+        "creator",
+        "base",
+        "stb"
+      ],
+      "pageTitles": [
+        "车站和站台：填写者",
+        "车站和站台：基础信息",
+        "车站和站台：车站总建筑"
+      ],
+      "standardBlockLayout": "singleRow",
+      "multiLineBlockIds": [
+        "floor-view-binding",
+        "rail-station-binding-editor"
+      ]
+    }
+  ]
+}

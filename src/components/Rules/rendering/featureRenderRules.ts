@@ -1,3 +1,6 @@
+// CairnMap FINAL CLEANUP: display algorithm executor/facade only. Display rule definitions live in preset Class/shared display JSON.
+// CairnMap LEGACY CLEANUP: display algorithm executor only.
+// Do not add new Class/display definitions here. New definitions belong in project-config/presets/*/classes and shared/display.
 import type { FeatureStore } from "@/components/Rules/data/featureStore";
 import type {
   FeatureRecord,
@@ -13,6 +16,7 @@ import {
   fmtFloorLabel,
 } from "@/components/Rules/utils/ruleHelpers";
 
+import { applyConfigDisplayOverlayToRule } from "../../../core/project/displayRuntimeOverlay";
 /**
  * 具体要素渲染规则（从 renderRules.ts 分离）。
  *
@@ -773,7 +777,7 @@ const DISPLAY_FALLBACK_POLYGON: FeatureDisplayRuleDraft = {
   },
 };
 
-export const FEATURE_RENDER_RULES: RenderRule[] = [
+const LEGACY_FEATURE_RENDER_RULES: RenderRule[] = [
   // ------------------------------------------------------------------
   // (1) 铁路 RLE：direction 缩放控制 + 沿线 label
   // - direction=3：zoomLevel 0..99 都显示
@@ -2007,3 +2011,7 @@ export const FEATURE_RENDER_RULES: RenderRule[] = [
     },
   },
 ];
+
+export const FEATURE_RENDER_RULES: RenderRule[] = LEGACY_FEATURE_RENDER_RULES.map((rule) =>
+  applyConfigDisplayOverlayToRule(rule),
+);

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "cairnmap.worlds.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "id": "zth",
+      "numericCode": 0,
+      "label": "主世界",
+      "enabled": true,
+      "default": true
+    },
+    {
+      "id": "naraku",
+      "numericCode": 1,
+      "label": "奈落",
+      "enabled": true
+    },
+    {
+      "id": "houtu",
+      "numericCode": 2,
+      "label": "后土",
+      "enabled": true
+    },
+    {
+      "id": "eden",
+      "numericCode": 3,
+      "label": "伊甸",
+      "enabled": true
+    },
+    {
+      "id": "laputa",
+      "numericCode": 4,
+      "label": "拉普达",
+      "enabled": true
+    },
+    {
+      "id": "yunduan",
+      "numericCode": 5,
+      "label": "云端",
+      "enabled": true
+    }
+  ]
+}

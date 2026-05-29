@@ -1,0 +1,9 @@
+{
+  "templateId": "cairnmap.class.line.template.v1",
+  "description": "Reference template for creating a LineString Class config with scripts/create-class-config.mjs.",
+  "recommendedGeometry": "LineString",
+  "defaultType": "Lines",
+  "defaultDisplayProfile": "networkLine",
+  "defaultCardLayout": "generic-line-card",
+  "requiredArguments": ["preset", "classCode", "classKey", "geometry", "labelZh"]
+}

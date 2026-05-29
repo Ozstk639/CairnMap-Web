@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cairnmap.local/schemas/cairnmap.assembly.v1.schema.json",
+  "title": "CairnMap Assembly",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": {
+      "const": "cairnmap.assembly.v1"
+    },
+    "projectId": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "assemblyId": {
+      "type": "string"
+    },
+    "displayName": {
+      "type": "string"
+    },
+    "loadOrder": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "path",
+          "enabled"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "kind": {
+            "enum": [
+              "preset",
+              "project"
+            ]
+          }
+        }
+      }
+    },
+    "mergePolicy": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "defaultPackagePath": {
+          "type": "string"
+        },
+        "defaultWorldId": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "assemblyId",
+    "loadOrder",
+    "mergePolicy",
+    "runtime"
+  ]
+}

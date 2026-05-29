@@ -1,0 +1,291 @@
+{
+  "schemaVersion": "cairnmap.class.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "active",
+  "classCode": "STB",
+  "classKey": "stationBuilding",
+  "sourceFeatureKey": "车站建筑",
+  "label": {
+    "zh-CN": "车站建筑",
+    "en": "Station Building"
+  },
+  "description": "车站建筑 class config-primary config. Runtime facade now resolves from preset Class config.",
+  "data": {
+    "typeField": "Type",
+    "classField": "Class",
+    "worldField": "World",
+    "defaultType": "Polygon",
+    "defaultClass": "STB"
+  },
+  "geometry": {
+    "type": "Polygon",
+    "sourceField": "Conpoints",
+    "axisOrder": "x,z,y",
+    "required": true
+  },
+  "identity": {
+    "idField": "ID",
+    "nameField": "Name",
+    "displayNameField": "Name"
+  },
+  "classification": {
+    "kindField": "Kind",
+    "skindField": "SKind",
+    "skind2Field": "SKind2",
+    "required": false,
+    "options": []
+  },
+  "fields": [
+    {
+      "key": "ID",
+      "label": {
+        "zh-CN": "车站建筑ID"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "ID",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "Name",
+      "label": {
+        "zh-CN": "车站建筑名"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Name",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "elevation",
+      "label": {
+        "zh-CN": "高度(y)"
+      },
+      "type": "number",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "elevation",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "height",
+      "label": {
+        "zh-CN": "建筑高度(height)"
+      },
+      "type": "number",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "height",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    }
+  ],
+  "groups": [
+    {
+      "key": "Floors",
+      "label": {
+        "zh-CN": "包含楼层 Floors"
+      },
+      "type": "array",
+      "optional": true,
+      "minItems": 0,
+      "addButtonText": "添加楼层条目",
+      "fields": [
+        {
+          "key": "ID",
+          "label": {
+            "zh-CN": "楼层ID"
+          },
+          "type": "text",
+          "required": false,
+          "optional": true,
+          "sourceRuntimeField": "ID",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": true
+          }
+        },
+        {
+          "key": "Group",
+          "label": {
+            "zh-CN": "分组(Group)"
+          },
+          "type": "text",
+          "required": false,
+          "optional": true,
+          "sourceRuntimeField": "Group",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        }
+      ]
+    }
+  ],
+  "tags": {
+    "enabled": true,
+    "allowOther": true,
+    "items": [
+      {
+        "key": "category",
+        "label": {
+          "zh-CN": "分类(category)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "level",
+        "label": {
+          "zh-CN": "等级(level)"
+        },
+        "type": "number"
+      },
+      {
+        "key": "status",
+        "label": {
+          "zh-CN": "状态(status)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "source",
+        "label": {
+          "zh-CN": "来源(source)"
+        },
+        "type": "text"
+      }
+    ]
+  },
+  "extensions": {
+    "enabled": true,
+    "allowOtherNamespaces": true,
+    "namespaces": []
+  },
+  "display": {
+    "runtimeStatus": "active",
+    "sourceRuntimeFile": "src/components/Rules/rendering/featureRenderRules.ts",
+    "rules": [
+      {
+        "id": "STB-station-structure",
+        "runtimeStatus": "active",
+        "match": {
+          "classCode": "STB"
+        },
+        "profile": "stationStructure",
+        "displayTier": "structure",
+        "geometry": {
+          "render": "polygonFillOutline"
+        },
+        "label": {
+          "enabled": true,
+          "source": "Name",
+          "styleKey": "structure-label"
+        },
+        "specialLogic": [
+          {
+            "key": "stationBuildingBinding",
+            "mode": "optional"
+          },
+          {
+            "key": "largeGeometryStableAnchor",
+            "mode": "optional"
+          }
+        ],
+        "notes": "Config rule metadata. Rendering behavior is executed by featureRenderRules.ts.",
+        "algorithms": [
+          {
+            "key": "buildingFloorBinding",
+            "mode": "registry"
+          },
+          {
+            "key": "stationPlatformVisibilityBinding",
+            "mode": "registry"
+          },
+          {
+            "key": "largeGeometryStableAnchor",
+            "mode": "registry"
+          },
+          {
+            "key": "polygonCandidateAnchor",
+            "mode": "registry"
+          },
+          {
+            "key": "structureLowZoomPointLabel",
+            "mode": "registry"
+          }
+        ]
+      }
+    ]
+  },
+  "card": {
+    "runtimeStatus": "active",
+    "layoutId": "rail-station-building-card",
+    "sections": [
+      {
+        "id": "main",
+        "title": "主要信息",
+        "slot": "mainRows"
+      },
+      {
+        "id": "other",
+        "title": "其他信息",
+        "slot": "otherRows",
+        "collapsedByDefault": true
+      }
+    ],
+    "fields": [],
+    "relations": [
+      {
+        "key": "floorViewBinding",
+        "relationActionKey": "floorViewBinding",
+        "runtimeStatus": "active"
+      }
+    ],
+    "enhancements": [
+      {
+        "key": "genericRelationLinks",
+        "componentKey": "relationRows",
+        "runtimeStatus": "active"
+      },
+      {
+        "key": "floorViewRelation",
+        "componentKey": "relationRows",
+        "relationActionKey": "floorViewBinding",
+        "runtimeStatus": "active"
+      }
+    ]
+  },
+  "workflowBindings": [
+    {
+      "workflowId": "rail-station-building-workflow",
+      "default": true,
+      "runtimeStatus": "active",
+      "runtimeMode": "specialComponentPrimary"
+    }
+  ]
+}

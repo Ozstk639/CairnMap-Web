@@ -1,0 +1,9 @@
+{
+  "templateId": "cairnmap.class.point.template.v1",
+  "description": "Reference template for creating a Point Class config with scripts/create-class-config.mjs.",
+  "recommendedGeometry": "Point",
+  "defaultType": "Points",
+  "defaultDisplayProfile": "poiPoint",
+  "defaultCardLayout": "generic-point-card",
+  "requiredArguments": ["preset", "classCode", "classKey", "geometry", "labelZh"]
+}

@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "cairnmap.icon-registry.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "id": "train",
+      "componentKey": "Train",
+      "usage": [
+        "ruleButton"
+      ]
+    },
+    {
+      "id": "route",
+      "componentKey": "Route",
+      "usage": [
+        "ruleButton"
+      ]
+    },
+    {
+      "id": "leaf",
+      "componentKey": "Leaf",
+      "usage": [
+        "ruleButton"
+      ]
+    },
+    {
+      "id": "home",
+      "componentKey": "Home",
+      "usage": [
+        "ruleButton"
+      ]
+    },
+    {
+      "id": "map",
+      "componentKey": "Map",
+      "usage": [
+        "ruleButton"
+      ]
+    },
+    {
+      "id": "zap",
+      "componentKey": "Zap",
+      "usage": [
+        "ruleButton"
+      ]
+    },
+    {
+      "id": "shoppingCart",
+      "componentKey": "ShoppingCart",
+      "usage": [
+        "ruleButton"
+      ]
+    },
+    {
+      "id": "building2",
+      "componentKey": "Building2",
+      "usage": [
+        "ruleButton"
+      ]
+    }
+  ]
+}

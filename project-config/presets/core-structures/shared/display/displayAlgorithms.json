@@ -1,0 +1,120 @@
+{
+  "schemaVersion": "cairnmap.display-algorithms.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "registry",
+  "items": [
+    {
+      "id": "largeGeometryStableAnchor",
+      "algorithmKey": "largeGeometryStableAnchor",
+      "label": "Large geometry stable anchor",
+      "allowedClasses": [
+        "ISG",
+        "BUD",
+        "STB",
+        "FLR",
+        "STF",
+        "PFB"
+      ],
+      "runtimeStatus": "registry",
+      "description": "Stable candidate anchor selection for large polygon/surface labels."
+    },
+    {
+      "id": "polygonCandidateAnchor",
+      "algorithmKey": "polygonCandidateAnchor",
+      "label": "Polygon candidate anchor",
+      "allowedClasses": [
+        "ISG",
+        "BUD",
+        "STB",
+        "FLR",
+        "STF",
+        "PFB"
+      ],
+      "runtimeStatus": "registry",
+      "description": "Polygon interior candidate scoring and viewport-aware anchor fallback."
+    },
+    {
+      "id": "structureLowZoomPointLabel",
+      "algorithmKey": "structureLowZoomPointLabel",
+      "label": "Structure low zoom point label",
+      "allowedClasses": [
+        "BUD",
+        "STB"
+      ],
+      "runtimeStatus": "registry",
+      "description": "Low zoom point+label representation for large structures."
+    },
+    {
+      "id": "lineLabelPathBinding",
+      "algorithmKey": "lineLabelPathBinding",
+      "label": "Line label path binding",
+      "allowedClasses": [
+        "RLE",
+        "ROD",
+        "ISL"
+      ],
+      "runtimeStatus": "registry",
+      "description": "Line label path/textPath/rotated label strategy binding."
+    },
+    {
+      "id": "chainageSearchLineLabel",
+      "algorithmKey": "chainageSearchLineLabel",
+      "label": "Chainage search line label",
+      "allowedClasses": [
+        "RLE",
+        "ROD",
+        "ISL"
+      ],
+      "runtimeStatus": "registry",
+      "description": "Viewport-aware chainage search for line label candidates."
+    },
+    {
+      "id": "railLineColorBinding",
+      "algorithmKey": "railLineColorBinding",
+      "label": "Rail line color binding",
+      "allowedClasses": [
+        "RLE",
+        "PFB"
+      ],
+      "runtimeStatus": "registry",
+      "description": "Rail line and platform outline color binding."
+    },
+    {
+      "id": "roadLineStyleBinding",
+      "algorithmKey": "roadLineStyleBinding",
+      "label": "Road line style binding",
+      "allowedClasses": [
+        "ROD"
+      ],
+      "runtimeStatus": "registry",
+      "description": "Road line style and hierarchy-based display binding."
+    },
+    {
+      "id": "stationPlatformVisibilityBinding",
+      "algorithmKey": "stationPlatformVisibilityBinding",
+      "label": "Station platform visibility binding",
+      "allowedClasses": [
+        "STA",
+        "PLF",
+        "PFB",
+        "STB"
+      ],
+      "runtimeStatus": "registry",
+      "description": "Station/platform/platform-outline visibility and interaction binding."
+    },
+    {
+      "id": "buildingFloorBinding",
+      "algorithmKey": "buildingFloorBinding",
+      "label": "Building floor binding",
+      "allowedClasses": [
+        "BUD",
+        "FLR",
+        "STB",
+        "STF",
+        "SBP"
+      ],
+      "runtimeStatus": "registry",
+      "description": "Building/floor and station-building/floor relation binding."
+    }
+  ]
+}

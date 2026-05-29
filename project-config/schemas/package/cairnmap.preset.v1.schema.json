@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cairnmap.local/schemas/cairnmap.preset.v1.schema.json",
+  "title": "CairnMap Preset Metadata",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": {
+      "const": "cairnmap.preset.v1"
+    },
+    "projectId": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "presetId": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "nativePreset": {
+      "type": "boolean"
+    },
+    "runtimeStatus": {
+      "enum": [
+        "active"
+      ]
+    },
+    "providedClasses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "providedSharedModules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "providedWorkflows": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "presetId",
+    "nativePreset",
+    "runtimeStatus"
+  ]
+}

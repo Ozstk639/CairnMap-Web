@@ -1,0 +1,606 @@
+{
+  "schemaVersion": "cairnmap.class.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "active",
+  "classCode": "ROD",
+  "classKey": "road",
+  "sourceFeatureKey": "道路",
+  "label": {
+    "zh-CN": "道路",
+    "en": "Road"
+  },
+  "description": "道路 class config-primary config. Runtime facade now resolves from preset Class config.",
+  "data": {
+    "typeField": "Type",
+    "classField": "Class",
+    "worldField": "World",
+    "defaultType": "Polyline",
+    "defaultClass": "ROD"
+  },
+  "geometry": {
+    "type": "LineString",
+    "sourceField": "Linepoints",
+    "axisOrder": "x,z,y",
+    "required": true
+  },
+  "identity": {
+    "idField": "ID",
+    "nameField": "Name",
+    "displayNameField": "Name"
+  },
+  "classification": {
+    "kindField": "Kind",
+    "skindField": "SKind",
+    "skind2Field": "SKind2",
+    "required": false,
+    "options": [
+      {
+        "kind": "NOM",
+        "skind": "",
+        "skind2": "",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "通用"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "TUK",
+        "skind": "",
+        "skind2": "",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "重要干线"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "PRI",
+        "skind": "",
+        "skind2": "",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "主干线"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "SEC",
+        "skind": "",
+        "skind2": "",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "次干线"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "SED",
+        "skind": "",
+        "skind2": "",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "支路"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        },
+        "notes": "CM_ROD_CLASSIFICATION_FIX_1: 支路由 SEC 改为 SED，避免与次干线 SEC:: 重复。"
+      },
+      {
+        "kind": "RES",
+        "skind": "",
+        "skind2": "",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "小区域道路"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "SVS",
+        "skind": "",
+        "skind2": "",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "匝道"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "IDR",
+        "skind": "",
+        "skind2": "",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "室内道路"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "SPE",
+        "skind": "",
+        "skind2": "",
+        "drawMode": "polyline",
+        "geom": "线",
+        "label": {
+          "zh-CN": "特殊"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      }
+    ]
+  },
+  "fields": [
+    {
+      "key": "ID",
+      "label": {
+        "zh-CN": "道路ID"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "ID",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "Name",
+      "label": {
+        "zh-CN": "道路名"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Name",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "Kind",
+      "label": {
+        "zh-CN": "类型(Kind)"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Kind",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "SKind",
+      "label": {
+        "zh-CN": "子类型(SKind)"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "SKind",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "SKind2",
+      "label": {
+        "zh-CN": "三级子类型(SKind2)"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "SKind2",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "Level",
+      "label": {
+        "zh-CN": "道路层级(Level)"
+      },
+      "type": "number",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Level",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "Oneway",
+      "label": {
+        "zh-CN": "是否单向(Oneway)"
+      },
+      "type": "bool",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Oneway",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "Enter",
+      "label": {
+        "zh-CN": "是否可进入(Enter)"
+      },
+      "type": "bool",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "Enter",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "Exit",
+      "label": {
+        "zh-CN": "是否可离开(Exit)"
+      },
+      "type": "bool",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "Exit",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "SelfJunction",
+      "label": {
+        "zh-CN": "是否允许自交(SelfJunction)"
+      },
+      "type": "bool",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "SelfJunction",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "Speed",
+      "label": {
+        "zh-CN": "道路速度(Speed)"
+      },
+      "type": "number",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "Speed",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "Situation",
+      "label": {
+        "zh-CN": "状态(Situation)"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "Situation",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    }
+  ],
+  "groups": [
+    {
+      "key": "ConnectL",
+      "label": {
+        "zh-CN": "显式连接关系(ConnectL)"
+      },
+      "type": "array",
+      "optional": true,
+      "minItems": 0,
+      "fields": [
+        {
+          "key": "mode",
+          "label": {
+            "zh-CN": "连接方式(mode)"
+          },
+          "type": "select",
+          "required": true,
+          "optional": false,
+          "options": [
+            {
+              "label": "端点(endpoint)",
+              "value": "endpoint"
+            },
+            {
+              "label": "中段(middle)",
+              "value": "middle"
+            }
+          ],
+          "sourceRuntimeField": "mode",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        },
+        {
+          "key": "tgt",
+          "label": {
+            "zh-CN": "目标道路ID(tgt)"
+          },
+          "type": "text",
+          "required": true,
+          "optional": false,
+          "sourceRuntimeField": "tgt",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        }
+      ]
+    },
+    {
+      "key": "Blacklist",
+      "label": {
+        "zh-CN": "黑名单(Blacklist)"
+      },
+      "type": "array",
+      "optional": true,
+      "minItems": 0,
+      "fields": [
+        {
+          "key": "tgt",
+          "label": {
+            "zh-CN": "目标道路ID(tgt)"
+          },
+          "type": "text",
+          "required": true,
+          "optional": false,
+          "sourceRuntimeField": "tgt",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        }
+      ]
+    },
+    {
+      "key": "Mode",
+      "label": {
+        "zh-CN": "允许出行方式(Mode)"
+      },
+      "type": "array",
+      "optional": true,
+      "minItems": 0,
+      "fields": [
+        {
+          "key": "code",
+          "label": {
+            "zh-CN": "出行方式编码(code)"
+          },
+          "type": "text",
+          "required": true,
+          "optional": false,
+          "sourceRuntimeField": "code",
+          "scenes": {
+            "workflow": true,
+            "editor": true,
+            "infocard": true,
+            "search": false
+          }
+        }
+      ]
+    }
+  ],
+  "tags": {
+    "enabled": true,
+    "allowOther": true,
+    "items": [
+      {
+        "key": "category",
+        "label": {
+          "zh-CN": "分类(category)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "level",
+        "label": {
+          "zh-CN": "等级(level)"
+        },
+        "type": "number"
+      },
+      {
+        "key": "status",
+        "label": {
+          "zh-CN": "状态(status)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "source",
+        "label": {
+          "zh-CN": "来源(source)"
+        },
+        "type": "text"
+      }
+    ]
+  },
+  "extensions": {
+    "enabled": true,
+    "allowOtherNamespaces": true,
+    "namespaces": []
+  },
+  "display": {
+    "runtimeStatus": "active",
+    "sourceRuntimeFile": "src/components/Rules/rendering/featureRenderRules.ts",
+    "rules": [
+      {
+        "id": "ROD-road-network-line",
+        "runtimeStatus": "active",
+        "match": {
+          "classCode": "ROD"
+        },
+        "profile": "networkLine",
+        "displayTier": "network",
+        "geometry": {
+          "render": "polyline"
+        },
+        "label": {
+          "enabled": true,
+          "source": "Name",
+          "styleKey": "gm-bw-dynamic"
+        },
+        "specialLogic": [
+          {
+            "key": "roadLineStyleBinding",
+            "mode": "optional"
+          },
+          {
+            "key": "roadZoomVisibility",
+            "mode": "optional"
+          },
+          {
+            "key": "lineLabelPathBinding",
+            "mode": "optional"
+          }
+        ],
+        "notes": "Config rule metadata. Rendering behavior is executed by featureRenderRules.ts.",
+        "algorithms": [
+          {
+            "key": "roadLineStyleBinding",
+            "mode": "registry"
+          },
+          {
+            "key": "lineLabelPathBinding",
+            "mode": "registry"
+          },
+          {
+            "key": "chainageSearchLineLabel",
+            "mode": "registry"
+          }
+        ]
+      }
+    ]
+  },
+  "card": {
+    "runtimeStatus": "active",
+    "layoutId": "generic-line-card",
+    "sections": [
+      {
+        "id": "main",
+        "title": "主要信息",
+        "slot": "mainRows"
+      },
+      {
+        "id": "other",
+        "title": "其他信息",
+        "slot": "otherRows",
+        "collapsedByDefault": true
+      }
+    ],
+    "fields": [],
+    "relations": [],
+    "enhancements": []
+  },
+  "workflowBindings": [
+    {
+      "workflowId": "road-workflow",
+      "default": true,
+      "runtimeStatus": "active",
+      "runtimeMode": "configPrimary"
+    }
+  ]
+}

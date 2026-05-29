@@ -1,0 +1,285 @@
+{
+  "schemaVersion": "cairnmap.card-layouts.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "id": "standard-feature-card",
+      "label": "标准要素信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    },
+    {
+      "id": "generic-point-card",
+      "label": "通用点要素信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    },
+    {
+      "id": "generic-line-card",
+      "label": "通用线要素信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    },
+    {
+      "id": "generic-polygon-card",
+      "label": "通用面要素信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    },
+    {
+      "id": "building-card",
+      "label": "建筑信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    },
+    {
+      "id": "floor-unit-card",
+      "label": "楼层/单元信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "registryField",
+          "path": "BuildingID",
+          "transform": "featureLink",
+          "linkTarget": {
+            "classCode": "BUD",
+            "matchField": "ID",
+            "displayField": "Name",
+            "fallbackDisplay": "raw"
+          }
+        },
+        {
+          "kind": "registryField",
+          "path": "tags.Land",
+          "transform": "featureLink",
+          "linkTarget": {
+            "classCode": "ISG",
+            "kind": "NGF",
+            "matchField": "ID",
+            "displayField": "Name",
+            "fallbackDisplay": "raw"
+          }
+        },
+        {
+          "kind": "registryField",
+          "path": "tags.Adm",
+          "transform": "featureLink",
+          "linkTarget": {
+            "classCode": "ISG",
+            "kind": "ADM",
+            "matchField": "ID",
+            "displayField": "Name",
+            "fallbackDisplay": "raw"
+          }
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    },
+    {
+      "id": "teleport-point-card",
+      "label": "传送点信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "registryField",
+          "path": "TGTWarp",
+          "transform": "featureLink",
+          "linkTarget": {
+            "classCode": "WRP",
+            "matchField": "WRPointI2D",
+            "displayField": "Name",
+            "fallbackDisplay": "raw"
+          }
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    },
+    {
+      "id": "warp-point-card",
+      "label": "Warp点信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    },
+    {
+      "id": "trade-point-card",
+      "label": "交易点信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "enhancement",
+          "key": "tradePointCard"
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    },
+    {
+      "id": "rail-platform-card",
+      "label": "站台信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "enhancement",
+          "key": "platformLineChips"
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    },
+    {
+      "id": "rail-station-card",
+      "label": "车站信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "registryField",
+          "path": "STBuilding",
+          "transform": "featureLink",
+          "linkTarget": {
+            "classCode": "STB",
+            "matchField": "ID",
+            "displayField": "Name",
+            "fallbackDisplay": "raw"
+          }
+        },
+        {
+          "kind": "enhancement",
+          "key": "stationLineChips"
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    },
+    {
+      "id": "rail-station-building-card",
+      "label": "车站建筑信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "enhancement",
+          "key": "stationBuildingLineChips"
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    },
+    {
+      "id": "rail-line-card",
+      "label": "铁路线路信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "enhancement",
+          "key": "railColorChip"
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    },
+    {
+      "id": "station-floor-card",
+      "label": "车站楼层信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "registryField",
+          "path": "staBuildingID",
+          "transform": "featureLink",
+          "linkTarget": {
+            "classCode": "STB",
+            "matchField": "ID",
+            "displayField": "Name",
+            "fallbackDisplay": "raw"
+          }
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    },
+    {
+      "id": "platform-footprint-card",
+      "label": "站台轮廓信息卡",
+      "items": [
+        {
+          "kind": "classification"
+        },
+        {
+          "kind": "registryField",
+          "path": "LineID",
+          "transform": "featureLink",
+          "linkTarget": {
+            "classCode": "RLE",
+            "matchField": "ID",
+            "displayField": "Name",
+            "fallbackDisplay": "raw"
+          }
+        },
+        {
+          "kind": "registryDefaultGroup"
+        }
+      ]
+    }
+  ]
+}

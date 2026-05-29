@@ -1,0 +1,207 @@
+{
+  "schemaVersion": "cairnmap.rule-buttons.v1",
+  "projectId": "openriamap-ria",
+  "storageKey": "cairnmap_rule_button_state_v1",
+  "legacyStorageKeys": [
+    "ria_rule_button_state_v1"
+  ],
+  "policy": {
+    "maxActive": 0
+  },
+  "defaults": {
+    "fallback": [
+      "railway_new",
+      "road",
+      "natural_geo",
+      "settlement",
+      "planning",
+      "teleport_point",
+      "trade_point",
+      "building"
+    ],
+    "byWorld": {}
+  },
+  "items": [
+    {
+      "id": "railway_new",
+      "label": "铁路-新",
+      "tone": "blue",
+      "iconKey": "train",
+      "defaultEnabled": true,
+      "criteria": {
+        "classCode": [
+          "RLE",
+          "STA",
+          "STB",
+          "PLF",
+          "PFB",
+          "SBP",
+          "STF"
+        ]
+      },
+      "behavior": {
+        "exclusiveWith": [],
+        "exclusiveGroup": null,
+        "linkedButtons": [],
+        "disableWhenEnabled": [],
+        "enableWhenEnabled": [],
+        "persistState": true
+      }
+    },
+    {
+      "id": "road",
+      "label": "道路",
+      "tone": "orange",
+      "iconKey": "route",
+      "defaultEnabled": true,
+      "criteria": {
+        "classCode": [
+          "ROD"
+        ]
+      },
+      "behavior": {
+        "exclusiveWith": [],
+        "exclusiveGroup": null,
+        "linkedButtons": [],
+        "disableWhenEnabled": [],
+        "enableWhenEnabled": [],
+        "persistState": true
+      }
+    },
+    {
+      "id": "natural_geo",
+      "label": "自然地理",
+      "tone": "green",
+      "iconKey": "leaf",
+      "defaultEnabled": true,
+      "criteria": {
+        "classCode": [
+          "ISG",
+          "ISL"
+        ],
+        "kind": [
+          "NGF"
+        ]
+      },
+      "behavior": {
+        "exclusiveWith": [],
+        "exclusiveGroup": null,
+        "linkedButtons": [],
+        "disableWhenEnabled": [],
+        "enableWhenEnabled": [],
+        "persistState": true
+      }
+    },
+    {
+      "id": "settlement",
+      "label": "聚落",
+      "tone": "cyan",
+      "iconKey": "home",
+      "defaultEnabled": true,
+      "criteria": {
+        "kind": [
+          "ADM"
+        ],
+        "skind": [
+          "DBZ",
+          "DBP"
+        ]
+      },
+      "behavior": {
+        "exclusiveWith": [],
+        "exclusiveGroup": null,
+        "linkedButtons": [],
+        "disableWhenEnabled": [],
+        "enableWhenEnabled": [],
+        "persistState": true
+      }
+    },
+    {
+      "id": "planning",
+      "label": "规划",
+      "tone": "slate",
+      "iconKey": "map",
+      "defaultEnabled": true,
+      "criteria": {
+        "kind": [
+          "ADM"
+        ],
+        "skind": [
+          "PLP"
+        ]
+      },
+      "behavior": {
+        "exclusiveWith": [],
+        "exclusiveGroup": null,
+        "linkedButtons": [],
+        "disableWhenEnabled": [],
+        "enableWhenEnabled": [],
+        "persistState": true
+      }
+    },
+    {
+      "id": "teleport_point",
+      "label": "传送点",
+      "tone": "cyan",
+      "iconKey": "zap",
+      "defaultEnabled": true,
+      "criteria": {
+        "classCode": [
+          "TPP",
+          "WRP"
+        ]
+      },
+      "behavior": {
+        "exclusiveWith": [],
+        "exclusiveGroup": null,
+        "linkedButtons": [],
+        "disableWhenEnabled": [],
+        "enableWhenEnabled": [],
+        "persistState": true
+      }
+    },
+    {
+      "id": "trade_point",
+      "label": "交易点",
+      "tone": "green",
+      "iconKey": "shoppingCart",
+      "defaultEnabled": true,
+      "criteria": {
+        "classCode": [
+          "TRP"
+        ]
+      },
+      "behavior": {
+        "exclusiveWith": [],
+        "exclusiveGroup": null,
+        "linkedButtons": [],
+        "disableWhenEnabled": [],
+        "enableWhenEnabled": [],
+        "persistState": true
+      }
+    },
+    {
+      "id": "building",
+      "label": "建筑",
+      "tone": "purple",
+      "iconKey": "building2",
+      "defaultEnabled": true,
+      "criteria": {
+        "classCode": [
+          "BUD",
+          "FLR",
+          "STB",
+          "STF"
+        ]
+      },
+      "behavior": {
+        "exclusiveWith": [],
+        "exclusiveGroup": null,
+        "linkedButtons": [],
+        "disableWhenEnabled": [],
+        "enableWhenEnabled": [],
+        "persistState": true
+      }
+    }
+  ]
+}

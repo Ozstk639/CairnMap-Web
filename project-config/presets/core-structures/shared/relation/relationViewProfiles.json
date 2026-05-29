@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "cairnmap.relation-view-profiles.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "id": "floor-parent-to-floor-surfaces",
+      "actionKey": "floorViewBinding",
+      "role": "parentSurface",
+      "sourceClassScope": [
+        "BUD",
+        "STB"
+      ],
+      "targetClassScope": [
+        "FLR",
+        "STF"
+      ],
+      "sourceField": "ID",
+      "targetFieldCandidates": [
+        "BuildingID",
+        "staBuildingID"
+      ],
+      "returnField": "ID",
+      "displayField": "Name",
+      "enableJump": true,
+      "description": "Parent building/station-building surface lists matching floor surfaces."
+    },
+    {
+      "id": "floor-surface-to-parent-surfaces",
+      "actionKey": "floorViewBinding",
+      "role": "floorSurface",
+      "sourceClassScope": [
+        "FLR",
+        "STF"
+      ],
+      "targetClassScope": [
+        "BUD",
+        "STB"
+      ],
+      "sourceFieldCandidates": [
+        "BuildingID",
+        "staBuildingID"
+      ],
+      "targetField": "ID",
+      "returnField": "ID",
+      "displayField": "Name",
+      "enableJump": true,
+      "description": "Floor surface can resolve and jump upward to multiple parent surface classes."
+    },
+    {
+      "id": "generic-class-relation-jump",
+      "actionKey": "genericRelationJump",
+      "role": "generic",
+      "targetClassScope": [
+        "ISP",
+        "ISL",
+        "ISG",
+        "ROD",
+        "TPP",
+        "WRP",
+        "TRP",
+        "BUD",
+        "FLR",
+        "STA",
+        "PLF",
+        "RLE",
+        "STB",
+        "SBP",
+        "STF",
+        "PFB"
+      ],
+      "searchFields": [
+        "ID",
+        "Name"
+      ],
+      "returnField": "ID",
+      "displayField": "Name",
+      "enableJump": true,
+      "description": "Generic card/workflow relation jump/search profile."
+    }
+  ]
+}

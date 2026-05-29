@@ -1,0 +1,111 @@
+{
+  "schemaVersion": "cairnmap.schema-runtime-contracts.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "active",
+  "items": [
+    {
+      "classCode": "STA",
+      "schemaMode": "schemaMetadata",
+      "formatMode": "specialFormatterConfigPrimary",
+      "sourceFeatureKey": "车站",
+      "notes": "Schema is config-primary; special formatter registry handles complex transform execution."
+    },
+    {
+      "classCode": "PLF",
+      "schemaMode": "schemaMetadata",
+      "formatMode": "specialFormatterConfigPrimary",
+      "sourceFeatureKey": "站台",
+      "notes": "Schema is config-primary; special formatter registry handles complex transform execution."
+    },
+    {
+      "classCode": "RLE",
+      "schemaMode": "schemaMetadata",
+      "formatMode": "specialFormatterConfigPrimary",
+      "sourceFeatureKey": "铁路",
+      "notes": "Schema is config-primary; special formatter registry handles complex transform execution."
+    },
+    {
+      "classCode": "PFB",
+      "schemaMode": "schemaMetadata",
+      "formatMode": "specialFormatterConfigPrimary",
+      "sourceFeatureKey": "站台轮廓",
+      "notes": "Schema is config-primary; special formatter registry handles complex transform execution."
+    },
+    {
+      "classCode": "STB",
+      "schemaMode": "schemaMetadata",
+      "formatMode": "specialFormatterConfigPrimary",
+      "sourceFeatureKey": "车站建筑",
+      "notes": "Schema is config-primary; special formatter registry handles complex transform execution."
+    },
+    {
+      "classCode": "SBP",
+      "schemaMode": "schemaMetadata",
+      "formatMode": "specialFormatterConfigPrimary",
+      "sourceFeatureKey": "车站建筑点",
+      "notes": "Schema is config-primary; special formatter registry handles complex transform execution."
+    },
+    {
+      "classCode": "STF",
+      "schemaMode": "schemaMetadata",
+      "formatMode": "specialFormatterConfigPrimary",
+      "sourceFeatureKey": "车站建筑楼层",
+      "notes": "Schema is config-primary; special formatter registry handles complex transform execution."
+    },
+    {
+      "classCode": "ROD",
+      "schemaMode": "schemaPrimary",
+      "formatMode": "genericConfigPrimary",
+      "sourceFeatureKey": "道路"
+    },
+    {
+      "classCode": "TPP",
+      "schemaMode": "schemaPrimary",
+      "formatMode": "genericConfigPrimary",
+      "sourceFeatureKey": "传送点"
+    },
+    {
+      "classCode": "WRP",
+      "schemaMode": "schemaPrimary",
+      "formatMode": "genericConfigPrimary",
+      "sourceFeatureKey": "Warp点"
+    },
+    {
+      "classCode": "TRP",
+      "schemaMode": "schemaMetadata",
+      "formatMode": "specialFormatterConfigPrimary",
+      "sourceFeatureKey": "交易点",
+      "notes": "Schema is config-primary; special formatter registry handles complex transform execution."
+    },
+    {
+      "classCode": "ISP",
+      "schemaMode": "schemaPrimary",
+      "formatMode": "genericConfigPrimary",
+      "sourceFeatureKey": "地物点"
+    },
+    {
+      "classCode": "ISL",
+      "schemaMode": "schemaPrimary",
+      "formatMode": "genericConfigPrimary",
+      "sourceFeatureKey": "地物线"
+    },
+    {
+      "classCode": "ISG",
+      "schemaMode": "schemaPrimary",
+      "formatMode": "genericConfigPrimary",
+      "sourceFeatureKey": "地物面"
+    },
+    {
+      "classCode": "BUD",
+      "schemaMode": "schemaPrimary",
+      "formatMode": "genericConfigPrimary",
+      "sourceFeatureKey": "建筑"
+    },
+    {
+      "classCode": "FLR",
+      "schemaMode": "schemaPrimary",
+      "formatMode": "genericConfigPrimary",
+      "sourceFeatureKey": "建筑楼层"
+    }
+  ]
+}

@@ -1,0 +1,339 @@
+{
+  "schemaVersion": "cairnmap.special-display-logic.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "id": "teleportPointBinding",
+      "logicKey": "teleportPointBinding",
+      "label": "传送点显示绑定",
+      "category": "teleport",
+      "allowedClasses": [
+        "TPP"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved binding for teleport-point display and navigation-related metadata."
+    },
+    {
+      "id": "warpPointBinding",
+      "logicKey": "warpPointBinding",
+      "label": "Warp点显示绑定",
+      "category": "teleport",
+      "allowedClasses": [
+        "WRP"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved binding for Warp-point display and navigation-related metadata."
+    },
+    {
+      "id": "tradePointCardBinding",
+      "logicKey": "tradePointCardBinding",
+      "label": "交易点卡片增强绑定",
+      "category": "trade",
+      "allowedClasses": [
+        "TRP"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved binding for trade-point display/card enhancement handoff."
+    },
+    {
+      "id": "buildingFloorBinding",
+      "logicKey": "buildingFloorBinding",
+      "label": "建筑-楼层绑定",
+      "category": "building",
+      "allowedClasses": [
+        "BUD",
+        "FLR",
+        "STB",
+        "STF"
+      ],
+      "runtimeStatus": "active",
+      "description": "Bind building polygons and floor polygons for future display and interaction logic.",
+      "paramsSchema": {
+        "role": "parentSurface | floorSurface | bidirectional",
+        "sourceField": "string",
+        "targetField": "string",
+        "targetClassScope": "string[]",
+        "displayField": "string",
+        "returnField": "string",
+        "enableJump": "boolean"
+      }
+    },
+    {
+      "id": "buildingStructureBinding",
+      "logicKey": "buildingStructureBinding",
+      "label": "建筑结构绑定",
+      "category": "building",
+      "allowedClasses": [
+        "BUD",
+        "FLR",
+        "STB",
+        "STF"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved high-level structure binding for building-related feature classes.",
+      "paramsSchema": {
+        "role": "parentSurface | floorSurface | bidirectional",
+        "sourceField": "string",
+        "targetField": "string",
+        "targetClassScope": "string[]",
+        "displayField": "string",
+        "returnField": "string",
+        "enableJump": "boolean"
+      }
+    },
+    {
+      "id": "floorViewBinding",
+      "logicKey": "floorViewBinding",
+      "label": "通用楼层视图绑定",
+      "category": "building",
+      "allowedClasses": [
+        "BUD",
+        "FLR",
+        "STB",
+        "STF"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reusable floor-view binding for BUD/STB parent surfaces and FLR/STF floor surfaces.",
+      "paramsSchema": {
+        "role": "parentSurface | floorSurface | bidirectional",
+        "sourceField": "string",
+        "targetField": "string",
+        "targetClassScope": "string[]",
+        "displayField": "string",
+        "returnField": "string",
+        "enableJump": "boolean"
+      }
+    },
+    {
+      "id": "stationPlatformVisibilityBinding",
+      "logicKey": "stationPlatformVisibilityBinding",
+      "label": "车站-站台可见性绑定",
+      "category": "rail",
+      "allowedClasses": [
+        "STA",
+        "PLF",
+        "PFB"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved station-platform relation binding for display visibility and interaction.",
+      "paramsSchema": {
+        "role": "source | target | bidirectional",
+        "sourceField": "string",
+        "targetField": "string",
+        "targetClassScope": "string[]",
+        "displayField": "string",
+        "returnField": "string",
+        "enableJump": "boolean"
+      }
+    },
+    {
+      "id": "stationBuildingBinding",
+      "logicKey": "stationBuildingBinding",
+      "label": "车站-站房绑定",
+      "category": "rail",
+      "allowedClasses": [
+        "STA",
+        "STB",
+        "SBP",
+        "STF"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved station-building relation binding for station structure display.",
+      "paramsSchema": {
+        "role": "source | target | bidirectional",
+        "sourceField": "string",
+        "targetField": "string",
+        "targetClassScope": "string[]",
+        "displayField": "string",
+        "returnField": "string",
+        "enableJump": "boolean"
+      }
+    },
+    {
+      "id": "stationBuildingPointFallback",
+      "logicKey": "stationBuildingPointFallback",
+      "label": "车站建筑点 fallback",
+      "category": "rail",
+      "allowedClasses": [
+        "SBP",
+        "STB"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved fallback behavior for station-building point features when polygon features exist."
+    },
+    {
+      "id": "stationPointColorBinding",
+      "logicKey": "stationPointColorBinding",
+      "label": "车站点颜色绑定",
+      "category": "rail",
+      "allowedClasses": [
+        "STA"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved station point color/style binding."
+    },
+    {
+      "id": "platformLineColorBinding",
+      "logicKey": "platformLineColorBinding",
+      "label": "站台线路颜色绑定",
+      "category": "rail",
+      "allowedClasses": [
+        "PLF",
+        "RLE"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved platform-line color binding."
+    },
+    {
+      "id": "platformConnectVisibility",
+      "logicKey": "platformConnectVisibility",
+      "label": "站台连通性可见性绑定",
+      "category": "rail",
+      "allowedClasses": [
+        "PLF"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved platform connection visibility binding."
+    },
+    {
+      "id": "stationPlatformOutlineColorBinding",
+      "logicKey": "stationPlatformOutlineColorBinding",
+      "label": "站台轮廓颜色绑定",
+      "category": "rail",
+      "allowedClasses": [
+        "PFB",
+        "PLF",
+        "RLE"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved platform-outline color/style binding."
+    },
+    {
+      "id": "stationFloorViewBinding",
+      "logicKey": "stationFloorViewBinding",
+      "label": "车站楼层视图绑定",
+      "category": "rail",
+      "allowedClasses": [
+        "STF",
+        "STB"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved station-floor view binding."
+    },
+    {
+      "id": "railLineColorBinding",
+      "logicKey": "railLineColorBinding",
+      "label": "铁路线路颜色绑定",
+      "category": "rail",
+      "allowedClasses": [
+        "RLE",
+        "PLF"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved rail-line color binding."
+    },
+    {
+      "id": "railDirectionVisibility",
+      "logicKey": "railDirectionVisibility",
+      "label": "铁路方向显示绑定",
+      "category": "rail",
+      "allowedClasses": [
+        "RLE"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved rail direction visibility binding."
+    },
+    {
+      "id": "lineLabelPathBinding",
+      "logicKey": "lineLabelPathBinding",
+      "label": "线要素沿线标签绑定",
+      "category": "line",
+      "allowedClasses": [
+        "RLE",
+        "ROD",
+        "ISL"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved path-label binding for line features."
+    },
+    {
+      "id": "roadLineStyleBinding",
+      "logicKey": "roadLineStyleBinding",
+      "label": "道路线样式绑定",
+      "category": "road",
+      "allowedClasses": [
+        "ROD"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved road-line style binding."
+    },
+    {
+      "id": "roadZoomVisibility",
+      "logicKey": "roadZoomVisibility",
+      "label": "道路缩放可见性绑定",
+      "category": "road",
+      "allowedClasses": [
+        "ROD"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved road zoom visibility binding."
+    },
+    {
+      "id": "largeGeometryStableAnchor",
+      "logicKey": "largeGeometryStableAnchor",
+      "label": "大几何稳定锚点",
+      "category": "label",
+      "allowedClasses": [
+        "ISG",
+        "BUD",
+        "STB"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved stable anchor logic for large polygon labels."
+    },
+    {
+      "id": "geoClassificationStyleBinding",
+      "logicKey": "geoClassificationStyleBinding",
+      "label": "地物面分类样式绑定",
+      "category": "geo",
+      "allowedClasses": [
+        "ISG"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved style binding for geographic surface classification."
+    },
+    {
+      "id": "lineClassificationStyleBinding",
+      "logicKey": "lineClassificationStyleBinding",
+      "label": "地物线分类样式绑定",
+      "category": "geo",
+      "allowedClasses": [
+        "ISL"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved style binding for geographic line classification."
+    },
+    {
+      "id": "genericPointIconBinding",
+      "logicKey": "genericPointIconBinding",
+      "label": "通用点图标绑定",
+      "category": "poi",
+      "allowedClasses": [
+        "ISP"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved generic point icon binding."
+    },
+    {
+      "id": "hideIfSameIdExistsInClasses",
+      "logicKey": "hideIfSameIdExistsInClasses",
+      "label": "同ID要素存在时隐藏",
+      "category": "fallback",
+      "allowedClasses": [
+        "SBP"
+      ],
+      "runtimeStatus": "active",
+      "description": "Reserved duplicate-ID fallback visibility behavior."
+    }
+  ]
+}

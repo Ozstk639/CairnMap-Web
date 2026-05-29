@@ -102,6 +102,7 @@ import WorkflowHost, {
   type WorkflowRegistry,
   type WorldPoint,
 } from '@/components/Mapping/Workflow/WorkflowHost';
+import { getConfigDrivenWorkflowRegistry, getConfigDrivenWorkflowSelectOptions, describeWorkflowRuntimeSelection } from '@/components/Mapping/Workflow/workflowConfigRuntimeBridge';
 import RailwayWorkflow from '@/components/Mapping/Workflow/RailwayWorkflow';
 import StationWorkflow from '@/components/Mapping/Workflow/StationWorkflow';
 import NaturalLandWorkflow from '@/components/Mapping/Workflow/NaturalLandWorkflow';
@@ -3663,7 +3664,7 @@ const handleDrawModeButtonClick = (m: 'point' | 'polyline' | 'polygon') => {
 // =========================
 // Workflow（快捷模式）桥接层
 // =========================
-const workflowRegistry: WorkflowRegistry = {
+const legacyWorkflowRegistry: WorkflowRegistry = {
   railway: RailwayWorkflow,
   station: StationWorkflow,
   tpp_point: TeleportPointWorkflow,
@@ -3684,7 +3685,7 @@ const workflowRegistry: WorkflowRegistry = {
 };
 
 
-const WORKFLOW_SELECT_OPTIONS: Array<{ key: WorkflowKey; label: string; hidden?: boolean }> = [
+const LEGACY_WORKFLOW_SELECT_OPTIONS: Array<{ key: WorkflowKey; label: string; hidden?: boolean }> = [
   { key: 'railway', label: '铁路' },
   { key: 'station', label: '车站和站台' },
   { key: 'rod_road', label: '道路' },
@@ -3705,6 +3706,10 @@ const WORKFLOW_SELECT_OPTIONS: Array<{ key: WorkflowKey; label: string; hidden?:
 
 ];
 
+const workflowRegistry: WorkflowRegistry = getConfigDrivenWorkflowRegistry(legacyWorkflowRegistry);
+const WORKFLOW_SELECT_OPTIONS: Array<{ key: WorkflowKey; label: string; hidden?: boolean }> =
+  getConfigDrivenWorkflowSelectOptions(LEGACY_WORKFLOW_SELECT_OPTIONS);
+
 
 const stopWorkflowToSelector = () => {
   // 回到“工作流初始选择页面”（不退出测绘）
@@ -3724,6 +3729,12 @@ const stopWorkflowToSelector = () => {
 const startWorkflow = () => {
   if (guardTempMountReadonly()) return;
   if (workflowRunning) return;
+
+  try {
+    void describeWorkflowRuntimeSelection(workflowKey);
+  } catch {
+    // config-driven workflow diagnostics should never block legacy workflow startup
+  }
 
   // 快捷模式下：开始工作流前重置草稿/临时输出（保持 fixed 不动）
   workflowRootRef.current?.clearLayers();

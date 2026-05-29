@@ -1,3 +1,6 @@
+// CairnMap FINAL CLEANUP: workflow editor adapter only. Active workflow definitions live in preset workflow JSON and component executor contracts.
+// CairnMap LEGACY CLEANUP: workflow component executor/compatibility only.
+// New workflow registrations belong in presets/shared/workflow and workflowLegacyExecutors.json.
 export type {
   ClassificationEditScope,
   ClassificationSceneUsage,

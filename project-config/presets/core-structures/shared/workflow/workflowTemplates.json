@@ -1,0 +1,99 @@
+{
+  "schemaVersion": "cairnmap.workflow-templates.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "id": "basic-point-3step",
+      "label": "基础点要素三步式工作流",
+      "targetGeometry": "Point",
+      "steps": [
+        {
+          "id": "basic",
+          "title": "基础信息",
+          "slot": "basicFields"
+        },
+        {
+          "id": "location",
+          "title": "位置",
+          "slot": "geometryFields"
+        },
+        {
+          "id": "review",
+          "title": "检查与提交",
+          "slot": "review"
+        }
+      ]
+    },
+    {
+      "id": "basic-line-3step",
+      "label": "基础线要素三步式工作流",
+      "targetGeometry": "LineString",
+      "steps": [
+        {
+          "id": "basic",
+          "title": "基础信息",
+          "slot": "basicFields"
+        },
+        {
+          "id": "geometry",
+          "title": "绘制路径",
+          "slot": "geometryFields"
+        },
+        {
+          "id": "review",
+          "title": "检查与提交",
+          "slot": "review"
+        }
+      ]
+    },
+    {
+      "id": "basic-polygon-4step",
+      "label": "基础面要素四步式工作流",
+      "targetGeometry": "Polygon",
+      "steps": [
+        {
+          "id": "basic",
+          "title": "基础信息",
+          "slot": "basicFields"
+        },
+        {
+          "id": "classification",
+          "title": "分类",
+          "slot": "classificationFields"
+        },
+        {
+          "id": "geometry",
+          "title": "绘制范围",
+          "slot": "geometryFields"
+        },
+        {
+          "id": "review",
+          "title": "检查与提交",
+          "slot": "review"
+        }
+      ]
+    },
+    {
+      "id": "special-component-workflow",
+      "label": "特殊组件工作流",
+      "targetGeometry": "Any",
+      "steps": [
+        {
+          "id": "basic",
+          "title": "基础信息",
+          "slot": "basicFields"
+        },
+        {
+          "id": "special",
+          "title": "特殊配置",
+          "slot": "specialSteps"
+        },
+        {
+          "id": "review",
+          "title": "检查与提交",
+          "slot": "review"
+        }
+      ]
+    }
+  ]
+}

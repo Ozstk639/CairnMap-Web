@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "cairnmap.workflow.v1",
+  "projectId": "openriamap-ria",
+  "id": "generic-line-workflow",
+  "label": "Generic line workflow",
+  "runtimeStatus": "active",
+  "targetClass": "ISL",
+  "targetGeometry": "LineString",
+  "runtimeMode": "componentExecutor",
+  "componentKey": "settlementBoundaryLineWorkflow",
+  "legacyWorkflowKey": "地物线",
+  "blockRunnerReady": false,
+  "futureBlockTemplateRef": "basic-line-3step",
+  "executorDispatch": "configComponentKey",
+  "legacyFallback": true,
+  "notes": "Current runtime dispatches this workflow to a registered TS component executor. Fine-grained block/page assembly is intentionally not stored in the active workflow JSON."
+}

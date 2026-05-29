@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "cairnmap.project-package.v1",
+  "projectId": "openriamap-ria",
+  "label": "OpenRIAMap RIA",
+  "runtimeStatus": "active",
+  "presets": [
+    "core-structures",
+    "building",
+    "rail",
+    "road",
+    "teleport",
+    "warp",
+    "trade"
+  ],
+  "overrides": {
+    "classes": [],
+    "shared": [],
+    "workflows": []
+  },
+  "notes": "OpenRIAMap RIA now assembles native CairnMap presets and reserves this package for environment config and project-level overrides."
+}

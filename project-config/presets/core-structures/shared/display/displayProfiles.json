@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "cairnmap.display-profiles.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "id": "largeGeoSurface",
+      "label": "Large geographic surface",
+      "displayTier": "geoStructure",
+      "runtimeStatus": "active",
+      "sourceRuntimeProfile": "largeGeoSurface",
+      "notes": "Runtime is still provided by displayProfiles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "networkLine",
+      "label": "Network line",
+      "displayTier": "network",
+      "runtimeStatus": "active",
+      "sourceRuntimeProfile": "networkLine",
+      "notes": "Runtime is still provided by displayProfiles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "buildingStructure",
+      "label": "Building structure",
+      "displayTier": "structure",
+      "runtimeStatus": "active",
+      "sourceRuntimeProfile": "buildingStructure",
+      "notes": "Runtime is still provided by displayProfiles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "stationStructure",
+      "label": "Station structure",
+      "displayTier": "structure",
+      "runtimeStatus": "active",
+      "sourceRuntimeProfile": "stationStructure",
+      "notes": "Runtime is still provided by displayProfiles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "transportNode",
+      "label": "Transport node",
+      "displayTier": "node",
+      "runtimeStatus": "active",
+      "sourceRuntimeProfile": "transportNode",
+      "notes": "Runtime is still provided by displayProfiles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "poiPoint",
+      "label": "POI point",
+      "displayTier": "poi",
+      "runtimeStatus": "active",
+      "sourceRuntimeProfile": "poiPoint",
+      "notes": "Runtime is still provided by displayProfiles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "indoorUnit",
+      "label": "Indoor unit",
+      "displayTier": "indoor",
+      "runtimeStatus": "active",
+      "sourceRuntimeProfile": "indoorUnit",
+      "notes": "Runtime is still provided by displayProfiles.ts in CM_SHARED_1."
+    },
+    {
+      "id": "geometryOnlyFallback",
+      "label": "Geometry-only fallback",
+      "displayTier": "fallback",
+      "runtimeStatus": "active",
+      "sourceRuntimeProfile": "geometryOnlyFallback",
+      "notes": "Runtime is still provided by displayProfiles.ts in CM_SHARED_1."
+    }
+  ]
+}

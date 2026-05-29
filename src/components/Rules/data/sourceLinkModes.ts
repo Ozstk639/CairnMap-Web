@@ -1,3 +1,5 @@
+import { getOpenRIAMapSourceLinkModesConfig } from '../../../core/project/openriamapRiaEnvironment';
+
 /**
  * Rules 数据源链接模式注册表。
  *
@@ -13,23 +15,20 @@ export type SourceLinkModeDef = {
   isDefault?: boolean;
 };
 
-export const SOURCE_LINK_MODE_STORAGE_KEY = 'ria_source_link_mode_v1';
+const sourceLinkModesConfig = getOpenRIAMapSourceLinkModesConfig();
+
+export const SOURCE_LINK_MODE_STORAGE_KEY = sourceLinkModesConfig.storageKey;
+
+export const SOURCE_LINK_MODE_LEGACY_STORAGE_KEYS = sourceLinkModesConfig.legacyStorageKeys ?? [];
 
 export const RAW_GITHUB_BASE_URL = 'https://raw.githubusercontent.com';
 
-export const SOURCE_LINK_MODE_DEFS: SourceLinkModeDef[] = [
-  {
-    id: 'cdn639',
-    label: 'CDN加速(639)',
-    rawCompatibleBaseUrl: 'https://data.ozk639.top',
-    isDefault: true,
-  },
-  {
-    id: 'github_raw',
-    label: 'Github Raw',
-    rawCompatibleBaseUrl: RAW_GITHUB_BASE_URL,
-  },
-];
+export const SOURCE_LINK_MODE_DEFS: SourceLinkModeDef[] = sourceLinkModesConfig.items.map((item) => ({
+  id: item.id,
+  label: item.label,
+  rawCompatibleBaseUrl: item.rawCompatibleBaseUrl,
+  isDefault: item.default,
+}));
 
 function trimSlash(value: string): string {
   return String(value ?? '').trim().replace(/\/+$/, '');
@@ -37,6 +36,26 @@ function trimSlash(value: string): string {
 
 function getDefaultSourceLinkMode(): SourceLinkModeDef {
   return SOURCE_LINK_MODE_DEFS.find((item) => item.isDefault) ?? SOURCE_LINK_MODE_DEFS[0];
+}
+
+function readStoredSourceLinkModeId(): string {
+  try {
+    const current = localStorage.getItem(SOURCE_LINK_MODE_STORAGE_KEY) ?? '';
+    if (current) return current;
+    for (const key of SOURCE_LINK_MODE_LEGACY_STORAGE_KEYS) {
+      const legacy = localStorage.getItem(key) ?? '';
+      if (legacy) return legacy;
+    }
+  } catch {
+    return '';
+  }
+  return '';
+}
+
+function writeStoredSourceLinkModeId(modeId: string): void {
+  try {
+    localStorage.setItem(SOURCE_LINK_MODE_STORAGE_KEY, modeId);
+  } catch {}
 }
 
 export function getSourceLinkModeDefs(): SourceLinkModeDef[] {
@@ -54,20 +73,15 @@ export function findSourceLinkMode(modeId: string | null | undefined): SourceLin
 }
 
 export function getCurrentSourceLinkMode(): SourceLinkModeDef {
-  let stored = '';
-  try {
-    stored = localStorage.getItem(SOURCE_LINK_MODE_STORAGE_KEY) ?? '';
-  } catch {
-    stored = '';
+  const stored = readStoredSourceLinkModeId();
+  const found = findSourceLinkMode(stored);
+  if (found) {
+    writeStoredSourceLinkModeId(found.id);
+    return found;
   }
 
-  const found = findSourceLinkMode(stored);
-  if (found) return found;
-
   const fallback = getDefaultSourceLinkMode();
-  try {
-    localStorage.setItem(SOURCE_LINK_MODE_STORAGE_KEY, fallback.id);
-  } catch {}
+  writeStoredSourceLinkModeId(fallback.id);
   return fallback;
 }
 
@@ -77,9 +91,7 @@ export function getCurrentSourceLinkModeId(): string {
 
 export function setCurrentSourceLinkMode(modeId: string): SourceLinkModeDef {
   const found = findSourceLinkMode(modeId) ?? getDefaultSourceLinkMode();
-  try {
-    localStorage.setItem(SOURCE_LINK_MODE_STORAGE_KEY, found.id);
-  } catch {}
+  writeStoredSourceLinkModeId(found.id);
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('ria:source-link-mode-change', { detail: { modeId: found.id } }));
   }

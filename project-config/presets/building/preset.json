@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "cairnmap.preset.v1",
+  "presetId": "building",
+  "label": "CairnMap Building Structures",
+  "version": "0.1.0",
+  "nativePreset": true,
+  "runtimeStatus": "active",
+  "description": "CairnMap Building Structures preset extracted from OpenRIAMap RIA configuration.",
+  "providedClasses": [
+    "BUD",
+    "FLR"
+  ],
+  "providedSharedModules": [],
+  "providedWorkflows": [
+    "building-workflow",
+    "floor-workflow"
+  ],
+  "dependencies": [
+    "core-structures"
+  ]
+}

@@ -1,0 +1,299 @@
+{
+  "schemaVersion": "cairnmap.class.v1",
+  "projectId": "openriamap-ria",
+  "runtimeStatus": "active",
+  "classCode": "WRP",
+  "classKey": "warpPoint",
+  "sourceFeatureKey": "Warp点",
+  "label": {
+    "zh-CN": "Warp点",
+    "en": "Warp Point"
+  },
+  "description": "Warp点 class config-primary config. Runtime facade now resolves from preset Class config.",
+  "data": {
+    "typeField": "Type",
+    "classField": "Class",
+    "worldField": "World",
+    "defaultType": "Points",
+    "defaultClass": "WRP"
+  },
+  "geometry": {
+    "type": "Point",
+    "sourceField": "coordinate",
+    "axisOrder": "x,z,y",
+    "required": true
+  },
+  "identity": {
+    "idField": "ID",
+    "nameField": "Name",
+    "displayNameField": "Name"
+  },
+  "classification": {
+    "kindField": "Kind",
+    "skindField": "SKind",
+    "skind2Field": "SKind2",
+    "required": false,
+    "options": [
+      {
+        "kind": "NOM",
+        "skind": "NOM",
+        "skind2": "",
+        "drawMode": "point",
+        "geom": "点",
+        "label": {
+          "zh-CN": "默认"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      },
+      {
+        "kind": "SPE",
+        "skind": "SPE",
+        "skind2": "",
+        "drawMode": "point",
+        "geom": "点",
+        "label": {
+          "zh-CN": "特殊"
+        },
+        "workflow": {
+          "visible": true
+        },
+        "display": {
+          "ruleId": null
+        }
+      }
+    ]
+  },
+  "fields": [
+    {
+      "key": "ID",
+      "label": {
+        "zh-CN": "Warp点ID"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "ID",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "WRPointI2D",
+      "label": {
+        "zh-CN": "Warp点游戏内ID(WRPointI2D)"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "WRPointI2D",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "Name",
+      "label": {
+        "zh-CN": "Warp点名"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Name",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": true
+      }
+    },
+    {
+      "key": "Kind",
+      "label": {
+        "zh-CN": "类型(Kind)"
+      },
+      "type": "text",
+      "required": true,
+      "optional": false,
+      "sourceRuntimeField": "Kind",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "SKind",
+      "label": {
+        "zh-CN": "子类型(SKind)"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "SKind",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "SKind2",
+      "label": {
+        "zh-CN": "三级子类型(SKind2)"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "SKind2",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "hub",
+      "label": {
+        "zh-CN": "枢纽(hub)"
+      },
+      "type": "text",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "hub",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    },
+    {
+      "key": "elevation",
+      "label": {
+        "zh-CN": "高度(y)"
+      },
+      "type": "number",
+      "required": false,
+      "optional": true,
+      "sourceRuntimeField": "elevation",
+      "scenes": {
+        "workflow": true,
+        "editor": true,
+        "infocard": true,
+        "search": false
+      }
+    }
+  ],
+  "groups": [],
+  "tags": {
+    "enabled": true,
+    "allowOther": true,
+    "items": [
+      {
+        "key": "category",
+        "label": {
+          "zh-CN": "分类(category)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "level",
+        "label": {
+          "zh-CN": "等级(level)"
+        },
+        "type": "number"
+      },
+      {
+        "key": "status",
+        "label": {
+          "zh-CN": "状态(status)"
+        },
+        "type": "text"
+      },
+      {
+        "key": "source",
+        "label": {
+          "zh-CN": "来源(source)"
+        },
+        "type": "text"
+      }
+    ]
+  },
+  "extensions": {
+    "enabled": true,
+    "allowOtherNamespaces": true,
+    "namespaces": []
+  },
+  "display": {
+    "runtimeStatus": "active",
+    "sourceRuntimeFile": "src/components/Rules/rendering/featureRenderRules.ts",
+    "rules": [
+      {
+        "id": "WRP-warp-point",
+        "runtimeStatus": "active",
+        "match": {
+          "classCode": "WRP"
+        },
+        "profile": "poiPoint",
+        "displayTier": "poi",
+        "geometry": {
+          "render": "none"
+        },
+        "label": {
+          "enabled": true,
+          "source": "Name",
+          "styleKey": "bubble-dark-label-14"
+        },
+        "specialLogic": [
+          {
+            "key": "warpPointBinding",
+            "mode": "optional"
+          }
+        ],
+        "notes": "Config rule metadata. Rendering behavior is executed by featureRenderRules.ts."
+      }
+    ]
+  },
+  "card": {
+    "runtimeStatus": "active",
+    "layoutId": "warp-point-card",
+    "sections": [
+      {
+        "id": "main",
+        "title": "主要信息",
+        "slot": "mainRows"
+      },
+      {
+        "id": "other",
+        "title": "其他信息",
+        "slot": "otherRows",
+        "collapsedByDefault": true
+      }
+    ],
+    "fields": [],
+    "relations": [],
+    "enhancements": []
+  },
+  "workflowBindings": [
+    {
+      "workflowId": "warp-workflow",
+      "default": true,
+      "runtimeStatus": "active",
+      "runtimeMode": "configPrimary"
+    }
+  ]
+}

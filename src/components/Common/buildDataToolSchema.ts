@@ -1,4 +1,6 @@
-import { WORKFLOW_FEATURE_CATALOG, WORLD_CODE_BY_WORLD_ID } from './featureFormats';
+import { getClassConfigWorkflowCatalogEntries } from '@/core/project/classCatalogAdapter';
+import { listClassConfigs } from '@/core/project/classMetadata';
+import { getOpenRIAMapWorldsConfig } from '@/core/project/openriamapRiaEnvironment';
 
 export const DATA_TOOL_SCHEMA_VERSION = '1.1.0';
 export const SPECIAL_CLASS_LIST = ['ISG', 'ISL', 'ISP'] as const;
@@ -19,6 +21,28 @@ const sortObjectKeys = <T>(obj: Record<string, T>): Record<string, T> => Object.
   Object.entries(obj).sort(([a], [b]) => a.localeCompare(b, 'zh-CN')),
 ) as Record<string, T>;
 
+const geometryToDrawMode = (geometryType: string): string => {
+  if (geometryType === 'Point') return 'point';
+  if (geometryType === 'LineString') return 'polyline';
+  return 'polygon';
+};
+
+const geometryToChineseName = (geometryType: string): string => {
+  if (geometryType === 'Point') return '点';
+  if (geometryType === 'LineString') return '线';
+  return '面';
+};
+
+export function buildWorldCodeMapFromConfig(): Record<string, number> {
+  const worlds: Record<string, number> = {};
+  for (const item of getOpenRIAMapWorldsConfig().items ?? []) {
+    const id = String(item.id ?? '').trim();
+    const code = Number(item.numericCode);
+    if (id && Number.isFinite(code)) worlds[id] = code;
+  }
+  return sortObjectKeys(worlds);
+}
+
 export function buildDataToolSchema(): DataToolSchema {
   const featureClasses = new Set<string>(BASE_FEATURE_CLASS_LIST);
   const workflowKinds: Record<string, Set<string>> = {};
@@ -26,14 +50,24 @@ export function buildDataToolSchema(): DataToolSchema {
   const classToDrawMode: Record<string, string> = {};
   const classToGeometry: Record<string, string> = {};
 
-  for (const item of WORKFLOW_FEATURE_CATALOG) {
-    featureClasses.add(item.classCode);
-    (workflowKinds[item.classCode] ??= new Set<string>()).add(item.kind);
+  for (const config of listClassConfigs()) {
+    const classCode = String(config.classCode ?? '').trim().toUpperCase();
+    if (!classCode) continue;
+    featureClasses.add(classCode);
+    classToDrawMode[classCode] = geometryToDrawMode(config.geometry.type);
+    classToGeometry[classCode] = geometryToChineseName(config.geometry.type);
+  }
+
+  for (const item of getClassConfigWorkflowCatalogEntries()) {
+    const classCode = String(item.classCode ?? '').trim().toUpperCase();
+    if (!classCode) continue;
+    featureClasses.add(classCode);
+    (workflowKinds[classCode] ??= new Set<string>()).add(item.kind);
     if (item.skind) {
-      ((workflowSubKinds[item.classCode] ??= {})[item.kind] ??= new Set<string>()).add(item.skind);
+      ((workflowSubKinds[classCode] ??= {})[item.kind] ??= new Set<string>()).add(item.skind);
     }
-    if (!(item.classCode in classToDrawMode)) classToDrawMode[item.classCode] = item.drawMode;
-    if (!(item.classCode in classToGeometry)) classToGeometry[item.classCode] = item.geom;
+    if (!classToDrawMode[classCode]) classToDrawMode[classCode] = item.drawMode;
+    if (!classToGeometry[classCode]) classToGeometry[classCode] = item.geom;
   }
 
   const workflowKindsSorted = sortObjectKeys(
@@ -57,7 +91,7 @@ export function buildDataToolSchema(): DataToolSchema {
 
   return {
     schemaVersion: DATA_TOOL_SCHEMA_VERSION,
-    worlds: { ...WORLD_CODE_BY_WORLD_ID },
+    worlds: buildWorldCodeMapFromConfig(),
     featureClasses: Array.from(featureClasses).sort((a, b) => a.localeCompare(b, 'zh-CN')),
     specialClasses: Array.from(SPECIAL_CLASS_LIST),
     workflowKinds: workflowKindsSorted,

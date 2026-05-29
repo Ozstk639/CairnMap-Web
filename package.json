@@ -8,10 +8,21 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run export:data-schema && tsc -b && vite build",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "export:data-schema": "tsx ./scripts/export-data-schema.mjs"
+    "validate:project-config": "node ./scripts/validate-project-config.mjs",
+    "audit:class-config": "node ./scripts/audit-class-config.mjs",
+    "audit:display-config": "node ./scripts/audit-display-config.mjs",
+    "audit:schema-format": "node ./scripts/audit-schema-format.mjs",
+    "audit:render-format-final": "node ./scripts/audit-render-format-final.mjs",
+    "audit:card-config": "node ./scripts/audit-card-config.mjs",
+    "audit:workflow-config": "node ./scripts/audit-workflow-config.mjs",
+    "audit:package-assembly": "node ./scripts/audit-package-assembly.mjs",
+    "audit:legacy-definition": "node ./scripts/audit-legacy-definition.mjs",
+    "audit:project-config": "node ./scripts/audit-project-config.mjs",
+    "create:class": "node ./scripts/create-class-config.mjs",
+    "inspect:project-config": "node ./scripts/inspect-project-config.mjs"
   },
   "dependencies": {
     "jszip": "^3.10.1",

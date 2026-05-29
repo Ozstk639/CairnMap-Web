@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "cairnmap.card-enhancements.v1",
+  "projectId": "openriamap-ria",
+  "items": [
+    {
+      "id": "railColorChip",
+      "componentKey": "railColorChip",
+      "label": "铁路色号 Chip",
+      "allowedClasses": [
+        "RLE"
+      ],
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "platformLineChips",
+      "componentKey": "platformLineChips",
+      "label": "站台线路 Chip",
+      "allowedClasses": [
+        "PLF"
+      ],
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "stationLineChips",
+      "componentKey": "stationLineChips",
+      "label": "车站线路 Chip",
+      "allowedClasses": [
+        "STA"
+      ],
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "stationBuildingLineChips",
+      "componentKey": "stationBuildingLineChips",
+      "label": "站房线路 Chip",
+      "allowedClasses": [
+        "STB"
+      ],
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "tradePointCard",
+      "componentKey": "trpTradeSection",
+      "label": "交易点交易列表",
+      "allowedClasses": [
+        "TRP"
+      ],
+      "dataPath": "TradeJSON",
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "floorViewRelation",
+      "componentKey": "relationRows",
+      "label": "楼层视图关系跳转",
+      "allowedClasses": [
+        "BUD",
+        "FLR",
+        "STB",
+        "STF"
+      ],
+      "relationActionKey": "floorViewBinding",
+      "runtimeStatus": "active"
+    },
+    {
+      "id": "genericRelationLinks",
+      "componentKey": "relationRows",
+      "label": "通用关系跳转",
+      "allowedClasses": [
+        "*"
+      ],
+      "runtimeStatus": "active"
+    }
+  ]
+}
