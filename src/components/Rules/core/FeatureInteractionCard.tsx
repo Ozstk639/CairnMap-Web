@@ -8,7 +8,7 @@ import { loadMapSettings } from '@/lib/cookies';
 import type { FeatureRecord } from '@/components/Rules/rendering/renderRules';
 import { buildInfoSectionsForFeature, pickFeatureDisplayName } from '@/components/Rules/cardrules/fieldRules';
 import { buildPictureUrlsForFeature } from '@/components/Rules/cardrules/pictureRules';
-import { buildMinimalFeatureEditPackage } from '@/components/Mapping/core/minimalFeatureEditPackage';
+import { buildMinimalFeatureEditPackage } from '@/lib/minimalFeatureEditPackage';
 import { stringifyFeatureJsonArray } from '@/components/Common/featureJsonSerializer';
 import FeatureSharePanel from '@/components/Rules/share/FeatureSharePanel';
 import { buildFeatureSharePayload, type FeatureSharePayload } from '@/lib/featureShareLink';

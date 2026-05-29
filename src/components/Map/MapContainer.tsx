@@ -41,7 +41,7 @@ import { pickIdFieldValue, type FeatureRecord } from '@/components/Rules/renderi
 import RuleButtonPanel from '@/components/Rules/ButtonRule/RuleButtonPanel';
 import { useRuleButtonState } from '@/components/Rules/ButtonRule/ruleButtonState';
 
-import { formatGridNumber, snapWorldPointByMode } from '@/components/Mapping/tools/GridSnapModeSwitch';
+import { formatGridNumber, snapWorldPointByMode } from '@/lib/gridSnapUtils';
 import AppButton from '@/components/ui/AppButton';
 import AppCard from '@/components/ui/AppCard';
 import ToolIconButton from '@/components/Toolbar/ToolIconButton';

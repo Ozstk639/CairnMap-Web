@@ -33,7 +33,7 @@ import {
 import type { ParsedStation, ParsedLine, Coordinate, Player, TravelMode } from '@/types';
 import type { ParsedLandmark } from '@/components/Legacy/data/landmarkParser';
 import type { MultiModePathResult } from '@/components/Legacy/data/pathfinding';
-import { loadLegacyModuleBundle, type LegacyModuleBundle } from '@/entrypoints/legacyEntry';
+import type { LegacyModuleBundle } from '@/entrypoints/legacyEntry';
 import { useFeatureModuleStore } from '@/store/featureModuleStore';
 import { ensureLegacyDataLoaded } from '@/lib/legacyDataLoader';
 
@@ -48,7 +48,7 @@ import AppCard from '@/components/ui/AppCard';
 
 import { getRuleSearchPool } from '@/components/Rules/search/ruleSearchRegistry';
 import type { FeatureRecord } from '@/components/Rules/rendering/renderRules';
-import { formatGridNumber, snapWorldPointByMode } from '@/components/Mapping/tools/GridSnapModeSwitch';
+import { formatGridNumber, snapWorldPointByMode } from '@/lib/gridSnapUtils';
 import {
   isRuleBlacklisted,
   getRulePriorityIndex,
@@ -58,6 +58,12 @@ import {
 } from '@/components/Search/searchRuleTables';
 import { loadRailNewIndex, passLineBooleanFilters, type RailNewIndex } from '@/components/Navigation/railNewIndex';
 
+
+
+async function loadNavigationLegacyBundle(): Promise<LegacyModuleBundle> {
+  const mod = await import('@/entrypoints/legacyEntry');
+  return mod.loadLegacyModuleBundle();
+}
 
 // ---------------------------
 // utils
@@ -986,7 +992,7 @@ useEffect(() => {
   useEffect(() => {
     if (!legacyModuleLoaded) return;
     let cancelled = false;
-    loadLegacyModuleBundle()
+    loadNavigationLegacyBundle()
       .then((bundle) => {
         if (!cancelled) setLegacyBundle(bundle);
       })
@@ -1380,7 +1386,7 @@ if (travelMode === 'road') {
         await ensureLegacyDataLoaded();
       }
 
-      const legacy = legacyBundle ?? await loadLegacyModuleBundle();
+      const legacy = legacyBundle ?? await loadNavigationLegacyBundle();
       if (!legacyBundle) setLegacyBundle(legacy);
       const activeRailwayGraph = railwayGraph ?? legacy.buildRailwayGraph(lines);
       const activeToriiList = toriiList.length ? toriiList : legacy.extractToriiList(landmarks);

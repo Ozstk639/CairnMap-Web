@@ -14,54 +14,59 @@ export default defineConfig({
     },
   },
 
-server: {
-  proxy: {
-    '/api/dynmap': {
-      target: 'https://satellite.ria.red',
-      changeOrigin: true,
-      secure: true,
-      rewrite: (path) => path.replace(/^\/api\/dynmap/, '/map'),
+  server: {
+    proxy: {
+      '/api/dynmap': {
+        target: 'https://satellite.ria.red',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api\/dynmap/, '/map'),
+      },
     },
   },
-},
 
-build: {
+  build: {
     rollupOptions: {
       output: {
         manualChunks(id) {
           const normalized = id.replace(/\\/g, '/');
 
-          // 测绘扩展包：统一归组测绘入口、模块、workflow、工具与导入导出链路
-          if (
-            normalized.includes('/src/entrypoints/measuringEntry.ts') ||
-            normalized.includes('/src/components/Mapping/')
-          ) {
+          // Keep heavyweight third-party modules out of the initial app chunk.
+          // JSZip is only loaded by import/export package flows and should remain async.
+          if (normalized.includes('/node_modules/jszip/')) {
+            return 'vendor-jszip';
+          }
+
+          if (normalized.includes('/node_modules/')) {
+            return 'vendor-main';
+          }
+
+          // Do not chunk whole internal directories such as components/Mapping or
+          // components/Legacy. Several shared helpers are intentionally imported by
+          // the main map/navigation runtime. Directory-level manual chunks can create
+          // production-only TDZ errors when Rollup changes module initialization order.
+          // Instead, pin only the actual lazy entry roots; Rollup will keep their
+          // exclusive dependencies in async chunks and leave shared utilities where
+          // the dependency graph requires them.
+          const isMeasuringEntry =
+            normalized.endsWith('/src/entrypoints/measuringEntry.ts') ||
+            normalized.endsWith('/src/components/Mapping/core/MeasuringModule.tsx') ||
+            normalized.endsWith('/src/components/Mapping/core/Mtools.tsx');
+          if (isMeasuringEntry) {
             return 'measuring-ext';
           }
 
-          // Legacy 扩展包：统一归组旧图层、旧详情、旧铁路与旧传送相关链路
-          if (
-            normalized.includes('/src/entrypoints/legacyEntry.ts') ||
-            normalized.includes('/src/components/Legacy/') ||
-            normalized.includes('/src/components/Navigation/legacy/') ||
-            normalized.includes('pathfinding') ||
-            normalized.includes('toriiTeleport') ||
-            normalized.includes('RailwayLayer') ||
-            normalized.includes('LandmarkLayer') ||
-            normalized.includes('LineDetailCard') ||
-            normalized.includes('PointDetailCard') ||
-            normalized.includes('LinesPage')
-          ) {
+          const isLegacyEntry =
+            normalized.endsWith('/src/entrypoints/legacyEntry.ts') ||
+            normalized.endsWith('/src/components/Legacy/map/RailwayLayer.tsx') ||
+            normalized.endsWith('/src/components/Legacy/map/LandmarkLayer.tsx') ||
+            normalized.endsWith('/src/components/Legacy/detail/LineDetailCard.tsx') ||
+            normalized.endsWith('/src/components/Legacy/detail/PointDetailCard.tsx') ||
+            normalized.endsWith('/src/components/Legacy/lines/LinesPage.tsx') ||
+            normalized.endsWith('/src/components/Legacy/data/pathfinding.ts') ||
+            normalized.endsWith('/src/components/Legacy/data/toriiTeleport.ts');
+          if (isLegacyEntry) {
             return 'legacy-ext';
-          }
-
-          // 主包第三方依赖：统一归组常驻运行时依赖
-          if (normalized.includes('/node_modules/')) {
-            // jszip 基本只服务测绘导入/导出，跟随测绘扩展包加载更合理
-            if (normalized.includes('/node_modules/jszip/')) {
-              return 'measuring-ext';
-            }
-            return 'vendor-main';
           }
         },
       },
