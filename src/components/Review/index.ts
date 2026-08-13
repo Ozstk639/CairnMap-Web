@@ -4,3 +4,5 @@ export * from './adapterRegistry';
 export * from './workflow';
 export * from './submission';
 export * from './releasePreflight';
+export * from './auth';
+export * from './package';
