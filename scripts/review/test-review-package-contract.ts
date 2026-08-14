@@ -39,6 +39,8 @@ const strict = validateParsedReviewPackage(parsed, profile, 'strict-submission')
 if (!strict.valid || parsed.features.length !== 1 || parsed.deletes.length !== 1) throw new Error(`strict package validation failed: ${strict.errors.map((entry) => entry.code).join(',')}`);
 const digest = await calculateReviewPackageDigest(artifact.blob);
 if (digest.byteLength !== artifact.blob.size || !/^[a-f0-9]{64}$/.test(digest.sha256) || !/^[A-Za-z0-9+/]{22}==$/.test(digest.contentMd5)) throw new Error('digest generation failed');
+const knownDigest = await calculateReviewPackageDigest(new Blob(['hello']));
+if (knownDigest.sha256 !== '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824' || knownDigest.contentMd5 !== 'XUFAKrxLKna5cZ2REBfFkg==') throw new Error('digest algorithm compatibility failed');
 const identity = createReviewSubmissionIdentity({ submissionId: 'submission-test', clock: () => new Date('2026-08-13T00:00:00.000Z') });
 const request = await createReviewRevisionUploadRequest({ artifact, identity, expectedStateVersion: 0 });
 if (request.packageName !== 'test-package' || request.submissionId !== 'submission-test' || request.byteLength !== artifact.blob.size) throw new Error('revision upload request failed');
