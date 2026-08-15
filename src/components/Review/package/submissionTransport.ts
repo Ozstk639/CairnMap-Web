@@ -28,7 +28,8 @@ export function createReviewSubmissionIdentity(input: { submissionId?: string; r
 }
 
 export async function createReviewRevisionUploadRequest(input: {
-  artifact: ReviewPackageArtifact;
+  /** Only the immutable upload bytes and display name are needed to obtain a grant. */
+  artifact: Pick<ReviewPackageArtifact, 'blob' | 'packageName'>;
   identity: ReviewSubmissionIdentity;
   expectedStateVersion: number;
   summary?: string;
@@ -44,7 +45,7 @@ export async function createReviewRevisionUploadRequest(input: {
   };
 }
 
-export async function submitReviewPackageRevision<TSubmission>(transport: ReviewSubmissionTransport<TSubmission>, request: ReviewRevisionUploadRequest, artifact: ReviewPackageArtifact): Promise<ReviewRevisionUploadResult<TSubmission>> {
+export async function submitReviewPackageRevision<TSubmission>(transport: ReviewSubmissionTransport<TSubmission>, request: ReviewRevisionUploadRequest, artifact: Pick<ReviewPackageArtifact, 'blob'>): Promise<ReviewRevisionUploadResult<TSubmission>> {
   const grant = await transport.requestRevisionUpload(request);
   await transport.uploadRevision(grant, artifact.blob);
   return transport.completeRevisionUpload(request);

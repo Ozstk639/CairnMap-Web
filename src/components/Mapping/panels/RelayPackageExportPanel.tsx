@@ -11,13 +11,16 @@ export default function RelayPackageExportPanel(props: {
   featureCount: number;
   onClose: () => void;
   onExport: (operator: string, note: string) => Promise<{ blob: Blob; filename: string }>;
+  /** Optional application binding. Core export UI never chooses a provider. */
+  onUploadToReview?: (input: { blob: Blob; filename: string; operator: string; note: string }) => Promise<{ submissionId: string; revisionId: string }>;
 }) {
-  const { open, draft, featureCount, onClose, onExport } = props;
+  const { open, draft, featureCount, onClose, onExport, onUploadToReview } = props;
   const [operator, setOperator] = useState(draft.meta.operator ?? '');
   const [note, setNote] = useState(draft.meta.note ?? '');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preparedPackage, setPreparedPackage] = useState<{ blob: Blob; filename: string } | null>(null);
+  const [uploadResult, setUploadResult] = useState<{ submissionId: string; revisionId: string } | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -26,6 +29,7 @@ export default function RelayPackageExportPanel(props: {
     setBusy(false);
     setError(null);
     setPreparedPackage(null);
+    setUploadResult(null);
   }, [open]);
 
   const pictureCount = Object.values(draft.picturesById).reduce((sum, list) => sum + list.filter((x) => !x.deleted).length, 0);
@@ -83,6 +87,7 @@ export default function RelayPackageExportPanel(props: {
 
           {error ? <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
           {preparedPackage ? <div className="rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">{readyMessage}</div> : null}
+          {uploadResult ? <div className="rounded border border-blue-200 bg-blue-50 p-3 text-xs text-blue-800">已提交至审核序列：{uploadResult.submissionId}（版本 {uploadResult.revisionId}）</div> : null}
 
           <div className="flex gap-2">
             <AppButton className="flex-1 bg-gray-200 text-gray-800 px-3 py-2 rounded-lg" onClick={onClose} type="button" disabled={busy}>取消</AppButton>
@@ -107,6 +112,26 @@ export default function RelayPackageExportPanel(props: {
                 >
                   点击下载标准包
                 </AppButton>
+                {onUploadToReview ? <AppButton
+                  className="flex-1 bg-emerald-600 text-white px-3 py-2 rounded-lg disabled:opacity-60"
+                  onClick={async () => {
+                    if (!preparedPackage || !onUploadToReview) return;
+                    setBusy(true);
+                    setError(null);
+                    try {
+                      const result = await onUploadToReview({ ...preparedPackage, operator, note });
+                      setUploadResult(result);
+                    } catch (e) {
+                      setError(String((e as Error)?.message ?? e ?? '上传到审核序列失败'));
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                  type="button"
+                  disabled={busy || Boolean(uploadResult)}
+                >
+                  {busy ? '正在上传到审核序列…' : uploadResult ? '已上传到审核序列' : '上传到审核序列'}
+                </AppButton> : null}
               </>
             ) : (
               <AppButton
