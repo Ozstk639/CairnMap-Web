@@ -13,6 +13,9 @@ export type RelayPictureBindingItem = {
 export type RelayDeleteMarkItem = {
   ID: string;
   Name: string;
+  /** Optional location facts make a new submission independently verifiable. */
+  worldId?: string;
+  classCode?: string;
 };
 
 export type RelayPackageDraftStatus = 'new_draft' | 'exported_draft' | 'imported_package';

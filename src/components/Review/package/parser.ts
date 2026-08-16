@@ -1,9 +1,9 @@
+import { REVIEW_PACKAGE_LAYOUT } from './contracts';
 import type {
   ParsedReviewPackage,
   ParsedReviewPackageFeature,
   ParsedReviewPackagePicture,
   ReviewPackageDeleteMark,
-  ReviewPackageProfile,
   ReviewPackageValidationIssue,
 } from './contracts';
 
@@ -20,14 +20,14 @@ function stripTrailingSlash(value: string): string {
   return value.replace(/\/+$/, '');
 }
 
-function marker(path: string, profile: ReviewPackageProfile): boolean {
-  return path === profile.indexPath || path === profile.reviewPath || path === profile.deletePath
-    || path.startsWith(`${profile.featureRoot}/`) || path.startsWith(`${profile.pictureRoot}/`)
-    || (!!profile.toolRefreshRoot && path.startsWith(`${profile.toolRefreshRoot}/`));
+function marker(path: string): boolean {
+  return path === REVIEW_PACKAGE_LAYOUT.indexPath || path === REVIEW_PACKAGE_LAYOUT.reviewPath || path === REVIEW_PACKAGE_LAYOUT.deletePath
+    || path.startsWith(`${REVIEW_PACKAGE_LAYOUT.featureRoot}/`) || path.startsWith(`${REVIEW_PACKAGE_LAYOUT.pictureRoot}/`)
+    || path.startsWith(`${REVIEW_PACKAGE_LAYOUT.toolRefreshRoot}/`);
 }
 
-function determineRootPrefix(paths: string[], profile: ReviewPackageProfile): string {
-  if (paths.some((path) => marker(stripTrailingSlash(path), profile))) return '';
+function determineRootPrefix(paths: string[]): string {
+  if (paths.some((path) => marker(stripTrailingSlash(path)))) return '';
   const roots = [...new Set(paths.map((path) => path.split('/')[0]).filter(Boolean))];
   return roots.length === 1 ? `${roots[0]}/` : '';
 }
@@ -57,29 +57,29 @@ function parseDeleteMarks(value: Record<string, unknown> | null): ReviewPackageD
   });
 }
 
-function parseFeaturePath(path: string, profile: ReviewPackageProfile): Omit<ParsedReviewPackageFeature, 'path' | 'record'> | null {
+function parseFeaturePath(path: string): Omit<ParsedReviewPackageFeature, 'path' | 'record'> | null {
   const parts = path.split('/');
   const filename = parts[parts.length - 1];
-  if (parts.length < 4 || parts[0] !== profile.featureRoot || !filename?.endsWith('.json')) return null;
+  if (parts.length < 4 || parts[0] !== REVIEW_PACKAGE_LAYOUT.featureRoot || !filename?.endsWith('.json')) return null;
   const featureId = filename.slice(0, -'.json'.length);
   return { worldId: parts[1], classCode: parts[2], kindPath: parts.slice(3, -1), featureId };
 }
 
-function parsePicturePath(path: string, profile: ReviewPackageProfile): Omit<ParsedReviewPackagePicture, 'path' | 'content'> | null {
+function parsePicturePath(path: string): Omit<ParsedReviewPackagePicture, 'path' | 'content'> | null {
   const parts = path.split('/');
-  if (parts.length < 5 || parts[0] !== profile.pictureRoot) return null;
+  if (parts.length < 5 || parts[0] !== REVIEW_PACKAGE_LAYOUT.pictureRoot) return null;
   return { worldId: parts[1], classCode: parts[2], kindPath: parts.slice(3, -2), featureId: parts[parts.length - 2] ?? '', filename: parts[parts.length - 1] ?? '' };
 }
 
-export async function parseReviewPackageBlob(blob: Blob, profile: ReviewPackageProfile): Promise<ParsedReviewPackage> {
+export async function parseReviewPackageBlob(blob: Blob): Promise<ParsedReviewPackage> {
   const JSZip = (await import('jszip')).default;
   const zip = await JSZip.loadAsync(await blob.arrayBuffer());
   const entries = Object.values(zip.files).filter((entry: any) => !entry.dir && !ignored(String(entry.name ?? '')));
   const names = entries.map((entry: any) => String(entry.name ?? '').replace(/\\/g, '/').replace(/^\/+/, ''));
-  const rootPrefix = determineRootPrefix(names, profile);
+  const rootPrefix = determineRootPrefix(names);
   const result: ParsedReviewPackage = {
     rootPrefix,
-    isPackageLike: names.some((name) => marker(rootPrefix && name.startsWith(rootPrefix) ? name.slice(rootPrefix.length) : name, profile)),
+    isPackageLike: names.some((name) => marker(rootPrefix && name.startsWith(rootPrefix) ? name.slice(rootPrefix.length) : name)),
     paths: [],
     manifest: null,
     reviewMarker: null,
@@ -103,28 +103,28 @@ export async function parseReviewPackageBlob(blob: Blob, profile: ReviewPackageP
     }
     seen.add(path);
     result.paths.push(path);
-    if (path === profile.indexPath || path === profile.reviewPath || path === profile.deletePath || path.startsWith(`${profile.featureRoot}/`)) {
+    if (path === REVIEW_PACKAGE_LAYOUT.indexPath || path === REVIEW_PACKAGE_LAYOUT.reviewPath || path === REVIEW_PACKAGE_LAYOUT.deletePath || path.startsWith(`${REVIEW_PACKAGE_LAYOUT.featureRoot}/`)) {
       const text = await entry.async('string');
-      if (path === profile.indexPath) {
+      if (path === REVIEW_PACKAGE_LAYOUT.indexPath) {
         result.manifest = parseJson(text);
         if (!result.manifest) result.parseWarnings.push(warning('PACKAGE_CONTENT_INVALID', 'Index JSON is invalid.', path));
-      } else if (path === profile.reviewPath) {
+      } else if (path === REVIEW_PACKAGE_LAYOUT.reviewPath) {
         result.reviewMarker = parseJson(text);
         if (!result.reviewMarker) result.parseWarnings.push(warning('PACKAGE_CONTENT_INVALID', 'Review marker JSON is invalid.', path));
-      } else if (path === profile.deletePath) {
+      } else if (path === REVIEW_PACKAGE_LAYOUT.deletePath) {
         const deletion = parseJson(text);
         if (!deletion) result.parseWarnings.push(warning('PACKAGE_CONTENT_INVALID', 'Delete JSON is invalid.', path));
         else result.deletes = parseDeleteMarks(deletion);
       } else {
-        const info = parseFeaturePath(path, profile);
+        const info = parseFeaturePath(path);
         const record = parseJson(text);
         if (!info || !record) result.parseWarnings.push(warning('PACKAGE_FEATURE_INVALID', 'Feature path or JSON is invalid.', path));
         else result.features.push({ path, ...info, record });
       }
       continue;
     }
-    if (path.startsWith(`${profile.pictureRoot}/`)) {
-      const info = parsePicturePath(path, profile);
+    if (path.startsWith(`${REVIEW_PACKAGE_LAYOUT.pictureRoot}/`)) {
+      const info = parsePicturePath(path);
       if (!info) result.parseWarnings.push(warning('PACKAGE_PATH_INVALID', 'Picture path is invalid.', path));
       else result.pictures.push({ path, ...info, content: await entry.async('blob') });
       continue;

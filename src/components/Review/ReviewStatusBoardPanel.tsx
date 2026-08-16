@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { Archive, CheckCircle2, ClipboardCheck, FileDown, FileText, RefreshCw, RotateCcw, Send, ShieldCheck, XCircle } from 'lucide-react';
 import AppButton from '@/components/ui/AppButton';
 import { DraggablePanel } from '@/components/DraggablePanel/DraggablePanel';
+import type { ReviewAuthPort } from './auth';
 import type {
-  ReviewAuthPort,
   ReviewAuthorizationContext,
   ReviewPackageRevision,
   ReviewReleaseControlPort,
@@ -11,7 +11,7 @@ import type {
   ReviewStatusBoardAdapter,
   ReviewSubmissionAdapter,
   ReviewSubmissionSnapshot,
-} from './index';
+} from './contracts';
 import {
   compareReviewStatusBoards,
   isReviewStatusBoardDirty,
