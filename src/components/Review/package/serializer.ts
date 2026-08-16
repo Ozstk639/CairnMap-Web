@@ -1,6 +1,7 @@
 import { buildZipStore } from '../../../lib/zipStore';
 import {
   REVIEW_PACKAGE_CONTRACT_VERSION,
+  REVIEW_PACKAGE_LAYOUT,
   REVIEW_PACKAGE_REVIEW_SCHEMA_VERSION,
   type ReviewPackageArtifact,
   type ReviewPackageDraft,
@@ -23,14 +24,14 @@ function normalizedTime(value: string | undefined): string {
 
 function pathForFeature(profile: ReviewPackageProfile, feature: ReviewPackageDraft['features'][number]): string {
   const nested = new Set(profile.nestedKindClasses ?? []);
-  const parts = [profile.featureRoot, feature.worldId, feature.classCode];
+  const parts = [REVIEW_PACKAGE_LAYOUT.featureRoot, feature.worldId, feature.classCode];
   if (nested.has(feature.classCode)) parts.push(...(feature.kindPath ?? []));
   return `${parts.join('/')}/${feature.featureId}.json`;
 }
 
 function pathForPicture(profile: ReviewPackageProfile, picture: ReviewPackageDraft['pictures'][number]): string {
   const nested = new Set(profile.nestedKindClasses ?? []);
-  const parts = [profile.pictureRoot, picture.worldId, picture.classCode];
+  const parts = [REVIEW_PACKAGE_LAYOUT.pictureRoot, picture.worldId, picture.classCode];
   if (nested.has(picture.classCode)) parts.push(...(picture.kindPath ?? []));
   parts.push(picture.featureId, picture.filename);
   return parts.join('/');
@@ -73,9 +74,9 @@ export function buildReviewPackageFiles(profile: ReviewPackageProfile, draft: Re
   const manifest = createReviewPackageManifest(draft, exportedAt);
   const reviewMarker = createReviewPackageReviewMarker(exportedAt);
   const files: ReviewPackageFile[] = [
-    { path: profile.indexPath, content: json(manifest) },
-    { path: profile.reviewPath, content: json(reviewMarker) },
-    { path: profile.deletePath, content: json({ deleteTime: exportedAt, items: draft.deletes }) },
+    { path: REVIEW_PACKAGE_LAYOUT.indexPath, content: json(manifest) },
+    { path: REVIEW_PACKAGE_LAYOUT.reviewPath, content: json(reviewMarker) },
+    { path: REVIEW_PACKAGE_LAYOUT.deletePath, content: json({ deleteTime: exportedAt, items: draft.deletes }) },
   ];
   for (const feature of draft.features) {
     const path = pathForFeature(profile, feature);

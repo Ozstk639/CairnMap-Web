@@ -27,6 +27,7 @@
     "validate:review-contract-boundary": "node ./scripts/review/validate-review-contract-boundary.mjs",
     "validate:case-template": "node ./scripts/review/validate-case-template-manifest.mjs",
     "test:review-workspace-contracts": "tsx ./scripts/review/test-review-workspace-contracts.ts",
+    "test:review-status-board": "tsx ./scripts/review/test-review-status-board.ts",
     "test:data-source-selection": "tsx ./scripts/data-source/test-data-source-selection.ts",
     "test:review-package-contract": "tsx ./scripts/review/test-review-package-contract.ts"
   },

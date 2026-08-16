@@ -7,18 +7,28 @@
  */
 export const REVIEW_PACKAGE_CONTRACT_VERSION = 'cairnmap.review-package.v1';
 export const REVIEW_PACKAGE_REVIEW_SCHEMA_VERSION = 'cairnmap.native-relay-review.v1';
+export const REVIEW_PACKAGE_PROFILE_SCHEMA_VERSION = 'cairnmap.review-package-profile.v1';
+
+/**
+ * The Relay ZIP wire layout is a CairnMap protocol, not an application
+ * profile.  Applications may configure classification rules, but cannot
+ * redefine these external paths.
+ */
+export const REVIEW_PACKAGE_LAYOUT = Object.freeze({
+  featureRoot: 'Data_Spilt',
+  pictureRoot: 'Picture',
+  indexPath: 'INDEX.json',
+  reviewPath: 'Review.json',
+  deletePath: 'Delete.json',
+  toolRefreshRoot: 'Tool_Refresh',
+});
 
 export type ReviewPackageValidationMode = 'compat-import' | 'normalize-on-export' | 'strict-submission' | 'strict-execution';
 
 export type ReviewPackageProfile = {
+  schemaVersion: typeof REVIEW_PACKAGE_PROFILE_SCHEMA_VERSION;
   /** Local composition identifier; it is not a cloud or repository identifier. */
   profileId: string;
-  featureRoot: string;
-  pictureRoot: string;
-  indexPath: string;
-  reviewPath: string;
-  deletePath: string;
-  toolRefreshRoot?: string;
   /** Classes whose feature and picture paths preserve a nested kind path. */
   nestedKindClasses?: readonly string[];
 };

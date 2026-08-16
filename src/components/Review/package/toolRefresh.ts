@@ -1,13 +1,12 @@
-export type RelayPackageExtraFile = {
-  path: string;
-  text: string;
-};
+import { REVIEW_PACKAGE_LAYOUT, type ReviewPackageExtraFile } from './contracts';
 
 /**
- * 导出标准包时附带的 Tool_Refresh 文件。
- * 该工具保持现有包结构不变，仅用于重新统计根级 INDEX.json 中的计数与时间。
+ * Optional maintenance files shipped inside a standard Relay package. Their
+ * paths derive from the fixed upstream wire layout, never from an application
+ * profile.
  */
-export function buildRelayPackageToolRefreshFiles(): RelayPackageExtraFile[] {
+export function buildReviewPackageToolRefreshFiles(): ReviewPackageExtraFile[] {
+  const { featureRoot, pictureRoot, indexPath, deletePath, toolRefreshRoot } = REVIEW_PACKAGE_LAYOUT;
   const py = [
     'from __future__ import annotations',
     'from pathlib import Path',
@@ -20,19 +19,19 @@ export function buildRelayPackageToolRefreshFiles(): RelayPackageExtraFile[] {
     '    return datetime.now(TZ).replace(microsecond=0).isoformat()',
     '',
     'def count_json_features(root: Path) -> int:',
-    '    data_root = root / "Data_Spilt"',
+    `    data_root = root / "${featureRoot}"`,
     '    if not data_root.exists():',
     '        return 0',
     '    return sum(1 for p in data_root.rglob("*.json") if p.name.lower() != "index.json")',
     '',
     'def count_pictures(root: Path) -> int:',
-    '    pic_root = root / "Picture"',
+    `    pic_root = root / "${pictureRoot}"`,
     '    if not pic_root.exists():',
     '        return 0',
     '    return sum(1 for p in pic_root.rglob("*") if p.is_file())',
     '',
     'def count_deletes(root: Path) -> int:',
-    '    p = root / "Delete.json"',
+    `    p = root / "${deletePath}"`,
     '    if not p.exists():',
     '        return 0',
     '    try:',
@@ -44,7 +43,7 @@ export function buildRelayPackageToolRefreshFiles(): RelayPackageExtraFile[] {
     '',
     'def main():',
     '    root = Path(__file__).resolve().parent.parent',
-    '    index_path = root / "INDEX.json"',
+    `    index_path = root / "${indexPath}"`,
     '    try:',
     '        index_obj = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else {}',
     '    except Exception:',
@@ -59,7 +58,7 @@ export function buildRelayPackageToolRefreshFiles(): RelayPackageExtraFile[] {
     '    else:',
     '        index_obj["updatedAt"] = now_iso()',
     '    index_path.write_text(json.dumps(index_obj, ensure_ascii=False, indent=2), encoding="utf-8")',
-    '    print("INDEX.json refreshed")',
+    '    print("Relay package metadata refreshed")',
     '',
     'if __name__ == "__main__":',
     '    main()',
@@ -67,19 +66,19 @@ export function buildRelayPackageToolRefreshFiles(): RelayPackageExtraFile[] {
 
   return [
     {
-      path: 'Tool_Refresh/README.txt',
+      path: `${toolRefreshRoot}/README.txt`,
       text: [
-        '这是 Web 导出标准包附带的自刷新工具。',
-        '用途：在不改变当前包结构的前提下，重新统计根级 INDEX.json 中的 feature/picture/delete 数量。',
-        '使用方法：双击 refresh_package_meta.bat，或手动运行 refresh_package_meta.py。',
+        'Relay package maintenance helper.',
+        `It refreshes the root ${indexPath} feature, picture and delete counts.`,
+        'Run refresh_package_meta.py with Python, or double-click refresh_package_meta.bat on Windows.',
       ].join('\n'),
     },
     {
-      path: 'Tool_Refresh/refresh_package_meta.py',
+      path: `${toolRefreshRoot}/refresh_package_meta.py`,
       text: py,
     },
     {
-      path: 'Tool_Refresh/refresh_package_meta.bat',
+      path: `${toolRefreshRoot}/refresh_package_meta.bat`,
       text: [
         '@echo off',
         'setlocal',
@@ -90,3 +89,4 @@ export function buildRelayPackageToolRefreshFiles(): RelayPackageExtraFile[] {
     },
   ];
 }
+

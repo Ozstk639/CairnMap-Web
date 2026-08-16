@@ -323,6 +323,71 @@ export interface ReviewSubmissionAdapter {
   getReleaseFeed?(actor: ReviewAuthorizationContext, limit?: number): Promise<ReviewReleaseFeedItem[]>;
 }
 
+/**
+ * Optional formal-status seam. Implementations may keep the board in any
+ * authority selected by the application, but must reject a stale boardVersion
+ * instead of overwriting another reviewer’s saved status.
+ */
+export interface ReviewStatusBoardAdapter {
+  getStatusBoard(actor: ReviewAuthorizationContext): Promise<import('./statusBoard').ReviewStatusBoardSnapshot>;
+  saveStatusBoard(request: import('./statusBoard').ReviewStatusBoardSaveRequest): Promise<import('./statusBoard').ReviewStatusBoardSaveResult>;
+}
+
+/**
+ * The application-owned release-control seam.  The core only asks for a
+ * guarded precheck or confirmation; it never learns where a release runs or
+ * which storage, source-control, or worker service is responsible for it.
+ */
+export type ReviewReleaseControlReport = {
+  decision?: string;
+  gate?: ReviewReleaseGateSnapshot;
+  report?: {
+    reportSha256?: string;
+    findings?: Array<{ severity?: 'blocker' | 'warning' | 'info' | string; message?: string }>;
+  };
+  next?: { action?: string };
+};
+
+export type ReviewReleaseControlRequest = {
+  selectedSubmissionIds: readonly string[];
+  expectedBoardVersion: number;
+  request: ReviewSubmissionRequest;
+};
+
+export type ReviewReleaseConfirmationRequest = {
+  attemptId: string;
+  expectedGateVersion: number;
+  precheckReportSha256: string;
+  request: ReviewSubmissionRequest;
+};
+
+export interface ReviewReleaseControlPort {
+  getReleaseGate(actor: ReviewAuthorizationContext): Promise<ReviewReleaseGateSnapshot>;
+  runReleasePrecheck(request: ReviewReleaseControlRequest, actor: ReviewAuthorizationContext): Promise<ReviewReleaseControlReport>;
+  confirmRelease(request: ReviewReleaseConfirmationRequest, actor: ReviewAuthorizationContext): Promise<ReviewReleaseControlReport>;
+}
+
+/**
+ * Provider-neutral hand-off from a standard-package exporter to the review
+ * submission transport. The core never decides where the artifact is sent or
+ * how the actor authenticates; applications supply that binding.
+ */
+export type ReviewPackageUploadInput = {
+  packageName: string;
+  blob: Blob;
+  summary?: string;
+};
+
+export type ReviewPackageUploadResult = {
+  submissionId: string;
+  revisionId: string;
+  alreadySubmitted?: boolean;
+};
+
+export interface ReviewPackageUploadPort {
+  uploadPackage(input: ReviewPackageUploadInput): Promise<ReviewPackageUploadResult>;
+}
+
 /** The application resolves snapshots and authority; core UI code never does. */
 export interface ReviewReleaseSnapshotProvider {
   getReleaseSnapshot(actor: ReviewAuthorizationContext): Promise<ReviewReleaseSnapshot>;
