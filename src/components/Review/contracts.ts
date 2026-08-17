@@ -116,6 +116,48 @@ export type ReviewSubmissionResult = {
   reportReference?: string;
 };
 
+/**
+ * Neutral failure details intended for a human-facing Review UI.
+ * Transports may add implementation diagnostics to `details`, but the core
+ * never interprets them as deployment-specific settings.
+ */
+export type ReviewOperationFailure = {
+  code: string;
+  message: string;
+  retryable?: boolean;
+  correlationId?: string;
+  details?: readonly string[];
+};
+
+/** Preserves a machine-readable Review failure through an adapter boundary. */
+export class ReviewOperationError extends Error {
+  readonly code: string;
+  readonly retryable: boolean;
+  readonly correlationId?: string;
+  readonly details: readonly string[];
+
+  constructor(failure: ReviewOperationFailure) {
+    super(failure.message);
+    this.name = 'ReviewOperationError';
+    this.code = failure.code;
+    this.retryable = Boolean(failure.retryable);
+    this.correlationId = failure.correlationId;
+    this.details = failure.details ?? [];
+  }
+}
+
+/** A read-only, revision-specific package validation result. */
+export type ReviewPackagePrecheckReport = {
+  schemaVersion: 'cairn.review-package-precheck.v1';
+  decision: 'ready' | 'warning-confirmation-required' | 'blocked';
+  submissionId: string;
+  revisionId: string;
+  stateVersion: number;
+  findings: readonly ReviewPreflightFinding[];
+  summary?: { warnings: number; blockers: number };
+  correlationId?: string;
+};
+
 /** A provider-neutral current-data snapshot used by release preflight. */
 export type ReviewReleaseFeatureReference = {
   worldId: string;
@@ -198,9 +240,21 @@ export type ReviewReleaseGateSnapshot = {
   attemptId: string | null;
   gateVersion: number;
   state: ReviewReleaseGateState;
+  /** False when the authority has never persisted a release gate. */
+  initialized?: boolean;
+  /** Omitted for an uninitialized gate so UI never invents an epoch timestamp. */
+  updatedAt?: string;
   acquiredAt?: string;
   leaseExpiresAt?: string;
 };
+
+/**
+ * Normalizes an authority with no persisted gate into a safe, readable value.
+ * It is intentionally free of time, provider, and storage assumptions.
+ */
+export function createIdleReviewReleaseGate(): ReviewReleaseGateSnapshot {
+  return { attemptId: null, gateVersion: 0, state: 'idle', initialized: false };
+}
 
 export type ReviewReleaseFeedItem = {
   releaseId: string;
@@ -320,6 +374,12 @@ export interface ReviewSubmissionAdapter {
   getSubmission(submissionId: string, actor: ReviewAuthorizationContext): Promise<ReviewSubmissionSnapshot>;
   listSubmissions?(actor: ReviewAuthorizationContext): Promise<ReviewSubmissionSnapshot[]>;
   dispatchSubmission(request: ReviewSubmissionRequest): Promise<ReviewSubmissionResult>;
+  /**
+   * Optional explicit seam for a read-only package precheck.  Older adapters
+   * can retain `dispatchSubmission`; applications that provide this method
+   * avoid treating a report as a submission state-transition result.
+   */
+  precheckSubmission?(request: ReviewSubmissionRequest): Promise<ReviewPackagePrecheckReport>;
   getReleaseFeed?(actor: ReviewAuthorizationContext, limit?: number): Promise<ReviewReleaseFeedItem[]>;
 }
 
@@ -334,9 +394,8 @@ export interface ReviewStatusBoardAdapter {
 }
 
 /**
- * The application-owned release-control seam.  The core only asks for a
- * guarded precheck or confirmation; it never learns where a release runs or
- * which storage, source-control, or worker service is responsible for it.
+ * The application-owned release seam. The core only asks for a guarded
+ * precheck or confirmation; the host application owns the implementation.
  */
 export type ReviewReleaseControlReport = {
   decision?: string;
@@ -402,6 +461,15 @@ export interface ReviewWorkspaceHostPort {
   requestMode(mode: ReviewWorkspaceMode, reason: string): boolean;
   requestReviewExit(reason: string): boolean;
 }
+
+export type ReviewWorkspaceLoadStage = 'requesting-download' | 'downloading' | 'verifying' | 'parsing' | 'injecting' | 'ready';
+
+export type ReviewWorkspaceLoadProgress = {
+  stage: ReviewWorkspaceLoadStage;
+  message: string;
+  completedBytes?: number;
+  totalBytes?: number;
+};
 
 export type ReviewWorkspaceExtensionConfig = {
   schemaVersion: 'cairnmap.review-workspace-extension.v1';
