@@ -22,6 +22,7 @@ const genericPackageSourceFiles = [
   'src/components/Review/package/serializer.ts',
   'src/components/Review/package/submissionTransport.ts',
   'src/components/Review/package/validator.ts',
+  'src/components/Review/ReviewStatusBoardPanel.tsx',
   'src/components/Settings/ReviewAuthSettingsSection.tsx',
 ];
 for (const file of [...required.filter((file) => file.startsWith('src/')), ...genericPackageSourceFiles]) {
@@ -44,8 +45,13 @@ const packageContractFiles = [
   'scripts/review/test-review-package-contract.ts',
   'Update_Log/CM_REVIEW_PACKAGE_CONTRACT_AUTH_CORE_1.md',
 ];
-const allowed = new Set([...required, ...packageContractFiles, 'src/components/Review/workflow.ts', 'docs/ReviewWorkspaceContracts.md', 'docs/REVIEW_RELEASE_PREFLIGHT.md', 'scripts/review/validate-review-contract-boundary.mjs', 'scripts/review/validate-case-template-manifest.mjs', 'scripts/review/test-review-workspace-contracts.ts', 'Update_Log/CM_REVIEW_WORKFLOW_CONTRACTS_1.md', 'Update_Log/CM_REVIEW_WORKFLOW_CONTROL_CONTRACTS_1.md', 'Update_Log/CM_REVIEW_SUBMISSION_CONTRACTS_2.md', 'Update_Log/CM_REVIEW_RELEASE_PREFLIGHT_CORE_1.md', 'package.json']);
+const reviewWorkbenchUiFiles = [
+  // The workbench is a generic client for the review ports; it must not import
+  // application profiles or deployment bindings.
+  'src/components/Review/ReviewStatusBoardPanel.tsx',
+];
+const allowed = new Set([...required, ...packageContractFiles, ...reviewWorkbenchUiFiles, 'src/components/Review/workflow.ts', 'docs/ReviewWorkspaceContracts.md', 'docs/REVIEW_RELEASE_PREFLIGHT.md', 'scripts/review/validate-review-contract-boundary.mjs', 'scripts/review/validate-case-template-manifest.mjs', 'scripts/review/test-review-workspace-contracts.ts', 'Update_Log/CM_REVIEW_WORKFLOW_CONTRACTS_1.md', 'Update_Log/CM_REVIEW_WORKFLOW_CONTROL_CONTRACTS_1.md', 'Update_Log/CM_REVIEW_SUBMISSION_CONTRACTS_2.md', 'Update_Log/CM_REVIEW_RELEASE_PREFLIGHT_CORE_1.md', 'package.json']);
 for (const file of changed) if (!allowed.has(file)) errors.push(`baseline-preservation violation: ${file} is outside the contract-only allowlist`);
-if (changed.some((file) => (file.endsWith('.tsx') && !packageContractFiles.includes(file)) || file === 'src/components/Map/MapContainer.tsx' || file.startsWith('src/components/Mapping/'))) errors.push('baseline-preservation violation: UI or Mapping implementation changed');
+if (changed.some((file) => (file.endsWith('.tsx') && !packageContractFiles.includes(file) && !reviewWorkbenchUiFiles.includes(file)) || file === 'src/components/Map/MapContainer.tsx' || file.startsWith('src/components/Mapping/'))) errors.push('baseline-preservation violation: UI or Mapping implementation changed');
 if (errors.length) { console.error('Review contract boundary: FAIL'); errors.forEach((error) => console.error(`- ${error}`)); process.exitCode = 1; }
 else console.log('Review contract boundary: PASS');

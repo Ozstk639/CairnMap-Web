@@ -1,4 +1,4 @@
-import { canTransitionReviewSubmission, canTransitionReviewWorkflow, createReviewSubmissionIdempotencyKey, createReviewWorkflowIdempotencyKey, createReviewWorkspaceAdapterRegistry, emptyReviewWorkspaceSession, hasExpectedReviewSubmissionStateVersion, isReviewSubmissionActionAllowed, loadReviewWorkspaceSession, markReviewWorkspaceDirty, preflightReviewRelease, recordReviewWorkspaceIntent, serializeReviewReleasePreflightReport, targetStateForReviewIntent, type TemporaryLayerPort } from '../../src/components/Review';
+import { canTransitionReviewSubmission, canTransitionReviewWorkflow, createIdleReviewReleaseGate, createReviewSubmissionIdempotencyKey, createReviewWorkflowIdempotencyKey, createReviewWorkspaceAdapterRegistry, emptyReviewWorkspaceSession, hasExpectedReviewSubmissionStateVersion, isReviewSubmissionActionAllowed, loadReviewWorkspaceSession, markReviewWorkspaceDirty, preflightReviewRelease, recordReviewWorkspaceIntent, ReviewOperationError, serializeReviewReleasePreflightReport, targetStateForReviewIntent, type TemporaryLayerPort } from '../../src/components/Review';
 
 const layers: TemporaryLayerPort = { mount() {}, clear() {} };
 const registry = createReviewWorkspaceAdapterRegistry();
@@ -16,6 +16,10 @@ if (!canTransitionReviewSubmission('pending', 'approved') || canTransitionReview
 if (!isReviewSubmissionActionAllowed('pending', 'save') || isReviewSubmissionActionAllowed('approved', 'save')) throw new Error('submission action guard failed');
 if (!hasExpectedReviewSubmissionStateVersion(4, 4) || hasExpectedReviewSubmissionStateVersion(4, 5)) throw new Error('state version guard failed');
 if (createReviewSubmissionIdempotencyKey({ submissionId: 'submission-1', targetRevisionId: 'submission-1-r2', action: 'approve', correlationId: 'c-1' }) !== 'submission-1:submission-1-r2:approve:c-1') throw new Error('submission idempotency key failed');
+const idleGate = createIdleReviewReleaseGate();
+if (idleGate.state !== 'idle' || idleGate.initialized !== false || idleGate.gateVersion !== 0 || idleGate.updatedAt !== undefined) throw new Error('idle release gate normalization failed');
+const operationError = new ReviewOperationError({ code: 'blocked', message: 'blocked for test', retryable: true, correlationId: 'c-1', details: ['detail'] });
+if (operationError.code !== 'blocked' || !operationError.retryable || operationError.correlationId !== 'c-1' || operationError.details[0] !== 'detail') throw new Error('operation error contract failed');
 const warningPreflight = preflightReviewRelease({
   package: { submissionId: 'submission-1', revisionId: 'r2', sha256: 'a'.repeat(64), byteLength: 22 },
   candidate: { baseReleaseId: 'release-old', upserts: [{ worldId: 'world-a', classCode: 'BUD', featureId: 'f-1' }], deletes: [{ worldId: 'world-a', classCode: 'BUD', featureId: 'f-2' }] },
