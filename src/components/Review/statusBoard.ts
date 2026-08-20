@@ -1,4 +1,36 @@
-import type { ReviewAuthorizationContext, ReviewSubmissionState } from './contracts';
+import type { ReviewAuthorizationContext, ReviewReleaseGateSnapshot, ReviewSubmissionState } from './contracts';
+
+const activeReleaseGateStates = new Set<ReviewReleaseGateSnapshot['state']>([
+  'prechecking',
+  'awaiting-confirmation',
+  'queueing',
+  'running',
+  'mirroring',
+]);
+
+/**
+ * Treat an expired lease as inactive for presentation and retry decisions.
+ * A missing or malformed lease remains conservatively active: only an
+ * explicit, valid expiry can make an active-looking gate eligible for retry.
+ * The authority must still acquire the lock conditionally before any release.
+ */
+export function isReviewReleaseGateLeaseActive(
+  gate: Pick<ReviewReleaseGateSnapshot, 'state' | 'leaseExpiresAt'>,
+  now = Date.now(),
+): boolean {
+  if (!activeReleaseGateStates.has(gate.state)) return false;
+  const expiresAt = Date.parse(gate.leaseExpiresAt ?? '');
+  return !Number.isFinite(expiresAt) || expiresAt > now;
+}
+
+export function isReviewReleaseGateLeaseExpired(
+  gate: Pick<ReviewReleaseGateSnapshot, 'state' | 'leaseExpiresAt'>,
+  now = Date.now(),
+): boolean {
+  if (!activeReleaseGateStates.has(gate.state)) return false;
+  const expiresAt = Date.parse(gate.leaseExpiresAt ?? '');
+  return Number.isFinite(expiresAt) && expiresAt <= now;
+}
 
 /**
  * The board is deliberately separate from package revisions. A decision is
