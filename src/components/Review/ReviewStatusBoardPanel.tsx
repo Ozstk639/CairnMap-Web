@@ -13,12 +13,15 @@ import {
   type ReviewReleaseControlReport,
   type ReviewReleaseGateSnapshot,
   type ReviewStatusBoardAdapter,
+  type ReviewSubmissionActionKind,
   type ReviewSubmissionAdapter,
   type ReviewSubmissionSnapshot,
   type ReviewWorkspaceLoadProgress,
 } from './contracts';
 import {
   compareReviewStatusBoards,
+  isReviewReleaseGateLeaseActive,
+  isReviewReleaseGateLeaseExpired,
   isReviewStatusBoardDirty,
   type ReviewStatusBoardEntry,
   type ReviewStatusBoardSnapshot,
@@ -68,6 +71,34 @@ function normalizeGate(value: ReviewReleaseGateSnapshot | null | undefined) {
   return value && typeof value.state === 'string' ? value : createIdleReviewReleaseGate();
 }
 
+function reviewDecisionLabel(decision: string | undefined): string {
+  return ({
+    ready: '可继续',
+    'warning-confirmation-required': '需要人工确认',
+    blocked: '已阻断',
+    stale: '状态已过期',
+  } as Record<string, string>)[decision ?? ''] ?? '无结论';
+}
+
+function reviewFindingLabel(code: string, fallback?: string): string {
+  return ({
+    PACKAGE_INVALID: '审核包包含无效的要素或删除标识。',
+    UPSERT_DUPLICATE: '审核包中存在重复的要素更新或删除目标。',
+    DELETE_TARGET_MISSING: '删除目标不存在于当前正式数据中。',
+    DELETE_TARGET_AMBIGUOUS: '删除目标匹配多个要素；请补充世界和分类。',
+    SOURCE_SNAPSHOT_UNAVAILABLE: '当前正式数据快照不可用或不完整。',
+    SUBMISSION_STATE_CHANGED: '审核包状态已被其他操作更新。',
+    RELEASE_IN_PROGRESS: '当前已有发布正在进行。',
+    BASE_RELEASE_CHANGED: '该包基于较早的正式版本，将按当前正式数据继续核验。',
+    UPSERT_OVERWRITES_CURRENT: '该要素会覆盖当前同世界、同分类、同 ID 的要素。',
+    DELETE_EXISTING_TARGET: '删除目标存在；确认后将从正式数据中移除。',
+    SOURCE_FINGERPRINT_UNAVAILABLE: '当前或待更新要素缺少内容指纹，无法精确比较覆盖差异。',
+    BATCH_TARGET_OVERLAP: '另一已选审核包更新同一要素；请确认发布顺序。',
+    BATCH_DELETE_TARGET_OVERLAP: '另一已选审核包删除同一目标；请仅保留一个版本。',
+    PRECHECK_STALE: '预检结果已过期，请重新执行预检。',
+  } as Record<string, string>)[code] ?? fallback ?? '未提供阻断或警告说明。';
+}
+
 function createEntry(submission: ReviewSubmissionSnapshot, existing?: ReviewStatusBoardEntry): ReviewStatusBoardEntry {
   if (existing) return existing;
   const state = ['pending', 'approved', 'rejected', 'archived'].includes(submission.state)
@@ -85,13 +116,20 @@ function createEntry(submission: ReviewSubmissionSnapshot, existing?: ReviewStat
 
 function reportView(report: ReviewReleaseControlReport | ReviewPackagePrecheckReport | null, title: string) {
   if (!report) return null;
-  const findings = 'findings' in report ? report.findings : report.report?.findings ?? [];
+  const rawFindings = 'findings' in report ? report.findings : report.report?.findings ?? [];
+  const localizedFindings = rawFindings.map((finding) => {
+    const code = 'code' in finding ? finding.code : undefined;
+    return {
+      ...finding,
+      key: code ?? finding.message ?? 'finding',
+      message: code ? reviewFindingLabel(code, finding.message) : finding.message ?? '未提供阻断或警告说明。',
+    };
+  });
   return <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700">
-    <div className="font-semibold">{title}：{report.decision ?? '无决定'}</div>
-    {findings.length ? <div className="mt-2 space-y-1">{findings.map((finding, index) => <div key={`${finding.message ?? 'finding'}-${index}`} className={finding.severity === 'blocker' ? 'text-red-700' : finding.severity === 'warning' ? 'text-amber-700' : 'text-gray-600'}>• {finding.message ?? '未提供说明'}</div>)}</div> : <div className="mt-1 text-gray-500">未返回阻断或警告项。</div>}
+    <div className="font-semibold">{title}：{reviewDecisionLabel(report.decision)}</div>
+    {localizedFindings.length ? <div className="mt-2 space-y-1">{localizedFindings.map((finding, index) => <div key={`${finding.key}-${index}`} className={finding.severity === 'blocker' ? 'text-red-700' : finding.severity === 'warning' ? 'text-amber-700' : 'text-gray-600'}>• {finding.message}</div>)}</div> : <div className="mt-1 text-gray-500">未返回阻断或警告项。</div>}
   </div>;
 }
-
 function progressText(progress: ReviewWorkspaceLoadProgress) {
   if (!progress.totalBytes || progress.completedBytes === undefined) return progress.message;
   return `${progress.message} ${Math.min(100, Math.round((progress.completedBytes / progress.totalBytes) * 100))}%`;
@@ -117,6 +155,7 @@ export function ReviewStatusBoardPanel({ auth, submissionAdapter, releaseControl
   const revision = detail?.revisions.find((candidate) => candidate.revisionId === revisionId)
     ?? detail?.revisions.find((candidate) => candidate.revisionId === detail.currentRevisionId)
     ?? null;
+  const allowsDetailAction = (action: ReviewSubmissionActionKind) => Boolean(detail?.allowedActions.includes(action));
   const selectedEntries = useMemo(() => draft.filter((entry) => selectedIds.has(entry.submissionId)), [draft, selectedIds]);
   const dirty = board ? isReviewStatusBoardDirty({ baseBoardVersion: board.boardVersion, entries: draft }, board) : false;
   const publishReady = releaseReport?.decision === 'ready' || releaseReport?.decision === 'warning-confirmation-required';
@@ -151,6 +190,10 @@ export function ReviewStatusBoardPanel({ auth, submissionAdapter, releaseControl
     const current = draft.find((entry) => entry.submissionId === submissionId);
     const selected = submissions.find((item) => item.submissionId === submissionId);
     if (!current || !selected) return;
+    if (!decisionAction || !selected.allowedActions.includes(decisionAction)) {
+      setMessage('当前审核包状态不允许此操作；请刷新详情或选择允许该操作的状态。');
+      return;
+    }
     const actionLabel = ({ approve: '通过', reject: '打回', 'request-changes': '要求修改', archive: '归档', reopen: '恢复待审' } as Record<string, string>)[decisionAction ?? ''] ?? stateLabel(state);
     if (!window.confirm(`确认${actionLabel}此审核包？此操作仅修改本地状态灯，需点击“保存状态”后才会提交。`)) return;
     const selectedRevision = selected.revisions.find((item) => item.revisionId === revisionId) ?? selected.revisions.find((item) => item.revisionId === selected.currentRevisionId);
@@ -215,6 +258,10 @@ export function ReviewStatusBoardPanel({ auth, submissionAdapter, releaseControl
 
   const packagePrecheck = useCallback(async () => {
     if (!detail || !revision || !submissionAdapter.precheckSubmission) return;
+    if (!detail.allowedActions.includes('precheck')) {
+      setMessage('当前审核包状态不允许预检；请改选待审核包，或先执行“恢复待审”。');
+      return;
+    }
     setBusy('package-precheck');
     setPackageReport(null);
     try {
@@ -267,7 +314,8 @@ export function ReviewStatusBoardPanel({ auth, submissionAdapter, releaseControl
     try {
       const gate = normalizeGate(await releaseControl.getReleaseGate(actor));
       setReleaseGate(gate);
-      if (['prechecking', 'awaiting-confirmation', 'queueing', 'running', 'mirroring'].includes(gate.state)) { setMessage('当前已有发布进行中，请稍后刷新 Release Gate。'); return; }
+      if (isReviewReleaseGateLeaseActive(gate)) { setMessage('当前已有发布进行中，请稍后刷新 Release Gate。'); return; }
+      if (isReviewReleaseGateLeaseExpired(gate)) setMessage(null);
       const remote = await submissionAdapter.getStatusBoard(actor);
       const differences = compareReviewStatusBoards(draft, remote.entries).filter((difference) => difference.kind !== 'unchanged');
       if (remote.boardVersion !== board.boardVersion || differences.length) {
@@ -324,7 +372,7 @@ export function ReviewStatusBoardPanel({ auth, submissionAdapter, releaseControl
       <div className="w-[430px] max-h-[74vh] overflow-auto rounded-2xl border border-gray-200 bg-white shadow-xl" data-draggable-proxy-close="true">
         <div className="flex items-start justify-between border-b border-gray-200 px-5 py-4"><div><h2 className="text-xl font-bold text-gray-900" data-draggable-title>审核序列</h2><p className="mt-1 text-sm text-gray-500">状态灯先本地编辑；仅“保存状态”会提交至审核服务。</p></div><button type="button" data-draggable-close className="sr-only" aria-label="关闭" onClick={onClose} /></div>
         <div className="space-y-3 p-4">
-          <div className="grid grid-cols-2 gap-2"><AppButton onClick={() => void refreshGate()} disabled={busy !== null} className="justify-center rounded-xl bg-gray-100 px-3 py-2 text-sm text-gray-700 hover:bg-gray-200"><ShieldCheck className="h-4 w-4" />刷新 Release Gate</AppButton><AppButton onClick={() => void refreshFeed()} disabled={busy !== null} className="justify-center rounded-xl bg-gray-100 px-3 py-2 text-sm text-gray-700 hover:bg-gray-200"><FileText className="h-4 w-4" />刷新发布记录</AppButton><AppButton onClick={() => void refreshList()} disabled={busy !== null} className="justify-center rounded-xl bg-blue-50 px-3 py-2 text-sm text-blue-700 hover:bg-blue-100"><RefreshCw className="h-4 w-4" />刷新列表</AppButton><div className="rounded-xl bg-gray-50 px-3 py-2 text-center text-sm text-gray-600">Gate：{releaseGate ? stateLabel(releaseGate.state) : '未读取'} · 已选 {selectedIds.size}</div></div>
+          <div className="grid grid-cols-2 gap-2"><AppButton onClick={() => void refreshGate()} disabled={busy !== null} className="justify-center rounded-xl bg-gray-100 px-3 py-2 text-sm text-gray-700 hover:bg-gray-200"><ShieldCheck className="h-4 w-4" />刷新 Release Gate</AppButton><AppButton onClick={() => void refreshFeed()} disabled={busy !== null} className="justify-center rounded-xl bg-gray-100 px-3 py-2 text-sm text-gray-700 hover:bg-gray-200"><FileText className="h-4 w-4" />刷新发布记录</AppButton><AppButton onClick={() => void refreshList()} disabled={busy !== null} className="justify-center rounded-xl bg-blue-50 px-3 py-2 text-sm text-blue-700 hover:bg-blue-100"><RefreshCw className="h-4 w-4" />刷新列表</AppButton><div className="rounded-xl bg-gray-50 px-3 py-2 text-center text-sm text-gray-600">Gate：{releaseGate ? (isReviewReleaseGateLeaseExpired(releaseGate) ? '已过期' : stateLabel(releaseGate.state)) : '未读取'} · 已选 {selectedIds.size}</div></div>
           {message ? <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">{message}</div> : null}
           <div className="flex items-center justify-between"><h3 className="font-semibold text-gray-900">待审核包</h3><div className="flex gap-3 text-sm"><button type="button" className="text-blue-600 hover:underline" onClick={() => setSelectedIds(new Set(submissions.map((item) => item.submissionId)))}>全选</button><button type="button" className="text-gray-500 hover:underline" onClick={() => setSelectedIds(new Set())}>清空选择</button></div></div>
           <div className="space-y-2">{submissions.map((submission) => { const entry = draft.find((item) => item.submissionId === submission.submissionId); return <button key={submission.submissionId} type="button" onClick={() => { setDetailId(submission.submissionId); setRevisionId(submission.currentRevisionId); setPackageReport(null); }} className="w-full rounded-2xl border border-blue-200 bg-blue-50 p-3 text-left hover:border-blue-400"><div className="flex gap-3"><input aria-label={`选择 ${submission.packageName}`} type="checkbox" checked={selectedIds.has(submission.submissionId)} onClick={(event) => event.stopPropagation()} onChange={() => setSelectedIds((previous) => { const next = new Set(previous); if (next.has(submission.submissionId)) next.delete(submission.submissionId); else next.add(submission.submissionId); return next; })} /><div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-2"><span className="truncate font-semibold text-gray-900">{submission.packageName}</span><span className={`shrink-0 rounded-full px-2 py-1 text-xs ${stateTone(entry?.state ?? submission.state)}`}>{stateLabel(entry?.state ?? submission.state)}</span></div><div className="mt-1 text-xs text-gray-500">{submission.submissionId}</div><div className="mt-2 text-xs text-gray-600">决策版本：{entry?.decisionRevisionId ?? '未选择'} · 共 {submission.revisions.length} 个版本</div></div></div></button>; })}</div>
@@ -334,7 +382,60 @@ export function ReviewStatusBoardPanel({ auth, submissionAdapter, releaseControl
         </div>
       </div>
     </DraggablePanel>
-    {detail ? <DraggablePanel id="review-package-detail" defaultPosition={{ x: 900, y: 132 }} zIndex={1761} constrainExpandedToViewport><div className="w-[390px] max-h-[74vh] overflow-auto rounded-2xl border border-gray-200 bg-white p-4 shadow-xl" data-draggable-proxy-close="true"><div className="flex items-start justify-between"><div><h3 className="text-xl font-bold text-gray-900" data-draggable-title>审核包详情</h3><p className="mt-1 text-sm text-gray-500">{detail.submissionId}</p></div><button type="button" data-draggable-close className="sr-only" aria-label="关闭" onClick={() => setDetailId(null)} /></div><div className="mt-4 flex gap-2"><select className="min-w-0 flex-1 rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm" value={revision?.revisionId ?? ''} onChange={(event) => { setRevisionId(event.target.value); setPackageReport(null); }}>{detail.revisions.map((item) => <option key={item.revisionId} value={item.revisionId}>{item.revisionId}</option>)}</select><AppButton onClick={() => void refreshList()} disabled={busy !== null} className="rounded-xl bg-gray-100 px-3 text-gray-700 hover:bg-gray-200"><RefreshCw className="h-4 w-4" />刷新</AppButton></div><div className="mt-3 grid grid-cols-3 gap-2 text-center text-sm"><div className="rounded-xl bg-blue-50 p-2 text-blue-700"><b>{revision?.package.featureCount ?? 0}</b><div>要素</div></div><div className="rounded-xl bg-amber-50 p-2 text-amber-700"><b>{revision?.package.deleteCount ?? 0}</b><div>删除</div></div><div className="rounded-xl bg-purple-50 p-2 text-purple-700"><b>{revision?.package.pictureCount ?? 0}</b><div>图片</div></div></div><div className="mt-3 space-y-2"><AppButton onClick={() => void loadWorkspace()} disabled={!revision || busy !== null} className="w-full justify-center rounded-xl bg-orange-600 px-3 py-2 font-semibold text-white hover:bg-orange-700 disabled:bg-orange-300"><FileDown className="h-4 w-4" />加载到审核工作区</AppButton><AppButton onClick={() => void packagePrecheck()} disabled={!revision || busy !== null} className="w-full justify-center rounded-xl bg-blue-600 px-3 py-2 font-semibold text-white hover:bg-blue-700 disabled:bg-blue-300"><ClipboardCheck className="h-4 w-4" />预检</AppButton>{reportView(packageReport, '审核包预检报告')}</div><div className="mt-4 grid grid-cols-3 gap-2 border-t border-gray-100 pt-3"><AppButton onClick={() => updateDraft(detail.submissionId, 'archived', 'archive')} disabled={busy !== null} className="justify-center rounded-xl bg-gray-100 px-2 py-2 text-xs text-gray-700 hover:bg-gray-200"><Archive className="h-3.5 w-3.5" />归档</AppButton><AppButton onClick={() => { const reason = window.prompt('请填写要求修改的原因：'); if (reason?.trim()) updateDraft(detail.submissionId, 'rejected', 'request-changes', reason.trim()); }} disabled={busy !== null} className="justify-center rounded-xl bg-red-50 px-2 py-2 text-xs text-red-700 hover:bg-red-100"><XCircle className="h-3.5 w-3.5" />要求修改</AppButton><AppButton onClick={() => updateDraft(detail.submissionId, 'pending', 'reopen')} disabled={busy !== null} className="justify-center rounded-xl bg-amber-50 px-2 py-2 text-xs text-amber-800 hover:bg-amber-100"><RotateCcw className="h-3.5 w-3.5" />恢复待审</AppButton></div><div className="mt-2 grid grid-cols-2 gap-2"><AppButton onClick={() => updateDraft(detail.submissionId, 'approved', 'approve')} disabled={busy !== null} className="justify-center rounded-xl bg-green-600 px-2 py-2 text-xs text-white hover:bg-green-700"><CheckCircle2 className="h-3.5 w-3.5" />通过</AppButton><AppButton onClick={() => { const reason = window.prompt('请填写打回原因：'); if (reason?.trim()) updateDraft(detail.submissionId, 'rejected', 'reject', reason.trim()); }} disabled={busy !== null} className="justify-center rounded-xl bg-rose-600 px-2 py-2 text-xs text-white hover:bg-rose-700"><XCircle className="h-3.5 w-3.5" />打回</AppButton></div></div></DraggablePanel> : null}
++    {detail ? (
+      <DraggablePanel id="review-package-detail" defaultPosition={{ x: 900, y: 132 }} zIndex={1761} constrainExpandedToViewport>
+        <div className="w-[390px] max-h-[74vh] overflow-auto rounded-2xl border border-gray-200 bg-white p-4 shadow-xl" data-draggable-proxy-close="true">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900" data-draggable-title>审核包详情</h3>
+              <p className="mt-1 text-sm text-gray-500">{detail.submissionId}</p>
+            </div>
+            <button type="button" data-draggable-close className="sr-only" aria-label="关闭" onClick={() => setDetailId(null)} />
+          </div>
+          <div className="mt-4 flex gap-2">
+            <select className="min-w-0 flex-1 rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm" value={revision?.revisionId ?? ''} onChange={(event) => { setRevisionId(event.target.value); setPackageReport(null); }}>
+              {detail.revisions.map((item) => <option key={item.revisionId} value={item.revisionId}>{item.revisionId}</option>)}
+            </select>
+            <AppButton onClick={() => void refreshList()} disabled={busy !== null} className="rounded-xl bg-gray-100 px-3 text-gray-700 hover:bg-gray-200">
+              <RefreshCw className="h-4 w-4" />刷新
+            </AppButton>
+          </div>
+          <div className="mt-3 grid grid-cols-3 gap-2 text-center text-sm">
+            <div className="rounded-xl bg-blue-50 p-2 text-blue-700"><b>{revision?.package.featureCount ?? 0}</b><div>要素</div></div>
+            <div className="rounded-xl bg-amber-50 p-2 text-amber-700"><b>{revision?.package.deleteCount ?? 0}</b><div>删除</div></div>
+            <div className="rounded-xl bg-purple-50 p-2 text-purple-700"><b>{revision?.package.pictureCount ?? 0}</b><div>图片</div></div>
+          </div>
+          <div className="mt-3 space-y-2">
+            <AppButton onClick={() => void loadWorkspace()} disabled={!revision || busy !== null} className="w-full justify-center rounded-xl bg-orange-600 px-3 py-2 font-semibold text-white hover:bg-orange-700 disabled:bg-orange-300">
+              <FileDown className="h-4 w-4" />加载到审核工作区
+            </AppButton>
+            <AppButton onClick={() => void packagePrecheck()} disabled={!revision || !allowsDetailAction('precheck') || busy !== null} className="w-full justify-center rounded-xl bg-blue-600 px-3 py-2 font-semibold text-white hover:bg-blue-700 disabled:bg-blue-300">
+              <ClipboardCheck className="h-4 w-4" />预检
+            </AppButton>
+            {reportView(packageReport, '审核包预检报告')}
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-2 border-t border-gray-100 pt-3">
+            <AppButton onClick={() => updateDraft(detail.submissionId, 'archived', 'archive')} disabled={!allowsDetailAction('archive') || busy !== null} className="justify-center rounded-xl bg-gray-100 px-2 py-2 text-xs text-gray-700 hover:bg-gray-200">
+              <Archive className="h-3.5 w-3.5" />归档
+            </AppButton>
+            <AppButton onClick={() => { const reason = window.prompt('请填写要求修改的原因：'); if (reason?.trim()) updateDraft(detail.submissionId, 'rejected', 'request-changes', reason.trim()); }} disabled={!allowsDetailAction('request-changes') || busy !== null} className="justify-center rounded-xl bg-red-50 px-2 py-2 text-xs text-red-700 hover:bg-red-100">
+              <XCircle className="h-3.5 w-3.5" />要求修改
+            </AppButton>
+            <AppButton onClick={() => updateDraft(detail.submissionId, 'pending', 'reopen')} disabled={!allowsDetailAction('reopen') || busy !== null} className="justify-center rounded-xl bg-amber-50 px-2 py-2 text-xs text-amber-800 hover:bg-amber-100">
+              <RotateCcw className="h-3.5 w-3.5" />恢复待审
+            </AppButton>
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <AppButton onClick={() => updateDraft(detail.submissionId, 'approved', 'approve')} disabled={!allowsDetailAction('approve') || busy !== null} className="justify-center rounded-xl bg-green-600 px-2 py-2 text-xs text-white hover:bg-green-700">
+              <CheckCircle2 className="h-3.5 w-3.5" />通过
+            </AppButton>
+            <AppButton onClick={() => { const reason = window.prompt('请填写打回原因：'); if (reason?.trim()) updateDraft(detail.submissionId, 'rejected', 'reject', reason.trim()); }} disabled={!allowsDetailAction('reject') || busy !== null} className="justify-center rounded-xl bg-rose-600 px-2 py-2 text-xs text-white hover:bg-rose-700">
+              <XCircle className="h-3.5 w-3.5" />打回
+            </AppButton>
+          </div>
+        </div>
+      </DraggablePanel>
+    ) : null}
     {releaseFeed ? <DraggablePanel id="review-release-feed" defaultPosition={{ x: 870, y: 180 }} zIndex={1762} constrainExpandedToViewport><div className="w-[330px] max-h-[60vh] overflow-auto rounded-2xl border border-gray-200 bg-white p-4 shadow-xl" data-draggable-proxy-close="true"><h3 className="text-base font-bold text-gray-900" data-draggable-title>发布记录</h3><button type="button" data-draggable-close className="sr-only" aria-label="关闭" onClick={() => setReleaseFeed(null)} />{releaseFeed.length ? <div className="mt-3 space-y-2">{releaseFeed.map((item) => <div key={item.releaseId} className="rounded-xl bg-gray-50 p-2 text-xs"><div className="font-semibold text-gray-800">{item.releaseId}</div><div className="mt-1 text-gray-500">{item.occurredAt} · {stateLabel(item.state)}</div></div>)}</div> : <p className="mt-3 text-sm text-gray-500">暂无发布记录。</p>}</div></DraggablePanel> : null}
     {loadProgress ? <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40" role="dialog" aria-live="polite"><div className="w-[420px] max-w-[90vw] rounded-2xl border border-gray-200 bg-white shadow-xl"><div className="border-b border-gray-200 px-4 py-3 text-sm font-bold text-gray-900">正在加载审核包</div><div className="px-4 py-4 text-sm text-gray-700">{progressText(loadProgress)}</div><div className="px-4 pb-4"><div className="h-2 overflow-hidden rounded bg-gray-100"><div className="h-full w-3/5 animate-pulse rounded bg-blue-600" /></div></div></div></div> : null}
   </>;
