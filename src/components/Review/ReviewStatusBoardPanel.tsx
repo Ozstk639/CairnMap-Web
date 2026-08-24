@@ -58,6 +58,24 @@ function stateTone(state: string) {
   return ({ pending: 'bg-amber-100 text-amber-800', approved: 'bg-green-100 text-green-700', rejected: 'bg-red-100 text-red-700', archived: 'bg-gray-200 text-gray-700' } as Record<string, string>)[state] ?? 'bg-blue-100 text-blue-700';
 }
 
+function isStatusLampState(state: string): state is ReviewStatusBoardEntry['state'] {
+  return ['pending', 'approved', 'rejected', 'archived'].includes(state);
+}
+
+function displayState(submission: ReviewSubmissionSnapshot, entry?: ReviewStatusBoardEntry): string {
+  // Package state is authoritative for release-owned and failed submissions.
+  // Their older persisted lamp may still be pending/approved, but it must never
+  // disguise an in-flight or failed release as an editable review decision.
+  return isStatusLampState(submission.state) ? entry?.state ?? submission.state : submission.state;
+}
+
+function canSaveStatusLamp(submission: ReviewSubmissionSnapshot, entry: ReviewStatusBoardEntry): boolean {
+  if (isStatusLampState(submission.state)) return true;
+  // A failed package can only return through an explicit reviewer decision,
+  // never because a stale pending lamp is saved by accident.
+  return submission.state === 'failed' && entry.state === 'pending' && entry.decisionAction === 'reopen';
+}
+
 function describeError(error: unknown) {
   if (error instanceof ReviewOperationError) {
     const correlation = error.correlationId ? `（关联 ID：${error.correlationId}）` : '';
@@ -160,9 +178,9 @@ export function ReviewStatusBoardPanel({ auth, submissionAdapter, releaseControl
   const dirty = board ? isReviewStatusBoardDirty({ baseBoardVersion: board.boardVersion, entries: draft }, board) : false;
   const publishReady = releaseReport?.decision === 'ready' || releaseReport?.decision === 'warning-confirmation-required';
 
-  const refreshList = useCallback(async () => {
+  const refreshList = useCallback(async ({ preserveMessage = false }: { preserveMessage?: boolean } = {}) => {
     setBusy('refresh');
-    setMessage(null);
+    if (!preserveMessage) setMessage(null);
     try {
       const session = await auth.getSession();
       if (session.status !== 'authenticated' || !session.principalId) throw new ReviewOperationError({ code: 'authentication-required', message: session.message ?? '请先登录已授权身份。' });
@@ -177,7 +195,7 @@ export function ReviewStatusBoardPanel({ auth, submissionAdapter, releaseControl
       setSubmissions(items);
       setBoard({ ...remoteBoard, entries: hydrated });
       setDraft(hydrated);
-      setSelectedIds((previous) => new Set([...previous].filter((id) => items.some((item) => item.submissionId === id))));
+      setSelectedIds((previous) => new Set([...previous].filter((id) => items.some((item) => item.submissionId === id && isStatusLampState(item.state)))));
       setDetailId((previous) => previous && items.some((item) => item.submissionId === previous) ? previous : null);
     } catch (error) {
       setMessage(describeError(error));
@@ -211,6 +229,14 @@ export function ReviewStatusBoardPanel({ auth, submissionAdapter, releaseControl
 
   const saveStatus = useCallback(async () => {
     if (!board || !selectedEntries.length) return;
+    const protectedEntries = selectedEntries.filter((entry) => {
+      const submission = submissions.find((item) => item.submissionId === entry.submissionId);
+      return !submission || !canSaveStatusLamp(submission, entry);
+    });
+    if (protectedEntries.length) {
+      setMessage(`保存状态已阻断：${protectedEntries.map((entry) => entry.submissionId).join('、')} 正处于发布保护或失败状态。请先刷新；失败包只能在详情中明确选择“恢复待审”后再保存。`);
+      return;
+    }
     setBusy('save-status');
     try {
       const remote = await submissionAdapter.getStatusBoard(actor);
@@ -226,20 +252,19 @@ export function ReviewStatusBoardPanel({ auth, submissionAdapter, releaseControl
         return;
       }
       if (!window.confirm(`确认保存 ${selectedEntries.length} 个审核包的状态灯？`)) return;
-      const result = await submissionAdapter.saveStatusBoard({
+      await submissionAdapter.saveStatusBoard({
         requestId: createId('status-save'), correlationId: createId('status-correlation'), idempotencyKey: createId('status-idempotency'),
         expectedBoardVersion, entries: selectedEntries, actor, occurredAt: new Date().toISOString(),
       });
-      setBoard(result.board);
-      setDraft(result.board.entries.map((entry) => ({ ...entry })));
-      setMessage('审核状态已保存。');
       setReleaseReport(null);
+      await refreshList({ preserveMessage: true });
+      setMessage('审核状态已保存。');
     } catch (error) {
       setMessage(describeError(error));
     } finally {
       setBusy(null);
     }
-  }, [actor, board, draft, selectedEntries, submissionAdapter]);
+  }, [actor, board, draft, refreshList, selectedEntries, submissionAdapter, submissions]);
 
   const loadWorkspace = useCallback(async () => {
     if (!detail || !revision) return;
@@ -355,7 +380,7 @@ export function ReviewStatusBoardPanel({ auth, submissionAdapter, releaseControl
       setReleaseReport(result);
       setReleaseGate(normalizeGate(result.gate));
       setMessage('发布已进入受控执行队列。');
-      await refreshList();
+      await refreshList({ preserveMessage: true });
     } catch (error) {
       setMessage(describeError(error));
     } finally {
@@ -374,8 +399,8 @@ export function ReviewStatusBoardPanel({ auth, submissionAdapter, releaseControl
         <div className="space-y-3 p-4">
           <div className="grid grid-cols-2 gap-2"><AppButton onClick={() => void refreshGate()} disabled={busy !== null} className="justify-center rounded-xl bg-gray-100 px-3 py-2 text-sm text-gray-700 hover:bg-gray-200"><ShieldCheck className="h-4 w-4" />刷新 Release Gate</AppButton><AppButton onClick={() => void refreshFeed()} disabled={busy !== null} className="justify-center rounded-xl bg-gray-100 px-3 py-2 text-sm text-gray-700 hover:bg-gray-200"><FileText className="h-4 w-4" />刷新发布记录</AppButton><AppButton onClick={() => void refreshList()} disabled={busy !== null} className="justify-center rounded-xl bg-blue-50 px-3 py-2 text-sm text-blue-700 hover:bg-blue-100"><RefreshCw className="h-4 w-4" />刷新列表</AppButton><div className="rounded-xl bg-gray-50 px-3 py-2 text-center text-sm text-gray-600">Gate：{releaseGate ? (isReviewReleaseGateLeaseExpired(releaseGate) ? '已过期' : stateLabel(releaseGate.state)) : '未读取'} · 已选 {selectedIds.size}</div></div>
           {message ? <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">{message}</div> : null}
-          <div className="flex items-center justify-between"><h3 className="font-semibold text-gray-900">待审核包</h3><div className="flex gap-3 text-sm"><button type="button" className="text-blue-600 hover:underline" onClick={() => setSelectedIds(new Set(submissions.map((item) => item.submissionId)))}>全选</button><button type="button" className="text-gray-500 hover:underline" onClick={() => setSelectedIds(new Set())}>清空选择</button></div></div>
-          <div className="space-y-2">{submissions.map((submission) => { const entry = draft.find((item) => item.submissionId === submission.submissionId); return <button key={submission.submissionId} type="button" onClick={() => { setDetailId(submission.submissionId); setRevisionId(submission.currentRevisionId); setPackageReport(null); }} className="w-full rounded-2xl border border-blue-200 bg-blue-50 p-3 text-left hover:border-blue-400"><div className="flex gap-3"><input aria-label={`选择 ${submission.packageName}`} type="checkbox" checked={selectedIds.has(submission.submissionId)} onClick={(event) => event.stopPropagation()} onChange={() => setSelectedIds((previous) => { const next = new Set(previous); if (next.has(submission.submissionId)) next.delete(submission.submissionId); else next.add(submission.submissionId); return next; })} /><div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-2"><span className="truncate font-semibold text-gray-900">{submission.packageName}</span><span className={`shrink-0 rounded-full px-2 py-1 text-xs ${stateTone(entry?.state ?? submission.state)}`}>{stateLabel(entry?.state ?? submission.state)}</span></div><div className="mt-1 text-xs text-gray-500">{submission.submissionId}</div><div className="mt-2 text-xs text-gray-600">决策版本：{entry?.decisionRevisionId ?? '未选择'} · 共 {submission.revisions.length} 个版本</div></div></div></button>; })}</div>
+          <div className="flex items-center justify-between"><h3 className="font-semibold text-gray-900">待审核包</h3><div className="flex gap-3 text-sm"><button type="button" className="text-blue-600 hover:underline" onClick={() => setSelectedIds(new Set(submissions.filter((item) => isStatusLampState(item.state)).map((item) => item.submissionId)))}>全选</button><button type="button" className="text-gray-500 hover:underline" onClick={() => setSelectedIds(new Set())}>清空选择</button></div></div>
+          <div className="space-y-2">{submissions.map((submission) => { const entry = draft.find((item) => item.submissionId === submission.submissionId); const shownState = displayState(submission, entry); const selectable = isStatusLampState(submission.state); return <button key={submission.submissionId} type="button" onClick={() => { setDetailId(submission.submissionId); setRevisionId(submission.currentRevisionId); setPackageReport(null); }} className="w-full rounded-2xl border border-blue-200 bg-blue-50 p-3 text-left hover:border-blue-400"><div className="flex gap-3"><input aria-label={`选择 ${submission.packageName}`} type="checkbox" checked={selectedIds.has(submission.submissionId)} disabled={!selectable} onClick={(event) => event.stopPropagation()} onChange={() => setSelectedIds((previous) => { const next = new Set(previous); if (next.has(submission.submissionId)) next.delete(submission.submissionId); else next.add(submission.submissionId); return next; })} /><div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-2"><span className="truncate font-semibold text-gray-900">{submission.packageName}</span><span className={`shrink-0 rounded-full px-2 py-1 text-xs ${stateTone(shownState)}`}>{stateLabel(shownState)}</span></div><div className="mt-1 text-xs text-gray-500">{submission.submissionId}</div><div className="mt-2 text-xs text-gray-600">决策版本：{entry?.decisionRevisionId ?? '未选择'} · 共 {submission.revisions.length} 个版本</div>{!selectable ? <div className="mt-2 text-xs text-amber-700">发布保护状态；请刷新 Release Gate 或在详情中处理明确的失败恢复。</div> : null}</div></div></button>; })}</div>
           <div className="grid grid-cols-3 gap-2 border-t border-gray-100 pt-3"><AppButton disabled={!selectedEntries.length || busy !== null} onClick={() => void saveStatus()} className="justify-center rounded-xl bg-orange-600 px-2 py-2 text-xs text-white hover:bg-orange-700 disabled:bg-orange-300"><CheckCircle2 className="h-3.5 w-3.5" />保存状态</AppButton><AppButton disabled={!selectedEntries.length || dirty || busy !== null} onClick={() => void releasePrecheck()} className="justify-center rounded-xl bg-blue-600 px-2 py-2 text-xs text-white hover:bg-blue-700 disabled:bg-blue-300"><ClipboardCheck className="h-3.5 w-3.5" />发布前检查</AppButton><AppButton disabled={!publishReady || busy !== null} onClick={() => void publish()} className="justify-center rounded-xl bg-green-600 px-2 py-2 text-xs text-white hover:bg-green-700 disabled:bg-green-300"><Send className="h-3.5 w-3.5" />发布</AppButton></div>
           {dirty ? <p className="text-xs text-amber-700">状态灯有未保存的本地修改；请先保存状态。</p> : null}
           {reportView(releaseReport, '发布前检查报告')}
