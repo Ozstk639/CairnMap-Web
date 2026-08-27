@@ -4,6 +4,7 @@ import {
   calculateReviewPackageDigest,
   createReviewRevisionUploadRequest,
   createReviewSubmissionIdentity,
+  saveReviewPackageRevision,
   normalizeReviewPackageDeleteMarks,
   parseReviewPackageBlob,
   REVIEW_PACKAGE_LAYOUT,
@@ -57,6 +58,37 @@ if (knownDigest.sha256 !== '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e7304
 const identity = createReviewSubmissionIdentity({ submissionId: 'submission-test', clock: () => new Date('2026-08-13T00:00:00.000Z') });
 const request = await createReviewRevisionUploadRequest({ artifact, identity, expectedStateVersion: 0 });
 if (request.packageName !== 'test-package' || request.submissionId !== 'submission-test' || request.byteLength !== artifact.blob.size) throw new Error('revision upload request failed');
+
+const revisionStages: string[] = [];
+let uploadedRevisionId = '';
+const revisionSave = await saveReviewPackageRevision({
+  artifact,
+  submissionId: 'submission-test',
+  revisionCount: 3,
+  expectedStateVersion: 9,
+  onProgress: (stage) => revisionStages.push(stage),
+  transport: {
+    async requestRevisionUpload(value) {
+      if (value.submissionId !== 'submission-test' || !value.revisionId.startsWith('submission-test-r4-') || value.expectedStateVersion !== 9) throw new Error('revision-save-request-invalid');
+      uploadedRevisionId = value.revisionId;
+      return { method: 'PUT', url: 'https://example.invalid/upload', headers: {}, key: 'revision.zip', expiresInSeconds: 60 };
+    },
+    async uploadRevision(_grant, blob) {
+      if (blob.size !== artifact.blob.size) throw new Error('revision-save-upload-invalid');
+    },
+    async completeRevisionUpload(value) {
+      if (value.revisionId !== uploadedRevisionId) throw new Error('revision-save-completion-invalid');
+      return { accepted: true, submission: { submissionId: value.submissionId, currentRevisionId: value.revisionId } };
+    },
+  },
+});
+if (revisionSave.submissionId !== 'submission-test' || revisionSave.revisionId !== uploadedRevisionId || revisionStages.join(',') !== 'building-request,requesting-upload,uploading,finalizing,completed') throw new Error('revision save lifecycle failed');
+try {
+  await saveReviewPackageRevision({ artifact, submissionId: 'submission-test', revisionCount: 0, expectedStateVersion: 0, transport: {} as any });
+  throw new Error('revision save accepted invalid revision count');
+} catch (error) {
+  if (!(error instanceof Error) || error.message !== 'review-revision-count-invalid') throw error;
+}
 
 const legacyZip = new JSZip();
 legacyZip.file('legacy/INDEX.json', JSON.stringify({ featureCount: 1, pictureCount: 0, deleteCount: 1 }));
