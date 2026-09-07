@@ -1,12 +1,14 @@
 import JSZip from 'jszip';
 import {
   buildReviewPackageArtifact,
+  buildReviewPackageFiles,
   calculateReviewPackageDigest,
   createReviewRevisionUploadRequest,
   createReviewSubmissionIdentity,
   saveReviewPackageRevision,
   normalizeReviewPackageDeleteMarks,
   parseReviewPackageBlob,
+  REVIEW_PACKAGE_CONTRACT_VERSION,
   REVIEW_PACKAGE_LAYOUT,
   REVIEW_PACKAGE_PROFILE_SCHEMA_VERSION,
   parseReviewPackageProfile,
@@ -29,7 +31,7 @@ try {
   if (!(error instanceof Error) || !error.message.startsWith('review-package-profile-invalid')) throw error;
 }
 
-const artifact = await buildReviewPackageArtifact(profile, {
+const packageDraft = {
   packageName: 'test-package',
   operator: 'tester',
   note: 'contract test',
@@ -37,20 +39,37 @@ const artifact = await buildReviewPackageArtifact(profile, {
   packageVersion: 'draft-test',
   sourceSnapshot: { releaseId: 'release-a', formalVersion: 1, technicalId: 'technical-a', resolvedAt: '2026-08-13T00:00:00.000Z' },
   features: [
-    { worldId: 'world-a', classCode: 'BUD', featureId: 'feature-a', record: { ID: 'feature-a', Class: 'BUD' } },
+    { worldId: 'world-a', classCode: 'BUD', featureId: 'feature-a', kindPath: ['business-kind'], record: { ID: 'feature-a', Class: 'BUD', Kind: 'business-kind' } },
     { worldId: 'world-a', classCode: 'ISG', featureId: 'feature-kind-a', kindPath: ['gate'], record: { ID: 'feature-kind-a', Class: 'ISG' } },
   ],
-  pictures: [],
+  pictures: [
+    { worldId: 'world-a', classCode: 'BUD', featureId: 'feature-a', filename: 'flat-picture.png', kindPath: ['business-kind'], content: new Blob(['flat-picture']) },
+    { worldId: 'world-a', classCode: 'ISG', featureId: 'feature-kind-a', filename: 'nested-picture.png', kindPath: ['gate'], content: new Blob(['nested-picture']) },
+  ],
   deletes: [{ ID: 'feature-b', Name: 'Feature B', worldId: 'world-a', classCode: 'BUD' }],
   extraFiles: buildReviewPackageToolRefreshFiles(),
-});
-if (!artifact.files.some((file) => file.path === REVIEW_PACKAGE_LAYOUT.reviewPath)) throw new Error('review marker not generated');
-if (!artifact.files.some((file) => file.path === 'Data_Spilt/world-a/BUD/feature-a.json')) throw new Error('feature path not generated');
-if (!artifact.files.some((file) => file.path === 'Data_Spilt/world-a/ISG/gate/feature-kind-a.json')) throw new Error('configured nested kind path not generated');
-if (!artifact.files.some((file) => file.path === 'Tool_Refresh/refresh_package_meta.py')) throw new Error('tool refresh path not generated');
+} as const;
+const packageFiles = buildReviewPackageFiles(profile, packageDraft);
+if (!packageFiles.files.some((file) => file.path === REVIEW_PACKAGE_LAYOUT.reviewPath)) throw new Error('review marker not generated');
+if (!packageFiles.files.some((file) => file.path === 'Data_Spilt/world-a/BUD/feature-a.json')) throw new Error('feature path not generated');
+if (packageFiles.files.some((file) => file.path.includes('/BUD/business-kind/'))) throw new Error('unconfigured kind path was not normalized from feature paths');
+if (!packageFiles.files.some((file) => file.path === 'Data_Spilt/world-a/ISG/gate/feature-kind-a.json')) throw new Error('configured nested kind path not generated');
+if (!packageFiles.files.some((file) => file.path === 'Picture/world-a/BUD/feature-a/flat-picture.png')) throw new Error('flat picture path not generated');
+if (packageFiles.files.some((file) => file.path.includes('/BUD/business-kind/'))) throw new Error('unconfigured kind path was not normalized from picture paths');
+if (!packageFiles.files.some((file) => file.path === 'Picture/world-a/ISG/gate/feature-kind-a/nested-picture.png')) throw new Error('configured nested kind picture path not generated');
+if (!packageFiles.files.some((file) => file.path === 'Tool_Refresh/refresh_package_meta.py')) throw new Error('tool refresh path not generated');
+const artifact = await buildReviewPackageArtifact(profile, { ...packageDraft, pictures: [] });
 const parsed = await parseReviewPackageBlob(artifact.blob);
 const strict = validateParsedReviewPackage(parsed, profile, 'strict-submission');
-if (!strict.valid || parsed.features.length !== 2 || parsed.deletes.length !== 1) throw new Error(`strict package validation failed: ${strict.errors.map((entry) => entry.code).join(',')}`);
+if (!strict.valid || parsed.features.length !== 2 || parsed.pictures.length !== 0 || parsed.deletes.length !== 1) throw new Error(`strict package validation failed: ${strict.errors.map((entry) => entry.code).join(',')}`);
+const unconfiguredNestedZip = new JSZip();
+unconfiguredNestedZip.file('INDEX.json', JSON.stringify({ relayPackageContractVersion: REVIEW_PACKAGE_CONTRACT_VERSION, featureCount: 1, pictureCount: 0, deleteCount: 0 }));
+unconfiguredNestedZip.file('Review.json', JSON.stringify({ schemaVersion: 'cairnmap.native-relay-review.v1', status: 'pending', submissionMode: 'review-submission-v2', exportedAt: '2026-08-13T00:00:00.000Z' }));
+unconfiguredNestedZip.file('Delete.json', JSON.stringify({ items: [] }));
+unconfiguredNestedZip.file('Data_Spilt/world-a/BUD/unconfigured/feature-a.json', JSON.stringify({ ID: 'feature-a', Class: 'BUD' }));
+const unconfiguredNested = await parseReviewPackageBlob(await unconfiguredNestedZip.generateAsync({ type: 'blob' }));
+const unconfiguredNestedStrict = validateParsedReviewPackage(unconfiguredNested, profile, 'strict-submission');
+if (unconfiguredNestedStrict.valid || !unconfiguredNestedStrict.errors.some((entry) => entry.code === 'PACKAGE_PATH_UNRECOGNIZED')) throw new Error('strict import accepted an unconfigured nested kind path');
 const digest = await calculateReviewPackageDigest(artifact.blob);
 if (digest.byteLength !== artifact.blob.size || !/^[a-f0-9]{64}$/.test(digest.sha256) || !/^[A-Za-z0-9+/]{22}==$/.test(digest.contentMd5)) throw new Error('digest generation failed');
 const knownDigest = await calculateReviewPackageDigest(new Blob(['hello']));
