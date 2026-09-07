@@ -36,6 +36,16 @@ function validateKindPath(classCode: string, kindPath: readonly string[], profil
   return issue('PACKAGE_PATH_UNRECOGNIZED', compat ? 'warning' : 'error', `Class ${classCode} is not configured to use a nested kind path.`, path);
 }
 
+/**
+ * Converts application-provided classification metadata into the one Relay
+ * directory shape permitted by the active package Profile.  A raw `Kind`
+ * value remains part of the feature record, but only classes explicitly
+ * configured by the Profile may expose it as a directory segment.
+ */
+export function normalizeReviewPackageKindPath(profile: ReviewPackageProfile, classCode: string, kindPath: readonly string[] | undefined): string[] {
+  return (profile.nestedKindClasses ?? []).includes(classCode) ? [...(kindPath ?? [])] : [];
+}
+
 function report(mode: ReviewPackageValidationMode, issues: ReviewPackageValidationIssue[]): ReviewPackageValidationReport {
   const errors = issues.filter((entry) => entry.severity === 'error');
   const warnings = issues.filter((entry) => entry.severity === 'warning');
@@ -47,13 +57,12 @@ export function validateReviewPackageDraft(draft: ReviewPackageDraft, profile: R
   if (!String(draft.packageName ?? '').trim()) issues.push(issue('PACKAGE_NAME_INVALID', 'error', 'Package name is required.'));
   const featureKeys = new Set<string>();
   for (const feature of draft.features) {
-    const fields = [feature.worldId, feature.classCode, feature.featureId, ...(feature.kindPath ?? [])];
+    const effectiveKindPath = normalizeReviewPackageKindPath(profile, feature.classCode, feature.kindPath);
+    const fields = [feature.worldId, feature.classCode, feature.featureId, ...effectiveKindPath];
     if (!fields.every(isSafeSegment) || !feature.record || typeof feature.record !== 'object' || Array.isArray(feature.record)) {
       issues.push(issue('PACKAGE_FEATURE_INVALID', 'error', 'A feature has an invalid identity or record.'));
       continue;
     }
-    const kindIssue = validateKindPath(feature.classCode, feature.kindPath ?? [], profile, false);
-    if (kindIssue) issues.push(kindIssue);
     const key = `${feature.worldId}\u0000${feature.classCode}\u0000${feature.featureId}`;
     if (featureKeys.has(key)) issues.push(issue('PACKAGE_FEATURE_DUPLICATE', 'error', 'The package has duplicate feature identities.'));
     featureKeys.add(key);

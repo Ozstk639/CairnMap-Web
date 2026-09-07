@@ -10,7 +10,7 @@ import {
   type ReviewPackageProfile,
   type ReviewPackageReviewMarker,
 } from './contracts';
-import { isReviewPackageSafeSegment, validateReviewPackageDraft } from './validator';
+import { isReviewPackageSafeSegment, normalizeReviewPackageKindPath, validateReviewPackageDraft } from './validator';
 
 function json(value: unknown): string {
   return JSON.stringify(value, null, 2);
@@ -23,16 +23,14 @@ function normalizedTime(value: string | undefined): string {
 }
 
 function pathForFeature(profile: ReviewPackageProfile, feature: ReviewPackageDraft['features'][number]): string {
-  const nested = new Set(profile.nestedKindClasses ?? []);
   const parts = [REVIEW_PACKAGE_LAYOUT.featureRoot, feature.worldId, feature.classCode];
-  if (nested.has(feature.classCode)) parts.push(...(feature.kindPath ?? []));
+  parts.push(...normalizeReviewPackageKindPath(profile, feature.classCode, feature.kindPath));
   return `${parts.join('/')}/${feature.featureId}.json`;
 }
 
 function pathForPicture(profile: ReviewPackageProfile, picture: ReviewPackageDraft['pictures'][number]): string {
-  const nested = new Set(profile.nestedKindClasses ?? []);
   const parts = [REVIEW_PACKAGE_LAYOUT.pictureRoot, picture.worldId, picture.classCode];
-  if (nested.has(picture.classCode)) parts.push(...(picture.kindPath ?? []));
+  parts.push(...normalizeReviewPackageKindPath(profile, picture.classCode, picture.kindPath));
   parts.push(picture.featureId, picture.filename);
   return parts.join('/');
 }
