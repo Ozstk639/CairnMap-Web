@@ -54,7 +54,9 @@ export async function materializeCairnReviewPackageForWorkspace(file: File): Pro
       file: source,
       previewUrl: URL.createObjectURL(source),
       relativePath: picture.path,
-      order: (draft.picturesById[picture.featureId]?.length ?? 0) + 1,
+      order: Number.isSafeInteger(picture.order) && Number(picture.order) > 0
+        ? Number(picture.order)
+        : (draft.picturesById[picture.featureId]?.length ?? 0) + 1,
       source: 'imported',
     };
     draft.picturesById[picture.featureId] = [...(draft.picturesById[picture.featureId] ?? []), binding];
