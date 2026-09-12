@@ -86,6 +86,8 @@ export async function parseReviewPackageBlob(blob: Blob): Promise<ParsedReviewPa
     deletes: [],
     features: [],
     pictures: [],
+    pictureBindingManifest: null,
+    pictureBindingPathPresent: false,
     extraPaths: [],
     parseWarnings: [],
   };
@@ -103,6 +105,11 @@ export async function parseReviewPackageBlob(blob: Blob): Promise<ParsedReviewPa
     }
     seen.add(path);
     result.paths.push(path);
+    if (path === REVIEW_PACKAGE_LAYOUT.pictureIndexPath) {
+      result.pictureBindingPathPresent = true;
+      result.pictureBindingManifest = parseJson(await entry.async('string'));
+      continue;
+    }
     if (path === REVIEW_PACKAGE_LAYOUT.indexPath || path === REVIEW_PACKAGE_LAYOUT.reviewPath || path === REVIEW_PACKAGE_LAYOUT.deletePath || path.startsWith(`${REVIEW_PACKAGE_LAYOUT.featureRoot}/`)) {
       const text = await entry.async('string');
       if (path === REVIEW_PACKAGE_LAYOUT.indexPath) {
@@ -130,6 +137,20 @@ export async function parseReviewPackageBlob(blob: Blob): Promise<ParsedReviewPa
       continue;
     }
     result.extraPaths.push(path);
+  }
+  if (result.pictureBindingManifest && Array.isArray(result.pictureBindingManifest.bindings)) {
+    const orders = new Map<string, number>();
+    for (const rawBinding of result.pictureBindingManifest.bindings) {
+      if (!rawBinding || typeof rawBinding !== 'object' || Array.isArray(rawBinding)) continue;
+      const files = (rawBinding as Record<string, unknown>).files;
+      if (!Array.isArray(files)) continue;
+      for (const rawFile of files) {
+        if (!rawFile || typeof rawFile !== 'object' || Array.isArray(rawFile)) continue;
+        const file = rawFile as Record<string, unknown>;
+        if (typeof file.path === 'string' && Number.isSafeInteger(file.order)) orders.set(file.path, Number(file.order));
+      }
+    }
+    result.pictures = result.pictures.map((picture) => ({ ...picture, ...(orders.has(picture.path) ? { order: orders.get(picture.path) } : {}) }));
   }
   return result;
 }

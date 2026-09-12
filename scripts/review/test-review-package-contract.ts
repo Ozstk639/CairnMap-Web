@@ -57,6 +57,10 @@ if (!packageFiles.files.some((file) => file.path === 'Data_Spilt/world-a/ISG/gat
 if (!packageFiles.files.some((file) => file.path === 'Picture/world-a/BUD/feature-a/flat-picture.png')) throw new Error('flat picture path not generated');
 if (packageFiles.files.some((file) => file.path.includes('/BUD/business-kind/'))) throw new Error('unconfigured kind path was not normalized from picture paths');
 if (!packageFiles.files.some((file) => file.path === 'Picture/world-a/ISG/gate/feature-kind-a/nested-picture.png')) throw new Error('configured nested kind picture path not generated');
+const pictureIndex = packageFiles.files.find((file) => file.path === 'Picture/INDEX.json');
+if (!pictureIndex || typeof pictureIndex.content !== 'string') throw new Error('picture binding index not generated');
+const bindings = JSON.parse(pictureIndex.content);
+if (bindings.schemaVersion !== 'cairnmap.review-picture-bindings.v1' || bindings.bindings.length !== 2 || bindings.bindings.find((entry: any) => entry.featureId === 'feature-a')?.files[0]?.order !== 1) throw new Error('picture binding index invalid');
 if (!packageFiles.files.some((file) => file.path === 'Tool_Refresh/refresh_package_meta.py')) throw new Error('tool refresh path not generated');
 const artifact = await buildReviewPackageArtifact(profile, { ...packageDraft, pictures: [] });
 const parsed = await parseReviewPackageBlob(artifact.blob);

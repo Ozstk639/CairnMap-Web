@@ -2,11 +2,13 @@ import { buildZipStore } from '../../../lib/zipStore';
 import {
   REVIEW_PACKAGE_CONTRACT_VERSION,
   REVIEW_PACKAGE_LAYOUT,
+  REVIEW_PACKAGE_PICTURE_BINDINGS_SCHEMA_VERSION,
   REVIEW_PACKAGE_REVIEW_SCHEMA_VERSION,
   type ReviewPackageArtifact,
   type ReviewPackageDraft,
   type ReviewPackageFile,
   type ReviewPackageManifest,
+  type ReviewPackagePictureBinding,
   type ReviewPackageProfile,
   type ReviewPackageReviewMarker,
 } from './contracts';
@@ -76,16 +78,42 @@ export function buildReviewPackageFiles(profile: ReviewPackageProfile, draft: Re
     { path: REVIEW_PACKAGE_LAYOUT.reviewPath, content: json(reviewMarker) },
     { path: REVIEW_PACKAGE_LAYOUT.deletePath, content: json({ deleteTime: exportedAt, items: draft.deletes }) },
   ];
+  const pictureBindings = new Map<string, ReviewPackagePictureBinding>();
   for (const feature of draft.features) {
     const path = pathForFeature(profile, feature);
     assertFilePath(path);
     files.push({ path, content: json(feature.record) });
+    const kindPath = normalizeReviewPackageKindPath(profile, feature.classCode, feature.kindPath);
+    pictureBindings.set(`${feature.worldId}\u0000${feature.classCode}\u0000${feature.featureId}`, {
+      worldId: feature.worldId,
+      classCode: feature.classCode,
+      featureId: feature.featureId,
+      kindPath,
+      files: [],
+    });
   }
+  const nextOrderByFeature = new Map<string, number>();
   for (const picture of draft.pictures) {
     const path = pathForPicture(profile, picture);
     assertFilePath(path);
+    const key = `${picture.worldId}\u0000${picture.classCode}\u0000${picture.featureId}`;
+    const binding = pictureBindings.get(key);
+    if (!binding) throw new Error(`review-package-picture-feature-missing:${path}`);
+    const nextOrder = nextOrderByFeature.get(key) ?? 1;
+    const order = Number.isSafeInteger(picture.order) && Number(picture.order) > 0 ? Number(picture.order) : nextOrder;
+    nextOrderByFeature.set(key, Math.max(nextOrder, order + 1));
+    if (binding.files.some((file) => file.order === order)) throw new Error(`review-package-picture-order-duplicate:${path}`);
+    binding.files.push({ path, order, role: 'display' });
     files.push({ path, content: picture.content });
   }
+  for (const binding of pictureBindings.values()) binding.files.sort((left, right) => left.order - right.order || left.path.localeCompare(right.path));
+  files.push({
+    path: REVIEW_PACKAGE_LAYOUT.pictureIndexPath,
+    content: json({
+      schemaVersion: REVIEW_PACKAGE_PICTURE_BINDINGS_SCHEMA_VERSION,
+      bindings: [...pictureBindings.values()].sort((left, right) => `${left.worldId}\u0000${left.classCode}\u0000${left.featureId}`.localeCompare(`${right.worldId}\u0000${right.classCode}\u0000${right.featureId}`)),
+    }),
+  });
   for (const extra of draft.extraFiles ?? []) {
     assertFilePath(extra.path);
     files.push({ path: extra.path, content: extra.text });

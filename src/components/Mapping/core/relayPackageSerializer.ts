@@ -140,6 +140,7 @@ export async function buildRelayPackageZip(args: {
         kindPath: location.kindPath,
         filename: safeFilename(resolved.name),
         content: resolved.blob,
+        order: picture.order,
       });
     }
   }

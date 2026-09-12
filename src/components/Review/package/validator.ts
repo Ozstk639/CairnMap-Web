@@ -9,6 +9,7 @@ import {
   type ReviewPackageValidationIssue,
   type ReviewPackageValidationMode,
   type ReviewPackageValidationReport,
+  REVIEW_PACKAGE_PICTURE_BINDINGS_SCHEMA_VERSION,
 } from './contracts';
 
 const SAFE_SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
@@ -67,6 +68,26 @@ export function validateReviewPackageDraft(draft: ReviewPackageDraft, profile: R
     if (featureKeys.has(key)) issues.push(issue('PACKAGE_FEATURE_DUPLICATE', 'error', 'The package has duplicate feature identities.'));
     featureKeys.add(key);
   }
+  const pictureOrders = new Map<string, Set<number>>();
+  for (const picture of draft.pictures) {
+    const effectiveKindPath = normalizeReviewPackageKindPath(profile, picture.classCode, picture.kindPath);
+    const fields = [picture.worldId, picture.classCode, picture.featureId, picture.filename, ...effectiveKindPath];
+    const key = `${picture.worldId}\u0000${picture.classCode}\u0000${picture.featureId}`;
+    if (!fields.every(isSafeSegment) || !(picture.content instanceof Blob) || !featureKeys.has(key)) {
+      issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', 'error', 'A picture has an invalid identity, content, or target feature.'));
+      continue;
+    }
+    if (picture.order !== undefined) {
+      if (!Number.isSafeInteger(picture.order) || picture.order < 1) {
+        issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', 'error', 'A picture order must be a positive integer.'));
+        continue;
+      }
+      const orders = pictureOrders.get(key) ?? new Set<number>();
+      if (orders.has(picture.order)) issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', 'error', 'A feature has duplicate picture orders.'));
+      orders.add(picture.order);
+      pictureOrders.set(key, orders);
+    }
+  }
   if (draft.features.length === 0 && draft.deletes.length === 0) issues.push(issue('PACKAGE_CONTENT_INVALID', 'error', 'A package must contain at least one upsert or delete.'));
   const deleteKeys = new Set<string>();
   for (const deletion of draft.deletes) {
@@ -119,6 +140,47 @@ export function validateParsedReviewPackage(parsed: ParsedReviewPackage, profile
     const counts: Array<[string, number]> = [['featureCount', parsed.features.length], ['pictureCount', parsed.pictures.length], ['deleteCount', parsed.deletes.length]];
     for (const [field, actual] of counts) {
       if (Number.isSafeInteger(manifest[field]) && manifest[field] !== actual) issues.push(issue('PACKAGE_COUNT_MISMATCH', compat ? 'warning' : 'error', `Manifest ${field} does not match package content.`, REVIEW_PACKAGE_LAYOUT.indexPath));
+    }
+  }
+  if (parsed.pictureBindingPathPresent) {
+    const bindingManifest = parsed.pictureBindingManifest;
+    const bindingItems = bindingManifest?.bindings;
+    if (bindingManifest?.schemaVersion !== REVIEW_PACKAGE_PICTURE_BINDINGS_SCHEMA_VERSION || !Array.isArray(bindingItems)) {
+      issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', compat ? 'warning' : 'error', 'Picture binding index is invalid.', REVIEW_PACKAGE_LAYOUT.pictureIndexPath));
+    } else {
+      const featureKeys = new Set(parsed.features.map((feature) => `${feature.worldId}\u0000${feature.classCode}\u0000${feature.featureId}`));
+      const actualPaths = new Set(parsed.pictures.map((picture) => picture.path));
+      const boundPaths = new Set<string>();
+      const bindingKeys = new Set<string>();
+      for (const binding of bindingItems) {
+        const value = binding && typeof binding === 'object' && !Array.isArray(binding) ? binding as Record<string, unknown> : null;
+        const worldId = String(value?.worldId ?? '');
+        const classCode = String(value?.classCode ?? '');
+        const featureId = String(value?.featureId ?? '');
+        const kindPath = value?.kindPath;
+        const files = value?.files;
+        const key = `${worldId}\u0000${classCode}\u0000${featureId}`;
+        if (!value || ![worldId, classCode, featureId].every(isSafeSegment) || !Array.isArray(kindPath) || !kindPath.every(isSafeSegment) || !Array.isArray(files) || !featureKeys.has(key) || bindingKeys.has(key)) {
+          issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', compat ? 'warning' : 'error', 'Picture binding identity is invalid.', REVIEW_PACKAGE_LAYOUT.pictureIndexPath));
+          continue;
+        }
+        bindingKeys.add(key);
+        const orders = new Set<number>();
+        for (const file of files) {
+          const item = file && typeof file === 'object' && !Array.isArray(file) ? file as Record<string, unknown> : null;
+          const path = String(item?.path ?? '');
+          const order = item?.order;
+          if (!item || !actualPaths.has(path) || item.role !== 'display' || !Number.isSafeInteger(order) || Number(order) < 1 || orders.has(Number(order)) || boundPaths.has(path)) {
+            issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', compat ? 'warning' : 'error', 'Picture binding file is invalid.', REVIEW_PACKAGE_LAYOUT.pictureIndexPath));
+            continue;
+          }
+          orders.add(Number(order));
+          boundPaths.add(path);
+        }
+      }
+      if (bindingKeys.size !== featureKeys.size || boundPaths.size !== actualPaths.size) {
+        issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', compat ? 'warning' : 'error', 'Picture binding index does not cover the package features and pictures exactly.', REVIEW_PACKAGE_LAYOUT.pictureIndexPath));
+      }
     }
   }
   for (const deletion of parsed.deletes) {
