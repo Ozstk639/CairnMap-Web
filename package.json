@@ -29,7 +29,8 @@
     "test:review-workspace-contracts": "tsx ./scripts/review/test-review-workspace-contracts.ts",
     "test:review-status-board": "tsx ./scripts/review/test-review-status-board.ts",
     "test:data-source-selection": "tsx ./scripts/data-source/test-data-source-selection.ts",
-    "test:review-package-contract": "tsx ./scripts/review/test-review-package-contract.ts"
+    "test:review-package-contract": "tsx ./scripts/review/test-review-package-contract.ts",
+    "test:multipart-geometry": "tsx --tsconfig ./tsconfig.app.json ./scripts/geometry/test-multipart-geometry.ts"
   },
   "dependencies": {
     "jszip": "^3.10.1",

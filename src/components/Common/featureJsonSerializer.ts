@@ -1,6 +1,9 @@
 const EXPORT_COORD_STEP = 0.1;
 
 const GEOMETRY_KEYS = new Set([
+  'CoordP',
+  'CoordL',
+  'CoordG',
   'coordinate',
   'coordinates',
   'Linepoints',

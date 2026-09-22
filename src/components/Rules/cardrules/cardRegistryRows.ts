@@ -209,7 +209,7 @@ export const buildRowsByLayout = (
 };
 
 const shouldSkipDefaultKey = (key: string): boolean => {
-  const banned = new Set(['Conpoints', 'Flrpoints', 'PLpoints', 'Linepoints', 'coordinate']);
+  const banned = new Set(['CoordP', 'CoordL', 'CoordG', 'Conpoints', 'Flrpoints', 'PLpoints', 'Linepoints', 'coordinate']);
   return banned.has(key);
 };
 

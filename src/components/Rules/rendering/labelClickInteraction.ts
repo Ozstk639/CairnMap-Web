@@ -161,7 +161,13 @@ export function createHighlightLayerForFeature(args: {
 
   if (!r.coords3?.length) return null;
 
-  const latlngs = r.coords3.map((p) => projection.locationToLatLng(p.x, p.y, p.z));
+  const fallbackLatLngs = r.coords3.map((p) => projection.locationToLatLng(p.x, p.y, p.z));
+  const lineLatLngs = r.multipartGeometry?.type === 'LineString'
+    ? r.multipartGeometry.parts.map((part) => part.map((p) => projection.locationToLatLng(p.x, p.y, p.z)))
+    : fallbackLatLngs;
+  const polygonLatLngs = r.multipartGeometry?.type === 'Polygon'
+    ? r.multipartGeometry.parts.map((part) => part.map((ring) => ring.map((p) => projection.locationToLatLng(p.x, p.y, p.z))))
+    : fallbackLatLngs;
 
   // nav-outline：与导航 RouteHighlightLayer 的视觉一致（白色描边 + 主色加粗）
   if (highlightStyleKey === 'nav-outline') {
@@ -195,15 +201,15 @@ export function createHighlightLayerForFeature(args: {
 
     if (r.type === 'Polyline') {
       return L.layerGroup([
-        L.polyline(latlngs, outlineOpts as any),
-        L.polyline(latlngs, mainOpts as any),
+        L.polyline(lineLatLngs as any, outlineOpts as any),
+        L.polyline(lineLatLngs as any, mainOpts as any),
       ]);
     }
 
     if (r.type === 'Polygon') {
       return L.layerGroup([
-        L.polygon(latlngs, outlineOpts as any),
-        L.polygon(latlngs, mainOpts as any),
+        L.polygon(polygonLatLngs as any, outlineOpts as any),
+        L.polygon(polygonLatLngs as any, mainOpts as any),
       ]);
     }
 
@@ -213,11 +219,13 @@ export function createHighlightLayerForFeature(args: {
   const style = resolveHighlightStyle(highlightStyleKey);
 
   if (r.type === 'Polyline') {
-    return L.polyline(latlngs, { ...style, pane: 'ria-overlay-top', interactive: false });
+    return L.polyline(lineLatLngs as any, { ...style, pane: 'ria-overlay-top', interactive: false });
   }
 
   if (r.type === 'Polygon') {
-    return L.polygon(latlngs, { ...style, fillOpacity: 0, pane: 'ria-overlay-top', interactive: false });
+    // Leaflet accepts nested rings: every external and internal boundary is
+    // drawn with the dashed style, while fill remains transparent.
+    return L.polygon(polygonLatLngs as any, { ...style, fillOpacity: 0, pane: 'ria-overlay-top', interactive: false });
   }
 
   return null;
