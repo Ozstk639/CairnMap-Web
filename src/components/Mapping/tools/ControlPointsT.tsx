@@ -13,7 +13,7 @@ import 'leaflet/dist/leaflet.css';
 import { formatGridNumber, snapWorldPointByMode } from '@/components/Mapping/tools/GridSnapModeSwitch';
 import type { DynmapProjection } from '@/lib/DynmapProjection';
 import { DraggablePanel } from '@/components/DraggablePanel/DraggablePanel';
-import { Pencil, Plus, Save, Undo2, Redo2, X, ArrowLeftRight } from 'lucide-react';
+import { Pencil, Plus, Save, Undo2, Redo2, X, ArrowLeftRight, Trash2 } from 'lucide-react';
 import AppButton from '@/components/ui/AppButton';
 import AppCard from '@/components/ui/AppCard';
 
@@ -23,7 +23,9 @@ export type ControlPointsTHandle = {
   /** 主控件可用于判断是否需要屏蔽绘制区 click */
   isBusy: () => boolean;
   /** 当前工作模式 */
-  getMode: () => 'none' | 'edit' | 'add';
+  getMode: () => 'none' | 'edit' | 'add' | 'delete';
+  /** Safely close any active transaction; false means the user kept unsaved work. */
+  requestCloseAndClear: () => boolean;
 };
 
 type ControlPointsTProps = {
@@ -45,6 +47,12 @@ type ControlPointsTProps = {
    *（例如：setTempPoints(newCoords)）
    */
   onApplyActiveCoords?: (coords: WorldPoint[]) => void;
+
+  /** Reject a proposed active ring before it reaches the draft. */
+  validateCandidateCoords?: (coords: WorldPoint[]) => string | undefined;
+
+  /** Lets the multipart selector lock itself while this tool owns a session. */
+  onSessionStateChange?: (state: { busy: boolean; mode: 'none' | 'edit' | 'add' | 'delete' | 'array' }) => void;
 
   /**
    * 当控制点修改/添加窗口开启时，主控件应当屏蔽“绘制区 click 加点”
@@ -176,6 +184,11 @@ type EditAction =
       kind: 'insert';
       index: number;
       point: WorldPoint;
+    }
+  | {
+      kind: 'delete';
+      index: number;
+      point: WorldPoint;
     };
 
 function getGeometryTypeForArrayEditor(activeMode: ControlPointsTProps['activeMode']): GeometryTypeForArrayEditor | null {
@@ -252,6 +265,8 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
     activeColor,
     activeCoords,
     onApplyActiveCoords,
+    validateCandidateCoords,
+    onSessionStateChange,
     onSetDrawClickSuppressed,
 
     showControlPointsEnabled,
@@ -264,12 +279,16 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
     onExitAddModeRestoreAssistLine,
   } = props;
 
+  // Kept solely for backwards-compatible imperative closes. No visible entry
+  // opens this legacy container; all user actions are now the inline command bar.
   const [toolPanelOpen, setToolPanelOpen] = useState(false);
   const [editEnabled, setEditEnabled] = useState(false);
   const [addEnabled, setAddEnabled] = useState(false);
+  const [deleteEnabled, setDeleteEnabled] = useState(false);
 
   const [editPanelOpen, setEditPanelOpen] = useState(false);
   const [addPanelOpen, setAddPanelOpen] = useState(false);
+  const [deletePanelOpen, setDeletePanelOpen] = useState(false);
   const [arrayEditorOpen, setArrayEditorOpen] = useState(false);
 
   const [statusText, setStatusText] = useState<string>('');
@@ -374,11 +393,13 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
   }, []);
 
   const endAllModes = useCallback(
-    (opts?: { restoreAssistLine?: boolean; keepToolPanelOpen?: boolean }) => {
+    (opts?: { restoreAssistLine?: boolean }) => {
       setEditEnabled(false);
       setAddEnabled(false);
+      setDeleteEnabled(false);
       setEditPanelOpen(false);
       setAddPanelOpen(false);
+      setDeletePanelOpen(false);
       setSelectedIndex(null);
       setWorkingCoords(null);
       setUndoStack([]);
@@ -391,10 +412,6 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
       setArrayValidatedCoords(null);
       setArrayAppliedText('');
       setStatusText('');
-
-      if (!opts?.keepToolPanelOpen) {
-        setToolPanelOpen(false);
-      }
 
       onSetDrawClickSuppressed?.(false);
       restoreShowControlPoints();
@@ -439,8 +456,8 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
 
     overlay.clearLayers();
 
-    // 仅在 edit/add 启用且 dirty 时显示预览
-    if (!(editEnabled || addEnabled)) return;
+    // 仅在当前控制点事务启用且 dirty 时显示预览
+    if (!(editEnabled || addEnabled || deleteEnabled)) return;
     if (!dirty) return;
     if (!modeOk) return;
 
@@ -471,7 +488,7 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
         opacity: 0.9,
       }).addTo(overlay);
     }
-  }, [editEnabled, addEnabled, dirty, modeOk, sessionCoords, activeMode, activeColor, projectionRef]);
+  }, [editEnabled, addEnabled, deleteEnabled, dirty, modeOk, sessionCoords, activeMode, activeColor, projectionRef]);
 
   // -------- vertex：渲染控制点（仅当前要素）--------
   useEffect(() => {
@@ -481,8 +498,8 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
 
     vg.clearLayers();
 
-    // 只有 edit/add 启动时才显示（符合你本次“强制显示控制点”需求）
-    if (!(editEnabled || addEnabled)) {
+    // 只有控制点事务启动时才显示（符合“强制显示控制点”需求）
+    if (!(editEnabled || addEnabled || deleteEnabled)) {
       return;
     }
 
@@ -521,6 +538,31 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
           L.DomEvent.stop(e.originalEvent);
         }
 
+        if (deleteEnabled) {
+          const minimum = activeMode === 'polygon' ? 3 : activeMode === 'polyline' ? 2 : 1;
+          if (coords.length <= minimum) {
+            setStatusText(`控制点删除：${activeMode === 'polygon' ? '面' : '线'}至少保留 ${minimum} 个控制点`);
+            return;
+          }
+          setWorkingCoords((prev) => {
+            const base = (prev ?? activeCoords).slice();
+            const removed = base[idx];
+            if (!removed) return base;
+            const next = base.slice();
+            next.splice(idx, 1);
+            const error = validateCandidateCoords?.(next);
+            if (error) {
+              setStatusText(`未删除：${error}`);
+              return base;
+            }
+            setUndoStack((stack) => [...stack, { kind: 'delete', index: idx, point: removed }]);
+            setRedoStack([]);
+            setStatusText(`已删除控制点 #${idx + 1}`);
+            return next;
+          });
+          return;
+        }
+
         if (!editEnabled) return;
 
         setSelectedIndex(idx);
@@ -529,7 +571,7 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
 
       vg.addLayer(marker);
     });
-  }, [editEnabled, addEnabled, modeOk, sessionCoords, activeColor, selectedIndex, fmt, projectionRef]);
+  }, [editEnabled, addEnabled, deleteEnabled, modeOk, sessionCoords, activeColor, selectedIndex, fmt, projectionRef, activeMode, activeCoords, validateCandidateCoords]);
 
   // -------- map click：修改模式“选点后下一次点击移动”--------
   useEffect(() => {
@@ -556,6 +598,12 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
         const to: WorldPoint = { ...wSnapped, y: from?.y };
         base[selectedIndex] = to;
 
+        const error = validateCandidateCoords?.(base);
+        if (error) {
+          setStatusText(`未修改：${error}`);
+          return prev ?? activeCoords;
+        }
+
         setUndoStack((u) => [...u, { kind: 'move', index: selectedIndex, from, to }]);
         setRedoStack([]);
 
@@ -578,6 +626,7 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
     activeCoords,
     filterWorldPointByAssistLine,
     fmt,
+    validateCandidateCoords,
   ]);
 
   // -------- map click：添加模式“点击插入（阈值 50）”--------
@@ -639,6 +688,12 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
 
         next.splice(insertIndex, 0, inserted);
 
+        const error = validateCandidateCoords?.(next);
+        if (error) {
+          setStatusText(`未插入：${error}`);
+          return prev ?? activeCoords;
+        }
+
         setUndoStack((u) => [...u, { kind: 'insert', index: insertIndex, point: inserted }]);
         setRedoStack([]);
 
@@ -651,7 +706,7 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
     return () => {
       map.off('click', onMapClick);
     };
-  }, [leafletMapRef, addEnabled, addPanelOpen, modeOk, projToWorld, activeCoords, activeMode, fmt]);
+  }, [leafletMapRef, addEnabled, addPanelOpen, modeOk, projToWorld, activeCoords, activeMode, fmt, validateCandidateCoords]);
 
   // -------- 撤回/恢复 --------
   const doUndo = useCallback(() => {
@@ -670,6 +725,9 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
           if (last.index >= 0 && last.index < base.length) {
             base.splice(last.index, 1);
           }
+        } else if (last.kind === 'delete') {
+          const index = Math.max(0, Math.min(last.index, base.length));
+          base.splice(index, 0, last.point);
         }
         return base;
       });
@@ -694,6 +752,8 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
         } else if (last.kind === 'insert') {
           const idx = Math.max(0, Math.min(last.index, base.length));
           base.splice(idx, 0, last.point);
+        } else if (last.kind === 'delete') {
+          if (last.index >= 0 && last.index < base.length) base.splice(last.index, 1);
         }
 
         return base;
@@ -706,23 +766,18 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
 
   // -------- 保存（应用到当前要素，并关闭窗口）--------
   const commitAndClose = useCallback(
-    (mode: 'edit' | 'add') => {
+    (mode: 'edit' | 'add' | 'delete') => {
       const coords = (workingCoords ?? activeCoords).slice();
 
       onApplyActiveCoords?.(coords);
 
-      if (mode === 'add') {
-        endAllModes({ restoreAssistLine: true, keepToolPanelOpen: true });
-      } else {
-        endAllModes({ restoreAssistLine: false, keepToolPanelOpen: true });
-      }
-      setToolPanelOpen(true);
+      endAllModes({ restoreAssistLine: mode === 'add' });
     },
     [workingCoords, activeCoords, onApplyActiveCoords, endAllModes]
   );
 
   const tryClosePanelDiscard = useCallback(
-    (mode: 'edit' | 'add') => {
+    (mode: 'edit' | 'add' | 'delete') => {
       if (undoStack.length > 0) {
         const ok = window.confirm('修改未保存，确定关闭并丢弃本次修改吗？');
         if (!ok) return false;
@@ -731,8 +786,7 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
       if (mode === 'add') {
         onExitAddModeRestoreAssistLine?.();
       }
-      endAllModes({ restoreAssistLine: mode === 'add', keepToolPanelOpen: true });
-      setToolPanelOpen(true);
+      endAllModes({ restoreAssistLine: mode === 'add' });
       return true;
     },
     [undoStack.length, endAllModes, onExitAddModeRestoreAssistLine]
@@ -755,8 +809,8 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
       setStatusText('数组编辑：当前没有可编辑的要素类型');
       return;
     }
-    if (editEnabled || addEnabled) {
-      setStatusText('数组编辑开启前，请先结束控制点修改或控制点添加');
+    if (editEnabled || addEnabled || deleteEnabled) {
+      setStatusText('数组编辑开启前，请先结束控制点修改、添加或删除');
       return;
     }
     if (!activeCoords.length) {
@@ -778,14 +832,14 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
     setArrayEditorOpen(true);
     onSetDrawClickSuppressed?.(true);
     setStatusText('数组编辑已开启：当前控制点数组已导入并标记为“已校验”');
-  }, [arrayEditorOpen, arrayGeometryType, editEnabled, addEnabled, activeCoords, onSetDrawClickSuppressed]);
+  }, [arrayEditorOpen, arrayGeometryType, editEnabled, addEnabled, deleteEnabled, activeCoords, onSetDrawClickSuppressed]);
 
   const closeArrayEditorNow = useCallback(() => {
     resetArrayEditorState();
-    if (!(editEnabled || addEnabled)) {
+    if (!(editEnabled || addEnabled || deleteEnabled)) {
       onSetDrawClickSuppressed?.(false);
     }
-  }, [resetArrayEditorState, editEnabled, addEnabled, onSetDrawClickSuppressed]);
+  }, [resetArrayEditorState, editEnabled, addEnabled, deleteEnabled, onSetDrawClickSuppressed]);
 
   const tryCloseArrayEditor = useCallback(() => {
     if (arrayDirty) {
@@ -804,6 +858,8 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
 
     try {
       const parsed = parseArrayEditorCoords(arrayText, arrayGeometryType, arrayDefaultY);
+      const error = validateCandidateCoords?.(parsed.coords);
+      if (error) throw new Error(error);
       setArrayValidated(true);
       setArrayValidatedCoords(parsed.coords);
       setStatusText(`数组校验通过：当前控制点数 ${parsed.coords.length}`);
@@ -813,19 +869,24 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
       setArrayValidatedCoords(null);
       window.alert(message);
     }
-  }, [arrayGeometryType, arrayText, arrayDefaultY]);
+  }, [arrayGeometryType, arrayText, arrayDefaultY, validateCandidateCoords]);
 
   const applyArrayEditorToDraft = useCallback(() => {
     if (!arrayValidated || !arrayValidatedCoords) return false;
 
     const applied = arrayValidatedCoords.map((p) => ({ ...p }));
+    const error = validateCandidateCoords?.(applied);
+    if (error) {
+      setStatusText(`数组未应用：${error}`);
+      return false;
+    }
     onApplyActiveCoords?.(applied);
     setWorkingCoords(applied);
     setSelectedIndex(null);
     setArrayAppliedText(arrayText);
     setStatusText(`已应用数组编辑结果：当前控制点数 ${applied.length}`);
     return true;
-  }, [arrayValidated, arrayValidatedCoords, onApplyActiveCoords, arrayText]);
+  }, [arrayValidated, arrayValidatedCoords, onApplyActiveCoords, arrayText, validateCandidateCoords]);
 
   const finishArrayEditor = useCallback(() => {
     if (!arrayValidated) return;
@@ -880,26 +941,15 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
   }, [canArrayReverse, arrayValidatedCoords, arrayText]);
 
   const tryCloseToolPanel = useCallback(() => {
-    if (arrayEditorOpen) {
-      const ok = tryCloseArrayEditor();
-      if (!ok) return;
-    }
-
-    if (editEnabled && editPanelOpen) {
-      const ok = tryClosePanelDiscard('edit');
-      if (!ok) return;
-    }
-
-    if (addEnabled && addPanelOpen) {
-      const ok = tryClosePanelDiscard('add');
-      if (!ok) return;
-    }
-
+    if (arrayEditorOpen && !tryCloseArrayEditor()) return;
+    if (editEnabled && editPanelOpen && !tryClosePanelDiscard('edit')) return;
+    if (addEnabled && addPanelOpen && !tryClosePanelDiscard('add')) return;
+    if (deleteEnabled && deletePanelOpen && !tryClosePanelDiscard('delete')) return;
     setToolPanelOpen(false);
     setStatusText('');
-  }, [arrayEditorOpen, tryCloseArrayEditor, editEnabled, editPanelOpen, addEnabled, addPanelOpen, tryClosePanelDiscard]);
+  }, [arrayEditorOpen, tryCloseArrayEditor, editEnabled, editPanelOpen, addEnabled, addPanelOpen, deleteEnabled, deletePanelOpen, tryClosePanelDiscard]);
 
-  // -------- 互斥开关：控制点修改 / 控制点添加 --------
+  // -------- 互斥开关：控制点修改 / 添加 / 删除 --------
   const toggleEdit = useCallback(() => {
     if (arrayEditorOpen) {
       setStatusText('数组编辑开启中，其他控制点功能已锁定');
@@ -908,6 +958,10 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
 
     if (addEnabled || addPanelOpen) {
       const closed = tryClosePanelDiscard('add');
+      if (!closed) return;
+    }
+    if (deleteEnabled || deletePanelOpen) {
+      const closed = tryClosePanelDiscard('delete');
       if (!closed) return;
     }
 
@@ -923,6 +977,8 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
 
     setAddEnabled(false);
     setAddPanelOpen(false);
+    setDeleteEnabled(false);
+    setDeletePanelOpen(false);
 
     setEditEnabled(true);
     setEditPanelOpen(true);
@@ -939,6 +995,8 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
     arrayEditorOpen,
     addEnabled,
     addPanelOpen,
+    deleteEnabled,
+    deletePanelOpen,
     tryClosePanelDiscard,
     editEnabled,
     modeOk,
@@ -957,6 +1015,10 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
       const closed = tryClosePanelDiscard('edit');
       if (!closed) return;
     }
+    if (deleteEnabled || deletePanelOpen) {
+      const closed = tryClosePanelDiscard('delete');
+      if (!closed) return;
+    }
 
     if (addEnabled) {
       tryClosePanelDiscard('add');
@@ -970,6 +1032,8 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
 
     setEditEnabled(false);
     setEditPanelOpen(false);
+    setDeleteEnabled(false);
+    setDeletePanelOpen(false);
     setSelectedIndex(null);
 
     setAddEnabled(true);
@@ -987,6 +1051,8 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
     arrayEditorOpen,
     editEnabled,
     editPanelOpen,
+    deleteEnabled,
+    deletePanelOpen,
     tryClosePanelDiscard,
     addEnabled,
     modeOk,
@@ -996,9 +1062,47 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
     onEnterAddModeConfigureAssistLine,
   ]);
 
+  const canDelete = useMemo(() => modeOk && activeCoords.length > (activeMode === 'polygon' ? 3 : 2), [modeOk, activeCoords.length, activeMode]);
+
+  const toggleDelete = useCallback(() => {
+    if (arrayEditorOpen) {
+      setStatusText('数组编辑开启中，控制点删除已锁定');
+      return;
+    }
+    if (editEnabled || editPanelOpen) {
+      const closed = tryClosePanelDiscard('edit');
+      if (!closed) return;
+    }
+    if (addEnabled || addPanelOpen) {
+      const closed = tryClosePanelDiscard('add');
+      if (!closed) return;
+    }
+    if (deleteEnabled) {
+      tryClosePanelDiscard('delete');
+      return;
+    }
+    if (!canDelete) {
+      setStatusText('控制点删除：线至少保留 2 点，面至少保留 3 点');
+      return;
+    }
+    setEditEnabled(false);
+    setEditPanelOpen(false);
+    setAddEnabled(false);
+    setAddPanelOpen(false);
+    setDeleteEnabled(true);
+    setDeletePanelOpen(true);
+    setSelectedIndex(null);
+    setWorkingCoords(activeCoords.slice());
+    setUndoStack([]);
+    setRedoStack([]);
+    forceShowControlPointsOn();
+    onSetDrawClickSuppressed?.(true);
+    setStatusText('控制点删除已开启：点击要删除的控制点，再保存本次修改');
+  }, [arrayEditorOpen, editEnabled, editPanelOpen, addEnabled, addPanelOpen, deleteEnabled, tryClosePanelDiscard, canDelete, activeCoords, forceShowControlPointsOn, onSetDrawClickSuppressed]);
+
   // -------- 关闭时清理 overlay/markers --------
   useEffect(() => {
-    if (editEnabled || addEnabled) return;
+    if (editEnabled || addEnabled || deleteEnabled) return;
 
     vertexGroupRef.current?.clearLayers();
     overlayGroupRef.current?.clearLayers();
@@ -1007,7 +1111,7 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
       onSetDrawClickSuppressed?.(false);
     }
     restoreShowControlPoints();
-  }, [editEnabled, addEnabled, arrayEditorOpen, clearSession, onSetDrawClickSuppressed, restoreShowControlPoints]);
+  }, [editEnabled, addEnabled, deleteEnabled, arrayEditorOpen, clearSession, onSetDrawClickSuppressed, restoreShowControlPoints]);
 
   useEffect(() => {
     return () => {
@@ -1019,17 +1123,29 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
   useImperativeHandle(
     ref,
     () => ({
-      isBusy: () => Boolean(editEnabled || addEnabled || arrayEditorOpen),
-      getMode: () => (editEnabled ? 'edit' : addEnabled ? 'add' : 'none'),
+      isBusy: () => Boolean(editEnabled || addEnabled || deleteEnabled || arrayEditorOpen),
+      getMode: () => (editEnabled ? 'edit' : addEnabled ? 'add' : deleteEnabled ? 'delete' : 'none'),
+      requestCloseAndClear: () => {
+        if (arrayEditorOpen && !tryCloseArrayEditor()) return false;
+        if (editEnabled && editPanelOpen && !tryClosePanelDiscard('edit')) return false;
+        if (addEnabled && addPanelOpen && !tryClosePanelDiscard('add')) return false;
+        if (deleteEnabled && deletePanelOpen && !tryClosePanelDiscard('delete')) return false;
+        return true;
+      },
     }),
-    [editEnabled, addEnabled, arrayEditorOpen]
+    [editEnabled, addEnabled, deleteEnabled, arrayEditorOpen, editPanelOpen, addPanelOpen, deletePanelOpen, tryCloseArrayEditor, tryClosePanelDiscard]
   );
+
+  useEffect(() => {
+    const mode = editEnabled ? 'edit' : addEnabled ? 'add' : deleteEnabled ? 'delete' : arrayEditorOpen ? 'array' : 'none';
+    onSessionStateChange?.({ busy: mode !== 'none', mode });
+  }, [editEnabled, addEnabled, deleteEnabled, arrayEditorOpen, onSessionStateChange]);
 
   const canEdit = useMemo(() => modeOk && activeCoords.length >= 1, [modeOk, activeCoords.length]);
   const canAdd = useMemo(() => modeOk && activeCoords.length >= 2, [modeOk, activeCoords.length]);
   const canArrayEdit = useMemo(() => Boolean(arrayGeometryType) && activeCoords.length >= 1, [arrayGeometryType, activeCoords.length]);
 
-  const busy = useMemo(() => Boolean(editEnabled || addEnabled), [editEnabled, addEnabled]);
+  const busy = useMemo(() => Boolean(editEnabled || addEnabled || deleteEnabled), [editEnabled, addEnabled, deleteEnabled]);
 
   const canReverse = useMemo(() => {
     if (!modeOk) return false;
@@ -1058,26 +1174,19 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
   return (
     <div className="mt-2">
       <div className="flex flex-wrap items-center gap-2">
-        <AppButton
-          type="button"
-          className={`px-2 py-1 rounded text-xs border flex items-center gap-1 ${
-            toolPanelOpen || editEnabled || addEnabled || arrayEditorOpen
-              ? 'bg-blue-600 text-white border-blue-700'
-              : 'bg-white text-gray-800 border-gray-300'
-          }`}
-          onClick={() => {
-            if (toolPanelOpen) {
-              tryCloseToolPanel();
-              return;
-            }
-            setToolPanelOpen(true);
-          }}
-          title="控制点工具"
-        >
+        <span className="px-2 py-1 rounded text-xs border bg-slate-100 text-slate-700 flex items-center gap-1 select-none" aria-label="控制点工具">
           <Pencil size={14} />
           控制点工具
-        </AppButton>
+        </span>
+        <AppButton type="button" className={`px-2 py-1 rounded text-xs border ${editEnabled ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-800 border-gray-300'} ${canEdit && !arrayEditorOpen ? '' : 'opacity-50 cursor-not-allowed'}`} onClick={toggleEdit} disabled={!canEdit || arrayEditorOpen}>修改</AppButton>
+        <AppButton type="button" className={`px-2 py-1 rounded text-xs border ${addEnabled ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-800 border-gray-300'} ${canAdd && !arrayEditorOpen ? '' : 'opacity-50 cursor-not-allowed'}`} onClick={toggleAdd} disabled={!canAdd || arrayEditorOpen}>添加</AppButton>
+        <AppButton type="button" className={`px-2 py-1 rounded text-xs border flex items-center gap-1 ${deleteEnabled ? 'bg-rose-600 text-white border-rose-700' : 'bg-white text-gray-800 border-gray-300'} ${canDelete && !arrayEditorOpen ? '' : 'opacity-50 cursor-not-allowed'}`} onClick={toggleDelete} disabled={!canDelete || arrayEditorOpen}><Trash2 size={13} />删除</AppButton>
+        <AppButton type="button" className={`px-2 py-1 rounded text-xs border ${canReverse ? 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50' : 'opacity-50 cursor-not-allowed bg-white text-gray-800 border-gray-300'}`} onClick={doReverse} disabled={!canReverse}>反转</AppButton>
+        <AppButton type="button" className={`px-2 py-1 rounded text-xs border ${arrayEditorOpen ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-800 border-gray-300'} ${canArrayEdit && !busy ? '' : 'opacity-50 cursor-not-allowed'}`} onClick={() => arrayEditorOpen ? tryCloseArrayEditor() : openArrayEditor()} disabled={!arrayEditorOpen && (!canArrayEdit || busy)}>数组编辑</AppButton>
       </div>
+      {(editEnabled || addEnabled || deleteEnabled) && dirty && <div className="mt-1 text-xs text-orange-700">未保存修改</div>}
+      {arrayEditorOpen && <div className="mt-1 text-xs text-blue-700">数组编辑开启中，部件选择与其他控制点功能已锁定</div>}
+      {statusText && <div className="mt-1 text-xs text-gray-700">{statusText}</div>}
 
       {toolPanelOpen && (
         <DraggablePanel id="cpT-main-panel" defaultPosition={{ x: 16, y: 320 }} zIndex={1840}>
@@ -1324,6 +1433,28 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
                 </AppButton>
               </div>
 
+              <div className="text-[11px] text-gray-500">当前控制点数：{sessionCoords.length}</div>
+            </div>
+          </AppCard>
+        </DraggablePanel>
+      )}
+
+      {deleteEnabled && deletePanelOpen && (
+        <DraggablePanel id="cpT-delete-panel" defaultPosition={{ x: 16, y: 470 }} zIndex={1850}>
+          <AppCard className="w-80 overflow-hidden border">
+            <div className="flex items-center justify-between px-4 py-3 border-b">
+              <h3 className="font-bold text-gray-800">控制点删除</h3>
+              <AppButton onClick={() => tryClosePanelDiscard('delete')} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded" aria-label="关闭" title="关闭" type="button">
+                <X className="w-4 h-4" />
+              </AppButton>
+            </div>
+            <div className="p-3 space-y-2">
+              <div className="text-xs text-gray-600">点击要删除的控制点。线至少保留 2 点，面至少保留 3 点；删除可撤销。</div>
+              <div className="flex gap-2">
+                <AppButton className={`flex-1 px-2 py-2 rounded-lg text-sm bg-yellow-400 text-white flex items-center justify-center gap-2 ${undoStack.length ? '' : 'opacity-50 cursor-not-allowed'}`} onClick={doUndo} disabled={!undoStack.length} type="button"><Undo2 className="w-4 h-4" />撤回</AppButton>
+                <AppButton className={`flex-1 px-2 py-2 rounded-lg text-sm bg-orange-400 text-white flex items-center justify-center gap-2 ${redoStack.length ? '' : 'opacity-50 cursor-not-allowed'}`} onClick={doRedo} disabled={!redoStack.length} type="button"><Redo2 className="w-4 h-4" />恢复</AppButton>
+                <AppButton className="flex-1 px-2 py-2 rounded-lg text-sm bg-green-600 text-white flex items-center justify-center gap-2" onClick={() => commitAndClose('delete')} type="button"><Save className="w-4 h-4" />保存</AppButton>
+              </div>
               <div className="text-[11px] text-gray-500">当前控制点数：{sessionCoords.length}</div>
             </div>
           </AppCard>

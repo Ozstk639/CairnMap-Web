@@ -155,7 +155,8 @@ export default function FeatureInteractionCard(props: Props) {
 
   const title = useMemo(() => pickFeatureDisplayName(feature), [feature]);
 
-  const [pictures, setPictures] = useState<string[]>(['/pictures/normal.png']);
+  const [pictures, setPictures] = useState<string[]>([]);
+  const [pictureBindingState, setPictureBindingState] = useState<'loading' | 'none' | 'bound'>('loading');
   const [measuringModeActive, setMeasuringModeActive] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return Boolean((window as any).__riaMeasuringActive);
@@ -175,9 +176,11 @@ export default function FeatureInteractionCard(props: Props) {
   useEffect(() => {
     let alive = true;
     (async () => {
+      setPictureBindingState('loading');
       const urls = await buildPictureUrlsForFeature(feature);
       if (!alive) return;
-      setPictures(urls.length > 0 ? urls : ['/pictures/normal.png']);
+      setPictures(urls);
+      setPictureBindingState(urls.length > 0 ? 'bound' : 'none');
     })();
     return () => {
       alive = false;
@@ -463,6 +466,7 @@ export default function FeatureInteractionCard(props: Props) {
           </div>
         </div>
 
+        {pictureBindingState === 'bound' && pictures.length > 0 ? (
         <div className="px-3 pt-3">
           <div
             ref={stripRef}
@@ -495,8 +499,9 @@ export default function FeatureInteractionCard(props: Props) {
             ))}
           </div>
         </div>
+        ) : null}
 
-        <div className="px-3 pb-3" onWheel={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+        <div className={`${pictureBindingState === 'bound' && pictures.length > 0 ? 'px-3 pb-3' : 'px-3 pt-3 pb-3'}`} onWheel={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
           {/* 图片幕以下：作为唯一滚动宿主承担内容滚动；外层卡片不再额外裁切，避免双层限高互相打架。 */}
           <div className="mt-1 rounded-md border border-black/10 bg-white max-h-[46vh] overflow-y-auto">
             {midSection ? <div className="px-3 pt-3 pb-2">{midSection}</div> : null}

@@ -52,6 +52,9 @@ type CurveInputTProps = {
   /** 输出：将生成的点序列按顺序追加到当前要素控制点末尾 */
   onCommitPoints: (points: WorldPoint[]) => void;
 
+  /** Reports the visible editor session so parent selectors can lock safely. */
+  onOpenChange?: (open: boolean) => void;
+
   /** 外层容器 className（用于在主界面并排布局等场景） */
   outerClassName?: string;
 };
@@ -275,6 +278,7 @@ export default forwardRef<CurveInputTHandle, CurveInputTProps>(function CurveInp
     filterWorldPointByAssistLine,
     onSetDrawClickSuppressed,
     onCommitPoints,
+    onOpenChange,
     outerClassName,
   } = props;
 
@@ -362,6 +366,14 @@ export default forwardRef<CurveInputTHandle, CurveInputTProps>(function CurveInp
     if (open && !disabled) onSetDrawClickSuppressed(true);
     else onSetDrawClickSuppressed(false);
   }, [open, disabled, onSetDrawClickSuppressed]);
+
+  useEffect(() => {
+    onOpenChange?.(open && !disabled);
+  }, [open, disabled, onOpenChange]);
+
+  useEffect(() => {
+    if (disabled && open) requestCloseAndClear();
+  }, [disabled, open, requestCloseAndClear]);
 
   const worldToLatLng = useCallback(
     (p: WorldPoint): L.LatLng | null => {
