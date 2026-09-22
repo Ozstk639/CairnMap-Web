@@ -65,6 +65,9 @@ assert.match(validateMultipartHoleDraft(editablePolygon, 0, 0, [
   { x: 2.5, y: -64, z: 2.5 },
   { x: 12, y: -64, z: 2.5 },
 ]) ?? '', /必须位于外边界内/);
+assert.match(validateMultipartHoleDraft(editablePolygon, 0, 0, [
+  { x: 0, y: -64, z: 2.5 },
+]) ?? '', /必须位于外边界内/);
 
 const exported = stringifyFeatureJson({ Type: 'Polygon', Name: 'multipart', CoordG: serializeMultipartGeometry(polygon.geometry!) });
 assert.match(exported, /"CoordG"/);

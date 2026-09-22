@@ -259,6 +259,14 @@ function ringSelfIntersects(ring: MultipartCoord[]): boolean {
 }
 
 function pointInRing(point: MultipartCoord, ring: MultipartCoord[]): boolean {
+  // A hole may not touch the exterior boundary. Treat a point on any exterior
+  // segment as outside so map-click validation rejects it at insertion time,
+  // instead of waiting until a later Save validation.
+  for (let index = 0; index < ring.length; index += 1) {
+    const a = ring[index];
+    const b = ring[(index + 1) % ring.length];
+    if (orientation(a, point, b) === 0 && onSegment(a, point, b)) return false;
+  }
   let inside = false;
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
     const a = ring[i];
