@@ -1,5 +1,12 @@
 import type { CairnMapClassFieldConfig, CairnMapClassGroupConfig } from './classTypes';
 import type { CairnMapResolvedClassSchema } from './schemaTypes';
+import {
+  flattenMultipartCoordinates,
+  multipartGeometryFromSinglePath,
+  readMultipartGeometry,
+  validateMultipartGeometry,
+  withCanonicalMultipartGeometry,
+} from '../geometry/multipartGeometry';
 
 export type CairnMapCoord2D = { x: number; z: number; y?: number };
 
@@ -14,8 +21,6 @@ export type CairnMapGenericHydratedFormat = {
   values: Record<string, unknown>;
   groups: Record<string, unknown[]>;
 };
-
-const DEFAULT_COORD_Y = -64;
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -46,25 +51,6 @@ function pickFields(fields: CairnMapClassFieldConfig[], values: Record<string, u
   return out;
 }
 
-function buildPointCoordinate(coord: CairnMapCoord2D | undefined): Record<string, number> {
-  const y = Number(coord?.y);
-  const out: Record<string, number> = {
-    x: Number(coord?.x ?? 0),
-    y: Number.isFinite(y) ? y : DEFAULT_COORD_Y,
-    z: Number(coord?.z ?? 0),
-  };
-  return out;
-}
-
-function buildCoordinateArray(coords: CairnMapCoord2D[]): Array<[number, number, number]> {
-  return coords.map((coord) => {
-    const x = Number(coord.x);
-    const z = Number(coord.z);
-    const y = Number(coord.y);
-    return [x, Number.isFinite(y) ? y : DEFAULT_COORD_Y, z];
-  });
-}
-
 export function buildGenericFeatureInfoFromSchema(
   schema: CairnMapResolvedClassSchema,
   args: CairnMapGenericFormatBuildArgs
@@ -80,47 +66,18 @@ export function buildGenericFeatureInfoFromSchema(
     if (Array.isArray(items) && items.length > 0) out[group.key] = items;
   }
 
-  const sourceField = schema.geometry.sourceField;
-  if (schema.geometry.type === 'Point') {
-    out[sourceField] = buildPointCoordinate(args.coords[0]);
-  } else {
-    out[sourceField] = buildCoordinateArray(args.coords);
-  }
-
-  return out;
-}
-
-function readPointCoordinate(value: unknown): CairnMapCoord2D[] {
-  if (!isObject(value)) return [];
-  const x = Number(value.x);
-  const z = Number(value.z);
-  if (!Number.isFinite(x) || !Number.isFinite(z)) return [];
-  const y = Number(value.y);
-  return [{ x, z, y: Number.isFinite(y) ? y : DEFAULT_COORD_Y }];
-}
-
-function readCoordinateArray(value: unknown): CairnMapCoord2D[] {
-  if (!Array.isArray(value)) return [];
-  return value
-    .map((item): CairnMapCoord2D | null => {
-      if (!Array.isArray(item)) return null;
-      const x = Number(item[0]);
-      const z = item.length >= 3 ? Number(item[2]) : Number(item[1]);
-      if (!Number.isFinite(x) || !Number.isFinite(z)) return null;
-      const y = item.length >= 3 ? Number(item[1]) : Number.NaN;
-      return { x, z, y: Number.isFinite(y) ? y : DEFAULT_COORD_Y };
-    })
-    .filter((item): item is CairnMapCoord2D => Boolean(item));
+  return withCanonicalMultipartGeometry(
+    out,
+    multipartGeometryFromSinglePath(schema.geometry.type, args.coords),
+  );
 }
 
 export function coordsFromGenericFeatureInfo(
   schema: CairnMapResolvedClassSchema,
   featureInfo: unknown
 ): CairnMapCoord2D[] {
-  const info = isObject(featureInfo) ? featureInfo : {};
-  const value = info[schema.geometry.sourceField];
-  if (schema.geometry.type === 'Point') return readPointCoordinate(value);
-  return readCoordinateArray(value);
+  const resolved = readMultipartGeometry(featureInfo, schema.geometry.type, schema.geometry.sourceField);
+  return flattenMultipartCoordinates(resolved.geometry).map((coord) => ({ x: coord.x, y: coord.y, z: coord.z }));
 }
 
 export function hydrateGenericFeatureInfoFromSchema(
@@ -167,11 +124,11 @@ export function validateGenericFeatureInfoFromSchema(
     const items = hydrated.groups[group.key] ?? [];
     if (items.length < min) return `${group.key} 至少需要 ${min} 条`;
   }
-  const coords = coordsFromGenericFeatureInfo(schema, featureInfo);
+  const geometryRead = readMultipartGeometry(featureInfo, schema.geometry.type, schema.geometry.sourceField);
+  if (geometryRead.error) return geometryRead.error;
+  const geometryError = validateMultipartGeometry(geometryRead.geometry);
   if (schema.geometry.required !== false) {
-    if (schema.geometry.type === 'Point' && coords.length !== 1) return `${schema.geometry.sourceField} 必须包含 1 个点`;
-    if (schema.geometry.type === 'LineString' && coords.length < 2) return `${schema.geometry.sourceField} 至少需要 2 个点`;
-    if (schema.geometry.type === 'Polygon' && coords.length < 3) return `${schema.geometry.sourceField} 至少需要 3 个点`;
+    if (geometryError) return geometryError;
   }
   return undefined;
 }

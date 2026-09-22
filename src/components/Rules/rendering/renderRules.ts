@@ -7,6 +7,7 @@ import type { LabelStyleKey } from '@/components/Rules/rendering/labelStyles';
 import type { LabelClickPlan } from '@/components/Rules/rendering/labelClickInteraction';
 import type { FeatureDisplayRuleDraft } from '@/components/Rules/rendering/display/displayTypes';
 import { FEATURE_RENDER_RULES } from '@/components/Rules/rendering/featureRenderRules';
+import type { MultipartGeometry } from '@/core/geometry/multipartGeometry';
 
 // Re-export shared helpers for backward compatibility.
 export {
@@ -223,6 +224,13 @@ export type FeatureRecord = {
 
   /** world 坐标数组（用于线/面） */
   coords3?: Array<{ x: number; y: number; z: number }>;
+
+  /**
+   * Canonical multipart geometry. `p3` and `coords3` remain representative
+   * compatibility views for existing cards, navigation and floor-selection
+   * code; Leaflet rendering must use this field when present.
+   */
+  multipartGeometry?: MultipartGeometry;
 };
 
 function isPlainObject(x: any): x is Record<string, any> {
@@ -280,7 +288,7 @@ export function buildFeatureMeta(featureInfo: any, cls: string, type: GeoType, s
   // 你所说的“除了坐标以外的所有属性信息” → sig；数组/对象 → groups
   for (const [k, v] of Object.entries(featureInfo ?? {})) {
     // 坐标字段排除
-    if (k === 'Conpoints' || k === 'Flrpoints' || k === 'PLpoints' || k === 'Linepoints' || k === 'coordinate') continue;
+    if (k === 'CoordP' || k === 'CoordL' || k === 'CoordG' || k === 'Conpoints' || k === 'Flrpoints' || k === 'PLpoints' || k === 'Linepoints' || k === 'coordinate') continue;
 
     // tags：需要参与 signature（用于去重/差分），同时支持规则显式路径 tags.xxx
     if (k === 'tags') {

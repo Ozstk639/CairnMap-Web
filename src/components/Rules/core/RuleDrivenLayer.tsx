@@ -94,6 +94,7 @@ import {
   getLabelLayoutViewportPaddingPx,
   type LabelLayoutWindowState,
 } from "@/components/Rules/rendering/label/labelLayoutWindow";
+import { firstMultipartCoordinate, flattenMultipartCoordinates, geometryTypeFromFeatureType, readMultipartGeometry } from "@/core/geometry/multipartGeometry";
 
 import { filterRecordsByRuleButtons } from "@/components/Rules/ButtonRule/buttonRuleFilter";
 import { setRuleSearchPool } from "@/components/Rules/search/ruleSearchRegistry";
@@ -129,6 +130,8 @@ type LayerBundle = {
   kind: "marker" | "circleMarker" | "path";
   iconUrl?: string;
   pane?: string;
+  /** Present only when a Point feature owns multiple independently rendered markers. */
+  pointSignature?: string;
 };
 
 type LineAuditMutableRow = LineLabelAuditRow & {
@@ -666,36 +669,6 @@ function createDeletePickPointHitProxy(latlng: L.LatLng): L.CircleMarker {
     fillOpacity: 0,
     interactive: true,
   });
-}
-
-function toP3(v: any): { x: number; y: number; z: number } | null {
-  if (!v) return null;
-  if (Array.isArray(v)) {
-    const x = Number(v[0]);
-    const y = v.length >= 3 ? Number(v[1]) : Y_FOR_DISPLAY;
-    const z = v.length >= 3 ? Number(v[2]) : Number(v[1]);
-    if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z))
-      return { x, y, z };
-    return null;
-  }
-  if (typeof v === "object") {
-    const x = Number((v as any).x);
-    const y = Number((v as any).y ?? Y_FOR_DISPLAY);
-    const z = Number((v as any).z);
-    if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z))
-      return { x, y, z };
-  }
-  return null;
-}
-
-function toP3Array(v: any): Array<{ x: number; y: number; z: number }> {
-  if (!Array.isArray(v)) return [];
-  const out: Array<{ x: number; y: number; z: number }> = [];
-  for (const item of v) {
-    const p = toP3(item);
-    if (p) out.push(p);
-  }
-  return out;
 }
 
 function pointInPolygonXZ(
@@ -1248,13 +1221,15 @@ function detectGeoType(featureInfo: any): GeoType | null {
   if (t === "Points" || t === "Polyline" || t === "Polygon")
     return t as GeoType;
   // 兜底：按字段猜
-  if ((featureInfo as any)?.coordinate) return "Points";
+  if (Array.isArray((featureInfo as any)?.CoordP) || (featureInfo as any)?.coordinate) return "Points";
   if (
+    Array.isArray((featureInfo as any)?.CoordL) ||
     Array.isArray((featureInfo as any)?.PLpoints) ||
     Array.isArray((featureInfo as any)?.Linepoints)
   )
     return "Polyline";
   if (
+    Array.isArray((featureInfo as any)?.CoordG) ||
     Array.isArray((featureInfo as any)?.Conpoints) ||
     Array.isArray((featureInfo as any)?.Flrpoints)
   )
@@ -1294,21 +1269,26 @@ function buildRecordsFromJson(
       type,
     };
 
+    const geometryType = geometryTypeFromFeatureType(type);
+    if (!geometryType) continue;
+    const geometryRead = readMultipartGeometry(item, geometryType);
+    if (!geometryRead.geometry) {
+      if (geometryRead.error) console.warn('[multipart-geometry]', geometryRead.error, sourceFile, item);
+      continue;
+    }
+    r.multipartGeometry = geometryRead.geometry;
+    const representative = firstMultipartCoordinate(geometryRead.geometry);
+    if (!representative) continue;
     if (type === "Points") {
-      const p = toP3(
-        (item as any).coordinate ?? (item as any).Conpoints?.[0] ?? null,
-      );
-      if (!p) continue;
-      r.p3 = p;
+      r.p3 = representative;
     } else if (type === "Polyline") {
-      const arr = toP3Array((item as any).PLpoints ?? (item as any).Linepoints);
-      if (arr.length < 2) continue;
-      r.coords3 = arr;
+      const allParts = geometryRead.geometry.type === 'LineString' ? geometryRead.geometry.parts : [];
+      if (!allParts.length || allParts.some((part) => part.length < 2)) continue;
+      r.coords3 = flattenMultipartCoordinates(geometryRead.geometry);
     } else if (type === "Polygon") {
-      const pts = (item as any).Conpoints ?? (item as any).Flrpoints ?? null;
-      const arr = toP3Array(pts);
-      if (arr.length < 3) continue;
-      r.coords3 = arr;
+      const allParts = geometryRead.geometry.type === 'Polygon' ? geometryRead.geometry.parts : [];
+      if (!allParts.length || allParts.some((part) => (part[0]?.length ?? 0) < 3)) continue;
+      r.coords3 = flattenMultipartCoordinates(geometryRead.geometry);
     }
 
     out.push(r);
@@ -2728,8 +2708,14 @@ export default function RuleDrivenLayer(props: Props) {
         // 屏幕范围裁剪（点/线/面统一用 padded layoutBounds 预加载）
         let pointLatLng: L.LatLng | undefined;
         if (r.type === "Points" && r.p3) {
-          pointLatLng = projection.locationToLatLng(r.p3.x, r.p3.y, r.p3.z);
-          if (!layoutBounds.contains(pointLatLng)) continue;
+          const pointCoords = r.multipartGeometry?.type === 'Point'
+            ? r.multipartGeometry.parts
+            : [r.p3];
+          const visiblePoint = pointCoords
+            .map((point) => projection.locationToLatLng(point.x, point.y, point.z))
+            .find((candidate) => layoutBounds.contains(candidate));
+          if (!visiblePoint) continue;
+          pointLatLng = visiblePoint;
         } else if (r.coords3 && r.coords3.length) {
           // 用 bbox 做快速裁剪（可读性优先）
           let minLat = Infinity,
@@ -3823,6 +3809,54 @@ function createLayerBundle(
 
     // ✅ pane 解析优先级：pointPlan.pane > symbol.pane > 默认 ria-point
     const mainPane = (plan as any)?.pane ?? symbol?.pane ?? "ria-point";
+    const multipartPoints = r.multipartGeometry?.type === 'Point'
+      ? r.multipartGeometry.parts
+      : [r.p3];
+
+    if (multipartPoints.length > 1) {
+      const mainLayers = multipartPoints.map((point) => {
+        const pointLatLng = projection.locationToLatLng(point.x, point.y, point.z);
+        if (plan && plan.kind === 'icon') {
+          const iconUrl = plan.iconUrl ?? (plan.iconUrlFrom ? String((r.featureInfo as any)?.[plan.iconUrlFrom] ?? '').trim() : undefined);
+          if (iconUrl) {
+            return L.marker(pointLatLng, {
+              pane: mainPane,
+              icon: L.icon({ iconUrl, iconSize: plan.iconSize ?? [24, 24], iconAnchor: plan.iconAnchor ?? [12, 12] }),
+              interactive: deletePickTarget ? true : geomPointEnabled,
+              zIndexOffset: (plan as any)?.zIndexOffset ?? 0,
+            });
+          }
+        }
+        return L.circleMarker(pointLatLng, {
+          pane: mainPane,
+          radius: plan?.radius ?? 5,
+          interactive: deletePickTarget ? true : undefined,
+          ...(plan?.style ?? { color: '#111827', weight: 2, opacity: 0.9, fillOpacity: 0.6, fillColor: '#f97316' }),
+        });
+      });
+      const main = L.featureGroup(mainLayers);
+      if (deletePickTarget) bindDeletePick(main, r);
+      else if (geomPointEnabled && clickEnabled && onLabelClick) {
+        main.on('click', (event: L.LeafletMouseEvent) => {
+          (event as any)?.originalEvent?.stopPropagation?.();
+          onLabelClick(r, effectiveClickPlan as any);
+        });
+      }
+      const labelLayer = buildLabelLayer(
+        r, resolvedLabelPlan, ctx, store, projection, latlng, labelStyleKey,
+        effectiveClickPlan && clickEnabled ? (effectiveClickPlan as any) : null,
+        onClick, viewportWorldRectXZ, deletePickTarget,
+        deletePickTarget ? () => dispatchDeletePickFeature(r) : null, displayPlan,
+      );
+      return {
+        main,
+        label: labelLayer ?? undefined,
+        kind: plan?.kind === 'icon' ? 'marker' : 'circleMarker',
+        iconUrl: plan?.kind === 'icon' ? (plan.iconUrl ?? (plan.iconUrlFrom ? String((r.featureInfo as any)?.[plan.iconUrlFrom] ?? '').trim() : undefined)) : undefined,
+        pane: mainPane,
+        pointSignature: JSON.stringify(multipartPoints.map((point) => [point.x, point.y, point.z])),
+      };
+    }
 
     let main: L.Layer;
     let kind: LayerBundle["kind"] = "marker";
@@ -3919,9 +3953,13 @@ function createLayerBundle(
 
   // 线/面
   if (r.coords3 && r.coords3.length) {
-    const latlngs = r.coords3.map((p) =>
-      projection.locationToLatLng(p.x, p.y, p.z),
-    );
+    const fallbackLatLngs = r.coords3.map((p) => projection.locationToLatLng(p.x, p.y, p.z));
+    const lineLatLngs = r.multipartGeometry?.type === 'LineString'
+      ? r.multipartGeometry.parts.map((part) => part.map((p) => projection.locationToLatLng(p.x, p.y, p.z)))
+      : fallbackLatLngs;
+    const polygonLatLngs = r.multipartGeometry?.type === 'Polygon'
+      ? r.multipartGeometry.parts.map((part) => part.map((ring) => ring.map((p) => projection.locationToLatLng(p.x, p.y, p.z))))
+      : fallbackLatLngs;
 
     const style: L.PathOptions =
       typeof symbol.pathStyle === "function"
@@ -3933,7 +3971,7 @@ function createLayerBundle(
 
     const main =
       r.type === "Polyline"
-        ? L.polyline(latlngs, {
+        ? L.polyline(lineLatLngs as L.LatLngExpression[], {
             ...(style ?? {}),
             pane: mainPane,
             interactive:
@@ -3943,7 +3981,7 @@ function createLayerBundle(
                   ? true
                   : (style as any)?.interactive,
           })
-        : L.polygon(latlngs, {
+        : L.polygon(polygonLatLngs as L.LatLngExpression[], {
             ...(style ?? {}),
             pane: mainPane,
             interactive:
@@ -4047,6 +4085,9 @@ function updateLayerBundle(
   // 点：若 iconUrl 变化，重建
   if (r.type === "Points" && r.p3) {
     const latlng = projection.locationToLatLng(r.p3.x, r.p3.y, r.p3.z);
+    const nextPointSignature = r.multipartGeometry?.type === 'Point' && r.multipartGeometry.parts.length > 1
+      ? JSON.stringify(r.multipartGeometry.parts.map((point) => [point.x, point.y, point.z]))
+      : undefined;
     const plan =
       typeof symbol.point === "function"
         ? symbol.point(r, ctx, store)
@@ -4078,6 +4119,7 @@ function updateLayerBundle(
 
     if (
       nextKind !== bundle.kind ||
+      nextPointSignature !== bundle.pointSignature ||
       nextIconUrl !== bundle.iconUrl ||
       (bundle.kind === "marker" &&
         curMarkerInteractive !== nextMarkerInteractive) ||
@@ -4109,6 +4151,7 @@ function updateLayerBundle(
       bundle.kind = newBundle.kind;
       bundle.iconUrl = newBundle.iconUrl;
       bundle.hitProxy = newBundle.hitProxy;
+      bundle.pointSignature = newBundle.pointSignature;
       return;
     }
 

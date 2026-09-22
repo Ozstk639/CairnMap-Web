@@ -61,6 +61,14 @@ import DeleteFeatureSelectionPanel, { type DeletePanelItem } from '@/components/
 import DeleteFeaturePickPanel from '@/components/Mapping/panels/DeleteFeaturePickPanel';
 import FeaturePictureBindingPanel from '@/components/Mapping/panels/FeaturePictureBindingPanel';
 import { pickIdFieldValue, type FeatureRecord } from '@/components/Rules/rendering/renderRules';
+import {
+  multipartGeometryFromSinglePath,
+  readMultipartGeometry,
+  validateMultipartGeometry,
+  withCanonicalMultipartGeometry,
+  type MultipartGeometry,
+  type MultipartGeometryKind,
+} from '@/core/geometry/multipartGeometry';
 import { rebuildRoadGraphCacheForWorld } from '@/components/Navigation/Navigation_Road';
 import { rebuildRailNewIndexCacheForWorld } from '@/components/Navigation/railNewIndex';
 import { rebuildRailNewNavigationCacheForWorld } from '@/components/Navigation/Navigation_RailNewIntegrated';
@@ -248,6 +256,28 @@ useEffect(() => {
 
 // editingBackupCoordsRef 同样加 y?
 const editingBackupCoordsRef = useRef<{ x: number; z: number; y?: number }[] | null>(null);
+type EditorCoord = { x: number; z: number; y?: number };
+
+/**
+ * The legacy drawing tools still operate on one mutable coordinate list.  This
+ * ref owns the complete multipart value; `tempPoints` is only the currently
+ * selected component/ring projection of it. This keeps manual input, curves,
+ * control points and undo/redo scoped to the visible selected part.
+ */
+const multipartDraftRef = useRef<MultipartGeometry | null>(null);
+const [multipartEnabled, setMultipartEnabled] = useState(false);
+const [activeMultipartPart, setActiveMultipartPart] = useState(0);
+const [innerSpaceEnabled, setInnerSpaceEnabled] = useState(false);
+const [editSelectedInnerSpace, setEditSelectedInnerSpace] = useState(false);
+const [activeInnerSpace, setActiveInnerSpace] = useState(0);
+const activeMultipartPartRef = useRef(0);
+const innerSpaceEnabledRef = useRef(false);
+const editSelectedInnerSpaceRef = useRef(false);
+const activeInnerSpaceRef = useRef(0);
+useEffect(() => { activeMultipartPartRef.current = activeMultipartPart; }, [activeMultipartPart]);
+useEffect(() => { innerSpaceEnabledRef.current = innerSpaceEnabled; }, [innerSpaceEnabled]);
+useEffect(() => { editSelectedInnerSpaceRef.current = editSelectedInnerSpace; }, [editSelectedInnerSpace]);
+useEffect(() => { activeInnerSpaceRef.current = activeInnerSpace; }, [activeInnerSpace]);
 
 
 
@@ -266,6 +296,306 @@ type LayerType = {
     featureInfo: any;
   };
 };
+
+const geometryKindForDrawMode = (mode: DrawMode): MultipartGeometryKind =>
+  mode === 'point' ? 'Point' : mode === 'polyline' ? 'LineString' : 'Polygon';
+
+const asMultipartCoords = (coords: EditorCoord[]) => coords.map((coord) => ({
+  x: Number(coord.x),
+  y: Number.isFinite(Number(coord.y)) ? Number(coord.y) : -64,
+  z: Number(coord.z),
+}));
+
+const asEditorCoords = (coords: Array<{ x: number; y: number; z: number }>): EditorCoord[] =>
+  coords
+    .filter((coord) => Number.isFinite(coord.x) && Number.isFinite(coord.y) && Number.isFinite(coord.z))
+    .map((coord) => ({ x: coord.x, y: coord.y, z: coord.z }));
+
+const resetMultipartEditor = () => {
+  multipartDraftRef.current = null;
+  setMultipartEnabled(false);
+  setActiveMultipartPart(0);
+  setInnerSpaceEnabled(false);
+  setEditSelectedInnerSpace(false);
+  setActiveInnerSpace(0);
+};
+
+const activeEditorCoordsFromMultipart = (geometry: MultipartGeometry | null): EditorCoord[] => {
+  if (!geometry) return [];
+  const partIndex = Math.max(0, Math.min(activeMultipartPartRef.current, geometry.parts.length - 1));
+  if (geometry.type === 'Point') return asEditorCoords(geometry.parts.slice(partIndex, partIndex + 1));
+  if (geometry.type === 'LineString') return asEditorCoords(geometry.parts[partIndex] ?? []);
+  const component = geometry.parts[partIndex] ?? [];
+  const targetRing = editSelectedInnerSpaceRef.current
+    ? component[Math.max(1, activeInnerSpaceRef.current + 1)] ?? []
+    : component[0] ?? [];
+  return asEditorCoords(targetRing);
+};
+
+const persistActiveEditorCoords = (coords: EditorCoord[]) => {
+  const geometry = multipartDraftRef.current;
+  if (!geometry) return;
+  const partIndex = Math.max(0, Math.min(activeMultipartPartRef.current, geometry.parts.length - 1));
+  const next = asMultipartCoords(coords);
+  if (geometry.type === 'Point') {
+    // A point component is one coordinate. The current point controls may
+    // receive more than one click, so retain the most recently supplied one.
+    if (next[0]) geometry.parts[partIndex] = next[0];
+    return;
+  }
+  if (geometry.type === 'LineString') {
+    geometry.parts[partIndex] = next;
+    return;
+  }
+  const component = geometry.parts[partIndex] ?? (geometry.parts[partIndex] = [[]]);
+  if (editSelectedInnerSpaceRef.current) {
+    const ringIndex = Math.max(1, activeInnerSpaceRef.current + 1);
+    component[ringIndex] = next;
+  } else {
+    component[0] = next;
+  }
+};
+
+const buildCurrentMultipartGeometry = (mode: DrawMode, activeCoords: EditorCoord[]): MultipartGeometry => {
+  if (!multipartEnabled || !multipartDraftRef.current) {
+    return multipartGeometryFromSinglePath(geometryKindForDrawMode(mode), activeCoords);
+  }
+  persistActiveEditorCoords(activeCoords);
+  return multipartDraftRef.current;
+};
+
+const renderSelectedMultipartCoords = (geometry: MultipartGeometry | null, color: string) => {
+  const selected = activeEditorCoordsFromMultipart(geometry);
+  setTempPoints(selected);
+  setRedoStack([]);
+  draftEndpointRef.current?.clearLayers();
+  drawDraftGeometry(selected, drawModeRef.current, color);
+  return selected;
+};
+
+const selectMultipartPart = (nextIndex: number) => {
+  const geometry = multipartDraftRef.current;
+  if (!geometry) return;
+  persistActiveEditorCoords(tempPoints);
+  const index = Math.max(0, Math.min(nextIndex, geometry.parts.length - 1));
+  activeMultipartPartRef.current = index;
+  setActiveMultipartPart(index);
+  if (geometry.type === 'Polygon') {
+    const hasHoles = (geometry.parts[index]?.length ?? 0) > 1;
+    innerSpaceEnabledRef.current = hasHoles;
+    setInnerSpaceEnabled(hasHoles);
+    editSelectedInnerSpaceRef.current = false;
+    setEditSelectedInnerSpace(false);
+    activeInnerSpaceRef.current = 0;
+    setActiveInnerSpace(0);
+  }
+  renderSelectedMultipartCoords(geometry, drawColorRef.current);
+};
+
+const addMultipartPart = () => {
+  const geometry = multipartDraftRef.current;
+  if (!geometry) return;
+  persistActiveEditorCoords(tempPoints);
+  // An empty Point component must never silently become a real point at an
+  // arbitrary origin. The validator blocks it until the user clicks or enters
+  // one concrete coordinate for this selected component.
+  if (geometry.type === 'Point') geometry.parts.push({ x: Number.NaN, y: Number.NaN, z: Number.NaN });
+  else if (geometry.type === 'LineString') geometry.parts.push([]);
+  else geometry.parts.push([[]]);
+  selectMultipartPart(geometry.parts.length - 1);
+};
+
+const removeMultipartPart = () => {
+  const geometry = multipartDraftRef.current;
+  if (!geometry || geometry.parts.length <= 1) return;
+  persistActiveEditorCoords(tempPoints);
+  geometry.parts.splice(activeMultipartPartRef.current, 1);
+  selectMultipartPart(Math.min(activeMultipartPartRef.current, geometry.parts.length - 1));
+};
+
+const selectInnerSpace = (nextIndex: number) => {
+  const geometry = multipartDraftRef.current;
+  if (!geometry || geometry.type !== 'Polygon') return;
+  persistActiveEditorCoords(tempPoints);
+  const holes = (geometry.parts[activeMultipartPartRef.current]?.length ?? 1) - 1;
+  const index = Math.max(0, Math.min(nextIndex, Math.max(0, holes - 1)));
+  activeInnerSpaceRef.current = index;
+  setActiveInnerSpace(index);
+  editSelectedInnerSpaceRef.current = true;
+  setEditSelectedInnerSpace(true);
+  renderSelectedMultipartCoords(geometry, drawColorRef.current);
+};
+
+const addInnerSpace = () => {
+  const geometry = multipartDraftRef.current;
+  if (!geometry || geometry.type !== 'Polygon') return;
+  persistActiveEditorCoords(tempPoints);
+  const component = geometry.parts[activeMultipartPartRef.current] ?? (geometry.parts[activeMultipartPartRef.current] = [[]]);
+  component.push([]);
+  innerSpaceEnabledRef.current = true;
+  setInnerSpaceEnabled(true);
+  selectInnerSpace(component.length - 2);
+};
+
+const removeInnerSpace = () => {
+  const geometry = multipartDraftRef.current;
+  if (!geometry || geometry.type !== 'Polygon') return;
+  const component = geometry.parts[activeMultipartPartRef.current] ?? [];
+  if (component.length <= 1) return;
+  persistActiveEditorCoords(tempPoints);
+  component.splice(activeInnerSpaceRef.current + 1, 1);
+  const hasHoles = component.length > 1;
+  innerSpaceEnabledRef.current = hasHoles;
+  setInnerSpaceEnabled(hasHoles);
+  editSelectedInnerSpaceRef.current = hasHoles;
+  setEditSelectedInnerSpace(hasHoles);
+  selectInnerSpace(Math.min(activeInnerSpaceRef.current, Math.max(0, component.length - 2)));
+};
+
+/**
+ * Both desktop and compact mapping panels share one multipart editor.  Keeping
+ * this as a single renderer is intentional: selected parts/rings are a single
+ * editor state and either panel must offer exactly the same operations.
+ */
+const renderMultipartEditor = () => (
+  drawMode !== 'none' && drawing ? (
+    <div className="mb-2 rounded border border-slate-200 bg-slate-50 p-2">
+      <div className="flex gap-2">
+        <AppButton
+          type="button"
+          className={`flex-1 px-2 py-1 rounded text-sm border ${
+            multipartEnabled ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
+          }`}
+          onClick={() => {
+            if (multipartEnabled) {
+              const partCount = multipartDraftRef.current?.parts.length ?? 1;
+              if (partCount > 1) {
+                alert('当前要素包含多个部件；请先删除至仅剩 1 个部件，才能关闭多部件要素模式。');
+                return;
+              }
+              setMultipartEnabled(false);
+              return;
+            }
+            multipartDraftRef.current = multipartGeometryFromSinglePath(
+              geometryKindForDrawMode(drawMode as DrawMode),
+              tempPoints,
+            );
+            activeMultipartPartRef.current = 0;
+            setActiveMultipartPart(0);
+            setMultipartEnabled(true);
+          }}
+          title="启用后，绘制、控制点、手工输入与数组编辑只作用于当前选定部件"
+        >
+          多部件要素
+        </AppButton>
+      </div>
+
+      {multipartEnabled && multipartDraftRef.current && (
+        <>
+          <div className="mt-2 flex items-center gap-2">
+            <select
+              aria-label="部件编号"
+              className="min-w-0 flex-1 rounded border p-1 text-sm"
+              value={activeMultipartPart}
+              onChange={(event) => selectMultipartPart(Number(event.target.value))}
+            >
+              {multipartDraftRef.current.parts.map((_, index) => (
+                <option key={index} value={index}>部件 {index + 1}</option>
+              ))}
+            </select>
+            <AppButton type="button" className="px-3 py-1 rounded border bg-white" onClick={addMultipartPart} title="添加部件">+</AppButton>
+            <AppButton
+              type="button"
+              className="px-3 py-1 rounded border bg-white disabled:opacity-40"
+              onClick={removeMultipartPart}
+              disabled={multipartDraftRef.current.parts.length <= 1}
+              title="删除当前部件"
+            >
+              −
+            </AppButton>
+          </div>
+
+          {drawMode === 'polygon' && multipartDraftRef.current.type === 'Polygon' && (
+            <div className="mt-2 border-t border-slate-200 pt-2">
+              <div className="flex gap-2">
+                <AppButton
+                  type="button"
+                  className={`flex-1 px-2 py-1 rounded text-sm border ${
+                    innerSpaceEnabled ? 'bg-violet-600 text-white border-violet-700' : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
+                  }`}
+                  onClick={() => {
+                    const currentPart = multipartDraftRef.current?.type === 'Polygon'
+                      ? multipartDraftRef.current.parts[activeMultipartPartRef.current] ?? []
+                      : [];
+                    const hasHoles = currentPart.length > 1;
+                    const next = hasHoles ? true : !innerSpaceEnabled;
+                    innerSpaceEnabledRef.current = next;
+                    setInnerSpaceEnabled(next);
+                    if (!next) {
+                      editSelectedInnerSpaceRef.current = false;
+                      setEditSelectedInnerSpace(false);
+                      renderSelectedMultipartCoords(multipartDraftRef.current, drawColorRef.current);
+                    }
+                  }}
+                  title="内部空间存在时会随所选部件自动保持开启"
+                >
+                  内部空间
+                </AppButton>
+                <AppButton
+                  type="button"
+                  className={`flex-1 px-2 py-1 rounded text-sm border ${
+                    editSelectedInnerSpace ? 'bg-violet-600 text-white border-violet-700' : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
+                  } disabled:opacity-40`}
+                  disabled={!innerSpaceEnabled || ((multipartDraftRef.current.parts[activeMultipartPart]?.length ?? 1) <= 1)}
+                  onClick={() => {
+                    if (editSelectedInnerSpaceRef.current) {
+                      persistActiveEditorCoords(tempPoints);
+                      editSelectedInnerSpaceRef.current = false;
+                      setEditSelectedInnerSpace(false);
+                      renderSelectedMultipartCoords(multipartDraftRef.current, drawColorRef.current);
+                      return;
+                    }
+                    selectInnerSpace(activeInnerSpace);
+                  }}
+                  title="开启后，绘图状态与辅助工具编辑所选内部洞；关闭时编辑外边界"
+                >
+                  编辑所选内洞
+                </AppButton>
+              </div>
+
+              {innerSpaceEnabled && (
+                <div className="mt-2 flex items-center gap-2">
+                  <select
+                    aria-label="内部洞编号"
+                    className="min-w-0 flex-1 rounded border p-1 text-sm"
+                    value={activeInnerSpace}
+                    onChange={(event) => selectInnerSpace(Number(event.target.value))}
+                    disabled={(multipartDraftRef.current.parts[activeMultipartPart]?.length ?? 1) <= 1}
+                  >
+                    {multipartDraftRef.current.parts[activeMultipartPart]?.slice(1).map((_, index) => (
+                      <option key={index} value={index}>内部洞 {index + 1}</option>
+                    ))}
+                    {(multipartDraftRef.current.parts[activeMultipartPart]?.length ?? 1) <= 1 && <option value={0}>尚未添加内部洞</option>}
+                  </select>
+                  <AppButton type="button" className="px-3 py-1 rounded border bg-white" onClick={addInnerSpace} title="添加内部洞">+</AppButton>
+                  <AppButton
+                    type="button"
+                    className="px-3 py-1 rounded border bg-white disabled:opacity-40"
+                    onClick={removeInnerSpace}
+                    disabled={(multipartDraftRef.current.parts[activeMultipartPart]?.length ?? 1) <= 1}
+                    title="删除当前内部洞"
+                  >
+                    −
+                  </AppButton>
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  ) : null
+);
 
 
 // 所有固定图层
@@ -1108,7 +1438,10 @@ const onMapDrawClick = (e: L.LeafletMouseEvent) => {
   setRedoStack([]);
 
   setTempPoints((prev) => {
-    const updated = [...prev, newPoint];
+    // Point multipart components are individual coordinates, not a nested
+    // path. Re-clicking replaces the selected point rather than creating an
+    // invisible second coordinate in the same component.
+    const updated = drawMode === 'point' && multipartEnabled ? [newPoint] : [...prev, newPoint];
     drawDraftGeometry(updated, drawMode, drawColor);
     updateLatestEndpointMarker(newPoint, drawColor);
     return updated;
@@ -1131,7 +1464,7 @@ const onManualPointSubmit = (v: { x: number; y: number; z: number }) => {
   setRedoStack([]);
 
   setTempPoints((prev) => {
-    const updated = [...prev, newPoint];
+    const updated = drawMode === 'point' && multipartEnabled ? [newPoint] : [...prev, newPoint];
     drawDraftGeometry(updated, drawMode, drawColor);
     updateLatestEndpointMarker({ x: v.x, z: v.z }, drawColor);
     return updated;
@@ -1152,7 +1485,40 @@ const onManualPointSubmit = (v: { x: number; y: number; z: number }) => {
  
    draft.clearLayers();
  
-   if (mode === 'none' || coords.length === 0) return;
+  if (mode === 'none') return;
+
+  // Keep every non-selected multipart component visible while the legacy
+  // tools edit only `coords`. The active component/ring is drawn below with
+  // the normal solid style; retained components are a non-interactive dashed
+  // reference and can never receive accidental control-point edits.
+  const draftMultipart = multipartEnabled ? multipartDraftRef.current : null;
+  const activePart = activeMultipartPartRef.current;
+  const activeHole = activeInnerSpaceRef.current;
+  const editingHole = editSelectedInnerSpaceRef.current;
+  const referenceStyle = { color, weight: 2, opacity: 0.45, fillOpacity: 0.08, dashArray: '5 7', interactive: false } as L.PathOptions;
+  const projectReference = (point: { x: number; y: number; z: number }) => proj.locationToLatLng(point.x, 64, point.z);
+  if (draftMultipart?.type === 'Point' && mode === 'point') {
+    draftMultipart.parts.forEach((point, index) => {
+      if (index === activePart || !Number.isFinite(point.x) || !Number.isFinite(point.z)) return;
+      L.circleMarker(projectReference(point), { color, fillColor: color, radius: 5, opacity: 0.45, fillOpacity: 0.2, dashArray: '5 7', interactive: false }).addTo(draft);
+    });
+  } else if (draftMultipart?.type === 'LineString' && mode === 'polyline') {
+    draftMultipart.parts.forEach((part, index) => {
+      if (index === activePart || part.length < 2) return;
+      L.polyline(part.map(projectReference), referenceStyle).addTo(draft);
+    });
+  } else if (draftMultipart?.type === 'Polygon' && mode === 'polygon') {
+    draftMultipart.parts.forEach((component, partIndex) => {
+      const referenceRings = component.filter((_ring, ringIndex) =>
+        partIndex !== activePart || (editingHole ? ringIndex !== activeHole + 1 : ringIndex !== 0));
+      for (const ring of referenceRings) {
+        if (ring.length < 3) continue;
+        const closed = [...ring, ring[0]].map(projectReference);
+        L.polyline(closed, referenceStyle).addTo(draft);
+      }
+    });
+  }
+  if (coords.length === 0) return;
  
    const latlngs = coords.map(p => proj.locationToLatLng(p.x, 64, p.z));
  
@@ -1299,18 +1665,32 @@ const finishLayer = () => {
   if (editingLayerId === null && finalCoords.length === 0) return;
   if (editingLayerId !== null && finalCoords.length === 0) return;
 
-  const makeLeafletGroup = (mode: DrawMode, coords: { x: number; z: number; y?: number }[], color: string) => {
+  const makeLeafletGroup = (
+    mode: DrawMode,
+    coords: { x: number; z: number; y?: number }[],
+    color: string,
+    multipart?: MultipartGeometry,
+  ) => {
     const g = L.layerGroup();
     const latlngs = coords.map(p => proj.locationToLatLng(p.x, 64, p.z));
 
     if (mode === 'point') {
-      latlngs.forEach(ll => {
+      const points = multipart?.type === 'Point'
+        ? multipart.parts.map((point) => proj.locationToLatLng(point.x, point.y, point.z))
+        : latlngs;
+      points.forEach(ll => {
         L.circleMarker(ll, { color, fillColor: color, radius: 6 }).addTo(g);
       });
     } else if (mode === 'polyline') {
-      L.polyline(latlngs, { color }).addTo(g);
+      const parts = multipart?.type === 'LineString'
+        ? multipart.parts.map((part) => part.map((point) => proj.locationToLatLng(point.x, point.y, point.z)))
+        : latlngs;
+      L.polyline(parts as any, { color }).addTo(g);
     } else if (mode === 'polygon') {
-      if (latlngs.length > 2) L.polygon(latlngs, { color }).addTo(g);
+      const parts = multipart?.type === 'Polygon'
+        ? multipart.parts.map((part) => part.map((ring) => ring.map((point) => proj.locationToLatLng(point.x, point.y, point.z))))
+        : latlngs;
+      if (latlngs.length > 2) L.polygon(parts as any, { color }).addTo(g);
       else L.polyline(latlngs, { color }).addTo(g);
     }
 
@@ -1336,6 +1716,7 @@ const finishLayer = () => {
     setFeatureInfo(hydrated.values ?? {});
     setGroupInfo(hydrated.groups ?? {});
     resetWorkflowStyleEditorState();
+    resetMultipartEditor();
   };
 
   // =========================
@@ -1533,6 +1914,12 @@ const finishLayer = () => {
   // - workflow-style 编辑：先把 registry draft 合并回 raw featureInfo，再走现有 buildFeatureInfo
   // =========================
   const def = FORMAT_REGISTRY[subType] ?? FORMAT_REGISTRY['默认'];
+  const finalGeometry = buildCurrentMultipartGeometry(drawMode as DrawMode, finalCoords);
+  const geometryError = validateMultipartGeometry(finalGeometry);
+  if (geometryError) {
+    alert(`无法保存，${geometryError}`);
+    return;
+  }
   const op = editingLayerId !== null ? 'edit' : 'create';
   const prevFeatureInfo = editingLayerId !== null
     ? layersRef.current.find(l => l.id === editingLayerId)?.jsonInfo?.featureInfo
@@ -1598,9 +1985,11 @@ const finishLayer = () => {
     });
   }
 
+  finalFeatureInfo = withCanonicalMultipartGeometry(finalFeatureInfo, finalGeometry);
+
   const newLayerId = editingLayerId ?? nextLayerId.current++;
 
-  const newGroup = makeLeafletGroup(drawMode as DrawMode, finalCoords, drawColor);
+  const newGroup = makeLeafletGroup(drawMode as DrawMode, finalCoords, drawColor, finalGeometry);
 
   const layerObj: LayerType = {
     id: newLayerId,
@@ -2341,7 +2730,8 @@ const clearAllLayers = () => {
   setEditingLayerId(null);
   setDrawing(false);
   setDrawMode('none');
-  resetWorkflowStyleEditorState();
+    resetWorkflowStyleEditorState();
+    resetMultipartEditor();
 
   // 4) 工作流态复位
   setWorkflowRunning(false);
@@ -2428,6 +2818,25 @@ const editLayer = (id: number) => {
   // 备份原始坐标
   editingBackupCoordsRef.current = layer.coords;
 
+  const geometryKind = geometryKindForDrawMode(layer.mode);
+  const persistedGeometry = readMultipartGeometry(layer.jsonInfo?.featureInfo, geometryKind);
+  if (persistedGeometry.geometry) {
+    multipartDraftRef.current = persistedGeometry.geometry;
+    const hasMultipleParts = persistedGeometry.geometry.parts.length > 1;
+    const hasHoles = persistedGeometry.geometry.type === 'Polygon' && persistedGeometry.geometry.parts.some((part) => part.length > 1);
+    setMultipartEnabled(hasMultipleParts || hasHoles);
+    setActiveMultipartPart(0);
+    activeMultipartPartRef.current = 0;
+    setInnerSpaceEnabled(false);
+    innerSpaceEnabledRef.current = false;
+    setEditSelectedInnerSpace(false);
+    editSelectedInnerSpaceRef.current = false;
+    setActiveInnerSpace(0);
+    activeInnerSpaceRef.current = 0;
+  } else {
+    resetMultipartEditor();
+  }
+
   // 进入编辑态
   setEditingLayerId(id);
   setDrawing(true);
@@ -2435,8 +2844,11 @@ const editLayer = (id: number) => {
   setDrawColor(layer.color);
 
   // 恢复坐标并画草稿
-  setTempPoints(layer.coords);
-  drawDraftGeometry(layer.coords, layer.mode, layer.color);
+  const editCoords = persistedGeometry.geometry
+    ? activeEditorCoordsFromMultipart(persistedGeometry.geometry)
+    : layer.coords;
+  setTempPoints(editCoords);
+  drawDraftGeometry(editCoords, layer.mode, layer.color);
 
   resetWorkflowStyleEditorState();
 
@@ -2608,10 +3020,15 @@ const runBatchImportFromText = (rawText: string, sourceLabel: string) => {
 
     const mode = v.mode;
     const coords = v.coords;
+    const importedGeometry = readMultipartGeometry(item, geometryKindForDrawMode(mode));
+    if (!importedGeometry.geometry) {
+      errors.push(`${sourceLabel} ${def.label} 第 ${i + 1} 条导入失败：${importedGeometry.error ?? '缺少可解析的几何坐标'}`);
+      continue;
+    }
     const hydrated = v.hydrated ?? def.hydrate(item);
     const normGroups = normalizeGroupInfoByDef(def, (hydrated.groups ?? {}) as any);
 
-    const featureInfoOut = def.buildFeatureInfo({
+    const featureInfoOut = withCanonicalMultipartGeometry(def.buildFeatureInfo({
       op: 'import',
       mode,
       coords,
@@ -2620,7 +3037,7 @@ const runBatchImportFromText = (rawText: string, sourceLabel: string) => {
       worldId: currentWorldId,
       prevFeatureInfo: item,
       now: new Date(),
-    });
+    }), importedGeometry.geometry);
 
     const itemColor = randomColor();
     const group = L.layerGroup();
@@ -2631,15 +3048,26 @@ const runBatchImportFromText = (rawText: string, sourceLabel: string) => {
       : 64;
 
     const latlngs = coords.map(p => proj.locationToLatLng(p.x, yForDisplay, p.z));
+    const toLatLng = (point: { x: number; y: number; z: number }) =>
+      proj.locationToLatLng(point.x, yForDisplay, point.z);
 
     if (mode === 'point') {
-      latlngs.forEach(ll => {
+      const points = importedGeometry.geometry.type === 'Point'
+        ? importedGeometry.geometry.parts.map(toLatLng)
+        : latlngs;
+      points.forEach(ll => {
         L.circleMarker(ll, { color: itemColor, fillColor: itemColor, radius: 6 }).addTo(group);
       });
     } else if (mode === 'polyline') {
-      L.polyline(latlngs, { color: itemColor }).addTo(group);
+      const parts = importedGeometry.geometry.type === 'LineString'
+        ? importedGeometry.geometry.parts.map((part) => part.map(toLatLng))
+        : latlngs;
+      L.polyline(parts as any, { color: itemColor }).addTo(group);
     } else {
-      L.polygon(latlngs, { color: itemColor }).addTo(group);
+      const parts = importedGeometry.geometry.type === 'Polygon'
+        ? importedGeometry.geometry.parts.map((part) => part.map((ring) => ring.map(toLatLng)))
+        : latlngs;
+      L.polygon(parts as any, { color: itemColor }).addTo(group);
     }
 
     const id = nextLayerId.current++;
@@ -4856,6 +5284,9 @@ onChange={(e) => {
     }}
   />
 )}
+
+{/* 多部件编辑：tempPoints 始终只指向当前下拉选择的部件（或当前内洞）。 */}
+{renderMultipartEditor()}
 </div>
 
 
@@ -5165,6 +5596,9 @@ onChange={(e) => {
     }}
   />
 )}
+
+{/* 紧凑面板与桌面面板共用同一套多部件/内部洞编辑器。 */}
+{renderMultipartEditor()}
 
 
 

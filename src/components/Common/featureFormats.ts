@@ -11,6 +11,13 @@ import type { CairnMapClassConfig, CairnMapClassFieldConfig, CairnMapClassGroupC
 import { getFormatExecutorByClassCode, getFormatExecutorKeyByClassCode } from '../../core/project/formatExecutorRegistry';
 import { stringifyFeatureJsonArray } from './featureJsonSerializer';
 import { buildWorldCodeMapFromConfig } from './buildDataToolSchema';
+import {
+  flattenMultipartCoordinates,
+  multipartGeometryFromSinglePath,
+  readMultipartGeometry,
+  validateMultipartGeometry,
+  withCanonicalMultipartGeometry,
+} from '../../core/geometry/multipartGeometry';
 
 export type WorkflowCatalogGeom = '点' | '线' | '面';
 
@@ -379,7 +386,6 @@ const TYPE_NAME_BY_MODE: Record<DrawMode, 'Points' | 'Polyline' | 'Polygon'> = {
 };
 
 export const WORLD_CODE_BY_WORLD_ID: Record<string, number> = buildWorldCodeMapFromConfig();
-const DEFAULT_COORD_Y = -64;
 
 const formatYYYYMMDD = (d: Date) => {
   const y = d.getFullYear();
@@ -437,36 +443,6 @@ const mapGroup = (group: CairnMapClassGroupConfig): GroupDef => ({
   minItems: group.minItems,
   fields: group.fields.map(mapField),
 });
-
-const buildCoordinateArray = (coords: Coord2D[]): Array<[number, number, number]> => coords.map((coord) => {
-  const x = Number(coord.x);
-  const z = Number(coord.z);
-  const y = Number(coord.y);
-  return [x, Number.isFinite(y) ? y : DEFAULT_COORD_Y, z];
-});
-
-const readPointCoordinate = (value: unknown): Coord2D[] => {
-  if (!isObject(value)) return [];
-  const x = Number(value.x);
-  const z = Number(value.z);
-  if (!Number.isFinite(x) || !Number.isFinite(z)) return [];
-  const y = Number(value.y);
-  return [{ x, z, y: Number.isFinite(y) ? y : DEFAULT_COORD_Y }];
-};
-
-const readCoordinateArray = (value: unknown): Coord2D[] => {
-  if (!Array.isArray(value)) return [];
-  return value
-    .map((item): Coord2D | null => {
-      if (!Array.isArray(item)) return null;
-      const x = Number(item[0]);
-      const z = item.length >= 3 ? Number(item[2]) : Number(item[1]);
-      if (!Number.isFinite(x) || !Number.isFinite(z)) return null;
-      const y = item.length >= 3 ? Number(item[1]) : Number.NaN;
-      return { x, z, y: Number.isFinite(y) ? y : DEFAULT_COORD_Y };
-    })
-    .filter((item): item is Coord2D => Boolean(item));
-};
 
 const buildBaseFields = (fields: FieldDef[], values: Record<string, unknown>): Record<string, unknown> => {
   const out: Record<string, unknown> = {};
@@ -587,18 +563,8 @@ const createFormatDefFromClassConfig = (config: CairnMapClassConfig): FormatDef 
   const buildFeatureInfo: FormatDef['buildFeatureInfo'] = ({ op, coords, values, groups: groupValues, worldId, editorId, prevFeatureInfo, now }) => {
     const out = buildBaseFields(fields, values);
     injectGroups(out, groupValues);
-    if (config.geometry.type === 'Point') {
-      const coord = coords[0];
-      const y = Number(coord?.y);
-      out[config.geometry.sourceField] = {
-        x: Number(coord?.x ?? 0),
-        y: Number.isFinite(y) ? y : DEFAULT_COORD_Y,
-        z: Number(coord?.z ?? 0),
-      };
-    } else {
-      out[config.geometry.sourceField] = buildCoordinateArray(coords);
-    }
-    return withSystemFields({ ...FORMAT_REGISTRY['默认'], key, classCode: config.classCode, fields, groups, label: resolveCairnMapLocalizedLabel(config.label, 'zh-CN', key), modes: [mode] }, out, {
+    const base = withCanonicalMultipartGeometry(out, multipartGeometryFromSinglePath(config.geometry.type, coords));
+    return withSystemFields({ ...FORMAT_REGISTRY['默认'], key, classCode: config.classCode, fields, groups, label: resolveCairnMapLocalizedLabel(config.label, 'zh-CN', key), modes: [mode] }, base, {
       op,
       mode,
       worldId,
@@ -622,9 +588,8 @@ const createFormatDefFromClassConfig = (config: CairnMapClassConfig): FormatDef 
   };
 
   const coordsFromFeatureInfo: FormatDef['coordsFromFeatureInfo'] = (featureInfo) => {
-    const info = isObject(featureInfo) ? featureInfo : {};
-    const value = info[config.geometry.sourceField];
-    return config.geometry.type === 'Point' ? readPointCoordinate(value) : readCoordinateArray(value);
+    const resolved = readMultipartGeometry(featureInfo, config.geometry.type, config.geometry.sourceField);
+    return flattenMultipartCoordinates(resolved.geometry).map((coord) => ({ x: coord.x, y: coord.y, z: coord.z }));
   };
 
   const validateImportItem = (item: unknown): string | undefined => {
@@ -659,23 +624,17 @@ const createDefaultFormatDef = (): FormatDef => ({
   groups: [],
   buildFeatureInfo: ({ op, mode, coords, worldId, editorId, prevFeatureInfo, now }) => {
     const out: Record<string, unknown> = {};
-    if (mode === 'point') {
-      const coord = coords[0];
-      const y = Number(coord?.y);
-      out.coordinate = {
-        x: Number(coord?.x ?? 0),
-        y: Number.isFinite(y) ? y : DEFAULT_COORD_Y,
-        z: Number(coord?.z ?? 0),
-      };
-    } else {
-      out.Conpoints = buildCoordinateArray(coords);
-    }
-    return withSystemFields(FORMAT_REGISTRY['默认'], out, { op, mode, worldId, editorId, prevFeatureInfo, now });
+    const geometryType = mode === 'point' ? 'Point' : mode === 'polyline' ? 'LineString' : 'Polygon';
+    const base = withCanonicalMultipartGeometry(out, multipartGeometryFromSinglePath(geometryType, coords));
+    return withSystemFields(FORMAT_REGISTRY['默认'], base, { op, mode, worldId, editorId, prevFeatureInfo, now });
   },
   hydrate: () => ({ values: {}, groups: {} }),
   coordsFromFeatureInfo: (featureInfo) => {
     const info = isObject(featureInfo) ? featureInfo : {};
-    return readPointCoordinate(info.coordinate).length > 0 ? readPointCoordinate(info.coordinate) : readCoordinateArray(info.Conpoints);
+    const type = Array.isArray(info.CoordG) || Array.isArray(info.Conpoints) ? 'Polygon'
+      : Array.isArray(info.CoordL) || Array.isArray(info.PLpoints) || Array.isArray(info.Linepoints) ? 'LineString'
+        : 'Point';
+    return flattenMultipartCoordinates(readMultipartGeometry(info, type).geometry).map((coord) => ({ x: coord.x, y: coord.y, z: coord.z }));
   },
 });
 
@@ -755,12 +714,8 @@ export type ImportValidationResult = {
   hydrated: { values: Record<string, unknown>; groups: Record<string, unknown[]> } | null;
 };
 
-const validateGeometryForMode = (mode: DrawMode, coords: Coord2D[]): MissingEntry[] => {
-  if (mode === 'point' && coords.length !== 1) return [{ kind: 'geometry', detail: '点模式需要 1 个点（coordinate.x / coordinate.z）' }];
-  if (mode === 'polyline' && coords.length < 2) return [{ kind: 'geometry', detail: '线模式至少需要 2 个点（coordinates[]）' }];
-  if (mode === 'polygon' && coords.length < 3) return [{ kind: 'geometry', detail: '面模式至少需要 3 个点（coordinates[]）' }];
-  return [];
-};
+const geometryTypeForMode = (mode: DrawMode): 'Point' | 'LineString' | 'Polygon' =>
+  mode === 'point' ? 'Point' : mode === 'polyline' ? 'LineString' : 'Polygon';
 
 export const validateImportItemDetailed = (
   def: FormatDef,
@@ -773,7 +728,10 @@ export const validateImportItemDetailed = (
   const mode = (def.modes?.[0] ?? 'point') as DrawMode;
   const coords = def.coordsFromFeatureInfo(item);
   const missing: MissingEntry[] = [];
-  missing.push(...validateGeometryForMode(mode, coords));
+  const geometry = readMultipartGeometry(item, geometryTypeForMode(mode));
+  if (geometry.error) structuralErrors.push(geometry.error);
+  const geometryError = validateMultipartGeometry(geometry.geometry);
+  if (geometryError) missing.push({ kind: 'geometry', detail: geometryError });
 
   const source = isObject(item) ? item : {};
   if (def.key !== '默认' && def.classCode) {
