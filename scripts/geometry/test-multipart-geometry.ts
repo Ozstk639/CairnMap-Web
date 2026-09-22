@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {
   readMultipartGeometry,
   serializeMultipartGeometry,
+  validateMultipartHoleDraft,
   validateMultipartGeometry,
 } from '../../src/core/geometry/multipartGeometry';
 import { stringifyFeatureJson } from '../../src/components/Common/featureJsonSerializer';
@@ -54,6 +55,16 @@ const invalidHole = readMultipartGeometry({
   ]],
 }, 'Polygon');
 assert.match(validateMultipartGeometry(invalidHole.geometry) ?? '', /必须完全位于外边界内/);
+
+const editablePolygon = polygon.geometry!;
+assert.equal(validateMultipartHoleDraft(editablePolygon, 0, 0, [
+  { x: 2.5, y: -64, z: 2.5 },
+  { x: 3, y: -64, z: 2.5 },
+]), undefined);
+assert.match(validateMultipartHoleDraft(editablePolygon, 0, 0, [
+  { x: 2.5, y: -64, z: 2.5 },
+  { x: 12, y: -64, z: 2.5 },
+]) ?? '', /必须位于外边界内/);
 
 const exported = stringifyFeatureJson({ Type: 'Polygon', Name: 'multipart', CoordG: serializeMultipartGeometry(polygon.geometry!) });
 assert.match(exported, /"CoordG"/);

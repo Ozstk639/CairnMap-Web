@@ -64,11 +64,13 @@ import { pickIdFieldValue, type FeatureRecord } from '@/components/Rules/renderi
 import {
   multipartGeometryFromSinglePath,
   readMultipartGeometry,
+  validateMultipartHoleDraft,
   validateMultipartGeometry,
   withCanonicalMultipartGeometry,
   type MultipartGeometry,
   type MultipartGeometryKind,
 } from '@/core/geometry/multipartGeometry';
+import { makeLabelDivIcon } from '@/components/Rules/rendering/labelStyles';
 import { rebuildRoadGraphCacheForWorld } from '@/components/Navigation/Navigation_Road';
 import { rebuildRailNewIndexCacheForWorld } from '@/components/Navigation/railNewIndex';
 import { rebuildRailNewNavigationCacheForWorld } from '@/components/Navigation/Navigation_RailNewIntegrated';
@@ -270,14 +272,23 @@ const [activeMultipartPart, setActiveMultipartPart] = useState(0);
 const [innerSpaceEnabled, setInnerSpaceEnabled] = useState(false);
 const [editSelectedInnerSpace, setEditSelectedInnerSpace] = useState(false);
 const [activeInnerSpace, setActiveInnerSpace] = useState(0);
+const [showMultipartPartLabels, setShowMultipartPartLabels] = useState(false);
+const [controlPointSessionBusy, setControlPointSessionBusy] = useState(false);
+const [manualPointInputOpen, setManualPointInputOpen] = useState(false);
+const [curveInputOpen, setCurveInputOpen] = useState(false);
+const [multipartInputError, setMultipartInputError] = useState('');
 const activeMultipartPartRef = useRef(0);
 const innerSpaceEnabledRef = useRef(false);
 const editSelectedInnerSpaceRef = useRef(false);
 const activeInnerSpaceRef = useRef(0);
+const showMultipartPartLabelsRef = useRef(false);
 useEffect(() => { activeMultipartPartRef.current = activeMultipartPart; }, [activeMultipartPart]);
 useEffect(() => { innerSpaceEnabledRef.current = innerSpaceEnabled; }, [innerSpaceEnabled]);
 useEffect(() => { editSelectedInnerSpaceRef.current = editSelectedInnerSpace; }, [editSelectedInnerSpace]);
 useEffect(() => { activeInnerSpaceRef.current = activeInnerSpace; }, [activeInnerSpace]);
+useEffect(() => { showMultipartPartLabelsRef.current = showMultipartPartLabels; }, [showMultipartPartLabels]);
+
+const multipartStructureLocked = showMultipartPartLabels || controlPointSessionBusy || manualPointInputOpen || curveInputOpen;
 
 
 
@@ -318,6 +329,8 @@ const resetMultipartEditor = () => {
   setInnerSpaceEnabled(false);
   setEditSelectedInnerSpace(false);
   setActiveInnerSpace(0);
+  setShowMultipartPartLabels(false);
+  setMultipartInputError('');
 };
 
 const activeEditorCoordsFromMultipart = (geometry: MultipartGeometry | null): EditorCoord[] => {
@@ -356,6 +369,24 @@ const persistActiveEditorCoords = (coords: EditorCoord[]) => {
   }
 };
 
+/** Keep invalid hole points out of every editing entrance, not only Save. */
+const validateActiveMultipartCoords = (coords: EditorCoord[]): string | undefined => {
+  const geometry = multipartDraftRef.current;
+  if (!multipartEnabled || !geometry || geometry.type !== 'Polygon' || !editSelectedInnerSpaceRef.current) return undefined;
+  return validateMultipartHoleDraft(
+    geometry,
+    activeMultipartPartRef.current,
+    activeInnerSpaceRef.current,
+    asMultipartCoords(coords),
+  );
+};
+
+const acceptActiveMultipartCoords = (coords: EditorCoord[]): boolean => {
+  const error = validateActiveMultipartCoords(coords);
+  setMultipartInputError(error ?? '');
+  return !error;
+};
+
 const buildCurrentMultipartGeometry = (mode: DrawMode, activeCoords: EditorCoord[]): MultipartGeometry => {
   if (!multipartEnabled || !multipartDraftRef.current) {
     return multipartGeometryFromSinglePath(geometryKindForDrawMode(mode), activeCoords);
@@ -374,6 +405,7 @@ const renderSelectedMultipartCoords = (geometry: MultipartGeometry | null, color
 };
 
 const selectMultipartPart = (nextIndex: number) => {
+  if (multipartStructureLocked) return;
   const geometry = multipartDraftRef.current;
   if (!geometry) return;
   persistActiveEditorCoords(tempPoints);
@@ -393,6 +425,7 @@ const selectMultipartPart = (nextIndex: number) => {
 };
 
 const addMultipartPart = () => {
+  if (multipartStructureLocked) return;
   const geometry = multipartDraftRef.current;
   if (!geometry) return;
   persistActiveEditorCoords(tempPoints);
@@ -406,6 +439,7 @@ const addMultipartPart = () => {
 };
 
 const removeMultipartPart = () => {
+  if (multipartStructureLocked) return;
   const geometry = multipartDraftRef.current;
   if (!geometry || geometry.parts.length <= 1) return;
   persistActiveEditorCoords(tempPoints);
@@ -414,6 +448,7 @@ const removeMultipartPart = () => {
 };
 
 const selectInnerSpace = (nextIndex: number) => {
+  if (multipartStructureLocked) return;
   const geometry = multipartDraftRef.current;
   if (!geometry || geometry.type !== 'Polygon') return;
   persistActiveEditorCoords(tempPoints);
@@ -427,6 +462,7 @@ const selectInnerSpace = (nextIndex: number) => {
 };
 
 const addInnerSpace = () => {
+  if (multipartStructureLocked) return;
   const geometry = multipartDraftRef.current;
   if (!geometry || geometry.type !== 'Polygon') return;
   persistActiveEditorCoords(tempPoints);
@@ -438,6 +474,7 @@ const addInnerSpace = () => {
 };
 
 const removeInnerSpace = () => {
+  if (multipartStructureLocked) return;
   const geometry = multipartDraftRef.current;
   if (!geometry || geometry.type !== 'Polygon') return;
   const component = geometry.parts[activeMultipartPartRef.current] ?? [];
@@ -452,6 +489,19 @@ const removeInnerSpace = () => {
   selectInnerSpace(Math.min(activeInnerSpaceRef.current, Math.max(0, component.length - 2)));
 };
 
+const toggleMultipartPartLabels = () => {
+  if (!multipartEnabled || !multipartDraftRef.current) return;
+  if (showMultipartPartLabels) {
+    setShowMultipartPartLabels(false);
+    return;
+  }
+  if (!controlPointsTRef.current?.requestCloseAndClear?.()) return;
+  curveInputTRef.current?.requestCloseAndClear?.();
+  persistActiveEditorCoords(tempPoints);
+  setMultipartInputError('');
+  setShowMultipartPartLabels(true);
+};
+
 /**
  * Both desktop and compact mapping panels share one multipart editor.  Keeping
  * this as a single renderer is intentional: selected parts/rings are a single
@@ -459,13 +509,14 @@ const removeInnerSpace = () => {
  */
 const renderMultipartEditor = () => (
   drawMode !== 'none' && drawing ? (
-    <div className="mb-2 rounded border border-slate-200 bg-slate-50 p-2">
+    <div className="mt-5 mb-2 rounded border border-slate-200 bg-slate-50 p-2">
       <div className="flex gap-2">
         <AppButton
           type="button"
           className={`flex-1 px-2 py-1 rounded text-sm border ${
             multipartEnabled ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
-          }`}
+          } ${showMultipartPartLabels ? 'opacity-60 cursor-not-allowed' : ''}`}
+          disabled={showMultipartPartLabels}
           onClick={() => {
             if (multipartEnabled) {
               const partCount = multipartDraftRef.current?.parts.length ?? 1;
@@ -488,27 +539,42 @@ const renderMultipartEditor = () => (
         >
           多部件要素
         </AppButton>
+        {multipartEnabled && (
+          <AppButton
+            type="button"
+            className={`flex-1 px-2 py-1 rounded text-sm border ${
+              showMultipartPartLabels ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
+            }`}
+            onClick={toggleMultipartPartLabels}
+            title="以独立标签层强制显示部件与当前部件的内部洞编号；开启后锁定编辑操作"
+          >
+            显示部件编号
+          </AppButton>
+        )}
       </div>
 
       {multipartEnabled && multipartDraftRef.current && (
         <>
+          {showMultipartPartLabels && <div className="mt-2 text-xs text-blue-700">部件编号显示中：已锁定部件、内洞与所有编辑工具；关闭此模式后才可继续编辑。</div>}
+          {multipartInputError && <div className="mt-2 text-xs text-rose-700">{multipartInputError}</div>}
           <div className="mt-2 flex items-center gap-2">
             <select
               aria-label="部件编号"
               className="min-w-0 flex-1 rounded border p-1 text-sm"
               value={activeMultipartPart}
               onChange={(event) => selectMultipartPart(Number(event.target.value))}
+              disabled={multipartStructureLocked}
             >
               {multipartDraftRef.current.parts.map((_, index) => (
                 <option key={index} value={index}>部件 {index + 1}</option>
               ))}
             </select>
-            <AppButton type="button" className="px-3 py-1 rounded border bg-white" onClick={addMultipartPart} title="添加部件">+</AppButton>
+            <AppButton type="button" className="px-3 py-1 rounded border bg-white disabled:opacity-40" onClick={addMultipartPart} disabled={multipartStructureLocked} title="添加部件">+</AppButton>
             <AppButton
               type="button"
               className="px-3 py-1 rounded border bg-white disabled:opacity-40"
               onClick={removeMultipartPart}
-              disabled={multipartDraftRef.current.parts.length <= 1}
+              disabled={multipartStructureLocked || multipartDraftRef.current.parts.length <= 1}
               title="删除当前部件"
             >
               −
@@ -522,7 +588,8 @@ const renderMultipartEditor = () => (
                   type="button"
                   className={`flex-1 px-2 py-1 rounded text-sm border ${
                     innerSpaceEnabled ? 'bg-violet-600 text-white border-violet-700' : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
-                  }`}
+                  } ${multipartStructureLocked ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  disabled={multipartStructureLocked}
                   onClick={() => {
                     const currentPart = multipartDraftRef.current?.type === 'Polygon'
                       ? multipartDraftRef.current.parts[activeMultipartPartRef.current] ?? []
@@ -546,7 +613,7 @@ const renderMultipartEditor = () => (
                   className={`flex-1 px-2 py-1 rounded text-sm border ${
                     editSelectedInnerSpace ? 'bg-violet-600 text-white border-violet-700' : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
                   } disabled:opacity-40`}
-                  disabled={!innerSpaceEnabled || ((multipartDraftRef.current.parts[activeMultipartPart]?.length ?? 1) <= 1)}
+                  disabled={multipartStructureLocked || !innerSpaceEnabled || ((multipartDraftRef.current.parts[activeMultipartPart]?.length ?? 1) <= 1)}
                   onClick={() => {
                     if (editSelectedInnerSpaceRef.current) {
                       persistActiveEditorCoords(tempPoints);
@@ -570,19 +637,19 @@ const renderMultipartEditor = () => (
                     className="min-w-0 flex-1 rounded border p-1 text-sm"
                     value={activeInnerSpace}
                     onChange={(event) => selectInnerSpace(Number(event.target.value))}
-                    disabled={(multipartDraftRef.current.parts[activeMultipartPart]?.length ?? 1) <= 1}
+                    disabled={multipartStructureLocked || (multipartDraftRef.current.parts[activeMultipartPart]?.length ?? 1) <= 1}
                   >
                     {multipartDraftRef.current.parts[activeMultipartPart]?.slice(1).map((_, index) => (
                       <option key={index} value={index}>内部洞 {index + 1}</option>
                     ))}
                     {(multipartDraftRef.current.parts[activeMultipartPart]?.length ?? 1) <= 1 && <option value={0}>尚未添加内部洞</option>}
                   </select>
-                  <AppButton type="button" className="px-3 py-1 rounded border bg-white" onClick={addInnerSpace} title="添加内部洞">+</AppButton>
+                  <AppButton type="button" className="px-3 py-1 rounded border bg-white disabled:opacity-40" onClick={addInnerSpace} disabled={multipartStructureLocked} title="添加内部洞">+</AppButton>
                   <AppButton
                     type="button"
                     className="px-3 py-1 rounded border bg-white disabled:opacity-40"
                     onClick={removeInnerSpace}
-                    disabled={(multipartDraftRef.current.parts[activeMultipartPart]?.length ?? 1) <= 1}
+                    disabled={multipartStructureLocked || (multipartDraftRef.current.parts[activeMultipartPart]?.length ?? 1) <= 1}
                     title="删除当前内部洞"
                   >
                     −
@@ -822,6 +889,9 @@ const assistLineToolsRef = useRef<AssistLineToolsHandle | null>(null);
 // =====featureInfo=== draft 内额外覆盖层：最新点击端点 + 控制点预览 ========
 const draftEndpointRef = useRef<L.LayerGroup | null>(null);
 const draftVertexOverlayRef = useRef<L.LayerGroup | null>(null);
+// Independent of rule-driven layers: multipart labels are an editor-only,
+// non-interactive overlay with the shared BUD-like visual preset.
+const multipartLabelOverlayRef = useRef<L.LayerGroup | null>(null);
 
 // ======== 绘制态光标：只在“本模块设置过”时才负责清理，避免干扰其它工具 ========
 const drawCursorOwnedRef = useRef(false);
@@ -1280,6 +1350,10 @@ useEffect(() => {
     draftVertexOverlayRef.current = L.layerGroup();
     draftRootRef.current.addLayer(draftVertexOverlayRef.current);
   }
+  if (!multipartLabelOverlayRef.current) {
+    multipartLabelOverlayRef.current = L.layerGroup();
+    draftRootRef.current.addLayer(multipartLabelOverlayRef.current);
+  }
 }, [mapReady]);
 
 
@@ -1389,6 +1463,7 @@ const clearDraftOverlays = () => {
   draftGeomRef.current?.clearLayers();
   draftEndpointRef.current?.clearLayers();
   draftVertexOverlayRef.current?.clearLayers();
+  multipartLabelOverlayRef.current?.clearLayers();
 };
 
 const updateLatestEndpointMarker = (p: { x: number; z: number }, color: string) => {
@@ -1411,6 +1486,7 @@ const updateLatestEndpointMarker = (p: { x: number; z: number }, color: string) 
 
 
 const onMapDrawClick = (e: L.LeafletMouseEvent) => {
+  if (showMultipartPartLabelsRef.current) return;
   // 曲线输入面板开启时：主绘制/编辑区完全冻结
   if (curveInputFrozenRef.current) return;
 
@@ -1434,21 +1510,21 @@ const onMapDrawClick = (e: L.LeafletMouseEvent) => {
   // ② 网格化（整数 / 0.5 / 强制中心）：在“辅助线修正”之后立刻对点击坐标做修正
   newPoint = snapWorldPointByMode(newPoint);
 
-  // ③ 常规 undo/redo：一旦新增点，redoStack 必须清空
-  setRedoStack([]);
-
   setTempPoints((prev) => {
     // Point multipart components are individual coordinates, not a nested
     // path. Re-clicking replaces the selected point rather than creating an
     // invisible second coordinate in the same component.
     const updated = drawMode === 'point' && multipartEnabled ? [newPoint] : [...prev, newPoint];
-    drawDraftGeometry(updated, drawMode, drawColor);
-    updateLatestEndpointMarker(newPoint, drawColor);
+    if (!acceptActiveMultipartCoords(updated)) return prev;
+    setRedoStack([]);
+    drawDraftGeometry(updated, drawMode, drawColorRef.current);
+    updateLatestEndpointMarker(newPoint, drawColorRef.current);
     return updated;
   });
 };
 
 const onManualPointSubmit = (v: { x: number; y: number; z: number }) => {
+  if (showMultipartPartLabelsRef.current) return;
   if (!measuringActive || !drawing || drawMode === 'none') return;
   if (curveInputFrozenRef.current) return;
   if (controlPointsTRef.current?.isBusy?.()) return;
@@ -1461,12 +1537,12 @@ const onManualPointSubmit = (v: { x: number; y: number; z: number }) => {
 
   const newPoint = ({ x: v.x, z: v.z, y: v.y } as { x: number; z: number; y: number });
 
-  setRedoStack([]);
-
   setTempPoints((prev) => {
     const updated = drawMode === 'point' && multipartEnabled ? [newPoint] : [...prev, newPoint];
-    drawDraftGeometry(updated, drawMode, drawColor);
-    updateLatestEndpointMarker({ x: v.x, z: v.z }, drawColor);
+    if (!acceptActiveMultipartCoords(updated)) return prev;
+    setRedoStack([]);
+    drawDraftGeometry(updated, drawMode, drawColorRef.current);
+    updateLatestEndpointMarker({ x: v.x, z: v.z }, drawColorRef.current);
     return updated;
   });
 };
@@ -1493,9 +1569,9 @@ const onManualPointSubmit = (v: { x: number; y: number; z: number }) => {
   // reference and can never receive accidental control-point edits.
   const draftMultipart = multipartEnabled ? multipartDraftRef.current : null;
   const activePart = activeMultipartPartRef.current;
-  const activeHole = activeInnerSpaceRef.current;
   const editingHole = editSelectedInnerSpaceRef.current;
-  const referenceStyle = { color, weight: 2, opacity: 0.45, fillOpacity: 0.08, dashArray: '5 7', interactive: false } as L.PathOptions;
+  const referenceStyle = { color, weight: 4, opacity: 0.76, fillOpacity: 0.1, dashArray: '10 7', interactive: false } as L.PathOptions;
+  const referenceHaloStyle = { color, weight: 9, opacity: 0.2, interactive: false } as L.PathOptions;
   const projectReference = (point: { x: number; y: number; z: number }) => proj.locationToLatLng(point.x, 64, point.z);
   if (draftMultipart?.type === 'Point' && mode === 'point') {
     draftMultipart.parts.forEach((point, index) => {
@@ -1505,17 +1581,41 @@ const onManualPointSubmit = (v: { x: number; y: number; z: number }) => {
   } else if (draftMultipart?.type === 'LineString' && mode === 'polyline') {
     draftMultipart.parts.forEach((part, index) => {
       if (index === activePart || part.length < 2) return;
-      L.polyline(part.map(projectReference), referenceStyle).addTo(draft);
+      const latLngs = part.map(projectReference);
+      L.polyline(latLngs, referenceHaloStyle).addTo(draft);
+      L.polyline(latLngs, referenceStyle).addTo(draft);
     });
   } else if (draftMultipart?.type === 'Polygon' && mode === 'polygon') {
     draftMultipart.parts.forEach((component, partIndex) => {
-      const referenceRings = component.filter((_ring, ringIndex) =>
-        partIndex !== activePart || (editingHole ? ringIndex !== activeHole + 1 : ringIndex !== 0));
-      for (const ring of referenceRings) {
-        if (ring.length < 3) continue;
-        const closed = [...ring, ring[0]].map(projectReference);
-        L.polyline(closed, referenceStyle).addTo(draft);
+      const [outer, ...holes] = component;
+      if (outer?.length >= 3) {
+        const polygon = [outer, ...holes.filter((hole) => hole.length >= 3)].map((ring) => ring.map(projectReference));
+        L.polygon(polygon, {
+          color: 'transparent',
+          weight: 0,
+          fillColor: color,
+          fillOpacity: partIndex === activePart ? 0.13 : 0.065,
+          fillRule: 'evenodd',
+          interactive: false,
+        }).addTo(draft);
       }
+      component.forEach((ring, ringIndex) => {
+        if (ring.length < 2) return;
+        const closed = [...ring, ring[0]].map(projectReference);
+        const activeOuterForHole = partIndex === activePart && editingHole && ringIndex === 0;
+        const ringColor = ringIndex === 0 ? color : '#7c3aed';
+        const halo = activeOuterForHole
+          ? { color: ringColor, weight: 13, opacity: 0.48, interactive: false }
+          : { color: ringColor, weight: 7, opacity: partIndex === activePart ? 0.25 : 0.14, interactive: false };
+        L.polyline(closed, halo).addTo(draft);
+        L.polyline(closed, {
+          color: ringColor,
+          weight: activeOuterForHole ? 5 : 4,
+          opacity: partIndex === activePart ? 0.9 : 0.72,
+          dashArray: ringIndex === 0 ? '10 7' : '4 6',
+          interactive: false,
+        }).addTo(draft);
+      });
     });
   }
   if (coords.length === 0) return;
@@ -1527,13 +1627,53 @@ const onManualPointSubmit = (v: { x: number; y: number; z: number }) => {
        L.circleMarker(ll, { color, fillColor: color, radius: 6 }).addTo(draft);
      });
    } else if (mode === 'polyline') {
-     L.polyline(latlngs, { color }).addTo(draft);
+     L.polyline(latlngs, { color, weight: 4, opacity: 0.96 }).addTo(draft);
    } else if (mode === 'polygon') {
-     if (latlngs.length > 2) L.polygon(latlngs, { color }).addTo(draft);
-     else L.polyline(latlngs, { color }).addTo(draft);
+     if (latlngs.length > 2 && !editingHole) L.polygon(latlngs, { color, weight: 4, fillColor: color, fillOpacity: 0.18 }).addTo(draft);
+     else L.polyline([...latlngs, ...(latlngs.length > 2 ? [latlngs[0]] : [])], { color, weight: 4, dashArray: editingHole ? '4 6' : undefined }).addTo(draft);
    }
  };
  
+// Editor labels deliberately use the shared label-style factory but live in a
+// separate non-interactive layer. They are therefore a CairnMap capability,
+// not a RIA/BUD rule-rendering side effect.
+useEffect(() => {
+  const projection = projectionRef.current;
+  const overlay = multipartLabelOverlayRef.current;
+  if (!projection || !overlay) return;
+  overlay.clearLayers();
+  if (!showMultipartPartLabels || !multipartEnabled || !multipartDraftRef.current) return;
+
+  const labelAt = (coords: Array<{ x: number; y: number; z: number }>, text: string) => {
+    if (!coords.length) return;
+    const finite = coords.filter((point) => Number.isFinite(point.x) && Number.isFinite(point.z));
+    if (!finite.length) return;
+    const anchor = finite.reduce((sum, point) => ({ x: sum.x + point.x, z: sum.z + point.z }), { x: 0, z: 0 });
+    const latLng = projection.locationToLatLng(anchor.x / finite.length, 64, anchor.z / finite.length);
+    L.marker(latLng, {
+      interactive: false,
+      keyboard: false,
+      icon: makeLabelDivIcon('gm-outline-bold', text, { placement: 'center', withDot: false, interactive: false }),
+    }).addTo(overlay);
+  };
+
+  const geometry = multipartDraftRef.current;
+  if (geometry.type === 'Point') {
+    geometry.parts.forEach((part, index) => labelAt([part], `部件 ${index + 1}`));
+    return;
+  }
+  if (geometry.type === 'LineString') {
+    geometry.parts.forEach((part, index) => labelAt(part, `部件 ${index + 1}`));
+    return;
+  }
+  geometry.parts.forEach((part, index) => {
+    labelAt(part[0] ?? [], `部件 ${index + 1}`);
+    if (index === activeMultipartPartRef.current) {
+      part.slice(1).forEach((hole, holeIndex) => labelAt(hole, `内洞 ${holeIndex + 1}`));
+    }
+  });
+}, [showMultipartPartLabels, multipartEnabled, activeMultipartPart, activeInnerSpace, tempPoints, drawMode, drawing, mapReady]);
+
 // 颜色变化时：立即刷新草稿图形（避免“必须保存后颜色才变化”）
 useEffect(() => {
   if (!measuringActive) return;
@@ -2692,10 +2832,10 @@ const handleUndo = () => {
   const updated = tempPoints.slice(0, tempPoints.length - 1);
   setTempPoints(updated);
 
-  drawDraftGeometry(updated, drawMode, drawColor);
+  drawDraftGeometry(updated, drawMode, drawColorRef.current);
 
   if (updated.length === 0) draftEndpointRef.current?.clearLayers();
-  else updateLatestEndpointMarker(updated[updated.length - 1], drawColor);
+  else updateLatestEndpointMarker(updated[updated.length - 1], drawColorRef.current);
 };
 
 const handleRedo = () => {
@@ -2707,9 +2847,38 @@ const handleRedo = () => {
   const updated = [...tempPoints, redoPoint];
   setTempPoints(updated);
 
-  drawDraftGeometry(updated, drawMode, drawColor);
-  updateLatestEndpointMarker(redoPoint, drawColor);
+  drawDraftGeometry(updated, drawMode, drawColorRef.current);
+  updateLatestEndpointMarker(redoPoint, drawColorRef.current);
 };
+
+// Normal drawing owns browser-style history only while no focused text editor
+// or specialised tool owns it. ControlPointsT keeps its own transactional
+// undo/redo and therefore deliberately takes precedence.
+useEffect(() => {
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (!measuringActive || !drawing || drawMode === 'none') return;
+    if (manualPointInputOpen || curveInputOpen || controlPointSessionBusy) return;
+    const target = event.target as HTMLElement | null;
+    const tag = target?.tagName?.toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select' || target?.isContentEditable) return;
+    if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+
+    const key = event.key.toLowerCase();
+    if (key === 'z' && !event.shiftKey) {
+      if (!tempPoints.length) return;
+      event.preventDefault();
+      handleUndo();
+      return;
+    }
+    if (key === 'y' || (key === 'z' && event.shiftKey)) {
+      if (!redoStack.length) return;
+      event.preventDefault();
+      handleRedo();
+    }
+  };
+  window.addEventListener('keydown', onKeyDown);
+  return () => window.removeEventListener('keydown', onKeyDown);
+}, [measuringActive, drawing, drawMode, manualPointInputOpen, curveInputOpen, controlPointSessionBusy, tempPoints, redoStack]);
 
  
  
@@ -4538,7 +4707,7 @@ const workflowBridge: WorkflowBridge = {
   };
 
   const toggleTempMountAllLayers = async (layerList: LayerType[], busy: boolean) => {
-    if (busy) return;
+    if (busy || showMultipartPartLabels) return;
     const ids = layerList.map((l) => l.id);
 
     // 已挂载：移除所有 layer-* 临时源，并恢复测绘图层显示（存在即移除）
@@ -4707,7 +4876,7 @@ const workflowBridge: WorkflowBridge = {
               <AppButton
                 type="button"
                 className={`px-2 py-1 text-sm rounded border ${
-                  busy || visibleList.length === 0 || (!tempMountAllActive && hasDefaultLayer)
+                  busy || showMultipartPartLabels || visibleList.length === 0 || (!tempMountAllActive && hasDefaultLayer)
                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-200'
                     : tempMountAllActive
                       ? 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700'
@@ -4716,6 +4885,8 @@ const workflowBridge: WorkflowBridge = {
                 title={
                   busy
                     ? '当前有要素正在编辑/绘制，请先保存'
+                    : showMultipartPartLabels
+                      ? '显示部件编号期间锁定临时挂载，以保持部件边界稳定'
                     : visibleList.length === 0
                       ? '暂无图层'
                       : (!tempMountAllActive && hasDefaultLayer)
@@ -4724,7 +4895,7 @@ const workflowBridge: WorkflowBridge = {
                         ? '取消临时挂载（存在即移除）'
                         : '临时挂载所有图层到规则图层（用于测试显示/去重/关联）'
                 }
-                disabled={busy || visibleList.length === 0 || (!tempMountAllActive && hasDefaultLayer)}
+                disabled={busy || showMultipartPartLabels || visibleList.length === 0 || (!tempMountAllActive && hasDefaultLayer)}
                 onClick={() => void toggleTempMountAllLayers(visibleList, busy)}
               >
                 {tempMountAllActive ? '取消临时挂载' : '临时挂载'}
@@ -5193,16 +5364,17 @@ onChange={(e) => {
 {/* 手动输入 & 曲线输入：同一行并平分空间 */}
 <div className="flex gap-2 mb-2">
   <ManualPointInput
-    enabled={measuringActive && drawing && drawMode !== 'none' && !showDraftControlPointsLocked && !drawClickSuppressed && !curveInputFrozen}
+    enabled={measuringActive && drawing && drawMode !== 'none' && !showMultipartPartLabels && !showDraftControlPointsLocked && !drawClickSuppressed && !curveInputFrozen}
     activeMode={drawMode}
     defaultY={-64}
     onSubmit={onManualPointSubmit}
+    onOpenChange={setManualPointInputOpen}
     outerClassName="flex-1"
   />
 
   <CurveInputT
     ref={curveInputTRef}
-    enabled={measuringActive && drawing && (drawMode === 'polyline' || drawMode === 'polygon') && !showDraftControlPointsLocked}
+    enabled={measuringActive && drawing && !showMultipartPartLabels && (drawMode === 'polyline' || drawMode === 'polygon') && !showDraftControlPointsLocked}
     externallySuppressed={drawClickSuppressed || curveInputFrozen}
     mapReady={mapReady}
     leafletMapRef={leafletMapRef}
@@ -5211,6 +5383,7 @@ onChange={(e) => {
     outerClassName="flex-1"
     // 曲线输入开启时：完全冻结主绘制/编辑交互（不影响 ControlPointsT 的抑制状态）
     onSetDrawClickSuppressed={(v) => setCurveInputFrozenImmediate(v)}
+    onOpenChange={setCurveInputOpen}
     filterWorldPointByAssistLine={(p) => {
       const assist = assistLineToolsRef.current;
       if (assist?.isEnabled?.()) {
@@ -5222,12 +5395,13 @@ onChange={(e) => {
     onCommitPoints={(points) => {
       if (!Array.isArray(points) || points.length === 0) return;
 
-      setRedoStack([]);
       setTempPoints((prev) => {
         const updated = [...prev, ...points];
-        drawDraftGeometry(updated, drawMode, drawColor);
+        if (!acceptActiveMultipartCoords(updated)) return prev;
+        setRedoStack([]);
+        drawDraftGeometry(updated, drawMode, drawColorRef.current);
         const last = updated[updated.length - 1];
-        if (last) updateLatestEndpointMarker({ x: last.x, z: last.z }, drawColor);
+        if (last) updateLatestEndpointMarker({ x: last.x, z: last.z }, drawColorRef.current);
         return updated;
       });
     }}
@@ -5257,9 +5431,12 @@ onChange={(e) => {
     activeMode={drawMode}
     activeColor={drawColor}
     activeCoords={tempPoints}
+    validateCandidateCoords={(coords) => validateActiveMultipartCoords(coords)}
+    onSessionStateChange={({ busy }) => setControlPointSessionBusy(busy)}
     onApplyActiveCoords={(coords) => {
+      if (!acceptActiveMultipartCoords(coords)) return;
       setTempPoints(coords);
-      drawDraftGeometry(coords, drawMode, drawColor);
+      drawDraftGeometry(coords, drawMode, drawColorRef.current);
 
       // 控制点编辑/插入保存后：不保留“最新端点临时点”
       draftEndpointRef.current?.clearLayers();
@@ -5569,9 +5746,12 @@ onChange={(e) => {
     activeMode={drawMode}
     activeColor={drawColor}
     activeCoords={tempPoints}
+    validateCandidateCoords={(coords) => validateActiveMultipartCoords(coords)}
+    onSessionStateChange={({ busy }) => setControlPointSessionBusy(busy)}
     onApplyActiveCoords={(coords) => {
+      if (!acceptActiveMultipartCoords(coords)) return;
       setTempPoints(coords);
-      drawDraftGeometry(coords, drawMode, drawColor);
+      drawDraftGeometry(coords, drawMode, drawColorRef.current);
 
       // 控制点编辑/插入保存后：不保留“最新端点临时点”
       draftEndpointRef.current?.clearLayers();

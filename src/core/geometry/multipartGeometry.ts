@@ -280,6 +280,62 @@ function ringsIntersect(a: MultipartCoord[], b: MultipartCoord[]): boolean {
   return false;
 }
 
+/**
+ * Validate a polygon-hole draft before it is committed to the multipart
+ * editor.  Unlike validateMultipartGeometry this accepts an incomplete ring:
+ * it is intended for map clicks, control-point moves, manual input and array
+ * previews, where rejecting an impossible point immediately is preferable to
+ * letting an invalid draft survive until Save.
+ */
+export function validateMultipartHoleDraft(
+  geometry: MultipartGeometry | null,
+  partIndex: number,
+  holeIndex: number,
+  candidate: MultipartCoord[],
+): string | undefined {
+  if (!geometry || geometry.type !== 'Polygon') return undefined;
+  const component = geometry.parts[partIndex];
+  const outer = component?.[0];
+  if (!outer || outer.length < 3) return '内部洞必须先在有效的外边界内编辑';
+
+  const holeLabel = `第 ${partIndex + 1} 个部件内部洞 ${holeIndex + 1}`;
+  if (candidate.some((point) => !pointInRing(point, outer))) {
+    return `${holeLabel} 的控制点必须位于外边界内`;
+  }
+
+  // Every completed draft segment must stay inside the exterior.  Test only
+  // consecutive segments while the ring is incomplete; the closing segment is
+  // checked by validateMultipartGeometry when the user saves the geometry.
+  for (let index = 1; index < candidate.length; index += 1) {
+    const a = candidate[index - 1];
+    const b = candidate[index];
+    for (let outerIndex = 0; outerIndex < outer.length; outerIndex += 1) {
+      const c = outer[outerIndex];
+      const d = outer[(outerIndex + 1) % outer.length];
+      if (segmentsIntersect(a, b, c, d)) return `${holeLabel} 不能穿越外边界`;
+    }
+  }
+
+  const otherHoles = component.slice(1);
+  for (let index = 0; index < otherHoles.length; index += 1) {
+    if (index === holeIndex) continue;
+    const other = otherHoles[index];
+    if (!other?.length) continue;
+    if (candidate.some((point) => pointInRing(point, other))) {
+      return `${holeLabel} 不能进入其他内部洞`;
+    }
+    for (let segment = 1; segment < candidate.length; segment += 1) {
+      for (let otherIndex = 0; otherIndex < other.length; otherIndex += 1) {
+        if (segmentsIntersect(candidate[segment - 1], candidate[segment], other[otherIndex], other[(otherIndex + 1) % other.length])) {
+          return `${holeLabel} 不能与其他内部洞相交`;
+        }
+      }
+    }
+  }
+
+  return undefined;
+}
+
 export function validateMultipartGeometry(geometry: MultipartGeometry | null): string | undefined {
   if (!geometry) return '缺少几何坐标';
   const invalidCoordinate = flattenMultipartCoordinates(geometry).find((coord) =>

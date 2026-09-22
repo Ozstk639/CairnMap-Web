@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { X } from 'lucide-react';
 
@@ -27,11 +27,14 @@ export interface ManualPointInputProps {
 
   /** 点击“完成”时回调（不清空输入，不关闭面板） */
   onSubmit: (v: ManualPointInputValue) => void;
+
+  /** Reports the visible editor session so parent selectors can lock safely. */
+  onOpenChange?: (open: boolean) => void;
 }
 
 const isValid = (n: number | null) => typeof n === 'number' && Number.isFinite(n);
 
-export default function ManualPointInput({ enabled = true, activeMode = 'none', defaultY = -64, onSubmit, outerClassName }: ManualPointInputProps) {
+export default function ManualPointInput({ enabled = true, activeMode = 'none', defaultY = -64, onSubmit, outerClassName, onOpenChange }: ManualPointInputProps) {
   const [open, setOpen] = useState(false);
 
   const [xRaw, setXRaw] = useState('');
@@ -41,6 +44,14 @@ export default function ManualPointInput({ enabled = true, activeMode = 'none', 
   const [batchRaw, setBatchRaw] = useState('');
 
   const disabled = !enabled;
+
+  useEffect(() => {
+    if (disabled && open) setOpen(false);
+  }, [disabled, open]);
+
+  useEffect(() => {
+    onOpenChange?.(open && !disabled);
+  }, [open, disabled, onOpenChange]);
 
   const title = useMemo(() => {
     if (disabled) return '手动输入：需先进入点/线/面绘制或编辑状态';
