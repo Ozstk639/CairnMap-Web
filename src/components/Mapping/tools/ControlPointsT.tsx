@@ -13,7 +13,7 @@ import 'leaflet/dist/leaflet.css';
 import { formatGridNumber, snapWorldPointByMode } from '@/components/Mapping/tools/GridSnapModeSwitch';
 import type { DynmapProjection } from '@/lib/DynmapProjection';
 import { DraggablePanel } from '@/components/DraggablePanel/DraggablePanel';
-import { Pencil, Plus, Save, Undo2, Redo2, X, ArrowLeftRight, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Save, Undo2, Redo2, X, ArrowLeftRight } from 'lucide-react';
 import AppButton from '@/components/ui/AppButton';
 import AppCard from '@/components/ui/AppCard';
 
@@ -1173,20 +1173,14 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
 
   return (
     <div className="mt-2">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="px-2 py-1 rounded text-xs border bg-slate-100 text-slate-700 flex items-center gap-1 select-none" aria-label="控制点工具">
-          <Pencil size={14} />
-          控制点工具
-        </span>
-        <AppButton type="button" className={`px-2 py-1 rounded text-xs border ${editEnabled ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-800 border-gray-300'} ${canEdit && !arrayEditorOpen ? '' : 'opacity-50 cursor-not-allowed'}`} onClick={toggleEdit} disabled={!canEdit || arrayEditorOpen}>修改</AppButton>
-        <AppButton type="button" className={`px-2 py-1 rounded text-xs border ${addEnabled ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-800 border-gray-300'} ${canAdd && !arrayEditorOpen ? '' : 'opacity-50 cursor-not-allowed'}`} onClick={toggleAdd} disabled={!canAdd || arrayEditorOpen}>添加</AppButton>
-        <AppButton type="button" className={`px-2 py-1 rounded text-xs border flex items-center gap-1 ${deleteEnabled ? 'bg-rose-600 text-white border-rose-700' : 'bg-white text-gray-800 border-gray-300'} ${canDelete && !arrayEditorOpen ? '' : 'opacity-50 cursor-not-allowed'}`} onClick={toggleDelete} disabled={!canDelete || arrayEditorOpen}><Trash2 size={13} />删除</AppButton>
-        <AppButton type="button" className={`px-2 py-1 rounded text-xs border ${canReverse ? 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50' : 'opacity-50 cursor-not-allowed bg-white text-gray-800 border-gray-300'}`} onClick={doReverse} disabled={!canReverse}>反转</AppButton>
-        <AppButton type="button" className={`px-2 py-1 rounded text-xs border ${arrayEditorOpen ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-800 border-gray-300'} ${canArrayEdit && !busy ? '' : 'opacity-50 cursor-not-allowed'}`} onClick={() => arrayEditorOpen ? tryCloseArrayEditor() : openArrayEditor()} disabled={!arrayEditorOpen && (!canArrayEdit || busy)}>数组编辑</AppButton>
+      <div className="flex flex-nowrap items-center gap-1 overflow-x-auto whitespace-nowrap" aria-label="控制点工具">
+        <span className="shrink-0 px-1.5 py-1 text-xs text-slate-700 select-none">控制点工具</span>
+        <AppButton type="button" className={`shrink-0 px-1.5 py-1 rounded text-xs border ${editEnabled ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-800 border-gray-300'} ${canEdit && !arrayEditorOpen ? '' : 'opacity-50 cursor-not-allowed'}`} onClick={toggleEdit} disabled={!canEdit || arrayEditorOpen}>修改</AppButton>
+        <AppButton type="button" className={`shrink-0 px-1.5 py-1 rounded text-xs border ${addEnabled ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-800 border-gray-300'} ${canAdd && !arrayEditorOpen ? '' : 'opacity-50 cursor-not-allowed'}`} onClick={toggleAdd} disabled={!canAdd || arrayEditorOpen}>添加</AppButton>
+        <AppButton type="button" className={`shrink-0 px-1.5 py-1 rounded text-xs border ${deleteEnabled ? 'bg-rose-600 text-white border-rose-700' : 'bg-white text-gray-800 border-gray-300'} ${canDelete && !arrayEditorOpen ? '' : 'opacity-50 cursor-not-allowed'}`} onClick={toggleDelete} disabled={!canDelete || arrayEditorOpen}>删除</AppButton>
+        <AppButton type="button" className={`shrink-0 px-1.5 py-1 rounded text-xs border ${canReverse ? 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50' : 'opacity-50 cursor-not-allowed bg-white text-gray-800 border-gray-300'}`} onClick={doReverse} disabled={!canReverse}>反转</AppButton>
+        <AppButton type="button" className={`shrink-0 px-1.5 py-1 rounded text-xs border ${arrayEditorOpen ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-800 border-gray-300'} ${canArrayEdit && !busy ? '' : 'opacity-50 cursor-not-allowed'}`} onClick={() => arrayEditorOpen ? tryCloseArrayEditor() : openArrayEditor()} disabled={!arrayEditorOpen && (!canArrayEdit || busy)}>数组编辑</AppButton>
       </div>
-      {(editEnabled || addEnabled || deleteEnabled) && dirty && <div className="mt-1 text-xs text-orange-700">未保存修改</div>}
-      {arrayEditorOpen && <div className="mt-1 text-xs text-blue-700">数组编辑开启中，部件选择与其他控制点功能已锁定</div>}
-      {statusText && <div className="mt-1 text-xs text-gray-700">{statusText}</div>}
 
       {toolPanelOpen && (
         <DraggablePanel id="cpT-main-panel" defaultPosition={{ x: 16, y: 320 }} zIndex={1840}>
@@ -1371,6 +1365,7 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
               <div className="text-[11px] text-gray-500">
                 当前控制点数：{sessionCoords.length}；{selectedIndex === null ? '未选择控制点' : `已选 #${selectedIndex + 1}`}
               </div>
+              {(dirty || statusText) && <div className="text-xs text-gray-700">{dirty ? '未保存修改' : statusText}</div>}
             </div>
           </AppCard>
         </DraggablePanel>
@@ -1434,6 +1429,7 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
               </div>
 
               <div className="text-[11px] text-gray-500">当前控制点数：{sessionCoords.length}</div>
+              {(dirty || statusText) && <div className="text-xs text-gray-700">{dirty ? '未保存修改' : statusText}</div>}
             </div>
           </AppCard>
         </DraggablePanel>
@@ -1456,6 +1452,7 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
                 <AppButton className="flex-1 px-2 py-2 rounded-lg text-sm bg-green-600 text-white flex items-center justify-center gap-2" onClick={() => commitAndClose('delete')} type="button"><Save className="w-4 h-4" />保存</AppButton>
               </div>
               <div className="text-[11px] text-gray-500">当前控制点数：{sessionCoords.length}</div>
+              {(dirty || statusText) && <div className="text-xs text-gray-700">{dirty ? '未保存修改' : statusText}</div>}
             </div>
           </AppCard>
         </DraggablePanel>
@@ -1562,6 +1559,7 @@ export default forwardRef<ControlPointsTHandle, ControlPointsTProps>(function Co
               <div className="text-[11px] text-gray-500">
                 仅支持严格 [x,y,z] JSON 数组；点/线/面的最小控制点数会在校验时检查。
               </div>
+              {statusText && <div className="text-xs text-gray-700">{statusText}</div>}
             </div>
           </AppCard>
         </DraggablePanel>

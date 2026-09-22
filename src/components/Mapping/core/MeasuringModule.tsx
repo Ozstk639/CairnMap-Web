@@ -268,6 +268,10 @@ type EditorCoord = { x: number; z: number; y?: number };
  */
 const multipartDraftRef = useRef<MultipartGeometry | null>(null);
 const [multipartEnabled, setMultipartEnabled] = useState(false);
+// Leaflet listeners do not participate in React's render cycle. Keep the
+// mode decision in a synchronously updated ref so a click immediately after a
+// UI toggle can never be interpreted as the old single-part editor.
+const multipartEnabledRef = useRef(false);
 const [activeMultipartPart, setActiveMultipartPart] = useState(0);
 const [innerSpaceEnabled, setInnerSpaceEnabled] = useState(false);
 const [editSelectedInnerSpace, setEditSelectedInnerSpace] = useState(false);
@@ -324,6 +328,7 @@ const asEditorCoords = (coords: Array<{ x: number; y: number; z: number }>): Edi
 
 const resetMultipartEditor = () => {
   multipartDraftRef.current = null;
+  multipartEnabledRef.current = false;
   setMultipartEnabled(false);
   setActiveMultipartPart(0);
   setInnerSpaceEnabled(false);
@@ -372,7 +377,7 @@ const persistActiveEditorCoords = (coords: EditorCoord[]) => {
 /** Keep invalid hole points out of every editing entrance, not only Save. */
 const validateActiveMultipartCoords = (coords: EditorCoord[]): string | undefined => {
   const geometry = multipartDraftRef.current;
-  if (!multipartEnabled || !geometry || geometry.type !== 'Polygon' || !editSelectedInnerSpaceRef.current) return undefined;
+  if (!multipartEnabledRef.current || !geometry || geometry.type !== 'Polygon' || !editSelectedInnerSpaceRef.current) return undefined;
   return validateMultipartHoleDraft(
     geometry,
     activeMultipartPartRef.current,
@@ -388,7 +393,7 @@ const acceptActiveMultipartCoords = (coords: EditorCoord[]): boolean => {
 };
 
 const buildCurrentMultipartGeometry = (mode: DrawMode, activeCoords: EditorCoord[]): MultipartGeometry => {
-  if (!multipartEnabled || !multipartDraftRef.current) {
+  if (!multipartEnabledRef.current || !multipartDraftRef.current) {
     return multipartGeometryFromSinglePath(geometryKindForDrawMode(mode), activeCoords);
   }
   persistActiveEditorCoords(activeCoords);
@@ -495,7 +500,7 @@ const toggleMultipartPartLabels = () => {
     setShowMultipartPartLabels(false);
     return;
   }
-  if (!controlPointsTRef.current?.requestCloseAndClear?.()) return;
+  if (!closeControlPointSessions()) return;
   curveInputTRef.current?.requestCloseAndClear?.();
   persistActiveEditorCoords(tempPoints);
   setMultipartInputError('');
@@ -524,6 +529,7 @@ const renderMultipartEditor = () => (
                 alert('当前要素包含多个部件；请先删除至仅剩 1 个部件，才能关闭多部件要素模式。');
                 return;
               }
+              multipartEnabledRef.current = false;
               setMultipartEnabled(false);
               return;
             }
@@ -533,6 +539,7 @@ const renderMultipartEditor = () => (
             );
             activeMultipartPartRef.current = 0;
             setActiveMultipartPart(0);
+            multipartEnabledRef.current = true;
             setMultipartEnabled(true);
           }}
           title="启用后，绘制、控制点、手工输入与数组编辑只作用于当前选定部件"
@@ -795,7 +802,7 @@ const endMeasuringNow = () => {
   setEditingLayerId(null);
 
   // 5) 额外锁定/抑制归零
-  setDrawClickSuppressed(false);
+  clearControlPointSessionState();
   setShowDraftControlPointsLocked(false);
 
   // 6) 关闭确认框
@@ -851,7 +858,15 @@ const workflowPreviewMapRef = useRef<Map<string, L.Layer>>(new Map());
 
 
 // ======== ControlPointsT：控制点修改/添加（替代旧 ControlPointTools） ========
-const controlPointsTRef = useRef<ControlPointsTHandle | null>(null);
+// The desktop and compact shells are rendered concurrently.  They must not
+// share a ref: an inactive shell can otherwise overwrite the active session's
+// handle and let its map-click suppression leak.
+type ControlPointShell = 'desktop' | 'compact';
+const controlPointsTDesktopRef = useRef<ControlPointsTHandle | null>(null);
+const controlPointsTCompactRef = useRef<ControlPointsTHandle | null>(null);
+const controlPointBusyShellsRef = useRef(new Set<ControlPointShell>());
+const controlPointSuppressionShellsRef = useRef(new Set<ControlPointShell>());
+const controlPointSessionBusyRef = useRef(false);
 
 // ======== CurveInputT：曲线输入（独立临时容器） ========
 const curveInputTRef = useRef<CurveInputTHandle | null>(null);
@@ -870,9 +885,43 @@ const [drawClickSuppressed, setDrawClickSuppressed] = useState(false);
 
 // ref 兜底：避免 Leaflet/React 严格模式下偶发的旧闭包导致 click 仍落入绘制逻辑
 const drawClickSuppressedRef = useRef(false);
-useEffect(() => {
-  drawClickSuppressedRef.current = drawClickSuppressed;
-}, [drawClickSuppressed]);
+const setDrawClickSuppressedImmediate = (value: boolean) => {
+  drawClickSuppressedRef.current = value;
+  setDrawClickSuppressed(value);
+};
+
+const updateControlPointSessionState = (shell: ControlPointShell, busy: boolean) => {
+  if (busy) controlPointBusyShellsRef.current.add(shell);
+  else controlPointBusyShellsRef.current.delete(shell);
+  const active = controlPointBusyShellsRef.current.size > 0;
+  controlPointSessionBusyRef.current = active;
+  setControlPointSessionBusy(active);
+};
+
+const updateControlPointDrawSuppression = (shell: ControlPointShell, suppressed: boolean) => {
+  if (suppressed) controlPointSuppressionShellsRef.current.add(shell);
+  else controlPointSuppressionShellsRef.current.delete(shell);
+  setDrawClickSuppressedImmediate(controlPointSuppressionShellsRef.current.size > 0);
+};
+
+const clearControlPointSessionState = () => {
+  controlPointBusyShellsRef.current.clear();
+  controlPointSuppressionShellsRef.current.clear();
+  controlPointSessionBusyRef.current = false;
+  setControlPointSessionBusy(false);
+  setDrawClickSuppressedImmediate(false);
+};
+
+const closeControlPointSessions = () => {
+  const handles = [controlPointsTDesktopRef.current, controlPointsTCompactRef.current];
+  if (handles.some((handle) => handle && !handle.requestCloseAndClear?.())) return false;
+  clearControlPointSessionState();
+  return true;
+};
+
+// The stable Leaflet listener delegates to this ref. The function is replaced
+// every render, eliminating stale multipart/hole state from map clicks.
+const onMapDrawClickRef = useRef<(event: L.LeafletMouseEvent) => void>(() => undefined);
 
 
 // ControlPointsT 开启时强制锁定“显示控制点”=true，且不可关闭
@@ -1248,7 +1297,7 @@ const clearTemporaryForVariantSwitch = () => {
   // 控制点显示复位（避免切换后意外常显）
   setShowDraftControlPoints(false);
   setShowDraftControlPointCoords(false);
-  setDrawClickSuppressed(false);
+  clearControlPointSessionState();
   setShowDraftControlPointsLocked(false);
 
   // 合一草稿复位
@@ -1414,23 +1463,19 @@ useEffect(() => {
     // 曲线输入面板开启时：主绘制/编辑区完全冻结
     if (curveInputFrozenRef.current) return;
 
-    // 关键：ControlPointsT 工作时，绘制监听器必须完全不执行
-    // （否则同一次 click 会同时触发“移动控制点”和“绘制加点”，导致草稿线变长）
-    if (controlPointsTRef.current?.isBusy?.()) return;
-
-    if (!drawing || drawMode === 'none') return;
-
-    // 兜底：你已有的 state/ref 抑制仍保留
+    // ControlPointsT can exist in desktop and compact shells concurrently.
+    // The aggregate ref is updated synchronously by either shell.
+    if (controlPointSessionBusyRef.current) return;
     if (drawClickSuppressedRef.current) return;
 
-    onMapDrawClick(e);
+    onMapDrawClickRef.current(e);
   };
 
   map.on('click', handleClick);
   return () => {
     map.off('click', handleClick);
   };
-}, [drawing, drawMode]); 
+}, [mapReady]);
 
 
  
@@ -1490,8 +1535,8 @@ const onMapDrawClick = (e: L.LeafletMouseEvent) => {
   // 曲线输入面板开启时：主绘制/编辑区完全冻结
   if (curveInputFrozenRef.current) return;
 
-  // 双保险：即使某些情况下旧 click handler 没卸载，这里也确保不加点
-  if (controlPointsTRef.current?.isBusy?.()) return;
+  // Double protection for direct calls as well as Leaflet's stable listener.
+  if (controlPointSessionBusyRef.current) return;
   if (drawClickSuppressedRef.current) return;
 
   const proj = projectionRef.current;
@@ -1514,8 +1559,12 @@ const onMapDrawClick = (e: L.LeafletMouseEvent) => {
     // Point multipart components are individual coordinates, not a nested
     // path. Re-clicking replaces the selected point rather than creating an
     // invisible second coordinate in the same component.
-    const updated = drawMode === 'point' && multipartEnabled ? [newPoint] : [...prev, newPoint];
+    const updated = drawMode === 'point' && multipartEnabledRef.current ? [newPoint] : [...prev, newPoint];
     if (!acceptActiveMultipartCoords(updated)) return prev;
+    // The selected component/ring is the canonical draft before Leaflet draws
+    // the persistent reference geometry. This is what prevents redraws from
+    // appearing only after an unrelated Undo/Redo state change.
+    if (multipartEnabledRef.current) persistActiveEditorCoords(updated);
     setRedoStack([]);
     drawDraftGeometry(updated, drawMode, drawColorRef.current);
     updateLatestEndpointMarker(newPoint, drawColorRef.current);
@@ -1523,11 +1572,13 @@ const onMapDrawClick = (e: L.LeafletMouseEvent) => {
   });
 };
 
+onMapDrawClickRef.current = onMapDrawClick;
+
 const onManualPointSubmit = (v: { x: number; y: number; z: number }) => {
   if (showMultipartPartLabelsRef.current) return;
   if (!measuringActive || !drawing || drawMode === 'none') return;
   if (curveInputFrozenRef.current) return;
-  if (controlPointsTRef.current?.isBusy?.()) return;
+  if (controlPointSessionBusyRef.current) return;
   if (drawClickSuppressedRef.current) return;
 
   // 点要素：若手动输入包含 y，则写入 tempPoints[0].y，并同步写入 featureInfo.elevation（兼容旧规范）。
@@ -1538,8 +1589,9 @@ const onManualPointSubmit = (v: { x: number; y: number; z: number }) => {
   const newPoint = ({ x: v.x, z: v.z, y: v.y } as { x: number; z: number; y: number });
 
   setTempPoints((prev) => {
-    const updated = drawMode === 'point' && multipartEnabled ? [newPoint] : [...prev, newPoint];
+    const updated = drawMode === 'point' && multipartEnabledRef.current ? [newPoint] : [...prev, newPoint];
     if (!acceptActiveMultipartCoords(updated)) return prev;
+    if (multipartEnabledRef.current) persistActiveEditorCoords(updated);
     setRedoStack([]);
     drawDraftGeometry(updated, drawMode, drawColorRef.current);
     updateLatestEndpointMarker({ x: v.x, z: v.z }, drawColorRef.current);
@@ -1567,11 +1619,11 @@ const onManualPointSubmit = (v: { x: number; y: number; z: number }) => {
   // tools edit only `coords`. The active component/ring is drawn below with
   // the normal solid style; retained components are a non-interactive dashed
   // reference and can never receive accidental control-point edits.
-  const draftMultipart = multipartEnabled ? multipartDraftRef.current : null;
+  const draftMultipart = multipartEnabledRef.current ? multipartDraftRef.current : null;
   const activePart = activeMultipartPartRef.current;
   const editingHole = editSelectedInnerSpaceRef.current;
-  const referenceStyle = { color, weight: 4, opacity: 0.76, fillOpacity: 0.1, dashArray: '10 7', interactive: false } as L.PathOptions;
-  const referenceHaloStyle = { color, weight: 9, opacity: 0.2, interactive: false } as L.PathOptions;
+  const referenceStyle = { color, weight: 2.25, opacity: 0.72, fillOpacity: 0.08, dashArray: '8 6', interactive: false } as L.PathOptions;
+  const referenceHaloStyle = { color, weight: 4.75, opacity: 0.12, interactive: false } as L.PathOptions;
   const projectReference = (point: { x: number; y: number; z: number }) => proj.locationToLatLng(point.x, 64, point.z);
   if (draftMultipart?.type === 'Point' && mode === 'point') {
     draftMultipart.parts.forEach((point, index) => {
@@ -1602,17 +1654,26 @@ const onManualPointSubmit = (v: { x: number; y: number; z: number }) => {
       component.forEach((ring, ringIndex) => {
         if (ring.length < 2) return;
         const closed = [...ring, ring[0]].map(projectReference);
+        const editingCurrentRing = partIndex === activePart && (
+          (editingHole && ringIndex === activeInnerSpaceRef.current + 1)
+          || (!editingHole && ringIndex === 0)
+        );
+        // The live ring is painted once below with a solid editing style. Do
+        // not paint its stale dashed counterpart beneath it.
+        if (editingCurrentRing) return;
         const activeOuterForHole = partIndex === activePart && editingHole && ringIndex === 0;
-        const ringColor = ringIndex === 0 ? color : '#7c3aed';
+        // Holes belong to the selected feature, so they inherit its chosen
+        // drawing colour; styling (dash/opacity) distinguishes their role.
+        const ringColor = color;
         const halo = activeOuterForHole
-          ? { color: ringColor, weight: 13, opacity: 0.48, interactive: false }
-          : { color: ringColor, weight: 7, opacity: partIndex === activePart ? 0.25 : 0.14, interactive: false };
+          ? { color: ringColor, weight: 6.5, opacity: 0.3, interactive: false }
+          : { color: ringColor, weight: 4, opacity: partIndex === activePart ? 0.17 : 0.08, interactive: false };
         L.polyline(closed, halo).addTo(draft);
         L.polyline(closed, {
           color: ringColor,
-          weight: activeOuterForHole ? 5 : 4,
-          opacity: partIndex === activePart ? 0.9 : 0.72,
-          dashArray: ringIndex === 0 ? '10 7' : '4 6',
+          weight: activeOuterForHole ? 3.4 : 2.25,
+          opacity: partIndex === activePart ? 0.84 : 0.62,
+          dashArray: activeOuterForHole ? undefined : '8 6',
           interactive: false,
         }).addTo(draft);
       });
@@ -1629,8 +1690,8 @@ const onManualPointSubmit = (v: { x: number; y: number; z: number }) => {
    } else if (mode === 'polyline') {
      L.polyline(latlngs, { color, weight: 4, opacity: 0.96 }).addTo(draft);
    } else if (mode === 'polygon') {
-     if (latlngs.length > 2 && !editingHole) L.polygon(latlngs, { color, weight: 4, fillColor: color, fillOpacity: 0.18 }).addTo(draft);
-     else L.polyline([...latlngs, ...(latlngs.length > 2 ? [latlngs[0]] : [])], { color, weight: 4, dashArray: editingHole ? '4 6' : undefined }).addTo(draft);
+    if (latlngs.length > 2 && !editingHole) L.polygon(latlngs, { color, weight: 3.25, fillColor: color, fillOpacity: 0.16 }).addTo(draft);
+    else L.polyline([...latlngs, ...(latlngs.length > 2 ? [latlngs[0]] : [])], { color, weight: 3.25, dashArray: undefined }).addTo(draft);
    }
  };
  
@@ -1686,7 +1747,7 @@ useEffect(() => {
   if (ep && ep.getLayers().length > 0 && tempPoints.length > 0) {
     updateLatestEndpointMarker(tempPoints[tempPoints.length - 1], drawColor);
   }
-}, [drawColor, measuringActive, drawing, drawMode]);
+}, [drawColor, measuringActive, drawing, drawMode, tempPoints, multipartEnabled, activeMultipartPart, editSelectedInnerSpace, activeInnerSpace]);
 
 
 useEffect(() => {
@@ -2830,6 +2891,8 @@ const handleUndo = () => {
   setRedoStack((prev) => [...prev, last]);
 
   const updated = tempPoints.slice(0, tempPoints.length - 1);
+  if (!acceptActiveMultipartCoords(updated)) return;
+  if (multipartEnabledRef.current) persistActiveEditorCoords(updated);
   setTempPoints(updated);
 
   drawDraftGeometry(updated, drawMode, drawColorRef.current);
@@ -2845,6 +2908,8 @@ const handleRedo = () => {
   setRedoStack((prev) => prev.slice(0, prev.length - 1));
 
   const updated = [...tempPoints, redoPoint];
+  if (!acceptActiveMultipartCoords(updated)) return;
+  if (multipartEnabledRef.current) persistActiveEditorCoords(updated);
   setTempPoints(updated);
 
   drawDraftGeometry(updated, drawMode, drawColorRef.current);
@@ -2909,7 +2974,7 @@ const clearAllLayers = () => {
   setShowDraftControlPoints(false);
   setShowDraftControlPointCoords(false);
 
-  setDrawClickSuppressed(false);
+  clearControlPointSessionState();
   setShowDraftControlPointsLocked(false);
 };
 
@@ -2993,6 +3058,7 @@ const editLayer = (id: number) => {
     multipartDraftRef.current = persistedGeometry.geometry;
     const hasMultipleParts = persistedGeometry.geometry.parts.length > 1;
     const hasHoles = persistedGeometry.geometry.type === 'Polygon' && persistedGeometry.geometry.parts.some((part) => part.length > 1);
+    multipartEnabledRef.current = hasMultipleParts || hasHoles;
     setMultipartEnabled(hasMultipleParts || hasHoles);
     setActiveMultipartPart(0);
     activeMultipartPartRef.current = 0;
@@ -4516,6 +4582,10 @@ const workflowBridge: WorkflowBridge = {
   getTempPoints: () => tempPoints,
   setTempPoints: (pts: WorldPoint[]) => {
     const next = (pts ?? []) as any;
+    if (multipartEnabledRef.current) {
+      if (!acceptActiveMultipartCoords(next)) return;
+      persistActiveEditorCoords(next);
+    }
     setTempPoints(next);
     // 同步草稿几何显示（避免 setState 异步导致绘制模式滞后）
     drawDraftGeometry(next, drawModeRef.current, drawColorRef.current);
@@ -5398,6 +5468,7 @@ onChange={(e) => {
       setTempPoints((prev) => {
         const updated = [...prev, ...points];
         if (!acceptActiveMultipartCoords(updated)) return prev;
+        if (multipartEnabledRef.current) persistActiveEditorCoords(updated);
         setRedoStack([]);
         drawDraftGeometry(updated, drawMode, drawColorRef.current);
         const last = updated[updated.length - 1];
@@ -5424,7 +5495,7 @@ onChange={(e) => {
 {/* 控制点修改/添加/保存*/}
 {drawMode !== 'none' && (
   <ControlPointsT
-    ref={controlPointsTRef}
+    ref={controlPointsTDesktopRef}
     mapReady={mapReady}
     leafletMapRef={leafletMapRef}
     projectionRef={projectionRef}
@@ -5432,9 +5503,10 @@ onChange={(e) => {
     activeColor={drawColor}
     activeCoords={tempPoints}
     validateCandidateCoords={(coords) => validateActiveMultipartCoords(coords)}
-    onSessionStateChange={({ busy }) => setControlPointSessionBusy(busy)}
+    onSessionStateChange={({ busy }) => updateControlPointSessionState('desktop', busy)}
     onApplyActiveCoords={(coords) => {
       if (!acceptActiveMultipartCoords(coords)) return;
+      if (multipartEnabledRef.current) persistActiveEditorCoords(coords);
       setTempPoints(coords);
       drawDraftGeometry(coords, drawMode, drawColorRef.current);
 
@@ -5442,7 +5514,7 @@ onChange={(e) => {
       draftEndpointRef.current?.clearLayers();
     }}
     onSetDrawClickSuppressed={(v) => {
-      setDrawClickSuppressed(v);
+      updateControlPointDrawSuppression('desktop', v);
     }}
     showControlPointsEnabled={showDraftControlPoints}
     showControlPointsLocked={showDraftControlPointsLocked}
@@ -5560,6 +5632,7 @@ onChange={(e) => {
 
               // 反转控制点
               const reversed = [...tempPoints].reverse();
+              if (multipartEnabledRef.current) persistActiveEditorCoords(reversed);
               setTempPoints(reversed);
               drawDraftGeometry(reversed, 'polyline', drawColor);
 
@@ -5739,7 +5812,7 @@ onChange={(e) => {
 {/* 控制点修改/添加/保存 */}
 {drawMode !== 'none' && (
   <ControlPointsT
-    ref={controlPointsTRef}
+    ref={controlPointsTCompactRef}
     mapReady={mapReady}
     leafletMapRef={leafletMapRef}
     projectionRef={projectionRef}
@@ -5747,9 +5820,10 @@ onChange={(e) => {
     activeColor={drawColor}
     activeCoords={tempPoints}
     validateCandidateCoords={(coords) => validateActiveMultipartCoords(coords)}
-    onSessionStateChange={({ busy }) => setControlPointSessionBusy(busy)}
+    onSessionStateChange={({ busy }) => updateControlPointSessionState('compact', busy)}
     onApplyActiveCoords={(coords) => {
       if (!acceptActiveMultipartCoords(coords)) return;
+      if (multipartEnabledRef.current) persistActiveEditorCoords(coords);
       setTempPoints(coords);
       drawDraftGeometry(coords, drawMode, drawColorRef.current);
 
@@ -5757,7 +5831,7 @@ onChange={(e) => {
       draftEndpointRef.current?.clearLayers();
     }}
     onSetDrawClickSuppressed={(v) => {
-      setDrawClickSuppressed(v);
+      updateControlPointDrawSuppression('compact', v);
     }}
     showControlPointsEnabled={showDraftControlPoints}
     showControlPointsLocked={showDraftControlPointsLocked}
@@ -5873,6 +5947,7 @@ onChange={(e) => {
 
               // 反转控制点
               const reversed = [...tempPoints].reverse();
+              if (multipartEnabledRef.current) persistActiveEditorCoords(reversed);
               setTempPoints(reversed);
               drawDraftGeometry(reversed, 'polyline', drawColor);
 
