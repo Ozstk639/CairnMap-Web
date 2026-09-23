@@ -10,6 +10,7 @@ import {
   type ReviewPackageValidationMode,
   type ReviewPackageValidationReport,
   REVIEW_PACKAGE_PICTURE_BINDINGS_SCHEMA_VERSION,
+  REVIEW_PACKAGE_PICTURE_BINDINGS_LEGACY_SCHEMA_VERSION,
 } from './contracts';
 
 const SAFE_SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
@@ -35,6 +36,17 @@ export function validateReviewPackageProfile(profile: ReviewPackageProfile): Rev
 function validateKindPath(classCode: string, kindPath: readonly string[], profile: ReviewPackageProfile, compat: boolean, path?: string): ReviewPackageValidationIssue | null {
   if (!kindPath.length || (profile.nestedKindClasses ?? []).includes(classCode)) return null;
   return issue('PACKAGE_PATH_UNRECOGNIZED', compat ? 'warning' : 'error', `Class ${classCode} is not configured to use a nested kind path.`, path);
+}
+
+/** URL-only pictures are browser assets, never proxy/download targets. */
+function isSafeExternalPictureUrl(value: unknown): value is string {
+  if (typeof value !== 'string' || value.length === 0 || value.length > 2048) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && !url.username && !url.password && !url.hash;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -80,6 +92,25 @@ export function validateReviewPackageDraft(draft: ReviewPackageDraft, profile: R
     if (picture.order !== undefined) {
       if (!Number.isSafeInteger(picture.order) || picture.order < 1) {
         issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', 'error', 'A picture order must be a positive integer.'));
+        continue;
+      }
+      const orders = pictureOrders.get(key) ?? new Set<number>();
+      if (orders.has(picture.order)) issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', 'error', 'A feature has duplicate picture orders.'));
+      orders.add(picture.order);
+      pictureOrders.set(key, orders);
+    }
+  }
+  for (const picture of draft.externalPictures ?? []) {
+    const effectiveKindPath = normalizeReviewPackageKindPath(profile, picture.classCode, picture.kindPath);
+    const fields = [picture.worldId, picture.classCode, picture.featureId, ...effectiveKindPath];
+    const key = `${picture.worldId}\u0000${picture.classCode}\u0000${picture.featureId}`;
+    if (!fields.every(isSafeSegment) || !isSafeExternalPictureUrl(picture.url) || !featureKeys.has(key)) {
+      issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', 'error', 'An external picture has an invalid identity, HTTPS URL, or target feature.'));
+      continue;
+    }
+    if (picture.order !== undefined) {
+      if (!Number.isSafeInteger(picture.order) || picture.order < 1) {
+        issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', 'error', 'An external picture order must be a positive integer.'));
         continue;
       }
       const orders = pictureOrders.get(key) ?? new Set<number>();
@@ -145,7 +176,8 @@ export function validateParsedReviewPackage(parsed: ParsedReviewPackage, profile
   if (parsed.pictureBindingPathPresent) {
     const bindingManifest = parsed.pictureBindingManifest;
     const bindingItems = bindingManifest?.bindings;
-    if (bindingManifest?.schemaVersion !== REVIEW_PACKAGE_PICTURE_BINDINGS_SCHEMA_VERSION || !Array.isArray(bindingItems)) {
+    const bindingSchema = String(bindingManifest?.schemaVersion ?? '');
+    if (![REVIEW_PACKAGE_PICTURE_BINDINGS_SCHEMA_VERSION, REVIEW_PACKAGE_PICTURE_BINDINGS_LEGACY_SCHEMA_VERSION].includes(bindingSchema) || !Array.isArray(bindingItems)) {
       issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', compat ? 'warning' : 'error', 'Picture binding index is invalid.', REVIEW_PACKAGE_LAYOUT.pictureIndexPath));
     } else {
       const featureKeys = new Set(parsed.features.map((feature) => `${feature.worldId}\u0000${feature.classCode}\u0000${feature.featureId}`));
@@ -159,6 +191,7 @@ export function validateParsedReviewPackage(parsed: ParsedReviewPackage, profile
         const featureId = String(value?.featureId ?? '');
         const kindPath = value?.kindPath;
         const files = value?.files;
+        const links = value?.links;
         const key = `${worldId}\u0000${classCode}\u0000${featureId}`;
         if (!value || ![worldId, classCode, featureId].every(isSafeSegment) || !Array.isArray(kindPath) || !kindPath.every(isSafeSegment) || !Array.isArray(files) || !featureKeys.has(key) || bindingKeys.has(key)) {
           issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', compat ? 'warning' : 'error', 'Picture binding identity is invalid.', REVIEW_PACKAGE_LAYOUT.pictureIndexPath));
@@ -176,6 +209,22 @@ export function validateParsedReviewPackage(parsed: ParsedReviewPackage, profile
           }
           orders.add(Number(order));
           boundPaths.add(path);
+        }
+        if (links !== undefined && !Array.isArray(links)) {
+          issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', compat ? 'warning' : 'error', 'Picture binding links are invalid.', REVIEW_PACKAGE_LAYOUT.pictureIndexPath));
+          continue;
+        }
+        const seenUrls = new Set<string>();
+        for (const link of links ?? []) {
+          const item = link && typeof link === 'object' && !Array.isArray(link) ? link as Record<string, unknown> : null;
+          const url = String(item?.url ?? '');
+          const order = item?.order;
+          if (!item || item.role !== 'display' || !isSafeExternalPictureUrl(url) || !Number.isSafeInteger(order) || Number(order) < 1 || orders.has(Number(order)) || seenUrls.has(url)) {
+            issues.push(issue('PACKAGE_PICTURE_BINDING_INVALID', compat ? 'warning' : 'error', 'Picture binding external link is invalid.', REVIEW_PACKAGE_LAYOUT.pictureIndexPath));
+            continue;
+          }
+          orders.add(Number(order));
+          seenUrls.add(url);
         }
       }
       if (bindingKeys.size !== featureKeys.size || boundPaths.size !== actualPaths.size) {

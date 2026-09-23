@@ -209,6 +209,11 @@ const [featureInteractionSuppressionEnabled, setFeatureInteractionSuppressionEna
 const [toolPanelDisplaySuppressionEnabled, setToolPanelDisplaySuppressionEnabled] = useState(true);
 
 const mapDraftInputActive = measuringActive && drawing && drawMode !== 'none';
+// Leaflet's listener is stable by design.  This render-synchronous reference
+// is its write permit: an inactive workflow/panel can never reuse a stale
+// drawing closure to create a point.
+const mapDraftInputActiveRef = useRef(false);
+mapDraftInputActiveRef.current = mapDraftInputActive;
 const featureInteractionSuppressed = featureInteractionSuppressionEnabled && mapDraftInputActive;
 const shouldShowDrawingToolPanel = !toolPanelDisplaySuppressionEnabled || mapDraftInputActive;
 
@@ -976,7 +981,7 @@ type TempRuleSource = {
   label?: string;
   enabled: boolean;
   items: any[];
-  picturesById?: Record<string, Array<{ source?: 'pub' | 'dat'; url?: string; filename?: string; relativePath?: string }>>;
+  picturesById?: Record<string, Array<{ source?: 'pub' | 'dat' | 'formal' | 'external'; url?: string; filename?: string; relativePath?: string }>>;
 };
 
 // ======== “临时挂载(全局)”只读模式（模块化开关，便于后续移除） ========
@@ -1460,6 +1465,7 @@ useEffect(() => {
   if (!map) return;
 
   const handleClick = (e: L.LeafletMouseEvent) => {
+    if (!mapDraftInputActiveRef.current) return;
     // 曲线输入面板开启时：主绘制/编辑区完全冻结
     if (curveInputFrozenRef.current) return;
 
@@ -1531,6 +1537,9 @@ const updateLatestEndpointMarker = (p: { x: number; z: number }, color: string) 
 
 
 const onMapDrawClick = (e: L.LeafletMouseEvent) => {
+  // This remains the final guard for direct calls and for a listener that
+  // survives React transitions.  Idle map clicks must never mutate drafts.
+  if (!mapDraftInputActiveRef.current) return;
   if (showMultipartPartLabelsRef.current) return;
   // 曲线输入面板开启时：主绘制/编辑区完全冻结
   if (curveInputFrozenRef.current) return;
@@ -1952,17 +1961,20 @@ const finishLayer = () => {
         return false;
       }
 
-      const featureInfoOut = def.buildFeatureInfo({
-        op: 'create',
-        mode: 'point',
-        coords: pointCoords,
-        values: values ?? {},
-        groups: groups ?? {},
-        worldId: currentWorldId,
-        editorId: editorIdInput,
-        prevFeatureInfo: undefined,
-        now: new Date(),
-      });
+      const featureInfoOut = withCanonicalMultipartGeometry(
+        def.buildFeatureInfo({
+          op: 'create',
+          mode: 'point',
+          coords: pointCoords,
+          values: values ?? {},
+          groups: groups ?? {},
+          worldId: currentWorldId,
+          editorId: editorIdInput,
+          prevFeatureInfo: undefined,
+          now: new Date(),
+        }),
+        multipartGeometryFromSinglePath('Point', pointCoords),
+      );
 
       const id = nextLayerId.current++;
       const newGroup = makeLeafletGroup('point', pointCoords, drawColor);
@@ -2047,17 +2059,20 @@ const finishLayer = () => {
         return false;
       }
 
-      const featureInfoOut = def.buildFeatureInfo({
-        op: 'create',
-        mode: 'polygon',
-        coords: finalCoords,
-        values: values ?? {},
-        groups: groups ?? {},
-        worldId: currentWorldId,
-        editorId: editorIdInput,
-        prevFeatureInfo: undefined,
-        now: new Date(),
-      });
+      const featureInfoOut = withCanonicalMultipartGeometry(
+        def.buildFeatureInfo({
+          op: 'create',
+          mode: 'polygon',
+          coords: finalCoords,
+          values: values ?? {},
+          groups: groups ?? {},
+          worldId: currentWorldId,
+          editorId: editorIdInput,
+          prevFeatureInfo: undefined,
+          now: new Date(),
+        }),
+        multipartGeometryFromSinglePath('Polygon', finalCoords),
+      );
 
       const id = nextLayerId.current++;
       const newGroup = makeLeafletGroup('polygon', finalCoords, drawColor);
@@ -2715,8 +2730,8 @@ const buildTempRulePicturesByIdForLayer = (layer: LayerType): TempRuleSource['pi
       return ao - bo || a.idx - b.idx;
     })
     .map(({ pic }) => {
-      const source = pic.source === 'pub' || pic.source === 'dat' ? pic.source : 'dat';
-      const url = String(pic.previewUrl ?? pic.relativePath ?? '').trim();
+      const source: 'pub' | 'dat' | 'formal' | 'external' = pic.source === 'external' ? 'external' : pic.source === 'pub' || pic.source === 'dat' || pic.source === 'formal' ? pic.source : 'dat';
+      const url = String(pic.externalUrl ?? pic.previewUrl ?? pic.relativePath ?? '').trim();
       return {
         source,
         url,
@@ -2954,6 +2969,7 @@ const clearAllLayers = () => {
   workflowRootRef.current?.clearLayers();
   workflowPreviewMapRef.current.clear();
   clearDraftOverlays();
+  resetMultipartEditor();
 
   // 2) 清空 state
   setLayers([]);
@@ -4382,6 +4398,9 @@ const stopWorkflowToSelector = () => {
   workflowRootRef.current?.clearLayers();
   workflowPreviewMapRef.current.clear();
   clearDraftOverlays();
+  // Workflow output intentionally remains one path/ring only; do not inherit
+  // a full-editor component or hole selection when entering this mode.
+  resetMultipartEditor();
 
   setTempPoints([]);
   setRedoStack([]);
@@ -4502,11 +4521,16 @@ const commitFeatureFromWorkflow = (args: WorkflowCommitArgs) => {
 
   const now = new Date();
   const editorId = (args.editorId ?? editorIdInput ?? '').trim();
+  // A point workflow is intrinsically one feature coordinate.  Line and
+  // polygon workflows still receive their complete flat path, which is then
+  // wrapped as exactly one component (and one outer ring for polygons).
+  const workflowCoords = args.mode === 'point' ? args.coords.slice(0, 1) : args.coords;
+  if (workflowCoords.length === 0) return { ok: false as const, error: '无法保存：工作流缺少坐标。' };
 
-  const finalFeatureInfo = def.buildFeatureInfo({
+  const formatFeatureInfo = def.buildFeatureInfo({
     op: 'create',
     mode: args.mode as DrawMode,
-    coords: args.coords,
+    coords: workflowCoords,
     values: args.values ?? {},
     groups: args.groupInfo ?? {},
     worldId: currentWorldId,
@@ -4514,16 +4538,23 @@ const commitFeatureFromWorkflow = (args: WorkflowCommitArgs) => {
     prevFeatureInfo: undefined,
     now,
   });
+  // The bridge is shared by every registered workflow.  Applying canonical
+  // geometry here, after a format executor, prevents an old executor from
+  // reintroducing coordinate / PLpoints / Conpoints aliases.
+  const finalFeatureInfo = withCanonicalMultipartGeometry(
+    formatFeatureInfo,
+    multipartGeometryFromSinglePath(geometryKindForDrawMode(args.mode as DrawMode), workflowCoords),
+  );
 
   const id = nextLayerId.current++;
   const color = args.color ?? drawColor;
-  const newGroup = makeLeafletGroupForCoords(args.mode as DrawMode, args.coords, color);
+  const newGroup = makeLeafletGroupForCoords(args.mode as DrawMode, workflowCoords, color);
 
   const layerObj: LayerType = {
     id,
     mode: args.mode as any,
     color,
-    coords: args.coords,
+    coords: workflowCoords,
     visible: true,
     leafletGroup: newGroup,
     jsonInfo: {
@@ -4556,6 +4587,7 @@ const workflowBridge: WorkflowBridge = {
       setDrawing(false);
       setDrawMode('none');
       drawModeRef.current = 'none';
+      resetMultipartEditor();
       resetSpecialDrafts();
       return;
     }
@@ -4566,6 +4598,7 @@ const workflowBridge: WorkflowBridge = {
     setDrawMode(mode);
     drawModeRef.current = mode as any;
     setDrawing(true);
+    resetMultipartEditor();
     resetSpecialDrafts();
   },
 
@@ -4574,6 +4607,7 @@ const workflowBridge: WorkflowBridge = {
     setDrawing(false);
     setDrawMode('none');
     drawModeRef.current = 'none';
+    resetMultipartEditor();
     resetSpecialDrafts();
   },
 
@@ -4582,10 +4616,8 @@ const workflowBridge: WorkflowBridge = {
   getTempPoints: () => tempPoints,
   setTempPoints: (pts: WorldPoint[]) => {
     const next = (pts ?? []) as any;
-    if (multipartEnabledRef.current) {
-      if (!acceptActiveMultipartCoords(next)) return;
-      persistActiveEditorCoords(next);
-    }
+    // Workflow data is always a flat single-component draft.  It must not
+    // mutate the full editor's multipart reference even after a mode switch.
     setTempPoints(next);
     // 同步草稿几何显示（避免 setState 异步导致绘制模式滞后）
     drawDraftGeometry(next, drawModeRef.current, drawColorRef.current);

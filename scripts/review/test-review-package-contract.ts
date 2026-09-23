@@ -46,6 +46,9 @@ const packageDraft = {
     { worldId: 'world-a', classCode: 'BUD', featureId: 'feature-a', filename: 'flat-picture.png', kindPath: ['business-kind'], content: new Blob(['flat-picture']) },
     { worldId: 'world-a', classCode: 'ISG', featureId: 'feature-kind-a', filename: 'nested-picture.png', kindPath: ['gate'], content: new Blob(['nested-picture']) },
   ],
+  externalPictures: [
+    { worldId: 'world-a', classCode: 'BUD', featureId: 'feature-a', kindPath: ['business-kind'], url: 'https://images.example.test/feature-a.png', order: 2 },
+  ],
   deletes: [{ ID: 'feature-b', Name: 'Feature B', worldId: 'world-a', classCode: 'BUD' }],
   extraFiles: buildReviewPackageToolRefreshFiles(),
 } as const;
@@ -60,12 +63,13 @@ if (!packageFiles.files.some((file) => file.path === 'Picture/world-a/ISG/gate/f
 const pictureIndex = packageFiles.files.find((file) => file.path === 'Picture/INDEX.json');
 if (!pictureIndex || typeof pictureIndex.content !== 'string') throw new Error('picture binding index not generated');
 const bindings = JSON.parse(pictureIndex.content);
-if (bindings.schemaVersion !== 'cairnmap.review-picture-bindings.v1' || bindings.bindings.length !== 2 || bindings.bindings.find((entry: any) => entry.featureId === 'feature-a')?.files[0]?.order !== 1) throw new Error('picture binding index invalid');
+const featureABinding = bindings.bindings.find((entry: any) => entry.featureId === 'feature-a');
+if (bindings.schemaVersion !== 'cairnmap.review-picture-bindings.v2' || bindings.bindings.length !== 2 || featureABinding?.files[0]?.order !== 1 || featureABinding?.links[0]?.url !== 'https://images.example.test/feature-a.png' || featureABinding?.links[0]?.order !== 2) throw new Error('picture binding index invalid');
 if (!packageFiles.files.some((file) => file.path === 'Tool_Refresh/refresh_package_meta.py')) throw new Error('tool refresh path not generated');
 const artifact = await buildReviewPackageArtifact(profile, { ...packageDraft, pictures: [] });
 const parsed = await parseReviewPackageBlob(artifact.blob);
 const strict = validateParsedReviewPackage(parsed, profile, 'strict-submission');
-if (!strict.valid || parsed.features.length !== 2 || parsed.pictures.length !== 0 || parsed.deletes.length !== 1) throw new Error(`strict package validation failed: ${strict.errors.map((entry) => entry.code).join(',')}`);
+if (!strict.valid || parsed.features.length !== 2 || parsed.pictures.length !== 0 || parsed.externalPictures.length !== 1 || parsed.deletes.length !== 1) throw new Error(`strict package validation failed: ${strict.errors.map((entry) => entry.code).join(',')}`);
 const unconfiguredNestedZip = new JSZip();
 unconfiguredNestedZip.file('INDEX.json', JSON.stringify({ relayPackageContractVersion: REVIEW_PACKAGE_CONTRACT_VERSION, featureCount: 1, pictureCount: 0, deleteCount: 0 }));
 unconfiguredNestedZip.file('Review.json', JSON.stringify({ schemaVersion: 'cairnmap.native-relay-review.v1', status: 'pending', submissionMode: 'review-submission-v2', exportedAt: '2026-08-13T00:00:00.000Z' }));
