@@ -7,6 +7,7 @@ import {
   validateMultipartGeometry,
   withCanonicalMultipartGeometry,
 } from '../../src/core/geometry/multipartGeometry';
+import { removeMultipartInnerSpaceAt, removeMultipartPartAt } from '../../src/core/geometry/multipartEditorState';
 import { stringifyFeatureJson } from '../../src/components/Common/featureJsonSerializer';
 
 const point = readMultipartGeometry({ CoordP: [[1, -64, 2], [3, 70, 4]] }, 'Point');
@@ -33,6 +34,40 @@ const polygon = readMultipartGeometry({
 assert.equal(polygon.geometry?.type, 'Polygon');
 assert.equal((polygon.geometry as any).parts.length, 2);
 assert.equal(validateMultipartGeometry(polygon.geometry), undefined);
+
+const removalFixture = readMultipartGeometry({
+  CoordG: [
+    [[[0, -64, 0], [2, -64, 0], [0, -64, 2]]],
+    [[[10, -64, 0], [12, -64, 0], [10, -64, 2]]],
+    [[[20, -64, 0], [22, -64, 0], [20, -64, 2]]],
+    [[[30, -64, 0], [32, -64, 0], [30, -64, 2]]],
+  ],
+}, 'Polygon').geometry!;
+assert.deepEqual(removeMultipartPartAt(removalFixture, 3), { nextPartIndex: 2 });
+assert.deepEqual(serializeMultipartGeometry(removalFixture), [
+  [[[0, -64, 0], [2, -64, 0], [0, -64, 2]]],
+  [[[10, -64, 0], [12, -64, 0], [10, -64, 2]]],
+  [[[20, -64, 0], [22, -64, 0], [20, -64, 2]]],
+]);
+
+const innerSpaceRemovalFixture = readMultipartGeometry({
+  CoordG: [[
+    [[0, -64, 0], [20, -64, 0], [20, -64, 20], [0, -64, 20]],
+    [[2, -64, 2], [4, -64, 2], [2, -64, 4]],
+    [[6, -64, 2], [8, -64, 2], [6, -64, 4]],
+    [[10, -64, 2], [12, -64, 2], [10, -64, 4]],
+  ]],
+}, 'Polygon').geometry!;
+assert.deepEqual(removeMultipartInnerSpaceAt(innerSpaceRemovalFixture, 0, 2), {
+  partIndex: 0,
+  nextInnerSpaceIndex: 1,
+  hasInnerSpaces: true,
+});
+assert.deepEqual(serializeMultipartGeometry(innerSpaceRemovalFixture), [[
+  [[0, -64, 0], [20, -64, 0], [20, -64, 20], [0, -64, 20]],
+  [[2, -64, 2], [4, -64, 2], [2, -64, 4]],
+  [[6, -64, 2], [8, -64, 2], [6, -64, 4]],
+]]);
 
 const polygonWithConsecutiveDuplicate = readMultipartGeometry({
   CoordG: [[[
