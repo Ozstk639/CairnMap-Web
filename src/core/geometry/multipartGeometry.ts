@@ -80,6 +80,13 @@ function removeClosingCoordinate(ring: MultipartCoord[]): MultipartCoord[] {
   return ring;
 }
 
+function normalizeRingCoordinates(ring: MultipartCoord[]): MultipartCoord[] {
+  const withoutConsecutiveDuplicates = ring.filter((coordinate, index) => (
+    index === 0 || !coordinatesEqual(ring[index - 1], coordinate)
+  ));
+  return removeClosingCoordinate(withoutConsecutiveDuplicates);
+}
+
 function parseCanonical(value: unknown, type: MultipartGeometryKind): MultipartGeometry | null {
   if (!Array.isArray(value)) return null;
   if (type === 'Point') {
@@ -93,7 +100,7 @@ function parseCanonical(value: unknown, type: MultipartGeometryKind): MultipartG
       : null;
   }
   const parts = value.map((part) => Array.isArray(part)
-    ? part.map((ring) => Array.isArray(ring) ? removeClosingCoordinate(ring.map(tupleToCoord).filter((coord): coord is MultipartCoord => Boolean(coord))) : null)
+    ? part.map((ring) => Array.isArray(ring) ? normalizeRingCoordinates(ring.map(tupleToCoord).filter((coord): coord is MultipartCoord => Boolean(coord))) : null)
     : null);
   if (!parts.every((part) => Array.isArray(part) && part.length > 0 && part.every((ring) => Array.isArray(ring)))) return null;
   // Preserve an invalid tuple as an invalid canonical value rather than silently
@@ -116,7 +123,7 @@ function parseLegacy(value: unknown, type: MultipartGeometryKind): MultipartGeom
   const path = value.map(legacyTupleToCoord);
   if (!path.every(Boolean)) return null;
   if (type === 'LineString') return { type, parts: [path as MultipartCoord[]] };
-  return { type, parts: [[removeClosingCoordinate(path as MultipartCoord[])]] };
+  return { type, parts: [[normalizeRingCoordinates(path as MultipartCoord[])]] };
 }
 
 function stableGeometry(geometry: MultipartGeometry): string {
@@ -167,7 +174,7 @@ export function serializeMultipartGeometry(geometry: MultipartGeometry): unknown
   const tuple = (coord: MultipartCoord): [number, number, number] => [coord.x, coord.y, coord.z];
   if (geometry.type === 'Point') return geometry.parts.map(tuple);
   if (geometry.type === 'LineString') return geometry.parts.map((part) => part.map(tuple));
-  return geometry.parts.map((part) => part.map((ring) => removeClosingCoordinate(ring).map(tuple)));
+  return geometry.parts.map((part) => part.map((ring) => normalizeRingCoordinates(ring).map(tuple)));
 }
 
 export function withCanonicalMultipartGeometry(
