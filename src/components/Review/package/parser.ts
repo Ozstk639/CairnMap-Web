@@ -3,6 +3,7 @@ import type {
   ParsedReviewPackage,
   ParsedReviewPackageFeature,
   ParsedReviewPackagePicture,
+  ParsedReviewPackageExternalPicture,
   ReviewPackageDeleteMark,
   ReviewPackageValidationIssue,
 } from './contracts';
@@ -86,6 +87,7 @@ export async function parseReviewPackageBlob(blob: Blob): Promise<ParsedReviewPa
     deletes: [],
     features: [],
     pictures: [],
+    externalPictures: [],
     pictureBindingManifest: null,
     pictureBindingPathPresent: false,
     extraPaths: [],
@@ -148,6 +150,28 @@ export async function parseReviewPackageBlob(blob: Blob): Promise<ParsedReviewPa
         if (!rawFile || typeof rawFile !== 'object' || Array.isArray(rawFile)) continue;
         const file = rawFile as Record<string, unknown>;
         if (typeof file.path === 'string' && Number.isSafeInteger(file.order)) orders.set(file.path, Number(file.order));
+      }
+      const rawLinks = (rawBinding as Record<string, unknown>).links;
+      if (Array.isArray(rawLinks)) {
+        const binding = rawBinding as Record<string, unknown>;
+        const worldId = String(binding.worldId ?? '').trim();
+        const classCode = String(binding.classCode ?? '').trim();
+        const featureId = String(binding.featureId ?? '').trim();
+        const kindPath = Array.isArray(binding.kindPath) ? binding.kindPath.map((part) => String(part)) : [];
+        for (const rawLink of rawLinks) {
+          if (!rawLink || typeof rawLink !== 'object' || Array.isArray(rawLink)) continue;
+          const link = rawLink as Record<string, unknown>;
+          const url = String(link.url ?? '').trim();
+          if (!url) continue;
+          result.externalPictures.push({
+            worldId,
+            classCode,
+            featureId,
+            kindPath,
+            url,
+            ...(Number.isSafeInteger(link.order) ? { order: Number(link.order) } : {}),
+          } as ParsedReviewPackageExternalPicture);
+        }
       }
     }
     result.pictures = result.pictures.map((picture) => ({ ...picture, ...(orders.has(picture.path) ? { order: orders.get(picture.path) } : {}) }));

@@ -3,6 +3,7 @@ import {
   buildReviewPackageArtifact,
   type ReviewPackageFeatureInput,
   type ReviewPackagePictureInput,
+  type ReviewPackageExternalPictureInput,
   type ReviewPackageSourceSnapshot,
   type ReviewPackageProfile,
   CAIRNMAP_DEFAULT_REVIEW_PACKAGE_PROFILE,
@@ -41,7 +42,11 @@ function fileNameFromUrl(url: string): string | undefined {
   }
 }
 
-async function resolvePictureBlob(pic: { file?: File; previewUrl?: string; originalName: string }): Promise<{ blob: Blob; name: string } | null> {
+async function resolvePictureBlob(pic: { file?: File; previewUrl?: string; originalName: string; source?: string }): Promise<{ blob: Blob; name: string } | null> {
+  // External URLs are metadata bindings.  Export must never fetch them: doing
+  // so would unexpectedly mirror third-party assets into COS and can fail on
+  // ordinary image CORS policies.
+  if (pic.source === 'external') return null;
   if (pic.file) return { blob: pic.file, name: pic.originalName };
   const url = String(pic.previewUrl ?? '').trim();
   if (!url) return null;
@@ -126,11 +131,25 @@ export async function buildRelayPackageZip(args: {
   }
 
   const pictures: ReviewPackagePictureInput[] = [];
+  const externalPictures: ReviewPackageExternalPictureInput[] = [];
   for (const [featureId, bindings] of Object.entries(args.draft.picturesById)) {
     const location = locationsById.get(featureId);
     if (!location) continue;
     const active = [...bindings].filter((picture) => !picture.deleted).sort((left, right) => left.order - right.order);
     for (const picture of active) {
+      if (picture.source === 'external') {
+        const url = String(picture.externalUrl ?? picture.previewUrl ?? '').trim();
+        if (!url) continue;
+        externalPictures.push({
+          worldId: location.worldId,
+          classCode: location.classCode,
+          featureId,
+          kindPath: location.kindPath,
+          url,
+          order: picture.order,
+        });
+        continue;
+      }
       const resolved = await resolvePictureBlob(picture);
       if (!resolved) continue;
       pictures.push({
@@ -167,6 +186,7 @@ export async function buildRelayPackageZip(args: {
     sourceSnapshot: resolveSourceSnapshot(args.currentWorldId),
     features,
     pictures,
+    externalPictures,
     deletes,
     extraFiles: buildReviewPackageToolRefreshFiles(),
   });

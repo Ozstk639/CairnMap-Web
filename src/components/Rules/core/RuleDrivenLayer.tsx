@@ -1553,7 +1553,7 @@ export default function RuleDrivenLayer(props: Props) {
               if (!Array.isArray(list)) continue;
               const entries = list
                 .map((pic: any) => ({
-                  source: pic?.source === "pub" || pic?.source === "dat" ? pic.source : "dat",
+                  source: pic?.source === "pub" || pic?.source === "dat" || pic?.source === "formal" || pic?.source === "external" ? pic.source : "dat",
                   url: String(pic?.url ?? "").trim(),
                   filename: pic?.filename ? String(pic.filename) : undefined,
                   relativePath: pic?.relativePath ? String(pic.relativePath) : undefined,

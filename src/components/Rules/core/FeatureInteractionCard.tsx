@@ -157,6 +157,7 @@ export default function FeatureInteractionCard(props: Props) {
 
   const [pictures, setPictures] = useState<string[]>([]);
   const [pictureBindingState, setPictureBindingState] = useState<'loading' | 'none' | 'bound'>('loading');
+  const [fullscreenPicture, setFullscreenPicture] = useState<string | null>(null);
   const [measuringModeActive, setMeasuringModeActive] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return Boolean((window as any).__riaMeasuringActive);
@@ -186,6 +187,21 @@ export default function FeatureInteractionCard(props: Props) {
       alive = false;
     };
   }, [feature]);
+
+  useEffect(() => {
+    if (!fullscreenPicture) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setFullscreenPicture(null);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [fullscreenPicture]);
+
+  const openFullscreenPicture = (src: string) => {
+    // Keep touch devices on their native image interaction path.
+    if (typeof window === 'undefined' || !window.matchMedia('(min-width: 768px) and (pointer: fine)').matches) return;
+    setFullscreenPicture(src);
+  };
 
   // rail index（仅 STA / STB 需要）
   const [railIndex, setRailIndex] = useState<RailNewIndex | null>(null);
@@ -477,11 +493,12 @@ export default function FeatureInteractionCard(props: Props) {
             {pictures.map((src, idx) => (
               <div
                 key={`${src}-${idx}`}
-                className="shrink-0 snap-start rounded-md border border-black/10 bg-black/5"
+                className="shrink-0 snap-start rounded-md border border-black/10 bg-black/5 cursor-zoom-in"
                 style={{
                   width: pictureItemSize?.width ?? 324,
                   height: pictureItemSize?.height ?? 182,
                 }}
+                onClick={() => openFullscreenPicture(src)}
               >
                 <img
                   src={src}
@@ -803,6 +820,15 @@ export default function FeatureInteractionCard(props: Props) {
           </AppCard>
         </div>
       )}
+
+      {fullscreenPicture ? (
+        <div className="fixed inset-0 z-[30010] flex items-center justify-center bg-black/80 p-6" role="dialog" aria-modal="true" aria-label="图片全屏预览" onClick={() => setFullscreenPicture(null)}>
+          <div className="relative flex h-full w-full items-center justify-center" onClick={(event) => event.stopPropagation()}>
+            <AppButton type="button" className="absolute right-2 top-2 rounded bg-white/90 px-3 py-1.5 text-sm text-slate-700 shadow" onClick={() => setFullscreenPicture(null)}>关闭</AppButton>
+            <img src={fullscreenPicture} alt={title ? `${title}-全屏图片` : '全屏图片'} className="max-h-[92vh] max-w-[94vw] object-contain" onError={(event) => { event.currentTarget.src = '/pictures/normal.png'; }} />
+          </div>
+        </div>
+      ) : null}
 
       {shareOpen && sharePayload && (
         <DraggablePanel

@@ -5,9 +5,11 @@ export type RelayPictureBindingItem = {
   file?: File;
   relativePath?: string;
   previewUrl?: string;
+  /** Present only for URL-only bindings; never serialized as a Picture object. */
+  externalUrl?: string;
   deleted?: boolean;
   order: number;
-  source?: 'new' | 'imported' | 'pub' | 'dat';
+  source?: 'new' | 'imported' | 'pub' | 'dat' | 'formal' | 'external';
 };
 
 export type RelayDeleteMarkItem = {

@@ -62,6 +62,21 @@ export async function materializeCairnReviewPackageForWorkspace(file: File): Pro
     draft.picturesById[picture.featureId] = [...(draft.picturesById[picture.featureId] ?? []), binding];
   }
 
+  for (const picture of parsed.externalPictures ?? []) {
+    if (!picture.featureId || !picture.url) continue;
+    const binding: RelayPictureBindingItem = {
+      uid: `${picture.featureId}:external:${picture.order ?? picture.url}`,
+      originalName: picture.url,
+      externalUrl: picture.url,
+      previewUrl: picture.url,
+      order: Number.isSafeInteger(picture.order) && Number(picture.order) > 0
+        ? Number(picture.order)
+        : (draft.picturesById[picture.featureId]?.length ?? 0) + 1,
+      source: 'external',
+    };
+    draft.picturesById[picture.featureId] = [...(draft.picturesById[picture.featureId] ?? []), binding];
+  }
+
   return {
     draft,
     jsonItems: parsed.features.map((feature) => feature.record),

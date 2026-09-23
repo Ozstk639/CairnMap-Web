@@ -39,7 +39,7 @@ export const DEFAULT_RULE_PICTURE_SOURCE: RulePictureSourceDef = {
 };
 
 export type FeaturePictureEntry = {
-  source: SourceKey;
+  source: SourceKey | 'external';
   url: string;
   filename?: string;
   relativePath?: string;
@@ -62,7 +62,7 @@ function resolveTempMountedPictureEntriesForFeature(feature?: FeatureRecord | nu
   if (!Array.isArray(entries)) return [];
   return entries
     .map((x) => ({
-      source: x.source === 'pub' || x.source === 'dat' ? x.source : 'dat',
+      source: x.source === 'pub' || x.source === 'dat' || x.source === 'external' ? x.source : 'dat',
       url: String(x.url ?? '').trim(),
       filename: x.filename,
       relativePath: x.relativePath,
@@ -169,14 +169,25 @@ async function resolveRepositoryPictureEntriesForFeature(feature?: FeatureRecord
       repoType: 'picture',
       stageName: `picture-index-${className}`,
     });
-    const mapping = idx?.mapping ?? {};
+    const mapping = idx?.mapping ?? idx?.assetsByFeature ?? {};
     const rels = Array.isArray(mapping[id]) ? mapping[id] : [];
-    return rels.map((rel: string) => ({
-      source: 'dat',
-      url: resolvePictureFileUrl({ worldId: world, className, kind, relativePath: rel }),
-      filename: fileNameFromUrl(rel),
-      relativePath: rel,
-    }));
+    const entries: FeaturePictureEntry[] = [];
+    for (const rel of rels as unknown[]) {
+      if (typeof rel === 'object' && rel && typeof (rel as any).url === 'string') {
+        const url = String((rel as any).url).trim();
+        if (url) entries.push({ source: 'external', url, filename: fileNameFromUrl(url) });
+        continue;
+      }
+      const relativePath = typeof rel === 'string' ? rel : String((rel as any)?.relativePath ?? (rel as any)?.sourcePath ?? '').trim();
+      if (!relativePath) continue;
+      entries.push({
+        source: 'dat' as const,
+        url: resolvePictureFileUrl({ worldId: world, className, kind, relativePath }),
+        filename: fileNameFromUrl(relativePath),
+        relativePath,
+      });
+    }
+    return entries;
   } catch {
     return [];
   }

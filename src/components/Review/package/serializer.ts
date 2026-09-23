@@ -90,23 +90,40 @@ export function buildReviewPackageFiles(profile: ReviewPackageProfile, draft: Re
       featureId: feature.featureId,
       kindPath,
       files: [],
+      links: [],
     });
   }
-  const nextOrderByFeature = new Map<string, number>();
+  const usedOrdersByFeature = new Map<string, Set<number>>();
   for (const picture of draft.pictures) {
     const path = pathForPicture(profile, picture);
     assertFilePath(path);
     const key = `${picture.worldId}\u0000${picture.classCode}\u0000${picture.featureId}`;
     const binding = pictureBindings.get(key);
     if (!binding) throw new Error(`review-package-picture-feature-missing:${path}`);
-    const nextOrder = nextOrderByFeature.get(key) ?? 1;
-    const order = Number.isSafeInteger(picture.order) && Number(picture.order) > 0 ? Number(picture.order) : nextOrder;
-    nextOrderByFeature.set(key, Math.max(nextOrder, order + 1));
-    if (binding.files.some((file) => file.order === order)) throw new Error(`review-package-picture-order-duplicate:${path}`);
+    const usedOrders = usedOrdersByFeature.get(key) ?? new Set<number>();
+    const order = Number.isSafeInteger(picture.order) && Number(picture.order) > 0 ? Number(picture.order) : usedOrders.size + 1;
+    if (usedOrders.has(order)) throw new Error(`review-package-picture-order-duplicate:${path}`);
+    usedOrders.add(order);
+    usedOrdersByFeature.set(key, usedOrders);
     binding.files.push({ path, order, role: 'display' });
     files.push({ path, content: picture.content });
   }
-  for (const binding of pictureBindings.values()) binding.files.sort((left, right) => left.order - right.order || left.path.localeCompare(right.path));
+  for (const picture of draft.externalPictures ?? []) {
+    const key = `${picture.worldId}\u0000${picture.classCode}\u0000${picture.featureId}`;
+    const binding = pictureBindings.get(key);
+    if (!binding) throw new Error('review-package-external-picture-feature-missing');
+    const usedOrders = usedOrdersByFeature.get(key) ?? new Set<number>();
+    const order = Number.isSafeInteger(picture.order) && Number(picture.order) > 0 ? Number(picture.order) : usedOrders.size + 1;
+    if (usedOrders.has(order)) throw new Error('review-package-picture-order-duplicate:external');
+    usedOrders.add(order);
+    usedOrdersByFeature.set(key, usedOrders);
+    binding.links ??= [];
+    binding.links.push({ url: picture.url, order, role: 'display' });
+  }
+  for (const binding of pictureBindings.values()) {
+    binding.files.sort((left, right) => left.order - right.order || left.path.localeCompare(right.path));
+    binding.links?.sort((left, right) => left.order - right.order || left.url.localeCompare(right.url));
+  }
   files.push({
     path: REVIEW_PACKAGE_LAYOUT.pictureIndexPath,
     content: json({

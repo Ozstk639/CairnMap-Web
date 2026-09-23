@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import {
+  multipartGeometryFromSinglePath,
   readMultipartGeometry,
   serializeMultipartGeometry,
   validateMultipartHoleDraft,
   validateMultipartGeometry,
+  withCanonicalMultipartGeometry,
 } from '../../src/core/geometry/multipartGeometry';
 import { stringifyFeatureJson } from '../../src/components/Common/featureJsonSerializer';
 
@@ -73,5 +75,29 @@ const exported = stringifyFeatureJson({ Type: 'Polygon', Name: 'multipart', Coor
 assert.match(exported, /"CoordG"/);
 assert.match(exported, /\[0,-64,0\]/);
 assert.equal(exported.split('\n').filter((line) => line.includes('[0,-64,0]')).length, 1);
+
+// Every workflow commits one ordinary component: one CoordP point, one
+// CoordL path, or one CoordG outer ring. Legacy aliases must never leak back
+// out of a format executor after the canonical write is applied.
+const workflowPoint = withCanonicalMultipartGeometry(
+  { coordinate: { x: 1, y: -64, z: 2 } },
+  multipartGeometryFromSinglePath('Point', [{ x: 1, y: -64, z: 2 }]),
+);
+assert.deepEqual(workflowPoint.CoordP, [[1, -64, 2]]);
+assert.equal('coordinate' in workflowPoint, false);
+
+const workflowLine = withCanonicalMultipartGeometry(
+  { PLpoints: [[1, -64, 2], [3, -64, 4]] },
+  multipartGeometryFromSinglePath('LineString', [{ x: 1, y: -64, z: 2 }, { x: 3, y: -64, z: 4 }]),
+);
+assert.deepEqual(workflowLine.CoordL, [[[1, -64, 2], [3, -64, 4]]]);
+assert.equal('PLpoints' in workflowLine, false);
+
+const workflowPolygon = withCanonicalMultipartGeometry(
+  { Conpoints: [[0, -64, 0], [5, -64, 0], [0, -64, 5]] },
+  multipartGeometryFromSinglePath('Polygon', [{ x: 0, y: -64, z: 0 }, { x: 5, y: -64, z: 0 }, { x: 0, y: -64, z: 5 }]),
+);
+assert.deepEqual(workflowPolygon.CoordG, [[[[0, -64, 0], [5, -64, 0], [0, -64, 5]]]]);
+assert.equal('Conpoints' in workflowPolygon, false);
 
 console.log('multipart geometry contract: ok');
