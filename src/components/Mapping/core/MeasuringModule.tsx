@@ -70,6 +70,7 @@ import {
   type MultipartGeometry,
   type MultipartGeometryKind,
 } from '@/core/geometry/multipartGeometry';
+import { removeMultipartInnerSpaceAt, removeMultipartPartAt } from '@/core/geometry/multipartEditorState';
 import { makeLabelDivIcon } from '@/components/Rules/rendering/labelStyles';
 import { rebuildRoadGraphCacheForWorld } from '@/components/Navigation/Navigation_Road';
 import { rebuildRailNewIndexCacheForWorld } from '@/components/Navigation/railNewIndex';
@@ -414,11 +415,11 @@ const renderSelectedMultipartCoords = (geometry: MultipartGeometry | null, color
   return selected;
 };
 
-const selectMultipartPart = (nextIndex: number) => {
+const selectMultipartPart = (nextIndex: number, persistCurrent = true) => {
   if (multipartStructureLocked) return;
   const geometry = multipartDraftRef.current;
   if (!geometry) return;
-  persistActiveEditorCoords(tempPoints);
+  if (persistCurrent) persistActiveEditorCoords(tempPoints);
   const index = Math.max(0, Math.min(nextIndex, geometry.parts.length - 1));
   activeMultipartPartRef.current = index;
   setActiveMultipartPart(index);
@@ -445,7 +446,7 @@ const addMultipartPart = () => {
   if (geometry.type === 'Point') geometry.parts.push({ x: Number.NaN, y: Number.NaN, z: Number.NaN });
   else if (geometry.type === 'LineString') geometry.parts.push([]);
   else geometry.parts.push([[]]);
-  selectMultipartPart(geometry.parts.length - 1);
+  selectMultipartPart(geometry.parts.length - 1, false);
 };
 
 const removeMultipartPart = () => {
@@ -453,15 +454,16 @@ const removeMultipartPart = () => {
   const geometry = multipartDraftRef.current;
   if (!geometry || geometry.parts.length <= 1) return;
   persistActiveEditorCoords(tempPoints);
-  geometry.parts.splice(activeMultipartPartRef.current, 1);
-  selectMultipartPart(Math.min(activeMultipartPartRef.current, geometry.parts.length - 1));
+  const removal = removeMultipartPartAt(geometry, activeMultipartPartRef.current);
+  if (!removal) return;
+  selectMultipartPart(removal.nextPartIndex, false);
 };
 
-const selectInnerSpace = (nextIndex: number) => {
+const selectInnerSpace = (nextIndex: number, persistCurrent = true) => {
   if (multipartStructureLocked) return;
   const geometry = multipartDraftRef.current;
   if (!geometry || geometry.type !== 'Polygon') return;
-  persistActiveEditorCoords(tempPoints);
+  if (persistCurrent) persistActiveEditorCoords(tempPoints);
   const holes = (geometry.parts[activeMultipartPartRef.current]?.length ?? 1) - 1;
   const index = Math.max(0, Math.min(nextIndex, Math.max(0, holes - 1)));
   activeInnerSpaceRef.current = index;
@@ -480,7 +482,7 @@ const addInnerSpace = () => {
   component.push([]);
   innerSpaceEnabledRef.current = true;
   setInnerSpaceEnabled(true);
-  selectInnerSpace(component.length - 2);
+  selectInnerSpace(component.length - 2, false);
 };
 
 const removeInnerSpace = () => {
@@ -490,13 +492,19 @@ const removeInnerSpace = () => {
   const component = geometry.parts[activeMultipartPartRef.current] ?? [];
   if (component.length <= 1) return;
   persistActiveEditorCoords(tempPoints);
-  component.splice(activeInnerSpaceRef.current + 1, 1);
-  const hasHoles = component.length > 1;
-  innerSpaceEnabledRef.current = hasHoles;
-  setInnerSpaceEnabled(hasHoles);
-  editSelectedInnerSpaceRef.current = hasHoles;
-  setEditSelectedInnerSpace(hasHoles);
-  selectInnerSpace(Math.min(activeInnerSpaceRef.current, Math.max(0, component.length - 2)));
+  const removal = removeMultipartInnerSpaceAt(geometry, activeMultipartPartRef.current, activeInnerSpaceRef.current);
+  if (!removal) return;
+  innerSpaceEnabledRef.current = removal.hasInnerSpaces;
+  setInnerSpaceEnabled(removal.hasInnerSpaces);
+  editSelectedInnerSpaceRef.current = removal.hasInnerSpaces;
+  setEditSelectedInnerSpace(removal.hasInnerSpaces);
+  if (removal.hasInnerSpaces) {
+    selectInnerSpace(removal.nextInnerSpaceIndex, false);
+    return;
+  }
+  activeInnerSpaceRef.current = 0;
+  setActiveInnerSpace(0);
+  renderSelectedMultipartCoords(geometry, drawColorRef.current);
 };
 
 const toggleMultipartPartLabels = () => {
