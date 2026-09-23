@@ -34,6 +34,23 @@ assert.equal(polygon.geometry?.type, 'Polygon');
 assert.equal((polygon.geometry as any).parts.length, 2);
 assert.equal(validateMultipartGeometry(polygon.geometry), undefined);
 
+const polygonWithConsecutiveDuplicate = readMultipartGeometry({
+  CoordG: [[[
+    [0, -64, 0], [10, -64, 0], [10, -64, 0], [10, -64, 10], [0, -64, 10],
+  ]]],
+}, 'Polygon');
+assert.equal(validateMultipartGeometry(polygonWithConsecutiveDuplicate.geometry), undefined);
+assert.deepEqual(serializeMultipartGeometry(polygonWithConsecutiveDuplicate.geometry!), [[[
+  [0, -64, 0], [10, -64, 0], [10, -64, 10], [0, -64, 10],
+]]]);
+
+const selfIntersectingPolygon = readMultipartGeometry({
+  CoordG: [[[
+    [0, -64, 0], [10, -64, 10], [0, -64, 10], [10, -64, 0],
+  ]]],
+}, 'Polygon');
+assert.match(validateMultipartGeometry(selfIntersectingPolygon.geometry) ?? '', /拓扑无效/);
+
 const legacy = readMultipartGeometry({ Conpoints: [[0, -64, 0], [10, -64, 0], [10, -64, 10]] }, 'Polygon', 'Conpoints');
 assert.equal(legacy.source, 'legacy');
 assert.equal(validateMultipartGeometry(legacy.geometry), undefined);
