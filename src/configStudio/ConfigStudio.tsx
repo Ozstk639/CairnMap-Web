@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import { buildConfigPackageArchive, downloadConfigPackage, readConfigPackage } from './package';
 import { classificationPathKey, resolveEffectiveFields, resolveGeometryProfile, validateConfigPackage } from './runtime';
 import { createConfigPackageFromCurrentProject } from './legacyProjectAdapter';
-import type { CategoryNode, ConfigPackageV2, GeometryKind, GeometryProfile, MountedFeatureRecord, WorkflowStep } from './types';
+import type { CategoryNode, ConfigPackageV2, GeometryKind, GeometryProfile, MountedFeatureRecord, WorkflowDefinition, WorkflowStep } from './types';
 
 type StudioMode = 'feature' | 'workflow';
 
@@ -64,7 +64,25 @@ function PreviewMap({ config, node, zoom, onZoom }: { config: ConfigPackageV2; n
 function WorkflowEditor({ config, setConfig }: { config: ConfigPackageV2; setConfig: (config: ConfigPackageV2) => void }) {
   const [workflowId, setWorkflowId] = useState(() => config.workflows[0]?.id ?? '');
   const workflow = config.workflows.find((item) => item.id === workflowId) ?? config.workflows[0];
-  if (!workflow) return <div className="p-4 text-sm text-slate-500">尚无工作流。</div>;
+  const addStandardWorkflow = () => {
+    const target = config.nodes[0]?.path;
+    if (!target) return;
+    const id = `workflow-${Date.now()}`;
+    const next: WorkflowDefinition = {
+      id,
+      label: { zh: '标准要素填卡', en: 'Standard feature form' },
+      target,
+      steps: [
+        { id: `${id}-actor`, kind: 'actor', label: { zh: '填写人', en: 'Author' } },
+        { id: `${id}-form`, kind: 'form', label: { zh: '基本信息', en: 'Basic information' }, controls: [] },
+        { id: `${id}-tail`, kind: 'tagsExtensions', label: { zh: '标签与扩展', en: 'Tags and extensions' } },
+        { id: `${id}-geometry`, kind: 'geometry', label: { zh: '绘制', en: 'Geometry' }, geometry: ['Point'] },
+      ],
+    };
+    setConfig({ ...config, workflows: [...config.workflows, next] });
+    setWorkflowId(id);
+  };
+  if (!workflow) return <div className="p-4 text-sm text-slate-500">尚无工作流。<button type="button" onClick={addStandardWorkflow} className="ml-2 rounded border px-2 py-1 text-slate-700">创建标准工作流</button></div>;
   const fields = resolveEffectiveFields(config, workflow.target);
   const updateWorkflow = (updater: (value: typeof workflow) => typeof workflow) => setConfig({ ...config, workflows: config.workflows.map((item) => item.id === workflow.id ? updater(item) : item) });
   const updateStep = (id: string, patch: Partial<WorkflowStep>) => updateWorkflow((item) => ({ ...item, steps: item.steps.map((step) => step.id === id ? { ...step, ...patch } : step) }));
@@ -80,12 +98,12 @@ function WorkflowEditor({ config, setConfig }: { config: ConfigPackageV2; setCon
     <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">标准顺序固定为：填写人/上下文 → 一页或多页信息填写 → tags/extensions 尾部区 → 绘制页。绘制页固定为最后一步，tags/extensions 固定在其前。</div>
     <label className="block text-sm text-slate-700">工作流<select className="mt-1 w-full rounded border px-2 py-1.5" value={workflow.id} onChange={(event) => setWorkflowId(event.target.value)}>{config.workflows.map((item) => <option key={item.id} value={item.id}>{item.label.zh} · {classificationPathKey(item.target)}</option>)}</select></label>
     <label className="block text-sm text-slate-700">工作流名称<input className="mt-1 w-full rounded border px-2 py-1.5" value={workflow.label.zh} onChange={(event) => updateWorkflow((item) => ({ ...item, label: { ...item.label, zh: event.target.value } }))} /></label>
-    <button type="button" onClick={addForm} className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm"><Plus className="h-4 w-4" />在尾部区前添加信息页</button>
+    <div className="flex flex-wrap gap-2"><button type="button" onClick={addStandardWorkflow} className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm"><Plus className="h-4 w-4" />创建标准工作流</button><button type="button" onClick={addForm} className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm"><Plus className="h-4 w-4" />在尾部区前添加信息页</button></div>
     {workflow.steps.map((step, index) => <div key={step.id} className="rounded-lg border border-slate-200 bg-white p-3">
       <div className="flex items-center gap-2"><span className="rounded bg-slate-100 px-2 py-1 text-xs font-semibold">{index + 1}</span><input disabled={step.kind === 'tagsExtensions' || step.kind === 'geometry'} className="min-w-0 flex-1 rounded border px-2 py-1.5 disabled:bg-slate-100" value={step.label.zh} onChange={(event) => updateStep(step.id, { label: { ...step.label, zh: event.target.value } })} /><span className="text-xs text-slate-500">{step.kind}</span></div>
       {step.kind === 'special' ? <p className="mt-2 text-xs text-amber-700">混合适配器：{step.specialKey}（来自当前受控注册表，不能在下载包中任意执行组件）。</p> : null}
       {step.kind === 'tagsExtensions' ? <p className="mt-2 text-xs text-emerald-700">通用 tags/extensions 尾部区；会在最终绘制页前呈现。</p> : null}
-      {step.kind === 'geometry' ? <p className="mt-2 text-xs text-slate-500">最终绘制页：{step.geometry?.map((value) => geometryLabels[value]).join('、') || '未配置'}</p> : null}
+      {step.kind === 'geometry' ? <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-600">最终绘制页：{(['Point', 'LineString', 'Polygon'] as GeometryKind[]).map((geometry) => <label key={geometry} className="inline-flex items-center gap-1"><input type="checkbox" checked={step.geometry?.includes(geometry) ?? false} onChange={(event) => updateStep(step.id, { geometry: event.target.checked ? [...new Set([...(step.geometry ?? []), geometry])] : (step.geometry ?? []).filter((value) => value !== geometry) })} />{geometryLabels[geometry]}</label>)}</div> : null}
       {step.kind === 'form' ? <div className="mt-3 space-y-2 rounded bg-slate-50 p-2">{(step.controls ?? []).map((control) => <div key={control.id} className="grid gap-2 md:grid-cols-4"><select className="rounded border px-2 py-1" value={control.kind} onChange={(event) => updateControl(step, control.id, (value) => ({ ...value, kind: event.target.value as typeof value.kind }))}>{['text', 'textarea', 'select', 'classificationPicker', 'notice'].map((kind) => <option key={kind}>{kind}</option>)}</select><input className="rounded border px-2 py-1" value={control.label.zh} onChange={(event) => updateControl(step, control.id, (value) => ({ ...value, label: { ...value.label, zh: event.target.value } }))} /><select className="rounded border px-2 py-1" value={control.binding?.path ?? ''} onChange={(event) => updateControl(step, control.id, (value) => ({ ...value, binding: { target: 'field', path: event.target.value } }))}>{fields.map((field) => <option key={field.key}>{field.key}</option>)}</select><select className="rounded border px-2 py-1" value={control.columns} onChange={(event) => updateControl(step, control.id, (value) => ({ ...value, columns: Number(event.target.value) as 1 | 2 | 3 }))}>{[1, 2, 3].map((columns) => <option key={columns} value={columns}>{columns} 列</option>)}</select></div>)}<button type="button" onClick={() => addControl(step)} className="rounded border px-2 py-1 text-xs">+ 添加标准输入组件</button></div> : null}
     </div>)}
     <section className="rounded border border-slate-200 p-3"><h3 className="font-semibold text-slate-800">字段组装</h3><div className="mt-2 grid gap-2 md:grid-cols-3"><select className="rounded border px-2 py-1" value={workflow.idAssembly?.targetField ?? 'ID'} onChange={(event) => updateWorkflow((item) => ({ ...item, idAssembly: { targetField: event.target.value, operator: item.idAssembly?.operator ?? 'concat', parts: item.idAssembly?.parts ?? [], separator: item.idAssembly?.separator ?? '-' } }))}><option>ID</option>{fields.map((field) => <option key={field.key}>{field.key}</option>)}</select><input className="rounded border px-2 py-1" value={workflow.idAssembly?.parts.join('+') ?? ''} placeholder="字段名，用 + 分隔" onChange={(event) => updateWorkflow((item) => ({ ...item, idAssembly: { targetField: item.idAssembly?.targetField ?? 'ID', operator: 'concat', parts: event.target.value.split('+').map((value) => value.trim()).filter(Boolean), separator: item.idAssembly?.separator ?? '-' } }))} /><input className="rounded border px-2 py-1" value={workflow.idAssembly?.separator ?? '-'} placeholder="连接符" onChange={(event) => updateWorkflow((item) => ({ ...item, idAssembly: { targetField: item.idAssembly?.targetField ?? 'ID', operator: 'concat', parts: item.idAssembly?.parts ?? [], separator: event.target.value } }))} /></div></section>
