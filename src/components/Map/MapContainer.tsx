@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useRef, useState, useCallback } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import MobileBottomSheet from '@/components/Mobile/MobileBottomSheet';
 import MobileQuickDock from '@/components/Mobile/MobileQuickDock';
 import MobileFeatureJsonPanel from '@/components/Mobile/MobileFeatureJsonPanel';
@@ -321,6 +321,8 @@ function MapContainer() {
   const suppressRuleFeatureCardOpenRef = useRef(false);
   const ensureRuleWorldLoaded = useRuleDataStore((s) => s.ensureWorldLoaded);
   const currentRuleDataset = useRuleDataStore((s) => s.datasets[currentWorld]);
+  const loadedRuleDatasets = useRuleDataStore((s) => s.datasets);
+  const mountedRuleRecords = useMemo(() => Object.values(loadedRuleDatasets).flatMap((dataset) => dataset?.features ?? []), [loadedRuleDatasets]);
   const currentRulePending = useRuleDataStore((s) => s.pending[currentWorld]);
   const isGlobalLoading = useLoadingStore((s) => s.isLoading);
   const activeRuleWorldId = useLoadingStore((s) => s.activeRuleWorldId);
@@ -1927,7 +1929,7 @@ case 'players':
         </div>
       )}
 
-      {showConfigStudio ? <ConfigStudio onClose={() => setShowConfigStudio(false)} mountedRecords={currentRuleDataset?.features ?? []} /> : null}
+      {showConfigStudio ? <ConfigStudio onClose={() => setShowConfigStudio(false)} mountedRecords={mountedRuleRecords} /> : null}
 
       {/* 路径规划面板 */}
       {showNavigation && (
