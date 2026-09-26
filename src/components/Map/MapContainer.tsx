@@ -1927,7 +1927,7 @@ case 'players':
         </div>
       )}
 
-      {showConfigStudio ? <ConfigStudio onClose={() => setShowConfigStudio(false)} /> : null}
+      {showConfigStudio ? <ConfigStudio onClose={() => setShowConfigStudio(false)} mountedRecords={currentRuleDataset?.features ?? []} /> : null}
 
       {/* 路径规划面板 */}
       {showNavigation && (

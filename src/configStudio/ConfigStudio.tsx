@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import { buildConfigPackageArchive, downloadConfigPackage, readConfigPackage } from './package';
 import { classificationPathKey, resolveEffectiveFields, resolveGeometryProfile, validateConfigPackage } from './runtime';
 import { createConfigPackageFromCurrentProject } from './legacyProjectAdapter';
-import type { CategoryNode, ConfigPackageV2, GeometryKind, GeometryProfile, WorkflowStep } from './types';
+import type { CategoryNode, ConfigPackageV2, GeometryKind, GeometryProfile, MountedFeatureRecord, WorkflowStep } from './types';
 
 type StudioMode = 'feature' | 'workflow';
 
@@ -92,7 +92,7 @@ function WorkflowEditor({ config, setConfig }: { config: ConfigPackageV2; setCon
   </div>;
 }
 
-export function ConfigStudio({ onClose }: { onClose: () => void }) {
+export function ConfigStudio({ onClose, mountedRecords = [] }: { onClose: () => void; mountedRecords?: MountedFeatureRecord[] }) {
   const [config, setConfig] = useState<ConfigPackageV2>(() => createConfigPackageFromCurrentProject());
   const [selectedNodeId, setSelectedNodeId] = useState(() => config.nodes[0]?.nodeId ?? '');
   const [mode, setMode] = useState<StudioMode>('feature');
@@ -102,7 +102,7 @@ export function ConfigStudio({ onClose }: { onClose: () => void }) {
   const uploadRef = useRef<HTMLInputElement>(null);
   const selected = config.nodes.find((node) => node.nodeId === selectedNodeId) ?? config.nodes[0];
   const effectiveFields = useMemo(() => selected ? resolveEffectiveFields(config, selected.path) : [], [config, selected]);
-  const report = useMemo(() => validateConfigPackage(config), [config]);
+  const report = useMemo(() => validateConfigPackage(config, mountedRecords), [config, mountedRecords]);
   if (!selected) return null;
   const updateSelected = (updater: (node: CategoryNode) => CategoryNode) => setConfig((current) => updateNode(current, selected.nodeId, updater));
   const importPackage = async (file?: File) => {
@@ -113,7 +113,7 @@ export function ConfigStudio({ onClose }: { onClose: () => void }) {
     } catch (error) { setMessage(error instanceof Error ? error.message : '读取配置包失败。'); }
   };
   const exportPackage = async () => {
-    const nextReport = validateConfigPackage(config);
+    const nextReport = validateConfigPackage(config, mountedRecords);
     if (!nextReport.valid) { setMessage(`校验阻断：${nextReport.issues.filter((item) => item.severity === 'error').length} 项错误。请先修复。`); return; }
     const blob = await buildConfigPackageArchive(config, nextReport);
     downloadConfigPackage(blob, config);
@@ -135,7 +135,7 @@ export function ConfigStudio({ onClose }: { onClose: () => void }) {
         </>}
       </section>
     </div>
-    <footer className="flex shrink-0 items-center gap-3 border-t bg-white px-5 py-2 text-xs"><span className={report.valid ? 'text-emerald-700' : 'text-rose-700'}>{report.valid ? '完整功能校验通过，可导出本地包。' : report.issues.filter((item) => item.severity === 'error').map((item) => item.message).join('；')}</span><span className="flex-1" /><Save className="h-4 w-4 text-slate-500" /><span className="text-slate-500">仅本地保存；线上更新必须经 Pipeline 授权导入。</span></footer>
+    <footer className="flex shrink-0 items-center gap-3 border-t bg-white px-5 py-2 text-xs"><span className={report.valid ? 'text-emerald-700' : 'text-rose-700'}>{report.valid ? `完整功能校验通过（已检查当前挂载的 ${mountedRecords.length} 条要素），可导出本地包。` : report.issues.filter((item) => item.severity === 'error').map((item) => item.message).join('；')}</span><span className="flex-1" /><Save className="h-4 w-4 text-slate-500" /><span className="text-slate-500">仅本地保存；线上更新必须经 Pipeline 授权导入。</span></footer>
   </div>;
 }
 
