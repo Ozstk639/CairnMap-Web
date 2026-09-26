@@ -13,7 +13,7 @@ import type {
 } from './types';
 
 const GEOMETRIES: GeometryKind[] = ['Point', 'LineString', 'Polygon'];
-const SYSTEM_FIELD_KEYS = new Set(['ID', 'Class', 'Kind', 'Skind', 'Skind2', 'Creator', 'CreatedAt', 'Editor', 'EditedAt', 'CoordP', 'CoordL', 'CoordG']);
+const SYSTEM_FIELD_KEYS = new Set(['ID', 'Class', 'Kind', 'Skind', 'Skind2', 'SKind', 'SKind2', 'Creator', 'CreatedAt', 'Editor', 'EditedAt', 'CoordP', 'CoordL', 'CoordG']);
 
 export function classificationPathKey(path: ClassificationPath): string {
   return [path.class, path.kind, path.skind, path.skind2].filter((value): value is string => Boolean(value)).join('/');
@@ -82,7 +82,7 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV2,
   if (tailIndex >= 0 && geometryIndex >= 0 && tailIndex > geometryIndex) issues.push({ severity: 'error', code: 'workflow-tail-after-geometry', path: base, message: 'tags/extensions 尾部区必须位于绘制页之前。' });
   const fields = new Set(resolveEffectiveFields(config, workflow.target).map((field) => field.key));
   for (const step of workflow.steps) {
-    if (step.kind === 'special' && !/^[a-z][a-z0-9-]{2,64}$/.test(step.specialKey ?? '')) issues.push({ severity: 'error', code: 'workflow-special-key-invalid', path: `${base}/steps/${step.id}`, message: '特殊步骤必须引用受控注册表中的键。' });
+    if (step.kind === 'special' && (!/^[a-z][a-z0-9-]{2,64}$/.test(step.specialKey ?? '') || !config.specialComponentKeys?.includes(step.specialKey ?? ''))) issues.push({ severity: 'error', code: 'workflow-special-key-invalid', path: `${base}/steps/${step.id}`, message: '特殊步骤必须引用配置包受控注册表中的键。' });
     for (const control of step.controls ?? []) {
       if (control.binding?.target === 'field' && !fields.has(control.binding.path)) issues.push({ severity: 'error', code: 'workflow-field-binding-missing', path: `${base}/steps/${step.id}/controls/${control.id}`, message: `工作流绑定字段 ${control.binding.path} 不存在于目标分类。` });
     }
@@ -126,7 +126,7 @@ export function validateConfigPackage(config: ConfigPackageV2, mountedRecords: M
     validateWorkflow(workflow, config, issues);
   }
   for (const [index, record] of mountedRecords.entries()) {
-    const path: ClassificationPath = { class: String(record.Class ?? ''), ...(record.Kind ? { kind: String(record.Kind) } : {}), ...(record.Skind ? { skind: String(record.Skind) } : {}), ...(record.Skind2 ? { skind2: String(record.Skind2) } : {}) };
+    const path: ClassificationPath = { class: String(record.Class ?? ''), ...(record.Kind ? { kind: String(record.Kind) } : {}), ...((record.Skind ?? record.SKind) ? { skind: String(record.Skind ?? record.SKind) } : {}), ...((record.Skind2 ?? record.SKind2) ? { skind2: String(record.Skind2 ?? record.SKind2) } : {}) };
     const fields = resolveEffectiveFields(config, path);
     for (const field of fields.filter((item) => item.required)) {
       if (record[field.key] === null || record[field.key] === undefined || record[field.key] === '') issues.push({ severity: 'error', code: 'mounted-data-required-field-missing', path: `mounted/${index}/${field.key}`, message: `已挂载数据缺少必填字段 ${field.key}。` });

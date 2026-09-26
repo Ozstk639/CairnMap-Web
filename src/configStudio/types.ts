@@ -119,6 +119,9 @@ export type ConfigPackageV2 = {
   revision: number;
   displayName: LocalizedText;
   sourceManifestSha256?: string;
+  /** Explicit registry for hybrid legacy components.  A workflow may never
+   * execute an arbitrary component key supplied by a package. */
+  specialComponentKeys?: string[];
   nodes: CategoryNode[];
   workflows: WorkflowDefinition[];
 };

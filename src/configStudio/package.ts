@@ -62,13 +62,17 @@ export async function readConfigPackage(file: File): Promise<ConfigPackageV2> {
   const zip = await JSZip.loadAsync(bytes);
   const manifestRaw = await zip.file('manifest.json')?.async('string');
   const configRaw = await zip.file('config.json')?.async('string');
-  if (!manifestRaw || !configRaw) throw new Error('配置包缺少 manifest.json 或 config.json。');
+  const reportRaw = await zip.file('reports/validation-report.json')?.async('string');
+  if (!manifestRaw || !configRaw || !reportRaw) throw new Error('配置包缺少 manifest.json、config.json 或验证报告。');
   const manifest = JSON.parse(manifestRaw) as PackageManifest;
   if (manifest.schemaVersion !== 'cairnmap.config-package-manifest.v2') throw new Error('配置包清单版本不受支持。');
   const config: unknown = JSON.parse(configRaw);
   assertConfig(config);
   const configEntry = manifest.files.find((item) => item.path === 'config.json');
-  if (!configEntry || await sha256(textEncoder.encode(configRaw)) !== configEntry.sha256) throw new Error('config.json 哈希校验失败。');
+  const reportEntry = manifest.files.find((item) => item.path === 'reports/validation-report.json');
+  if (!configEntry || !reportEntry || await sha256(textEncoder.encode(configRaw)) !== configEntry.sha256 || await sha256(textEncoder.encode(reportRaw)) !== reportEntry.sha256) throw new Error('配置包文件哈希校验失败。');
+  const report = JSON.parse(reportRaw) as ConfigValidationReport;
+  if (report.schemaVersion !== 'cairnmap.config-validation-report.v2' || !report.valid || report.issues.some((item) => item.severity === 'error')) throw new Error('配置包内验证报告未通过，不能载入编辑。');
   return config;
 }
 
