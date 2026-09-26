@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { X, RefreshCw, Trash2, Database, Smartphone, CheckCircle, AlertCircle, Loader2, Download } from 'lucide-react';
+import { X, RefreshCw, Trash2, Database, Smartphone, CheckCircle, AlertCircle, Loader2, Download, SlidersHorizontal } from 'lucide-react';
 
 // PWA 安装事件类型
 interface BeforeInstallPromptEvent extends Event {
@@ -35,6 +35,7 @@ import {
 
 interface SettingsPanelProps {
   onClose: () => void;
+  onOpenConfigStudio?: () => void;
   /** Optional application-owned identity provider; generic settings remain unchanged when absent. */
   reviewAuth?: ReviewAuthPort;
   reviewAuthTitle?: string;
@@ -60,7 +61,7 @@ const RULE_WORLDS: Array<{ id: string; name: string }> = [
   { id: 'laputa', name: '拉普塔' },
 ];
 
-export function SettingsPanel({ onClose, reviewAuth, reviewAuthTitle, reviewAuthLoginLabel }: SettingsPanelProps) {
+export function SettingsPanel({ onClose, onOpenConfigStudio, reviewAuth, reviewAuthTitle, reviewAuthLoginLabel }: SettingsPanelProps) {
   const { cacheInfo, clearCache, forceRefresh, updateCacheInfo } = useDataStore();
   const { startLoading, updateStage, isLoading, activeFlowId, activeRuleWorldId } = useLoadingStore();
   const datasets = useRuleDataStore((s) => s.datasets);
@@ -615,6 +616,27 @@ export function SettingsPanel({ onClose, reviewAuth, reviewAuthTitle, reviewAuth
           )}
         </div>
 
+
+        {/* Data Tool Schema */}
+        {onOpenConfigStudio ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <SlidersHorizontal className="w-4 h-4" />
+              <span>配置文件工作台</span>
+            </div>
+            <div className="bg-blue-50 rounded-lg p-3 space-y-2 text-sm text-blue-900">
+              <p>本地可视化编辑分类、字段、显示层级、信息卡与工作流配置。</p>
+              <p className="text-xs">保存前执行完整校验；仅下载本地 Config Package，不直接更新线上配置。</p>
+            </div>
+            <AppButton
+              onClick={onOpenConfigStudio}
+              className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm rounded-lg transition-colors"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              <span>打开配置文件工作台</span>
+            </AppButton>
+          </div>
+        ) : null}
 
         {/* Data Tool Schema */}
         <div className="space-y-3">

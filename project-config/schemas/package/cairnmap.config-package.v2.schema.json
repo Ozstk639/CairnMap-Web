@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cairnmap.local/schemas/cairnmap.config-package.v2.schema.json",
+  "title": "CairnMap Config Package v2",
+  "type": "object",
+  "required": ["schemaVersion", "packageId", "projectId", "revision", "nodes", "workflows"],
+  "properties": {
+    "schemaVersion": { "const": "cairnmap.config-package.v2" },
+    "packageId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{2,80}$" },
+    "projectId": { "type": "string" },
+    "revision": { "type": "integer", "minimum": 1 },
+    "nodes": { "type": "array" },
+    "workflows": { "type": "array" }
+  }
+}

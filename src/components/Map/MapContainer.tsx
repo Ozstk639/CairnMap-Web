@@ -24,6 +24,7 @@ import { PlayersList } from '../Players/PlayersList';
 import { LoadingOverlay } from '../Loading/LoadingOverlay';
 import { DraggablePanel } from '../DraggablePanel/DraggablePanel';
 import { SettingsPanel } from '../Settings/SettingsPanel';
+import ConfigStudio from '@/configStudio/ConfigStudio';
 import { useDataStore } from '@/store/dataStore';
 import { ensureLegacyDataLoaded } from '@/lib/legacyDataLoader';
 import { useRuleDataStore } from '@/store/ruleDataStore';
@@ -297,6 +298,7 @@ function MapContainer() {
   const [showPlayersPage, setShowPlayersPage] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showConfigStudio, setShowConfigStudio] = useState(false);
   const [mobileActivePanel, setMobileActivePanel] = useState<MobilePanelKey>(null);
   const [mobileQuickPanel, setMobileQuickPanel] = useState<MobileQuickPanelKey>(null);
   const [mobileSheetCollapsed, setMobileSheetCollapsed] = useState(false);
@@ -1581,7 +1583,7 @@ map.on('mousemove', handleMouseMove);
       case 'about':
         return <AboutCard onClose={closeMobileSheet} />;
       case 'settings':
-        return <SettingsPanel onClose={closeMobileSheet} />;
+        return <SettingsPanel onClose={closeMobileSheet} onOpenConfigStudio={() => { closeMobileSheet(); setShowConfigStudio(true); }} />;
       case 'navigation':
         return (
           <NavigationPanel
@@ -1920,10 +1922,12 @@ case 'players':
           id="settings"
           defaultPosition={{ x: 16, y: 240 }}
         >
-          <SettingsPanel onClose={() => setShowSettings(false)} />
+          <SettingsPanel onClose={() => setShowSettings(false)} onOpenConfigStudio={() => { setShowSettings(false); setShowConfigStudio(true); }} />
         </DraggablePanel>
         </div>
       )}
+
+      {showConfigStudio ? <ConfigStudio onClose={() => setShowConfigStudio(false)} /> : null}
 
       {/* 路径规划面板 */}
       {showNavigation && (
