@@ -9,6 +9,11 @@
     "packageId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{2,80}$" },
     "projectId": { "type": "string" },
     "revision": { "type": "integer", "minimum": 1 },
+    "specialComponentKeys": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]{2,64}$" },
+      "uniqueItems": true
+    },
     "nodes": { "type": "array" },
     "workflows": { "type": "array" }
   }
