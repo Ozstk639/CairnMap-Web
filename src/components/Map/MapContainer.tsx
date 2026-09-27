@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useRef, useState, useCallback } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import MobileBottomSheet from '@/components/Mobile/MobileBottomSheet';
 import MobileQuickDock from '@/components/Mobile/MobileQuickDock';
 import MobileFeatureJsonPanel from '@/components/Mobile/MobileFeatureJsonPanel';
@@ -24,6 +24,7 @@ import { PlayersList } from '../Players/PlayersList';
 import { LoadingOverlay } from '../Loading/LoadingOverlay';
 import { DraggablePanel } from '../DraggablePanel/DraggablePanel';
 import { SettingsPanel } from '../Settings/SettingsPanel';
+import ConfigStudio from '@/configStudio/ConfigStudio';
 import { useDataStore } from '@/store/dataStore';
 import { ensureLegacyDataLoaded } from '@/lib/legacyDataLoader';
 import { useRuleDataStore } from '@/store/ruleDataStore';
@@ -297,6 +298,7 @@ function MapContainer() {
   const [showPlayersPage, setShowPlayersPage] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showConfigStudio, setShowConfigStudio] = useState(false);
   const [mobileActivePanel, setMobileActivePanel] = useState<MobilePanelKey>(null);
   const [mobileQuickPanel, setMobileQuickPanel] = useState<MobileQuickPanelKey>(null);
   const [mobileSheetCollapsed, setMobileSheetCollapsed] = useState(false);
@@ -319,6 +321,8 @@ function MapContainer() {
   const suppressRuleFeatureCardOpenRef = useRef(false);
   const ensureRuleWorldLoaded = useRuleDataStore((s) => s.ensureWorldLoaded);
   const currentRuleDataset = useRuleDataStore((s) => s.datasets[currentWorld]);
+  const loadedRuleDatasets = useRuleDataStore((s) => s.datasets);
+  const mountedRuleRecords = useMemo(() => Object.values(loadedRuleDatasets).flatMap((dataset) => dataset?.features ?? []), [loadedRuleDatasets]);
   const currentRulePending = useRuleDataStore((s) => s.pending[currentWorld]);
   const isGlobalLoading = useLoadingStore((s) => s.isLoading);
   const activeRuleWorldId = useLoadingStore((s) => s.activeRuleWorldId);
@@ -1581,7 +1585,7 @@ map.on('mousemove', handleMouseMove);
       case 'about':
         return <AboutCard onClose={closeMobileSheet} />;
       case 'settings':
-        return <SettingsPanel onClose={closeMobileSheet} />;
+        return <SettingsPanel onClose={closeMobileSheet} onOpenConfigStudio={() => { closeMobileSheet(); setShowConfigStudio(true); }} />;
       case 'navigation':
         return (
           <NavigationPanel
@@ -1920,10 +1924,12 @@ case 'players':
           id="settings"
           defaultPosition={{ x: 16, y: 240 }}
         >
-          <SettingsPanel onClose={() => setShowSettings(false)} />
+          <SettingsPanel onClose={() => setShowSettings(false)} onOpenConfigStudio={() => { setShowSettings(false); setShowConfigStudio(true); }} />
         </DraggablePanel>
         </div>
       )}
+
+      {showConfigStudio ? <ConfigStudio onClose={() => setShowConfigStudio(false)} mountedRecords={mountedRuleRecords} /> : null}
 
       {/* 路径规划面板 */}
       {showNavigation && (
