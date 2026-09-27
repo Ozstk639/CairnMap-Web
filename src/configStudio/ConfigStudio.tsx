@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CircleMarker, MapContainer as LeafletMap, Polygon, Polyline, Tooltip, useMap, useMapEvents } from 'react-leaflet';
-import { ChevronDown, ChevronRight, Download, FileUp, Plus, SlidersHorizontal, Trash2, X } from 'lucide-react';
+import { CircleMarker, MapContainer as LeafletMap, Marker, Polygon, Polyline, useMap, useMapEvents } from 'react-leaflet';
+import { ChevronDown, ChevronRight, Download, FileUp, Maximize2, Minimize2, Plus, SlidersHorizontal, Trash2, X } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import { createDynmapCRS, ZTH_FLAT_CONFIG } from '@/lib/DynmapProjection';
 import { createDynmapTileLayer } from '@/lib/DynmapTileLayer';
@@ -15,6 +15,7 @@ import {
   validateConfigPackage,
 } from './runtime';
 import { createConfigPackageFromCurrentProject } from './legacyProjectAdapter';
+import { makeLabelDivIcon } from '@/components/Rules/rendering/labelStyles';
 import type {
   CardConfiguration,
   CardItem,
@@ -87,14 +88,14 @@ function CategoryPathPicker({ config, selected, onSelect }: { config: ConfigPack
 }
 
 /** Controlled four-level selector used by relation links and searches. */
-function PathSelector({ config, value, onChange, label = '目标分类' }: { config: ConfigPackageV3; value: ClassificationPath; onChange: (value: ClassificationPath) => void; label?: string }) {
+function PathSelector({ config, value, onChange, label = '目标分类', editableClass = false }: { config: ConfigPackageV3; value: ClassificationPath; onChange: (value: ClassificationPath) => void; label?: string; editableClass?: boolean }) {
   const values = (items: Array<string | undefined>) => [...new Set(items.filter((item): item is string => Boolean(item)))].sort();
   const classes = values(config.nodes.map((node) => node.path.class));
   const kinds = values(config.nodes.filter((node) => node.path.class === value.class).map((node) => node.path.kind));
   const skinds = values(config.nodes.filter((node) => node.path.class === value.class && node.path.kind === value.kind).map((node) => node.path.skind));
   const skind2s = values(config.nodes.filter((node) => node.path.class === value.class && node.path.kind === value.kind && node.path.skind === value.skind).map((node) => node.path.skind2));
   return <fieldset className="grid gap-2 rounded border border-slate-200 p-2 sm:grid-cols-2 xl:grid-cols-4"><legend className="px-1 text-xs text-slate-500">{label}</legend>
-    <label className="text-xs">Class<select className="mt-1 w-full rounded border px-2 py-1" value={value.class} onChange={(event) => onChange({ class: event.target.value })}><option value="">选择 Class</option>{classes.map((item) => <option key={item}>{item}</option>)}</select></label>
+    <label className="text-xs">Class{editableClass ? <><input className="mt-1 w-full rounded border px-2 py-1" list="config-studio-class-options" value={value.class} placeholder="输入或选择 Class" onChange={(event) => onChange({ class: event.target.value })} /><datalist id="config-studio-class-options">{classes.map((item) => <option key={item} value={item} />)}</datalist></> : <select className="mt-1 w-full rounded border px-2 py-1" value={value.class} onChange={(event) => onChange({ class: event.target.value })}><option value="">选择 Class</option>{classes.map((item) => <option key={item}>{item}</option>)}</select>}</label>
     <label className="text-xs">Kind<select className="mt-1 w-full rounded border px-2 py-1" disabled={!value.class} value={value.kind ?? ''} onChange={(event) => onChange({ class: value.class, ...(event.target.value ? { kind: event.target.value } : {}) })}><option value="">全部 Kind</option>{kinds.map((item) => <option key={item}>{item}</option>)}</select></label>
     <label className="text-xs">Skind<select className="mt-1 w-full rounded border px-2 py-1" disabled={!value.kind} value={value.skind ?? ''} onChange={(event) => onChange({ class: value.class, kind: value.kind, ...(event.target.value ? { skind: event.target.value } : {}) })}><option value="">全部 Skind</option>{skinds.map((item) => <option key={item}>{item}</option>)}</select></label>
     <label className="text-xs">Skind2<select className="mt-1 w-full rounded border px-2 py-1" disabled={!value.skind} value={value.skind2 ?? ''} onChange={(event) => onChange({ class: value.class, kind: value.kind, skind: value.skind, ...(event.target.value ? { skind2: event.target.value } : {}) })}><option value="">全部 Skind2</option>{skind2s.map((item) => <option key={item}>{item}</option>)}</select></label>
@@ -154,7 +155,7 @@ function RelationLinkEditor({ config, item, onChange }: { config: ConfigPackageV
   const relation = item.relation ?? { targetClassification: { class: config.nodes[0]?.path.class ?? '' }, clickable: true };
   const target = relation.targetClassification ?? { class: config.nodes[0]?.path.class ?? '' };
   const targetFields = resolveSelectableFields(config, target).map((field) => field.key);
-  return <div className="mt-2 rounded border border-blue-100 bg-blue-50/40 p-2"><div className="mb-1 text-xs font-medium text-blue-950">关系跳转：Class / Kind / Skind / Skind2 / 匹配字段 / 展示字段</div><PathSelector config={config} label="目标分类范围" value={target} onChange={(targetClassification) => onChange({ ...relation, targetClassification, targetMatchField: undefined, targetDisplayField: undefined })} /><div className="mt-2 grid gap-2 sm:grid-cols-2"><label className="text-xs">目标匹配字段<select className="mt-1 w-full rounded border px-2 py-1" value={relation.targetMatchField ?? ''} onChange={(event) => onChange({ ...relation, targetMatchField: event.target.value || undefined })}><option value="">重新选择</option>{targetFields.map((field) => <option key={field}>{field}</option>)}</select></label><label className="text-xs">目标展示字段<select className="mt-1 w-full rounded border px-2 py-1" value={relation.targetDisplayField ?? ''} onChange={(event) => onChange({ ...relation, targetDisplayField: event.target.value || undefined })}><option value="">重新选择</option>{targetFields.map((field) => <option key={field}>{field}</option>)}</select></label></div></div>;
+  return <div className="mt-2 rounded border border-blue-100 bg-blue-50/40 p-2"><div className="mb-1 text-xs font-medium text-blue-950">关系跳转：Class / Kind / Skind / Skind2 / 匹配字段 / 展示字段</div><PathSelector config={config} editableClass label="目标分类范围" value={target} onChange={(targetClassification) => onChange({ ...relation, targetClassification, targetMatchField: undefined, targetDisplayField: undefined })} /><div className="mt-2 grid gap-2 sm:grid-cols-2"><label className="text-xs">目标匹配字段<select className="mt-1 w-full rounded border px-2 py-1" value={relation.targetMatchField ?? ''} onChange={(event) => onChange({ ...relation, targetMatchField: event.target.value || undefined })}><option value="">重新选择</option>{targetFields.map((field) => <option key={field}>{field}</option>)}</select></label><label className="text-xs">目标展示字段<select className="mt-1 w-full rounded border px-2 py-1" value={relation.targetDisplayField ?? ''} onChange={(event) => onChange({ ...relation, targetDisplayField: event.target.value || undefined })}><option value="">重新选择</option>{targetFields.map((field) => <option key={field}>{field}</option>)}</select></label></div></div>;
 }
 
 function FieldEditor({ config, node, onChange }: { config: ConfigPackageV3; node: CategoryNode; onChange: (node: CategoryNode) => void }) {
@@ -276,18 +277,20 @@ function PreviewMap({ config, node, zoom, onZoom }: { config: ConfigPackageV3; n
   const isFloor = node.containment?.enabled && node.containment.role === 'child';
   const visible = (profile: GeometryProfile) => profile.enabled && resolveZoomRule(profile, zoom)?.representation !== 'hidden';
   const opts = (profile: GeometryProfile) => ({ color: profile.color, weight: profile.style?.weight ?? 2, opacity: profile.style?.opacity ?? 0.9, fillOpacity: profile.style?.fillOpacity ?? 0.2, dashArray: profile.style?.dashArray });
-  return <div className="relative h-full min-h-[440px] overflow-hidden rounded-xl border border-slate-300"><LeafletMap center={[-4, 0]} zoom={zoom} minZoom={0} maxZoom={8} crs={createDynmapCRS(ZTH_FLAT_CONFIG)} className="h-full w-full" attributionControl zoomControl dragging={false} touchZoom={false} doubleClickZoom={false} boxZoom={false} keyboard={false} scrollWheelZoom>
+  return <div className="relative h-full min-h-[440px] overflow-hidden rounded-xl border border-slate-300"><LeafletMap center={[0, 0]} zoom={zoom} minZoom={0} maxZoom={8} crs={createDynmapCRS(ZTH_FLAT_CONFIG)} className="h-full w-full" attributionControl zoomControl dragging={false} touchZoom={false} doubleClickZoom={false} boxZoom={false} keyboard={false} scrollWheelZoom>
     <PreviewTiles /><ZoomReporter onChange={onZoom} />
-    {isFloor ? <Polygon positions={[[-7.5, -8.6], [-1.8, -7.2], [-1.2, 7.7], [-7.9, 7.2]]} pathOptions={{ color: '#111827', weight: 2, fillOpacity: 0.13 }}><Tooltip permanent direction="top">默认 BUD 主结构</Tooltip></Polygon> : null}
+    {isFloor ? <Polygon positions={[[-7.5, -8.6], [-1.8, -7.2], [-1.2, 7.7], [-7.9, 7.2]]} pathOptions={{ color: '#111827', weight: 2, fillOpacity: 0.13 }} /> : null}
     {profiles.map(({ geometry, profile }) => visible(profile) ? <PreviewGeometry key={geometry} geometry={geometry} profile={profile} label={label} options={opts(profile)} representation={resolveZoomRule(profile, zoom)?.representation ?? 'geometry'} /> : null)}
   </LeafletMap>{isFloor ? <div className="absolute right-3 top-3 z-[500] rounded-lg border bg-white/95 p-2 text-xs shadow"><div className="font-medium">楼层切换</div><div className="mt-1 flex gap-1"><button type="button" className="rounded bg-slate-800 px-2 py-1 text-white">主结构</button><button type="button" className="rounded border px-2 py-1">楼层 1</button></div></div> : null}{primary ? <PreviewCard config={config} node={node} geometry={primary.geometry} zoom={zoom} /> : null}</div>;
 }
 
 function PreviewGeometry({ geometry, profile, label, options, representation }: { geometry: GeometryKind; profile: GeometryProfile; label: string; options: { color: string; weight: number; opacity: number; fillOpacity: number; dashArray?: string }; representation: ZoomPriorityRule['representation'] }) {
-  const tooltip = profile.label.visible ? <Tooltip permanent direction="top">{label}</Tooltip> : null;
-  if (representation === 'point' || geometry === 'Point') return <CircleMarker center={[-4.4, 0]} radius={9} pathOptions={{ color: options.color, fillColor: options.color, fillOpacity: 0.88, weight: options.weight }}>{tooltip}</CircleMarker>;
-  if (geometry === 'LineString') return <Polyline positions={[[-8, -9], [-5.5, -3], [-4, 1], [-2.2, 8]]} pathOptions={options}>{tooltip}</Polyline>;
-  return <Polygon positions={[[-5.3, -8], [-3.2, -1], [-4.1, 7], [-8.2, 5], [-8.8, -4]]} pathOptions={options}>{tooltip}</Polygon>;
+  const labelPoint: [number, number] = geometry === 'Point' || representation === 'point' ? [-4.4, 0] : geometry === 'LineString' ? [-4, 1] : [-5, -0.5];
+  const labelStyle = /^(BUD|STB)(?:\/|$)/.test(label) ? 'structure-label' : 'gm-outline';
+  const normalLabel = profile.label.visible ? <Marker position={labelPoint} interactive={false} icon={makeLabelDivIcon(labelStyle, label, { placement: 'near', interactive: false })} /> : null;
+  if (representation === 'point' || geometry === 'Point') return <><CircleMarker center={[-4.4, 0]} radius={9} pathOptions={{ color: options.color, fillColor: options.color, fillOpacity: 0.88, weight: options.weight }} />{normalLabel}</>;
+  if (geometry === 'LineString') return <><Polyline positions={[[-8, -9], [-5.5, -3], [-4, 1], [-2.2, 8]]} pathOptions={options} />{normalLabel}</>;
+  return <><Polygon positions={[[-5.3, -8], [-3.2, -1], [-4.1, 7], [-8.2, 5], [-8.8, -4]]} pathOptions={options} />{normalLabel}</>;
 }
 
 function Report({ config, records }: { config: ConfigPackageV3; records: MountedFeatureRecord[] }) {
@@ -302,6 +305,7 @@ export function ConfigStudio({ onClose, mountedRecords }: { onClose: () => void;
   const [selectedNodeId, setSelectedNodeId] = useState(() => config.nodes[0]?.nodeId ?? '');
   const [mode, setMode] = useState<StudioMode>('feature');
   const [zoom, setZoom] = useState(2);
+  const [editorExpanded, setEditorExpanded] = useState(false);
   const [message, setMessage] = useState('已载入 V1 完整顺承基准；编辑仅保存在本地会话。');
   const uploadRef = useRef<HTMLInputElement>(null);
   const selected = config.nodes.find((node) => node.nodeId === selectedNodeId) ?? config.nodes[0];
@@ -329,7 +333,36 @@ export function ConfigStudio({ onClose, mountedRecords }: { onClose: () => void;
     downloadConfigPackage(blob, config);
     setMessage(`已下载 ${config.packageId}；线上更新仍需 Pipeline 授权导入。`);
   };
-  return <main className="fixed inset-0 z-[3000] flex h-screen flex-col overflow-hidden bg-slate-100 text-slate-800"><header className="flex shrink-0 items-center gap-3 border-b bg-white px-5 py-3"><SlidersHorizontal className="h-5 w-5 text-blue-600" /><div className="min-w-0 flex-1"><h1 className="font-bold">配置文件工作台</h1><p className="text-xs text-slate-500">{config.packageId} · V3 配置契约 · V1 顺承 {config.parity?.entries.filter((item) => item.status !== 'unsupported').length ?? 0}/{config.parity?.entries.length ?? 0} · 内部版本由导出流程记录</p></div><button type="button" onClick={() => uploadRef.current?.click()} className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm"><FileUp className="h-4 w-4" />导入</button><button type="button" onClick={exportPackage} className="inline-flex items-center gap-1 rounded bg-emerald-600 px-3 py-1.5 text-sm text-white"><Download className="h-4 w-4" />校验并下载</button><button type="button" onClick={onClose} className="rounded p-2 hover:bg-slate-100" aria-label="关闭工作台"><X className="h-5 w-5" /></button><input ref={uploadRef} className="hidden" type="file" accept=".zip,.json,application/json,application/zip" onChange={(event) => void importPackage(event.target.files?.[0])} /></header><div className="min-h-0 flex-1 grid grid-cols-1 gap-3 p-3 xl:grid-cols-2"><section className="min-h-[44vh] rounded-xl border bg-white p-3 xl:min-h-0"><div className="mb-2 flex justify-between text-sm"><strong>显示规则验证器</strong><span>Zoom {zoom} · 背景瓦片 / 固定中心 / 仅可缩放</span></div><PreviewMap config={config} node={selected} zoom={zoom} onZoom={setZoom} /><p className="mt-2 text-xs text-slate-500">预览没有临时挂载或编辑高亮态；它使用当前分类的已解析配置、正式坐标系和背景瓦片。附属结构会自动生成默认主结构与楼层切换状态。</p></section><section className="min-h-0 overflow-y-auto rounded-xl border bg-white p-4"><div className="mb-3 flex flex-wrap gap-2"><button type="button" onClick={() => setMode('feature')} className={`rounded px-3 py-1.5 text-sm ${mode === 'feature' ? 'bg-blue-600 text-white' : 'bg-slate-100'}`}>要素设计</button><button type="button" onClick={() => setMode('workflow')} className={`rounded px-3 py-1.5 text-sm ${mode === 'workflow' ? 'bg-blue-600 text-white' : 'bg-slate-100'}`}>工作流设计</button></div><div className="mb-3 rounded border bg-slate-50 p-2 text-xs text-slate-600">{message}</div>{mode === 'workflow' ? <WorkflowEditor config={config} setConfig={setConfig} /> : <div className="space-y-5"><CategoryPathPicker config={config} selected={selected} onSelect={setSelectedNodeId} /><FieldEditor config={config} node={selected} onChange={(node) => setConfig((current) => updateNode(current, node.nodeId, () => node))} /><section><h3 className="mb-2 font-semibold">显示、交互与层级</h3><div className="grid gap-3 2xl:grid-cols-3">{geometryValues.map((geometry) => { const profile = selected.geometryProfiles[geometry] ?? defaultProfile(geometry); return <GeometryEditor key={geometry} geometry={geometry} profile={profile} onChange={(value) => updateSelected((node) => ({ ...node, geometryProfiles: { ...node.geometryProfiles, [geometry]: value } }))} />; })}</div></section><ContainmentEditor node={selected} fields={fields.map((field) => field.key)} onChange={(node) => setConfig((current) => updateNode(current, node.nodeId, () => node))} /><CardEditor config={config} node={selected} fields={fields.map((field) => field.key)} onChange={(node) => setConfig((current) => updateNode(current, node.nodeId, () => node))} /></div>}</section></div><Report config={config} records={records} /></main>;
+  return <main className="fixed inset-0 z-[3000] flex h-screen flex-col overflow-hidden bg-slate-100 text-slate-800">
+    <header className="flex shrink-0 items-center gap-3 border-b bg-white px-5 py-3">
+      <SlidersHorizontal className="h-5 w-5 text-blue-600" />
+      <div className="min-w-0 flex-1">
+        <h1 className="font-bold">配置文件工作台</h1>
+        <p className="text-xs text-slate-500">{config.packageId} · V3 配置契约 · V1 顺承 {config.parity?.entries.filter((item) => item.status !== 'unsupported').length ?? 0}/{config.parity?.entries.length ?? 0} · 修订版只用于本地包排序和 Pipeline CAS 导入，不参与显示、碰撞或 Zoom 规则。</p>
+      </div>
+      <label className="hidden items-center gap-1 text-xs text-slate-600 lg:flex">包修订版
+        <input className="w-16 rounded border px-2 py-1" type="number" min="1" value={config.revision} onChange={(event) => setConfig((current) => ({ ...current, revision: Math.max(1, Math.trunc(Number(event.target.value) || 1)) }))} />
+      </label>
+      <button type="button" onClick={() => uploadRef.current?.click()} className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm"><FileUp className="h-4 w-4" />导入</button>
+      <button type="button" onClick={exportPackage} className="inline-flex items-center gap-1 rounded bg-emerald-600 px-3 py-1.5 text-sm text-white"><Download className="h-4 w-4" />校验并下载</button>
+      <button type="button" onClick={() => setEditorExpanded((value) => !value)} className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm"><>{editorExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}</>{editorExpanded ? '显示验证器' : '编辑器全屏'}</button>
+      <button type="button" onClick={onClose} className="rounded p-2 hover:bg-slate-100" aria-label="关闭工作台"><X className="h-5 w-5" /></button>
+      <input ref={uploadRef} className="hidden" type="file" accept=".zip,.json,application/json,application/zip" onChange={(event) => void importPackage(event.target.files?.[0])} />
+    </header>
+    <div className={`min-h-0 flex-1 grid grid-cols-1 gap-3 p-3 ${editorExpanded ? '' : 'xl:grid-cols-2'}`}>
+      {!editorExpanded ? <section className="min-h-[44vh] rounded-xl border bg-white p-3 xl:min-h-0">
+        <div className="mb-2 flex justify-between text-sm"><strong>显示规则验证器</strong><span>Zoom {zoom} · 背景瓦片 / 固定中心 / 仅可缩放</span></div>
+        <PreviewMap config={config} node={selected} zoom={zoom} onZoom={setZoom} />
+        <p className="mt-2 text-xs text-slate-500">预览没有临时挂载或编辑高亮态；它使用当前分类的已解析配置、正式坐标系和背景瓦片。附属结构会自动生成默认主结构与楼层切换状态。</p>
+      </section> : null}
+      <section className={`min-h-0 overflow-y-auto rounded-xl border bg-white p-4 ${editorExpanded ? 'col-span-full' : ''}`}>
+        <div className="mb-3 flex flex-wrap gap-2"><button type="button" onClick={() => setMode('feature')} className={`rounded px-3 py-1.5 text-sm ${mode === 'feature' ? 'bg-blue-600 text-white' : 'bg-slate-100'}`}>要素设计</button><button type="button" onClick={() => setMode('workflow')} className={`rounded px-3 py-1.5 text-sm ${mode === 'workflow' ? 'bg-blue-600 text-white' : 'bg-slate-100'}`}>工作流设计</button></div>
+        <div className="mb-3 rounded border bg-slate-50 p-2 text-xs text-slate-600">{message}</div>
+        {mode === 'workflow' ? <WorkflowEditor config={config} setConfig={setConfig} /> : <div className="space-y-5"><CategoryPathPicker config={config} selected={selected} onSelect={setSelectedNodeId} /><FieldEditor config={config} node={selected} onChange={(node) => setConfig((current) => updateNode(current, node.nodeId, () => node))} /><section><h3 className="mb-2 font-semibold">显示、交互与层级</h3><div className="grid gap-3 2xl:grid-cols-3">{geometryValues.map((geometry) => { const profile = selected.geometryProfiles[geometry] ?? defaultProfile(geometry); return <GeometryEditor key={geometry} geometry={geometry} profile={profile} onChange={(value) => updateSelected((node) => ({ ...node, geometryProfiles: { ...node.geometryProfiles, [geometry]: value } }))} />; })}</div></section><ContainmentEditor node={selected} fields={fields.map((field) => field.key)} onChange={(node) => setConfig((current) => updateNode(current, node.nodeId, () => node))} /><CardEditor config={config} node={selected} fields={fields.map((field) => field.key)} onChange={(node) => setConfig((current) => updateNode(current, node.nodeId, () => node))} /></div>}
+      </section>
+    </div>
+    <Report config={config} records={records} />
+  </main>;
 }
 
 export default ConfigStudio;
