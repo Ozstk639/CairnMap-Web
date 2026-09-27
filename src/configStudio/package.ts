@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import type { ConfigPackageV2, ConfigValidationReport } from './types';
+import type { ConfigPackageV2, ConfigValidationReport, ParityReport } from './types';
 
 type PackageManifest = {
   schemaVersion: 'cairnmap.config-package-manifest.v2';
@@ -28,9 +28,11 @@ async function sha256(value: Uint8Array): Promise<string> {
 }
 
 export async function buildConfigPackageArchive(config: ConfigPackageV2, report: ConfigValidationReport): Promise<Blob> {
+  if (!config.parity) throw new Error('配置包缺少 V1 顺承报告。');
   const files = [
     { path: 'config.json', body: stableStringify(config) },
     { path: 'reports/validation-report.json', body: stableStringify(report) },
+    { path: 'reports/v1-parity-report.json', body: stableStringify(config.parity) },
   ];
   const manifestFiles = await Promise.all(files.map(async (file) => {
     const bytes = textEncoder.encode(file.body);
@@ -63,16 +65,20 @@ export async function readConfigPackage(file: File): Promise<ConfigPackageV2> {
   const manifestRaw = await zip.file('manifest.json')?.async('string');
   const configRaw = await zip.file('config.json')?.async('string');
   const reportRaw = await zip.file('reports/validation-report.json')?.async('string');
-  if (!manifestRaw || !configRaw || !reportRaw) throw new Error('配置包缺少 manifest.json、config.json 或验证报告。');
+  const parityRaw = await zip.file('reports/v1-parity-report.json')?.async('string');
+  if (!manifestRaw || !configRaw || !reportRaw || !parityRaw) throw new Error('配置包缺少 manifest.json、config.json、验证报告或 V1 顺承报告。');
   const manifest = JSON.parse(manifestRaw) as PackageManifest;
   if (manifest.schemaVersion !== 'cairnmap.config-package-manifest.v2') throw new Error('配置包清单版本不受支持。');
   const config: unknown = JSON.parse(configRaw);
   assertConfig(config);
   const configEntry = manifest.files.find((item) => item.path === 'config.json');
   const reportEntry = manifest.files.find((item) => item.path === 'reports/validation-report.json');
-  if (!configEntry || !reportEntry || await sha256(textEncoder.encode(configRaw)) !== configEntry.sha256 || await sha256(textEncoder.encode(reportRaw)) !== reportEntry.sha256) throw new Error('配置包文件哈希校验失败。');
+  const parityEntry = manifest.files.find((item) => item.path === 'reports/v1-parity-report.json');
+  if (!configEntry || !reportEntry || !parityEntry || await sha256(textEncoder.encode(configRaw)) !== configEntry.sha256 || await sha256(textEncoder.encode(reportRaw)) !== reportEntry.sha256 || await sha256(textEncoder.encode(parityRaw)) !== parityEntry.sha256) throw new Error('配置包文件哈希校验失败。');
   const report = JSON.parse(reportRaw) as ConfigValidationReport;
   if (report.schemaVersion !== 'cairnmap.config-validation-report.v2' || !report.valid || report.issues.some((item) => item.severity === 'error')) throw new Error('配置包内验证报告未通过，不能载入编辑。');
+  const parity = JSON.parse(parityRaw) as ParityReport;
+  if (parity.schemaVersion !== 'cairnmap.v1-parity-report.v1' || parity.entries.some((item) => item.status === 'unsupported')) throw new Error('配置包的 V1 顺承报告未通过。');
   return config;
 }
 
