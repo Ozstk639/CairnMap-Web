@@ -40,8 +40,9 @@
     "test:label-placement": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-label-placement.ts",
     "test:map-zoom": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-map-zoom.ts",
     "test:multipart-labels": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-multipart-labels.ts",
+    "test:package-roundtrip": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-package-roundtrip.ts",
     "test:localization": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-localization.ts",
-    "verify:config-v32": "npm run test:v1-render-baseline && npm run test:config-studio-v3 && npm run test:v3-semantic-parity && npm run test:workflow-output-editor && npm run test:v1-workflow-output-parity && npm run test:label-placement && npm run test:map-zoom && npm run test:multipart-labels && npm run test:localization",
+    "verify:config-v32": "npm run test:v1-render-baseline && npm run test:config-studio-v3 && npm run test:v3-semantic-parity && npm run test:workflow-output-editor && npm run test:v1-workflow-output-parity && npm run test:label-placement && npm run test:map-zoom && npm run test:multipart-labels && npm run test:localization && npm run test:package-roundtrip",
     "test:config-v32-acceptance": "npm run build",
     "audit:eol": "node ./scripts/quality/check-eol.mjs"
   },
