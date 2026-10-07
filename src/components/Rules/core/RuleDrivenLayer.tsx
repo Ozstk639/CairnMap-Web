@@ -1,4 +1,4 @@
-import { featureLabelParts, componentLabelId } from '@/components/Rules/rendering/multipartLabels';
+import { featureLabelParts, componentLabelId, filterFeatureGeometryParts } from '@/components/Rules/rendering/multipartLabels';
 import { iconBoundsAtAnchor, type LabelPlacement } from '@/components/Rules/rendering/labelPlacement';
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -3079,7 +3079,8 @@ export default function RuleDrivenLayer(props: Props) {
 
       const shouldShow = new Set<string>();
 
-      for (const r of records) {
+      for (const sourceRecord of records) {
+        let r = sourceRecord;
         const auditRow = lineAuditRows.get(r.uid);
         const polygonAuditRow = polygonAuditRows.get(r.uid);
         if (auditRow)
@@ -3169,6 +3170,12 @@ export default function RuleDrivenLayer(props: Props) {
             "V3.2 symbol-density gate blocked this feature",
           );
           continue;
+        }
+
+        if (configRuntime && displayPlan.anchor?.multipartMode === 'perPart') {
+          const filtered = filterFeatureGeometryParts(r, (part) => passesConfigRuntimeScreenGate(configRuntime, part, context, projection, map));
+          if (!filtered) continue;
+          r = filtered;
         }
 
         if (configRuntime && !passesConfigRuntimeScreenGate(configRuntime, r, context, projection, map)) {
@@ -3495,7 +3502,7 @@ export default function RuleDrivenLayer(props: Props) {
         }
         if (labelPlan?.enabled && labelPlan.declutter) {
           const rawRequests = buildLabelRequests(
-            r,
+            sourceRecord,
             labelPlan,
             context,
             store,
@@ -3504,6 +3511,8 @@ export default function RuleDrivenLayer(props: Props) {
             realViewportWorldRectXZ,
             layoutViewportWorldRectXZ,
             displayPlan,
+            configRuntime,
+            map,
           );
           const requests = rawRequests.map((rawReq) => applyAdvancedLineTextBudget(
             mergeDisplayCollisionIntoLabelRequest(rawReq, displayPlan),
@@ -3600,7 +3609,7 @@ export default function RuleDrivenLayer(props: Props) {
             }
             // 该要素当前不应显示 label（minLevel/text 空等）→ 移除旧 label
             const b = cacheRef.current.get(r.uid);
-            if (b?.label) {
+            if (b?.label || b?.partLabels?.size) {
               clearBundleLabel(b, root);
             }
           }
@@ -3896,7 +3905,7 @@ export default function RuleDrivenLayer(props: Props) {
           const wantsTextPath =
             advancedTextAllowed &&
             (!wantsGlyphPath || allowCjkTextPathFallback);
-          const renderSessionKey = `rbslu25|${req.featureUid ?? ""}|${anchorCandidateId ?? anchorIndex}|${p.text}|${Math.round(map.getZoom() * 100) / 100}`;
+          const renderSessionKey = `rbslu25|${req.id}|${anchorCandidateId ?? anchorIndex}|${p.text}|${Math.round(map.getZoom() * 100) / 100}`;
           const onLineTextClick = deletePick
             ? () => {
                 const uid = req.featureUid ?? "";
@@ -5169,15 +5178,19 @@ function resolveStructureLabelDisplayPlanForContext(
   return plan;
 }
 
-function buildLabelRequests(r: FeatureRecord, labelPlan: any, ctx: RenderContext, store: FeatureStore, projection: DynmapProjection, pointLatLng?: L.LatLng, realViewport?: WorldRectXZ | null, layoutViewport?: WorldRectXZ | null, displayPlan?: FeatureDisplayPlan | null): LabelRequest[] {
+function buildLabelRequests(r: FeatureRecord, labelPlan: any, ctx: RenderContext, store: FeatureStore, projection: DynmapProjection, pointLatLng?: L.LatLng, realViewport?: WorldRectXZ | null, layoutViewport?: WorldRectXZ | null, displayPlan?: FeatureDisplayPlan | null, config?: ConfigPackageV3, map?: L.Map): LabelRequest[] {
   const mode = displayPlan?.anchor?.multipartMode ?? 'featureBbox';
   return featureLabelParts(r, mode).flatMap(({ record, partIndex }) => {
     const anchor = record.type === 'Points'
       ? (partIndex === undefined && record.multipartGeometry?.parts.length && record.multipartGeometry.parts.length > 1 ? pointRepresentationLatLngs(record, projection, 'featureBbox')[0] : record.p3 ? projection.locationToLatLng(record.p3.x, record.p3.y, record.p3.z) : pointLatLng)
       : undefined;
-    const req = buildLabelRequest(record, labelPlan, ctx, store, projection, anchor, realViewport, layoutViewport, displayPlan);
-    if (!req) return [];
+    if (config && map && partIndex !== undefined && !passesConfigRuntimeScreenGate(config, record, ctx, projection, map)) return [];
+    const partRule = config && partIndex !== undefined ? resolveConfigRuntimeRule(config, record, ctx, null, store) : null;
+    const ownLabel = partRule?.symbol?.label;
+    const partLabelPlan = typeof ownLabel === 'function' ? ownLabel(record, ctx, store) : ownLabel ?? labelPlan;
     const id = componentLabelId(r.uid, partIndex);
+    const req = buildLabelRequest(record, partLabelPlan, ctx, store, projection, anchor, realViewport, layoutViewport, displayPlan, id);
+    if (!req) return [];
     return [{ ...req, id, partIndex, collisionOwnerUid: partIndex === undefined ? r.uid : id }];
   });
 }
@@ -5193,6 +5206,7 @@ function buildLabelRequest(
   realViewportWorldRectXZ?: WorldRectXZ | null,
   layoutViewportWorldRectXZ?: WorldRectXZ | null,
   displayPlan?: FeatureDisplayPlan | null,
+  anchorCacheKey?: string,
 ): LabelRequest | null {
   if (!labelPlan || !labelPlan.enabled) return null;
   if (!labelPlan.declutter) return null;
@@ -5227,7 +5241,7 @@ function buildLabelRequest(
   if (pointLatLng) return { ...common, id: `${r.uid}#label`, anchorLatLng: pointLatLng };
 
   const resolvedAnchor = resolveLabelAnchorForFeature({
-    feature: r,
+    feature: anchorCacheKey ? { ...r, uid: anchorCacheKey } : r,
     projection,
     y: Y_FOR_DISPLAY,
     viewportWorldRectXZ: layoutViewportWorldRectXZ ?? realViewportWorldRectXZ ?? null,

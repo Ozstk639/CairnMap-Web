@@ -15,3 +15,15 @@ export function featureLabelParts(record: FeatureRecord, mode: 'featureBbox' | '
 export function componentLabelId(featureUid: string, partIndex?: number): string {
   return partIndex === undefined ? `${featureUid}#label` : `${featureUid}#label#part-${partIndex}`;
 }
+
+/** Filter drawing parts without changing the original feature/card identity. */
+export function filterFeatureGeometryParts(record: FeatureRecord, accepts: (part: FeatureRecord) => boolean): FeatureRecord | undefined {
+  const geometry = record.multipartGeometry;
+  if (!geometry || geometry.parts.length < 2) return accepts(record) ? record : undefined;
+  const accepted = featureLabelParts(record, 'perPart').filter(({ record: part }) => accepts(part));
+  if (!accepted.length) return undefined;
+  if (accepted.length === geometry.parts.length) return record;
+  const filtered = { type: geometry.type, parts: accepted.map(({ record: part }) => part.multipartGeometry!.parts[0]) } as MultipartGeometry;
+  const coordinates = flattenMultipartCoordinates(filtered);
+  return { ...record, multipartGeometry: filtered, coords3: coordinates, ...(geometry.type === 'Point' ? { p3: coordinates[0] } : {}) };
+}
