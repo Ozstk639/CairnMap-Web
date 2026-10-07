@@ -541,6 +541,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
       label: {
         enabled: label.visible,
         textFrom: (candidate: FeatureRecord) => {
+          if (!label.source) return 'Null';
           const sources = [label.source, ...(label.fallbackSources ?? [])].filter((source): source is string => Boolean(source));
           for (const source of sources) {
             const value = String(featureValue(candidate, source) ?? '').trim();
@@ -551,7 +552,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
               return format === 'floorLabel' ? fmtFloorLabel(value) : value;
             }
           }
-          return 'Null';
+          return '';
         },
         ...(labelText?.maxChars !== undefined ? { maxChars: labelText.maxChars, abbreviation: { enabled: labelText.abbreviationEnabled !== false, maxChars: labelText.maxChars, suffix: labelText.suffix ?? '…' } } : {}),
         ...(labelText?.minChars !== undefined ? { minChars: labelText.minChars } : {}),

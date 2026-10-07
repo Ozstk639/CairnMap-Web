@@ -934,7 +934,7 @@ function pointRepresentationLatLngs(
 ): L.LatLng[] {
   const fallback = pointRepresentationLatLng(r, projection);
   const geometry = r.multipartGeometry;
-  if (multipartMode !== 'perPart' || !geometry || geometry.parts.length < 2) return fallback ? [fallback] : [];
+  if (multipartMode !== 'perPart' || !geometry) return fallback ? [fallback] : [];
 
   if (geometry.type === 'Point') {
     return geometry.parts.map((point) => projection.locationToLatLng(point.x, point.y, point.z));
@@ -3288,8 +3288,11 @@ export default function RuleDrivenLayer(props: Props) {
         }
 
         // ✅ 新增：把点符号当作“硬占用区”，用于 label 避让
-        if (r.type === "Points" && pointLatLng && !labelOnly) {
-          const pt = map.latLngToContainerPoint(pointLatLng);
+        const symbolAnchors = r.type === 'Points'
+          ? (r.multipartGeometry?.type === 'Point' ? r.multipartGeometry.parts : r.p3 ? [r.p3] : []).map((point) => projection.locationToLatLng(point.x, point.y, point.z))
+          : displayPlan.geometry?.render === 'point' ? pointRepresentationLatLngs(r, projection, displayPlan.anchor?.multipartMode ?? 'featureBbox') : [];
+        for (const symbolAnchor of labelOnly ? [] : symbolAnchors) {
+          const pt = map.latLngToContainerPoint(symbolAnchor);
 
           const sym = rule.symbol;
           const pointPlan =
@@ -5181,9 +5184,11 @@ function resolveStructureLabelDisplayPlanForContext(
 function buildLabelRequests(r: FeatureRecord, labelPlan: any, ctx: RenderContext, store: FeatureStore, projection: DynmapProjection, pointLatLng?: L.LatLng, realViewport?: WorldRectXZ | null, layoutViewport?: WorldRectXZ | null, displayPlan?: FeatureDisplayPlan | null, config?: ConfigPackageV3, map?: L.Map): LabelRequest[] {
   const mode = displayPlan?.anchor?.multipartMode ?? 'featureBbox';
   return featureLabelParts(r, mode).flatMap(({ record, partIndex }) => {
-    const anchor = record.type === 'Points'
-      ? (partIndex === undefined && record.multipartGeometry?.parts.length && record.multipartGeometry.parts.length > 1 ? pointRepresentationLatLngs(record, projection, 'featureBbox')[0] : record.p3 ? projection.locationToLatLng(record.p3.x, record.p3.y, record.p3.z) : pointLatLng)
-      : undefined;
+    const anchor = displayPlan?.geometry?.render === 'point'
+      ? pointRepresentationLatLngs(record, projection, mode)[0]
+      : record.type === 'Points'
+        ? (partIndex === undefined && record.multipartGeometry?.parts.length && record.multipartGeometry.parts.length > 1 ? pointRepresentationLatLngs(record, projection, 'featureBbox')[0] : record.p3 ? projection.locationToLatLng(record.p3.x, record.p3.y, record.p3.z) : pointLatLng)
+        : undefined;
     if (config && map && partIndex !== undefined && !passesConfigRuntimeScreenGate(config, record, ctx, projection, map)) return [];
     const partRule = config && partIndex !== undefined ? resolveConfigRuntimeRule(config, record, ctx, null, store) : null;
     const ownLabel = partRule?.symbol?.label;
