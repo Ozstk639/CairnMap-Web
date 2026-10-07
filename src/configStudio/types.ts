@@ -672,6 +672,7 @@ export type WorkflowRepeatGroup = {
 export type WorkflowControl = {
   id: string;
   slot?: string;
+  valueNormalization?: 'none' | 'trim' | 'abbr' | 'number';
   kind: WorkflowControlKind;
   columns: 1 | 2 | 3;
   label: LocalizedText;

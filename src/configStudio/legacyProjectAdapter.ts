@@ -1050,6 +1050,7 @@ function workflowsFromSchemas(classes: CairnMapClassConfig[]): WorkflowDefinitio
         id: `${schema.schemaKey}-${field.key}-${slot}`,
         slot,
         kind,
+        valueNormalization: options.persist === false ? 'abbr' : kind === 'number' ? 'number' : kind === 'text' || kind === 'textarea' || kind === 'featureSearch' ? 'trim' : 'none',
         columns: 1,
         label: { zh: field.label, en: '' },
         ...(field.placeholder ? { placeholder: field.placeholder } : {}),
@@ -1079,7 +1080,7 @@ function workflowsFromSchemas(classes: CairnMapClassConfig[]): WorkflowDefinitio
           group: {
             optional: group.optional,
             minItems: group.minItems,
-            addLabel: { zh: `添加${group.label}`, en: `Add ${group.label}` },
+            addLabel: { zh: `添加${group.label}`, en: '' },
             itemFields: group.fields.map((item) => ({
               key: item.key,
               label: { zh: item.labels.workflow ?? item.labels.default, en: '' },

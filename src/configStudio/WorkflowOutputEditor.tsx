@@ -2,7 +2,7 @@ import { GripVertical, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { ConfigPackageV3, WorkflowAssignment, WorkflowDefinition, WorkflowOutput } from './types';
 import { resolveSelectableFields, validateWorkflowDefinition } from './runtime';
-import { evaluateV3Expression, workflowOutputSystem, type V3WorkflowValueMap } from './V3WorkflowRunner';
+import { evaluateV3Expression, normalizeV3WorkflowSlots, workflowOutputSystem, type V3WorkflowValueMap } from './V3WorkflowRunner';
 import { formatWorkflowExpression, parseWorkflowExpression, WORKFLOW_SYSTEM_TOKENS } from './workflowExpression';
 
 const uid = () => `assignment-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -53,6 +53,7 @@ export function WorkflowOutputEditor({ config, workflow, output, slots, world, o
   const targets = resolveSelectableFields(config, output.classification).map((field) => field.key);
   const controlSlots = workflow.steps.flatMap((step) => step.controls ?? []).flatMap((control) => control.slot ? [control.slot] : []);
   const tokens = [...new Set([...controlSlots, ...WORKFLOW_SYSTEM_TOKENS, ...workflow.outputs.flatMap((_, index) => WORKFLOW_SYSTEM_TOKENS.map((token) => `${token}_${index + 1}`))])];
+  slots = normalizeV3WorkflowSlots(workflow, slots);
   const system = workflowOutputSystem(workflow, slots, { world }, output.id);
   const issues = useMemo(() => validateWorkflowDefinition(workflow, config).issues, [workflow, config]);
   const set = (assignments: WorkflowAssignment[]) => onChange({ ...output, assignments });
