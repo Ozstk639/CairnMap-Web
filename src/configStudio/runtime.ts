@@ -322,6 +322,8 @@ function validateRuleLabel(
     issue(issues, 'error', 'render-label-required', rulePath, '每个渲染规则必须定义 Label 效果。');
     return;
   }
+  for (const axis of ['offsetX', 'offsetY'] as const) if (label[axis] !== undefined && !Number.isFinite(label[axis])) issue(issues, 'error', 'label-offset-invalid', rulePath, `${axis} 必须是有限数字。`);
+  if (label.placement && !['center', 'near', 'N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW', 'aboveLine', 'belowLine'].includes(label.placement)) issue(issues, 'error', 'label-placement-invalid', rulePath, 'Label 位置无效。');
   if (!Number.isFinite(label.collision.basePriority)) issue(issues, 'error', 'label-base-priority-invalid', rulePath, 'Label 基础优先级必须是有限数字。');
   const fields = new Set(resolveEffectiveFields(config, sourcePath).map((field) => field.key));
   if (label.source && !sourceExists(label.source, fields)) issue(issues, 'error', 'render-label-source-invalid', rulePath, 'Label 来源必须是当前分类的有效字段、tags.xxx 或 extensions.xxx。', { field: label.source });

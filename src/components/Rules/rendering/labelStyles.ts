@@ -1,3 +1,5 @@
+import { labelPlacementTransform, labelScreenOffset, type LabelPlacement } from './labelPlacement';
+export type { LabelPlacement } from './labelPlacement';
 import * as L from 'leaflet';
 
 /**
@@ -47,13 +49,14 @@ export type LabelStyleKeyInput =
       underline?: boolean;
     };
 
-export type LabelPlacement = 'center' | 'near';
 
 export type LabelRenderOptions = {
   placement: LabelPlacement;
   withDot?: boolean;
   dotAnchorMode?: 'inline' | 'anchorRight';
   offsetY?: number;
+  offsetX?: number;
+  screenOffsets?: boolean;
   /** 是否允许交互（用于“点击 label”模式） */
   interactive?: boolean;
 };
@@ -95,14 +98,6 @@ function anchoredDotHtml(): string {
       flex:0 0 auto;
     "></span>
   `;
-}
-
-function placementTransform(placement: LabelPlacement): string {
-  return placement === 'near' ? 'translate(-50%, -120%)' : 'translate(-50%, -50%)';
-}
-
-function placementExtraMarginTopPx(placement: LabelPlacement, offsetY?: number): number {
-  return placement === 'near' ? -(Number(offsetY ?? 0) || 0) : 0;
 }
 
 /**
@@ -152,13 +147,15 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
 
   const placement = opts.placement ?? 'center';
   const anchorRight = !!opts.withDot && opts.dotAnchorMode === 'anchorRight';
-  const baseTransform = anchorRight ? 'translate(0, -50%)' : placementTransform(placement);
+  const baseTransform = anchorRight ? 'translate(0, -50%)' : labelPlacementTransform(placement);
   const transform = anchorRight
     ? baseTransform
     : writingMode === 'vertical'
       ? baseTransform
       : (rotateDeg ? `${baseTransform} rotate(${rotateDeg}deg)` : baseTransform);
-  const extraMarginTop = placementExtraMarginTopPx(placement, opts.offsetY);
+  const offset = labelScreenOffset(placement, opts.offsetX, opts.offsetY, opts.screenOffsets === true);
+  const extraMarginTop = offset.y;
+  const extraMarginLeft = offset.x;
 
   const dot = opts.withDot ? (anchorRight ? anchoredDotHtml() : dotHtml()) : '';
   const pe = opts.interactive ? 'auto' : 'none';
@@ -477,7 +474,7 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
   return `
     <div style="
       transform: ${transform};
-      margin-top: ${extraMarginTop}px;
+      margin-top: ${extraMarginTop}px; margin-left: ${extraMarginLeft}px;
       pointer-events: ${pe};
       cursor: ${cursor};
       display: inline-flex;
@@ -491,5 +488,5 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
 
 export function makeLabelDivIcon(styleKey: LabelStyleKeyInput, text: string, opts: LabelRenderOptions): L.DivIcon {
   const html = renderLabelHtml(styleKey, text, opts);
-  return L.divIcon({ className: '', html, iconSize: [0, 0] });
+  return L.divIcon({ className: '', html, iconSize: [0, 0], iconAnchor: [0, 0] });
 }

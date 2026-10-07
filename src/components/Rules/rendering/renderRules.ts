@@ -63,6 +63,8 @@ export type LabelPlan = {
 
   /** 可选：label 垂直上移（px），用于点位 label 更靠上 */
   offsetY?: number;
+  offsetX?: number;
+  screenOffsets?: boolean;
 
   /** 如果你已实现“中心点+label”，这里可保留 */
   withDot?: boolean;

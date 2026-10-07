@@ -561,6 +561,8 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
         ...(labelText?.maxLines !== undefined ? { maxLines: labelText.maxLines } : {}),
         placement: label.placement ?? (geometry === 'LineString' ? 'aboveLine' : 'center'),
         ...(label.offsetY !== undefined ? { offsetY: label.offsetY } : {}),
+        offsetX: label.offsetX ?? 0,
+        screenOffsets: true,
         // r5 deliberately does not synthesize a label-anchor decoration dot.
         // Point visibility is the authored point render rule itself; legacy
         // withDot/dotAnchorMode values remain import-only compatibility data.

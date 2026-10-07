@@ -144,6 +144,7 @@ export type RenderLabelStyle = {
   /** The visual position around the already-selected geometric anchor. */
   placement?: 'center' | 'N' | 'S' | 'E' | 'W' | 'NE' | 'NW' | 'SE' | 'SW' | 'aboveLine' | 'belowLine' | 'near';
   offsetY?: number;
+  offsetX?: number;
   withDot?: boolean;
   dotAnchorMode?: 'anchorRight' | 'inline';
   collision: LabelCollisionPolicy;

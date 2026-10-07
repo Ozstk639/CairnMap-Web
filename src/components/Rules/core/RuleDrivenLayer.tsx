@@ -1,3 +1,4 @@
+import { iconBoundsAtAnchor, type LabelPlacement } from '@/components/Rules/rendering/labelPlacement';
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import * as L from "leaflet";
@@ -730,7 +731,12 @@ function nativeHitProxySignature(kind: string, tolerance: number, baseSize: numb
   return enabled && tolerance > 0 ? `${kind}:${tolerance}:${baseSize}` : undefined;
 }
 
-function createNativePointHitProxy(latlngs: L.LatLng[], radius: number): L.Layer {
+function createNativePointHitProxy(latlngs: L.LatLng[], radius: number, iconPlan?: { iconSize?: [number, number]; iconAnchor?: [number, number] }, tolerance = 0): L.Layer {
+  if (iconPlan) {
+    const bounds = iconBoundsAtAnchor({ x: 0, y: 0 }, iconPlan.iconSize ?? [24, 24], iconPlan.iconAnchor ?? [12, 12], tolerance);
+    const makeIcon = (latlng: L.LatLng) => L.marker(latlng, { pane: 'ria-point', interactive: true, icon: L.divIcon({ className: 'ria-config-hit-proxy', iconSize: [bounds.w, bounds.h], iconAnchor: [-bounds.x, -bounds.y], html: '<span style="display:block;width:100%;height:100%;background:transparent"></span>' }) });
+    return latlngs.length === 1 ? makeIcon(latlngs[0]) : L.featureGroup(latlngs.map(makeIcon));
+  }
   const make = (latlng: L.LatLng) => L.circleMarker(latlng, {
     pane: 'ria-point-top',
     radius: Math.max(5, radius),
@@ -1405,11 +1411,13 @@ function getFeatureBoundsLatLng(
 function makeLabelMarker(
   latlng: L.LatLng,
   text: string,
-  placement: "center" | "near",
+  placement: LabelPlacement,
   withDot?: boolean,
   offsetY?: number,
   styleKey?: any, // string key; 类型由 labelStyles 维护
   dotAnchorMode?: "inline" | "anchorRight",
+  offsetX?: number,
+  screenOffsets?: boolean,
 ) {
   const icon = makeLabelDivIcon(
     (styleKey ?? "bubble-dark") as any,
@@ -1418,7 +1426,7 @@ function makeLabelMarker(
       placement,
       withDot: !!withDot,
       dotAnchorMode,
-      offsetY,
+      offsetY, offsetX, screenOffsets,
       interactive: false,
     },
   );
@@ -3304,13 +3312,10 @@ export default function RuleDrivenLayer(props: Props) {
             }
           }
 
-          avoidRectsPx.push({
-            x: pt.x - w / 2,
-            y: pt.y - h / 2,
-            w,
-            h,
-            ownerUid: r.uid,
-          });
+          const bounds = pointPlan?.kind === 'icon'
+            ? iconBoundsAtAnchor(pt, [w, h], pointPlan.iconAnchor ?? [w / 2, h / 2])
+            : { x: pt.x - w / 2, y: pt.y - h / 2, w, h };
+          avoidRectsPx.push({ ...bounds, ownerUid: r.uid });
         }
 
         shouldShow.add(r.uid);
@@ -3964,7 +3969,7 @@ export default function RuleDrivenLayer(props: Props) {
             : textPathMarker
               ? `textPath:${anchorCandidateId ?? anchorIndex}`
               : `simpleLine:${anchorCandidateId ?? anchorIndex}`;
-          const labelKey = `${p.text}|${req.placement}|${req.withDot ? 1 : 0}|${req.dotAnchorMode ?? "inline"}|${Number(req.offsetY ?? 0)}|${styleKeyCache}|${plan ? 1 : 0}|${renderModeKey}`;
+          const labelKey = `${p.text}|${req.placement}|${req.withDot ? 1 : 0}|${req.dotAnchorMode ?? "inline"}|${Number(req.offsetY ?? 0)}|${Number(req.offsetX ?? 0)}|${req.screenOffsets ? 1 : 0}|${styleKeyCache}|${plan ? 1 : 0}|${renderModeKey}`;
 
           // RB_SLU_24: advanced line-text markers (glyphPath/textPath) are
           // viewport-container geometry. They must be rebuilt every refresh;
@@ -3992,6 +3997,8 @@ export default function RuleDrivenLayer(props: Props) {
                 withDot: !!req.withDot,
                 dotAnchorMode: req.dotAnchorMode,
                 offsetY: req.offsetY,
+                offsetX: req.offsetX,
+                screenOffsets: req.screenOffsets,
                 styleKey: styleKey as any,
                 onClick: () => {
                   const uid = req.featureUid ?? "";
@@ -4007,6 +4014,8 @@ export default function RuleDrivenLayer(props: Props) {
                 withDot: !!req.withDot,
                 dotAnchorMode: req.dotAnchorMode,
                 offsetY: req.offsetY,
+                offsetX: req.offsetX,
+                screenOffsets: req.screenOffsets,
                 styleKey: styleKey as any,
                 onClick: () => {
                   const uid = req.featureUid ?? "";
@@ -4023,6 +4032,8 @@ export default function RuleDrivenLayer(props: Props) {
                 req.offsetY,
                 styleKey,
                 req.dotAnchorMode,
+                req.offsetX,
+                req.screenOffsets,
               );
             }
             b.labelKey = labelKey;
@@ -4337,6 +4348,7 @@ function createLayerBundle(
         hitProxy = createNativePointHitProxy(
           multipartPoints.map((point) => projection.locationToLatLng(point.x, point.y, point.z)),
           pointProxyRadius,
+          plan?.kind === 'icon' ? plan : undefined, pointTolerance,
         );
         hitProxySignature = nativeHitProxySignature('point', pointTolerance, pointProxyRadius, true);
         bindNativeHitProxy(hitProxy, r, {
@@ -4434,7 +4446,7 @@ function createLayerBundle(
     let hitProxy: L.Layer | undefined;
     let hitProxySignature: string | undefined;
     if (nativePointHitEnabled) {
-      hitProxy = createNativePointHitProxy([latlng], pointProxyRadius);
+      hitProxy = createNativePointHitProxy([latlng], pointProxyRadius, plan?.kind === 'icon' ? plan : undefined, pointTolerance);
       hitProxySignature = nativeHitProxySignature('point', pointTolerance, pointProxyRadius, true);
       bindNativeHitProxy(hitProxy, r, {
         deletePickTarget,
@@ -4513,7 +4525,7 @@ function createLayerBundle(
     let hitProxy: L.Layer | undefined;
     let hitProxySignature: string | undefined;
     if (nativePointHitEnabled) {
-      hitProxy = createNativePointHitProxy(centers, pointProxyRadius);
+      hitProxy = createNativePointHitProxy(centers, pointProxyRadius, plan?.kind === 'icon' ? plan : undefined, pointTolerance);
       hitProxySignature = nativeHitProxySignature('point-representation', pointTolerance, pointProxyRadius, true);
       bindNativeHitProxy(hitProxy, r, {
         deletePickTarget,
@@ -5160,11 +5172,7 @@ function buildLabelRequest(
   const text = resolveLabelTextForAudit(r, labelPlan, ctx, store);
   if (!text) return null;
 
-  const effectivePlacement: "center" | "near" =
-    labelPlan.placement === "near" ||
-    (labelPlan.placement === "center" && r.type === "Points")
-      ? "near"
-      : "center";
+  const effectivePlacement: LabelPlacement = labelPlan.placement ?? 'center';
 
   const effectiveDisplayAnchor = resolveEffectiveDisplayAnchor(
     displayPlan,
@@ -5181,6 +5189,8 @@ function buildLabelRequest(
     withDot: !!labelPlan.withDot,
     dotAnchorMode: labelPlan.dotAnchorMode,
     offsetY: Number(labelPlan.offsetY ?? 0),
+    offsetX: Number(labelPlan.offsetX ?? 0),
+    screenOffsets: Boolean(labelPlan.screenOffsets),
     declutter: labelPlan.declutter,
   };
 
@@ -5236,7 +5246,7 @@ function buildLabelLayer(
   const text = resolveLabelTextForAudit(r, labelPlan, ctx, store);
   if (!text) return null;
 
-  const placement = labelPlan.placement === "near" ? "near" : "center";
+  const placement: LabelPlacement = labelPlan.placement ?? 'center';
   const withDot = !!labelPlan.withDot;
   const dotAnchorMode = labelPlan.dotAnchorMode as "inline" | "anchorRight" | undefined;
   const effectivePlacement = placement;
@@ -5268,6 +5278,8 @@ function buildLabelLayer(
         withDot,
         dotAnchorMode,
         offsetY: labelPlan.offsetY,
+        offsetX: labelPlan.offsetX,
+        screenOffsets: labelPlan.screenOffsets,
         styleKey: (styleKey ?? "bubble-dark") as any,
         onClick: onDeletePickClick,
       });
@@ -5280,11 +5292,13 @@ function buildLabelLayer(
         withDot,
         dotAnchorMode,
         offsetY: labelPlan.offsetY,
+        offsetX: labelPlan.offsetX,
+        screenOffsets: labelPlan.screenOffsets,
         styleKey: (styleKey ?? (clickPlan as any).labelStyleKey ?? "bubble-dark") as any,
         onClick,
       });
     }
-    return makeLabelMarker(ll, text, effectivePlacement, withDot, labelPlan.offsetY, styleKey, dotAnchorMode);
+    return makeLabelMarker(ll, text, effectivePlacement, withDot, labelPlan.offsetY, styleKey, dotAnchorMode, labelPlan.offsetX, labelPlan.screenOffsets);
   };
   return makeOne(anchor);
 }

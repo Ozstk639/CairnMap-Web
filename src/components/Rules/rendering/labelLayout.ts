@@ -1,3 +1,4 @@
+import { placeLabel, labelCandidateShift } from './labelPlacement';
 import * as L from "leaflet";
 import {
   LabelDensityLimiter,
@@ -267,9 +268,11 @@ export type LabelRequest = {
   geoAnchorDebug?: unknown;
 
   /** 复用现有 makeLabelMarker 的 placement（决定 CSS transform 参考点） */
-  placement: "center" | "near";
+  placement: LabelPlacement;
 
   offsetY?: number;
+  offsetX?: number;
+  screenOffsets?: boolean;
 
   /** 是否带中心点（影响 bbox 宽度估计） */
   withDot?: boolean;
@@ -555,9 +558,11 @@ function measureText(
 function computeLabelRect(
   anchor: L.Point,
   size: Measured,
-  placement: "center" | "near",
+  placement: LabelPlacement,
   offsetY: number,
   dotAnchorMode?: "inline" | "anchorRight",
+  offsetX = 0,
+  screenOffsets = false,
 ): Rect {
   if (dotAnchorMode === "anchorRight") {
     // dot-anchor-right：anchor 是 dot 中心，文字从 dot 右侧展开。
@@ -568,16 +573,7 @@ function computeLabelRect(
     return { x, y, w: size.w + dotVisualLeftPadPx, h: size.h };
   }
 
-  if (placement === "center") {
-    const x = anchor.x - size.w / 2;
-    const y = anchor.y - size.h / 2;
-    return { x, y, w: size.w, h: size.h };
-  }
-
-  // placement === 'near' => transform: translate(-50%, -120%)，再加 margin-top:-offsetY
-  const x = anchor.x - size.w / 2;
-  const y = anchor.y - size.h * 1.2 - offsetY;
-  return { x, y, w: size.w, h: size.h };
+  return placeLabel(anchor, size, placement, offsetX, offsetY, screenOffsets);
 }
 
 function normalizeCandidates(
@@ -606,7 +602,7 @@ function normalizeCandidates(
   return list.map((c, idx) => {
     if (typeof c.dx === "number" && typeof c.dy === "number") return c;
 
-    const { dx, dy } = candidateShift(
+    const { dx, dy } = (req.screenOffsets ? labelCandidateShift : candidateShift)(
       c.name,
       req.placement,
       size,
@@ -892,6 +888,8 @@ function rectForCandidate(
     baseReq.placement,
     Number(baseReq.offsetY ?? 0),
     baseReq.dotAnchorMode,
+    Number(baseReq.offsetX ?? 0),
+    baseReq.screenOffsets,
   );
   return { rect, dx, dy };
 }
