@@ -570,6 +570,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
         styleKey: labelKey as any,
         declutter: {
           enabled: label.collision.hideWhenColliding,
+          ...(anchor?.candidates ? { candidates: anchor.candidates } : {}),
           group: label.collision.collisionGroup ?? 'config-runtime',
           priority: label.collision.basePriority + ruleDisplayPriority,
           role: label.collision.role,

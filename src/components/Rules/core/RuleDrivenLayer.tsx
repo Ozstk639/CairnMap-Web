@@ -3518,7 +3518,10 @@ export default function RuleDrivenLayer(props: Props) {
             map,
           );
           const requests = rawRequests.map((rawReq) => applyAdvancedLineTextBudget(
-            mergeDisplayCollisionIntoLabelRequest(rawReq, displayPlan),
+            rawReq.partIndex === undefined ? mergeDisplayCollisionIntoLabelRequest(rawReq, displayPlan) : {
+              ...mergeDisplayCollisionIntoLabelRequest(rawReq, displayPlan),
+              declutter: { ...mergeDisplayCollisionIntoLabelRequest(rawReq, displayPlan).declutter, priority: rawReq.declutter.priority },
+            },
             displayPlan,
             advancedLineTextBudget,
           ));

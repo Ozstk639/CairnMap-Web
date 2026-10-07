@@ -597,7 +597,7 @@ function normalizeCandidates(
   }
 
   const list = (
-    raw && raw.length ? raw.map(asCandidate) : defaultCandidates(req.placement)
+    raw && raw.length ? raw.map(asCandidate) : defaultCandidates(req.placement, req.screenOffsets)
   ).slice(0, Math.max(1, params.maxCandidatesPerLabel));
 
   // 将 name 转为 dx/dy（若用户未给 dx/dy）
@@ -614,7 +614,8 @@ function normalizeCandidates(
   });
 }
 
-function defaultCandidates(placement: LabelPlacement): LabelCandidate[] {
+function defaultCandidates(placement: LabelPlacement, screenOffsets = false): LabelCandidate[] {
+  if (screenOffsets) return ['C', 'N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW'].map((name) => ({ name: name as LabelCandidateName }));
   if (placement === "center")
     return [
       { name: "C" },
