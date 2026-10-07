@@ -22,6 +22,7 @@ import type {
   SelectOption,
   ZoomPriorityRule,
 } from './types';
+import { isSafeWorkflowTarget, parseWorkflowExpression, workflowExpressionTokens, WORKFLOW_SYSTEM_TOKENS } from './workflowExpression';
 import { createBlankV32Package } from './v32Defaults';
 
 const GEOMETRIES: GeometryKind[] = ['Point', 'LineString', 'Polygon'];
@@ -31,7 +32,6 @@ const SYSTEM_FIELD_KEYS = new Set([
 ]);
 /** Name is a V1-configured field in several classes, even though it is also universally selectable. */
 const PROTECTED_FIELD_KEYS = new Set([...SYSTEM_FIELD_KEYS].filter((key) => key !== 'Name'));
-const WORKFLOW_SYSTEM_TOKENS = new Set(['ID', 'World', 'WorldPrefix', 'Class', 'Kind', 'Skind', 'Skind2']);
 const EXTERNAL_WORKFLOW_REASONS = new Set(['railway-integrated', 'station-integrated', 'trp-integrated']);
 const CARD_RENDERERS = new Set(['text', 'tag', 'colorCapsule', 'nameColorCapsule', 'relationLink', 'lineChips', 'media']);
 
@@ -558,26 +558,27 @@ function validateSearch(control: Pick<WorkflowControl, 'kind' | 'search'>, confi
   if (!Number.isInteger(search.minQueryLength) || Number(search.minQueryLength) < 0 || !Number.isInteger(search.maxResults) || Number(search.maxResults) < 1) issue(issues, 'error', 'workflow-search-options-invalid', path, '搜索必须配置有效的最短输入长度和结果上限。');
 }
 
-function expressionTokens(expression: string): string[] {
-  return (expression.match(/\b[A-Za-z][A-Za-z0-9_]*\b/g) ?? []).filter((token) => token !== 'join');
-}
-
 function targetSupportsClassificationPicker(config: ConfigPackageV3, target: ClassificationPath): boolean {
   return hasDescendants(config, target);
 }
 
-function validateOutput(output: WorkflowOutput, outputIndex: number, workflow: WorkflowDefinition, config: ConfigPackageV3, slots: Set<string>, issues: ConfigValidationIssue[]): void {
+export function validateWorkflowOutput(output: WorkflowOutput, _outputIndex: number, workflow: WorkflowDefinition, config: ConfigPackageV3, slots: Set<string>, issues: ConfigValidationIssue[]): void {
   const base = `workflows/${workflow.id}/outputs/${output.id}`;
   if (!isContinuousPath(output.classification) || !hasCategoryNode(config, output.classification)) issue(issues, 'error', 'workflow-output-classification-invalid', base, '工作流输出必须选择存在且连续的目标分类。');
   if (!output.geometry.selected) issue(issues, 'error', 'workflow-output-geometry-required', base, '每个工作流输出必须选择固定绘制类型。');
   else if (!resolveGeometryProfile(config, output.classification, output.geometry.selected)?.enabled) issue(issues, 'error', 'workflow-output-geometry-disabled', base, `输出分类没有启用 ${output.geometry.selected} 绘制类型。`);
   const fields = new Set(resolveEffectiveFields(config, output.classification).map((field) => field.key));
-  const tokens = new Set([...WORKFLOW_SYSTEM_TOKENS, ...[...WORKFLOW_SYSTEM_TOKENS].map((item) => `${item}_${outputIndex + 1}`), ...slots]);
+  const tokens = new Set([...WORKFLOW_SYSTEM_TOKENS, ...workflow.outputs.flatMap((_, index) => WORKFLOW_SYSTEM_TOKENS.map((item) => `${item}_${index + 1}`)), ...slots]);
+  const assignmentIds = new Set<string>();
   for (const assignment of output.assignments) {
     const assignmentPath = `${base}/assignments/${assignment.id}`;
     if (!assignment.target.trim() || !assignment.expression.trim()) issue(issues, 'error', 'workflow-assignment-invalid', assignmentPath, '字段组装必须同时指定目标和表达式。');
-    if (!fields.has(assignment.target) && !/^tags\.[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)*$/.test(assignment.target) && !/^extensions\.[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)*$/.test(assignment.target) && !SYSTEM_FIELD_KEYS.has(assignment.target)) issue(issues, 'error', 'workflow-assignment-target-invalid', assignmentPath, `字段组装目标 ${assignment.target} 不是有效字段、tags 或 extensions 路径。`);
-    for (const token of expressionTokens(assignment.expression)) if (!tokens.has(token) && !/^\d+$/.test(token)) issue(issues, 'error', 'workflow-assignment-slot-missing', assignmentPath, `字段组装引用了不存在的输入槽位或系统字段 ${token}。`);
+    if (!isSafeWorkflowTarget(assignment.target) || (!fields.has(assignment.target) && !/^tags\.[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)*$/.test(assignment.target) && !/^extensions\.[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)*$/.test(assignment.target) && !SYSTEM_FIELD_KEYS.has(assignment.target))) issue(issues, 'error', 'workflow-assignment-target-invalid', assignmentPath, `字段组装目标 ${assignment.target} 不是有效字段、tags 或 extensions 路径。`);
+    if (!assignment.id || assignmentIds.has(assignment.id)) issue(issues, 'error', 'workflow-assignment-id-invalid', assignmentPath, '组装行标识必须存在且不能重复。');
+    assignmentIds.add(assignment.id);
+    try {
+      for (const token of workflowExpressionTokens(parseWorkflowExpression(assignment.expression))) if (!tokens.has(token)) issue(issues, 'error', 'workflow-assignment-slot-missing', assignmentPath, `字段组装引用了不存在的输入槽位或系统字段 ${token}。`);
+    } catch (error) { issue(issues, 'error', 'workflow-assignment-expression-invalid', assignmentPath, error instanceof Error ? error.message : '组装表达式无效。'); }
   }
 }
 
@@ -636,7 +637,7 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
   for (const [outputIndex, output] of workflow.outputs.entries()) {
     const managed = controlList.filter((control) => control.kind === 'classificationPicker' && control.systemManaged && (control.outputId === output.id || (!control.outputId && control.classificationScope && classificationPathKey(control.classificationScope) === classificationPathKey(output.classification))));
     if (targetSupportsClassificationPicker(config, output.classification) !== Boolean(managed.length)) issue(issues, 'error', 'workflow-classification-picker-stale', `${base}/outputs/${output.id}`, '工作流输出分类的子分类状态已变化；请打开工作流以刷新系统 Classification 控件。');
-    validateOutput(output, outputIndex, workflow, config, slots, issues);
+    validateWorkflowOutput(output, outputIndex, workflow, config, slots, issues);
   }
 }
 

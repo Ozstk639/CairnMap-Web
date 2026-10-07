@@ -4,45 +4,12 @@ import { normalizeRuleSourceWorldId } from '@/components/Rules/data/ruleDataSour
 import type { ClassificationPath, ConfigPackageV3, MountedFeatureRecord, SearchProfile, WorkflowControl, WorkflowDefinition, WorkflowGroupField } from './types';
 import { listCategoryPaths, normalizeSearchProfile, optionLabel, pathMatchesScope, readRecordPath, workflowPathLabel } from './runtime';
 
+import { evaluateWorkflowExpression, isSafeWorkflowTarget } from './workflowExpression';
+
 export type V3WorkflowValueMap = Record<string, unknown>;
 export type V3WorkflowRunResult = Array<{ outputId: string; classification: ClassificationPath; geometry: string; record: Record<string, unknown> }>;
 export type V3WorkflowInputIssue = { stepId?: string; controlId?: string; message: string };
 export type V3SearchCandidate = { id: string; display: string; returned: unknown; record: MountedFeatureRecord };
-
-function getTokenValue(token: string, slots: V3WorkflowValueMap, system: V3WorkflowValueMap): unknown {
-  const clean = token.trim();
-  if (!clean) return '';
-  if ((clean.startsWith('"') && clean.endsWith('"')) || (clean.startsWith("'") && clean.endsWith("'"))) return clean.slice(1, -1).replace(/\\([\\"'])/g, '$1');
-  if (Object.prototype.hasOwnProperty.call(slots, clean)) return slots[clean];
-  if (Object.prototype.hasOwnProperty.call(system, clean)) return system[clean];
-  return clean;
-}
-
-function splitTopLevel(source: string, delimiter: string): string[] {
-  const values: string[] = []; let current = ''; let quote = ''; let escaped = false; let depth = 0;
-  for (const char of source) {
-    if (escaped) { current += char; escaped = false; continue; }
-    if (char === '\\') { current += char; escaped = true; continue; }
-    if (quote) { current += char; if (char === quote) quote = ''; continue; }
-    if (char === '"' || char === "'") { quote = char; current += char; continue; }
-    if (char === '(') { depth += 1; current += char; continue; }
-    if (char === ')') { depth = Math.max(0, depth - 1); current += char; continue; }
-    if (char === delimiter && depth === 0) { values.push(current); current = ''; continue; }
-    current += char;
-  }
-  values.push(current); return values;
-}
-
-function evaluateJoinExpression(source: string, slots: V3WorkflowValueMap, system: V3WorkflowValueMap): unknown | undefined {
-  const match = /^join\((.*)\)$/s.exec(source.trim());
-  if (!match) return undefined;
-  const args = splitTopLevel(match[1], ',').map((part) => part.trim());
-  if (args.length < 2) return '';
-  const separator = evaluateV3Expression(args[0], slots, system);
-  return args.slice(1).map((part) => evaluateV3Expression(part, slots, system))
-    .filter((value) => value !== undefined && value !== null && String(value).trim())
-    .map((value) => typeof value === 'string' ? value : JSON.stringify(value)).join(String(separator ?? ''));
-}
 
 export function resolveV3WorldPrefix(world: unknown): string {
   const raw = normalizeV3WorldId(world);
@@ -57,22 +24,11 @@ export function normalizeV3WorldId(world: unknown): string {
   return normalizeRuleSourceWorldId(String(world ?? ''));
 }
 
-/** Deliberately non-eval expression language: A+"_"+B and
- * join("_",WorldPrefix+Class,A) cover the V1 assemblies without running JS. */
-export function evaluateV3Expression(expression: string, slots: V3WorkflowValueMap, system: V3WorkflowValueMap): unknown {
-  const source = String(expression ?? '').trim();
-  if (!source) return '';
-  const joined = evaluateJoinExpression(source, slots, system);
-  if (joined !== undefined) return joined;
-  const tokens = splitTopLevel(source, '+');
-  if (tokens.length === 1) return getTokenValue(tokens[0], slots, system);
-  return tokens.map((token) => {
-    const value = getTokenValue(token, slots, system);
-    return value === null || value === undefined ? '' : typeof value === 'string' ? value : JSON.stringify(value);
-  }).join('');
-}
+/** The editor and runner use exactly the same safe parser/evaluator. */
+export const evaluateV3Expression = evaluateWorkflowExpression;
 
 function setPath(target: Record<string, unknown>, path: string, value: unknown): void {
+  if (!isSafeWorkflowTarget(path)) throw new Error(`无效组装路径：${path}`);
   const parts = String(path ?? '').split('.').filter(Boolean); if (!parts.length) return;
   let cursor = target;
   for (const key of parts.slice(0, -1)) {
@@ -92,21 +48,31 @@ function parseStructuredOutput(target: string, value: unknown): unknown {
   try { return JSON.parse(value); } catch { return value; }
 }
 
+export function workflowOutputSystem(workflow: WorkflowDefinition, slots: V3WorkflowValueMap, options: { world?: string; classifications?: Record<string, ClassificationPath | undefined> }, outputId: string): V3WorkflowValueMap {
+  const world = normalizeV3WorldId(options.world ?? slots.World ?? 'zth');
+  const values = (classification: ClassificationPath) => ({ World: world, WorldPrefix: resolveV3WorldPrefix(world), Class: classification.class, Kind: classification.kind ?? '', Skind: classification.skind ?? '', Skind2: classification.skind2 ?? '', Creator: slots.actor ?? '', ID: slots.ID ?? '' });
+  const selected = workflow.outputs.find((output) => output.id === outputId) ?? workflow.outputs[0];
+  const system: V3WorkflowValueMap = selected ? values(resolvedClassification(selected, options.classifications ?? {})) : {};
+  workflow.outputs.forEach((output, index) => Object.entries(values(resolvedClassification(output, options.classifications ?? {}))).forEach(([key, value]) => { system[`${key}_${index + 1}`] = value; }));
+  return system;
+}
+
 export function evaluateV3WorkflowOutputs(workflow: WorkflowDefinition, slots: V3WorkflowValueMap, options: { world?: string; classifications?: Record<string, ClassificationPath | undefined> } = {}): V3WorkflowRunResult {
   const world = normalizeV3WorldId(options.world ?? slots.World ?? 'zth');
-  return workflow.outputs.map((output, outputIndex) => {
+  return workflow.outputs.map((output) => {
     const classification = resolvedClassification(output, options.classifications ?? {});
-    const system: V3WorkflowValueMap = {
-      World: world, WorldPrefix: resolveV3WorldPrefix(world), Class: classification.class, Kind: classification.kind ?? '', Skind: classification.skind ?? '', Skind2: classification.skind2 ?? '',
-      [`World_${outputIndex + 1}`]: world, [`WorldPrefix_${outputIndex + 1}`]: resolveV3WorldPrefix(world), [`Class_${outputIndex + 1}`]: classification.class, [`Kind_${outputIndex + 1}`]: classification.kind ?? '', [`Skind_${outputIndex + 1}`]: classification.skind ?? '', [`Skind2_${outputIndex + 1}`]: classification.skind2 ?? '',
-    };
+    const system = workflowOutputSystem(workflow, slots, { ...options, world }, output.id);
     const record: Record<string, unknown> = { World: world, Class: classification.class, ...(classification.kind ? { Kind: classification.kind } : {}), ...(classification.skind ? { SKind: classification.skind } : {}), ...(classification.skind2 ? { SKind2: classification.skind2 } : {}) };
     const actor = String(slots.actor ?? '').trim(); if (actor) record.Creator = actor;
     for (const namespace of ['tags', 'extensions'] as const) {
       const value = parseStructuredOutput(namespace, slots[namespace]);
       if (value && typeof value === 'object' && !Array.isArray(value)) record[namespace] = value;
     }
-    for (const assignment of output.assignments) setPath(record, assignment.target, parseStructuredOutput(assignment.target, evaluateV3Expression(assignment.expression, slots, system)));
+    for (const assignment of output.assignments) {
+      setPath(record, assignment.target, parseStructuredOutput(assignment.target, evaluateV3Expression(assignment.expression, slots, system)));
+      system.ID = record.ID ?? '';
+    }
+    record.World = world;
     return { outputId: output.id, classification, geometry: output.geometry.selected, record };
   });
 }
@@ -216,20 +182,22 @@ function ControlInput({ control, value, onChange, config, records, world }: { co
 
 /** Usable generic runner. It runs V3-composed flows and performs the same
  * target-scoped search used by saved workflows; external units remain intact. */
-export function V3WorkflowRunner({ config, workflow, records = [], worldId, onSubmit, onRequestExternal, onRequestGeometry }: { config: ConfigPackageV3; workflow: WorkflowDefinition; records?: MountedFeatureRecord[]; worldId?: string; onSubmit?: (result: V3WorkflowRunResult) => void; onRequestExternal?: (workflow: WorkflowDefinition) => void; onRequestGeometry?: (outputId: string, geometry: string) => void }) {
+export function V3WorkflowRunner({ config, workflow, records = [], worldId, onSubmit, onRequestExternal, onRequestGeometry, onPreviewSlotsChange }: { onPreviewSlotsChange?: (slots: V3WorkflowValueMap) => void; config: ConfigPackageV3; workflow: WorkflowDefinition; records?: MountedFeatureRecord[]; worldId?: string; onSubmit?: (result: V3WorkflowRunResult) => void; onRequestExternal?: (workflow: WorkflowDefinition) => void; onRequestGeometry?: (outputId: string, geometry: string) => void }) {
   const activeWorld = normalizeV3WorldId(worldId ?? records.find((record) => String(record.World ?? '').trim())?.World ?? 'zth');
   const [page, setPage] = useState(0);
   const [slots, setSlots] = useState<V3WorkflowValueMap>(() => ({ World: activeWorld, ...Object.fromEntries(workflow.steps.flatMap((step) => step.controls ?? []).flatMap((control) => control.defaultValue === undefined ? [] : [[control.slot ?? control.id, control.defaultValue]])) }));
   const [classifications, setClassifications] = useState<Record<string, ClassificationPath | undefined>>({}); const [submitted, setSubmitted] = useState<V3WorkflowRunResult | null>(null); const [inputIssues, setInputIssues] = useState<V3WorkflowInputIssue[]>([]);
   const steps = workflow.mode === 'composed' ? workflow.steps : []; const step = steps[page]; const controls = step?.controls ?? [];
-  const preview = useMemo(() => workflow.mode === 'composed' ? evaluateV3WorkflowOutputs(workflow, slots, { world: activeWorld, classifications }) : [], [workflow, slots, classifications, activeWorld]);
+  const previewState = useMemo(() => { try { return { outputs: workflow.mode === 'composed' ? evaluateV3WorkflowOutputs(workflow, slots, { world: activeWorld, classifications }) : [], error: '' }; } catch (error) { return { outputs: [], error: error instanceof Error ? error.message : '输出表达式无效。' }; } }, [workflow, slots, classifications, activeWorld]);
+  const preview = previewState.outputs;
+  useEffect(() => { onPreviewSlotsChange?.(slots); }, [slots, onPreviewSlotsChange]);
   useEffect(() => { setSlots((current) => ({ ...Object.fromEntries(workflow.steps.flatMap((item) => item.controls ?? []).flatMap((control) => control.defaultValue === undefined ? [] : [[control.slot ?? control.id, control.defaultValue]])), ...current, World: activeWorld })); }, [workflow, activeWorld]);
   if (workflow.mode === 'external') return <section className="rounded-lg border border-violet-200 bg-violet-50 p-3 text-sm"><strong>外部整体工作流：{workflow.label.zh}</strong><p className="mt-1 text-slate-600">此工作流保留为完整受控单元，不伪装成模块化表单。</p><button type="button" className="mt-2 rounded bg-violet-700 px-3 py-1.5 text-white" onClick={() => onRequestExternal?.(workflow)}>打开已受控工作流</button></section>;
   if (!step) return <div className="rounded border border-amber-300 bg-amber-50 p-3 text-sm">工作流没有页面。</div>;
   const isLast = page === steps.length - 1; const currentIssues = inputIssues.filter((issue) => !issue.stepId || issue.stepId === step.id);
   const continueTo = (nextPage: number) => { const issues = validateV3WorkflowInputs(workflow, slots, [step]); setInputIssues(issues); if (!issues.length) setPage(nextPage); };
-  const submit = () => { const issues = validateV3WorkflowInputs(workflow, slots); setInputIssues(issues); if (issues.length) return; setSubmitted(preview); onSubmit?.(preview); };
-  return <section className="rounded-lg border bg-white p-3"><div className="mb-3 flex items-center justify-between gap-2"><strong>{step.label.zh}</strong><span className="text-xs text-slate-500">世界：{activeWorld} · 第 {page + 1} / {steps.length} 页</span></div>{step.kind === 'actor' ? <label className="block text-sm">填写人<input className="mt-1 w-full rounded border px-2 py-1" value={String(slots.actor ?? '')} onChange={(event) => setSlots((current) => ({ ...current, actor: event.target.value }))} /></label> : null}{step.kind === 'tagsExtensions' ? <div className="grid gap-2 sm:grid-cols-2"><textarea className="rounded border p-2 text-sm" rows={3} placeholder="tags JSON（可选）" value={String(slots.tags ?? '')} onChange={(event) => setSlots((current) => ({ ...current, tags: event.target.value }))} /><textarea className="rounded border p-2 text-sm" rows={3} placeholder="extensions JSON（可选）" value={String(slots.extensions ?? '')} onChange={(event) => setSlots((current) => ({ ...current, extensions: event.target.value }))} /></div> : null}{step.kind === 'geometry' ? <div className="rounded border border-dashed p-3 text-sm">此绘制页固定类型：{step.geometry?.[0] ?? '未指定'}<button type="button" className="ml-3 rounded border px-2 py-1" onClick={() => onRequestGeometry?.(step.outputId ?? '', step.geometry?.[0] ?? '')}>进入绘制</button></div> : null}{controls.length ? <div className="grid gap-2 md:grid-cols-6">{controls.map((control) => <div key={control.id} className={`grid min-w-0 gap-1 text-sm ${control.columns === 1 ? 'md:col-span-6' : control.columns === 2 ? 'md:col-span-3' : 'md:col-span-2'}`}><span>{control.label.zh}{control.required ? ' *' : ''}</span><ControlInput control={control} value={slots[control.slot ?? control.id]} config={config} records={records} world={activeWorld} onChange={(value) => { if (control.kind === 'classificationPicker') { const path = decodePath(String(value)); const targets = control.outputId ? workflow.outputs.filter((output) => output.id === control.outputId) : workflow.outputs.filter((output) => path && pathMatchesScope(path, control.classificationScope ?? output.classification)); for (const output of targets) if (path) setClassifications((current) => ({ ...current, [output.id]: path })); } setSlots((current) => ({ ...current, [control.slot ?? control.id]: value })); setInputIssues([]); }} /></div>)}</div> : null}{currentIssues.length ? <ul className="mt-3 rounded border border-rose-200 bg-rose-50 p-2 text-xs text-rose-800">{currentIssues.map((issue, index) => <li key={`${issue.stepId ?? 'global'}-${issue.controlId ?? index}`}>{issue.message}</li>)}</ul> : null}<div className="mt-3 flex justify-between"><button type="button" disabled={page === 0} className="rounded border px-3 py-1 disabled:opacity-40" onClick={() => { setInputIssues([]); setPage((value) => Math.max(0, value - 1)); }}>上一页</button>{isLast ? <button type="button" className="rounded bg-emerald-600 px-3 py-1 text-white" onClick={submit}>确认保存输出</button> : <button type="button" className="rounded bg-blue-600 px-3 py-1 text-white" onClick={() => continueTo(Math.min(steps.length - 1, page + 1))}>下一页</button>}</div>{submitted ? <pre className="mt-3 max-h-48 overflow-auto rounded bg-slate-950 p-2 text-xs text-emerald-100">{JSON.stringify(submitted, null, 2)}</pre> : null}</section>;
+  const submit = () => { const issues = [...validateV3WorkflowInputs(workflow, slots), ...(previewState.error ? [{ message: previewState.error }] : [])]; setInputIssues(issues); if (issues.length) return; setSubmitted(preview); onSubmit?.(preview); };
+  return <section className="rounded-lg border bg-white p-3"><div className="mb-3 flex items-center justify-between gap-2"><strong>{step.label.zh}</strong><span className="text-xs text-slate-500">世界：{activeWorld} · 第 {page + 1} / {steps.length} 页</span></div>{step.kind === 'actor' ? <label className="block text-sm">填写人<input className="mt-1 w-full rounded border px-2 py-1" value={String(slots.actor ?? '')} onChange={(event) => setSlots((current) => ({ ...current, actor: event.target.value }))} /></label> : null}{step.kind === 'tagsExtensions' ? <div className="grid gap-2 sm:grid-cols-2"><textarea className="rounded border p-2 text-sm" rows={3} placeholder="tags JSON（可选）" value={String(slots.tags ?? '')} onChange={(event) => setSlots((current) => ({ ...current, tags: event.target.value }))} /><textarea className="rounded border p-2 text-sm" rows={3} placeholder="extensions JSON（可选）" value={String(slots.extensions ?? '')} onChange={(event) => setSlots((current) => ({ ...current, extensions: event.target.value }))} /></div> : null}{step.kind === 'geometry' ? <div className="rounded border border-dashed p-3 text-sm">此绘制页固定类型：{step.geometry?.[0] ?? '未指定'}<button type="button" className="ml-3 rounded border px-2 py-1" onClick={() => onRequestGeometry?.(step.outputId ?? '', step.geometry?.[0] ?? '')}>进入绘制</button></div> : null}{controls.length ? <div className="grid gap-2 md:grid-cols-6">{controls.map((control) => <div key={control.id} className={`grid min-w-0 gap-1 text-sm ${control.columns === 1 ? 'md:col-span-6' : control.columns === 2 ? 'md:col-span-3' : 'md:col-span-2'}`}><span>{control.label.zh}{control.required ? ' *' : ''}</span><ControlInput control={control} value={slots[control.slot ?? control.id]} config={config} records={records} world={activeWorld} onChange={(value) => { if (control.kind === 'classificationPicker') { const path = decodePath(String(value)); const targets = control.outputId ? workflow.outputs.filter((output) => output.id === control.outputId) : workflow.outputs.filter((output) => path && pathMatchesScope(path, control.classificationScope ?? output.classification)); for (const output of targets) if (path) setClassifications((current) => ({ ...current, [output.id]: path })); } setSlots((current) => ({ ...current, [control.slot ?? control.id]: value })); setInputIssues([]); }} /></div>)}</div> : null}{currentIssues.length ? <ul className="mt-3 rounded border border-rose-200 bg-rose-50 p-2 text-xs text-rose-800">{currentIssues.map((issue, index) => <li key={`${issue.stepId ?? 'global'}-${issue.controlId ?? index}`}>{issue.message}</li>)}</ul> : null}<div className="mt-3 flex justify-between"><button type="button" disabled={page === 0} className="rounded border px-3 py-1 disabled:opacity-40" onClick={() => { setInputIssues([]); setPage((value) => Math.max(0, value - 1)); }}>上一页</button>{isLast ? <button type="button" className="rounded bg-emerald-600 px-3 py-1 text-white" onClick={submit}>确认保存输出</button> : <button type="button" className="rounded bg-blue-600 px-3 py-1 text-white" onClick={() => continueTo(Math.min(steps.length - 1, page + 1))}>下一页</button>}</div><details className="mt-3 rounded border p-2"><summary>最终 record 预览</summary>{previewState.error ? <p role="alert" className="text-rose-700">{previewState.error}</p> : <pre className="max-h-64 overflow-auto text-xs">{JSON.stringify(preview, null, 2)}</pre>}</details>{submitted ? <pre className="mt-3 max-h-48 overflow-auto rounded bg-slate-950 p-2 text-xs text-emerald-100">{JSON.stringify(submitted, null, 2)}</pre> : null}</section>;
 }
 
 export default V3WorkflowRunner;
