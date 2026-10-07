@@ -156,6 +156,7 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
   const offset = labelScreenOffset(placement, opts.offsetX, opts.offsetY, opts.screenOffsets === true);
   const extraMarginTop = offset.y;
   const extraMarginLeft = offset.x;
+  const originStyle = opts.screenOffsets ? 'position:absolute;left:0;top:0;' : '';
 
   const dot = opts.withDot ? (anchorRight ? anchoredDotHtml() : dotHtml()) : '';
   const pe = opts.interactive ? 'auto' : 'none';
@@ -255,8 +256,9 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
 
     return `
       <div style="
+        ${originStyle}
         transform:${transform};
-        margin-top:${extraMarginTop}px;
+        margin-top:${extraMarginTop}px; margin-left:${extraMarginLeft}px;
         white-space:${labelWhiteSpace};
         pointer-events:${pe};
         cursor:${cursor};
@@ -315,8 +317,9 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
 
     return `
       <div style="
+        ${originStyle}
         transform:${transform};
-        margin-top:${extraMarginTop}px;
+        margin-top:${extraMarginTop}px; margin-left:${extraMarginLeft}px;
         white-space:${labelWhiteSpace};
         pointer-events:${pe};
         cursor:${cursor};
@@ -352,8 +355,9 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
     const radius = Math.max(6, Math.round(rlePillSize * PILL_RADIUS_RATIO));
     return `
       <div style="
+        ${originStyle}
         transform:${transform};
-        margin-top:${extraMarginTop}px;
+        margin-top:${extraMarginTop}px; margin-left:${extraMarginLeft}px;
         white-space:${labelWhiteSpace};
         pointer-events:${pe};
         cursor:${cursor};
@@ -398,8 +402,9 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
 
     return `
       <div style="
+        ${originStyle}
         transform:${transform};
-        margin-top:${extraMarginTop}px;
+        margin-top:${extraMarginTop}px; margin-left:${extraMarginLeft}px;
         white-space:${labelWhiteSpace};
         pointer-events:${pe};
         cursor:${cursor};
@@ -473,6 +478,7 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
 
   return `
     <div style="
+      ${originStyle}
       transform: ${transform};
       margin-top: ${extraMarginTop}px; margin-left: ${extraMarginLeft}px;
       pointer-events: ${pe};

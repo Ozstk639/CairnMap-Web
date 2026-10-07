@@ -873,6 +873,10 @@ function safeSvgColor(value: unknown, fallback: string): string {
   return /^(#[0-9a-f]{3,8}|(?:rgb|hsl)a?\([0-9.,%\s-]+\)|[a-z]+)$/i.test(color) ? color : fallback;
 }
 
+function configIconSignature(plan: any, url: string | undefined): string | undefined {
+  return url ? JSON.stringify([url, plan?.iconSize ?? [24, 24], plan?.iconAnchor ?? [12, 12], plan?.zIndexOffset ?? 0]) : undefined;
+}
+
 function configShapeSignature(plan: any): string {
   return `config-shape:${plan?.shape ?? 'square'}:${plan?.radius ?? 6}:${plan?.style?.color ?? ''}:${plan?.style?.fillColor ?? ''}:${plan?.style?.weight ?? ''}:${plan?.style?.opacity ?? ''}:${plan?.style?.fillOpacity ?? ''}`;
 }
@@ -4392,7 +4396,7 @@ function createLayerBundle(
         hitProxy,
         hitProxySignature,
         kind: plan?.kind === 'icon' || plan?.kind === 'shape' ? 'marker' : 'circleMarker',
-        iconUrl: plan?.kind === 'icon' ? (plan.iconUrl ?? (plan.iconUrlFrom ? String((r.featureInfo as any)?.[plan.iconUrlFrom] ?? '').trim() : undefined)) : plan?.kind === 'shape' ? configShapeSignature(plan) : undefined,
+        iconUrl: plan?.kind === 'icon' ? configIconSignature(plan, plan.iconUrl ?? (plan.iconUrlFrom ? String((r.featureInfo as any)?.[plan.iconUrlFrom] ?? '').trim() : undefined)) : plan?.kind === 'shape' ? configShapeSignature(plan) : undefined,
         pane: mainPane,
         pointSignature: JSON.stringify(multipartPoints.map((point) => [point.x, point.y, point.z])),
       };
@@ -4504,7 +4508,7 @@ function createLayerBundle(
       hitProxy,
       hitProxySignature,
       kind,
-      iconUrl,
+      iconUrl: plan?.kind === 'icon' ? configIconSignature(plan, iconUrl) : iconUrl,
       pane: mainPane,
     };
   }
@@ -4563,7 +4567,7 @@ function createLayerBundle(
       hitProxy,
       hitProxySignature,
       kind: plan?.kind === 'icon' || plan?.kind === 'shape' ? 'marker' : 'circleMarker',
-      iconUrl: plan?.kind === 'icon' ? (plan.iconUrl ?? (plan.iconUrlFrom ? String((r.featureInfo as any)?.[plan.iconUrlFrom] ?? '').trim() : undefined)) : plan?.kind === 'shape' ? configShapeSignature(plan) : undefined,
+      iconUrl: plan?.kind === 'icon' ? configIconSignature(plan, plan.iconUrl ?? (plan.iconUrlFrom ? String((r.featureInfo as any)?.[plan.iconUrlFrom] ?? '').trim() : undefined)) : plan?.kind === 'shape' ? configShapeSignature(plan) : undefined,
       pane: mainPane,
       pointSignature: JSON.stringify(centers.map((item) => [item.lat, item.lng])),
     };
@@ -4750,7 +4754,7 @@ function updateLayerBundle(
       const plan = typeof symbol.point === 'function' ? symbol.point(r, ctx, store) : symbol.point;
       const iconUrl = plan?.kind === 'icon' ? (plan.iconUrl ?? (plan.iconUrlFrom ? String((r.featureInfo as any)?.[plan.iconUrlFrom] ?? '').trim() : undefined)) : undefined;
       const expectedKind: LayerBundle['kind'] = plan?.kind === 'shape' || iconUrl ? 'marker' : 'circleMarker';
-      const expectedSignature = plan?.kind === 'shape' ? configShapeSignature(plan) : iconUrl;
+      const expectedSignature = plan?.kind === 'shape' ? configShapeSignature(plan) : configIconSignature(plan, iconUrl);
       const centerSignature = JSON.stringify(centers.map((item) => [item.lat, item.lng]));
       const pointTolerance = nativeHitTolerance(displayPlan);
       const nativePointHitEnabled = pointTolerance > 0 && (deletePickTarget || geomPathEnabled);
@@ -4829,7 +4833,7 @@ function updateLayerBundle(
         (plan.iconUrlFrom
           ? String((r.featureInfo as any)?.[plan.iconUrlFrom] ?? "").trim()
           : undefined);
-      nextIconUrl = url || undefined;
+      nextIconUrl = configIconSignature(plan, url);
       nextKind = url ? "marker" : "circleMarker";
     } else if (plan && plan.kind === 'shape') {
       nextKind = 'marker';
