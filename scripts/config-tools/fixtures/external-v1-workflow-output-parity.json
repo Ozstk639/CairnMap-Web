@@ -1,0 +1,398 @@
+{
+  "schemaVersion": "cairnmap.external-v1-output-fixtures.v1",
+  "sourceHead": "5447e117a86d01f833bea012c1e0c09440489ff6",
+  "source": "untouched original V32 V1 production formatters",
+  "now": "2026-10-07T00:00:00Z",
+  "cases": [
+    {
+      "componentKey": "railwayWorkflow",
+      "subType": "铁路",
+      "mode": "polyline",
+      "coords": [
+        {
+          "x": 10,
+          "y": -64,
+          "z": 20
+        },
+        {
+          "x": 40,
+          "y": -64,
+          "z": 50
+        }
+      ],
+      "values": {
+        "ID": "ZRLE_01",
+        "Name": "铁路样例",
+        "bureau": "RIA",
+        "line": "01",
+        "color": "#123456",
+        "direction": "down",
+        "startplf": "ZPLF_A",
+        "endplf": "ZPLF_B"
+      },
+      "groups": {},
+      "expectedRecord": {
+        "ID": "ZRLE_01",
+        "Name": "铁路样例",
+        "bureau": "RIA",
+        "line": "01",
+        "color": "#123456",
+        "direction": "down",
+        "startplf": "ZPLF_A",
+        "endplf": "ZPLF_B",
+        "CoordL": [
+          [
+            [
+              10,
+              -64,
+              20
+            ],
+            [
+              40,
+              -64,
+              50
+            ]
+          ]
+        ],
+        "Type": "Polyline",
+        "Class": "RLE",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      }
+    },
+    {
+      "componentKey": "stationWorkflow",
+      "subType": "车站建筑",
+      "mode": "polygon",
+      "coords": [
+        {
+          "x": 10,
+          "y": -64,
+          "z": 20
+        },
+        {
+          "x": 40,
+          "y": -64,
+          "z": 20
+        },
+        {
+          "x": 40,
+          "y": -64,
+          "z": 50
+        },
+        {
+          "x": 10,
+          "y": -64,
+          "z": 20
+        }
+      ],
+      "values": {
+        "ID": "ZSTB_A",
+        "Name": "车站建筑样例"
+      },
+      "groups": {},
+      "expectedRecord": {
+        "ID": "ZSTB_A",
+        "Name": "车站建筑样例",
+        "CoordG": [
+          [
+            [
+              [
+                10,
+                -64,
+                20
+              ],
+              [
+                40,
+                -64,
+                20
+              ],
+              [
+                40,
+                -64,
+                50
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "STB",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      }
+    },
+    {
+      "componentKey": "stationWorkflow",
+      "subType": "站台轮廓",
+      "mode": "polygon",
+      "coords": [
+        {
+          "x": 10,
+          "y": -64,
+          "z": 20
+        },
+        {
+          "x": 40,
+          "y": -64,
+          "z": 20
+        },
+        {
+          "x": 40,
+          "y": -64,
+          "z": 50
+        },
+        {
+          "x": 10,
+          "y": -64,
+          "z": 20
+        }
+      ],
+      "values": {
+        "ID": "ZPFB_A",
+        "Name": "站台轮廓样例",
+        "LineID": "ZRLE_01"
+      },
+      "groups": {},
+      "expectedRecord": {
+        "ID": "ZPFB_A",
+        "Name": "站台轮廓样例",
+        "LineID": "ZRLE_01",
+        "CoordG": [
+          [
+            [
+              [
+                10,
+                -64,
+                20
+              ],
+              [
+                40,
+                -64,
+                20
+              ],
+              [
+                40,
+                -64,
+                50
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "PFB",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      }
+    },
+    {
+      "componentKey": "stationWorkflow",
+      "subType": "站台",
+      "mode": "point",
+      "coords": [
+        {
+          "x": 10,
+          "y": -64,
+          "z": 20
+        }
+      ],
+      "values": {
+        "ID": "ZPLF_A_DOWN",
+        "Name": "下行样例",
+        "LineID": "ZRLE_01",
+        "direction": "down",
+        "Station": "ZSTA_A",
+        "STBuilding": "ZSTB_A"
+      },
+      "groups": {},
+      "expectedRecord": {
+        "ID": "ZPLF_A_DOWN",
+        "Name": "下行样例",
+        "CoordP": [
+          [
+            10,
+            -64,
+            20
+          ]
+        ],
+        "Type": "Points",
+        "Class": "PLF",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      }
+    },
+    {
+      "componentKey": "stationWorkflow",
+      "subType": "站台",
+      "mode": "point",
+      "coords": [
+        {
+          "x": 10,
+          "y": -64,
+          "z": 20
+        }
+      ],
+      "values": {
+        "ID": "ZPLF_A_UP",
+        "Name": "上行样例",
+        "LineID": "ZRLE_01",
+        "direction": "up",
+        "Station": "ZSTA_A",
+        "STBuilding": "ZSTB_A"
+      },
+      "groups": {},
+      "expectedRecord": {
+        "ID": "ZPLF_A_UP",
+        "Name": "上行样例",
+        "CoordP": [
+          [
+            10,
+            -64,
+            20
+          ]
+        ],
+        "Type": "Points",
+        "Class": "PLF",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      }
+    },
+    {
+      "componentKey": "stationWorkflow",
+      "subType": "车站",
+      "mode": "point",
+      "coords": [
+        {
+          "x": 10,
+          "y": -64,
+          "z": 20
+        }
+      ],
+      "values": {
+        "ID": "ZSTA_A",
+        "Name": "车站样例",
+        "STBuilding": "ZSTB_A"
+      },
+      "groups": {
+        "platforms": [
+          {
+            "ID": "ZPLF_A_DOWN"
+          },
+          {
+            "ID": "ZPLF_A_UP"
+          }
+        ]
+      },
+      "expectedRecord": {
+        "ID": "ZSTA_A",
+        "Name": "车站样例",
+        "STBuilding": "ZSTB_A",
+        "platforms": [
+          {
+            "ID": "ZPLF_A_DOWN"
+          },
+          {
+            "ID": "ZPLF_A_UP"
+          }
+        ],
+        "CoordP": [
+          [
+            10,
+            -64,
+            20
+          ]
+        ],
+        "Type": "Points",
+        "Class": "STA",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      }
+    },
+    {
+      "componentKey": "tradePointWorkflow",
+      "subType": "交易点",
+      "mode": "point",
+      "coords": [
+        {
+          "x": 10,
+          "y": -64,
+          "z": 20
+        }
+      ],
+      "values": {
+        "ID": "ZTRP_TEST",
+        "Name": "交易点样例",
+        "Kind": "SHOP",
+        "SKind": "",
+        "SKind2": "",
+        "Situation": "开放",
+        "Interaction": "面对面",
+        "elevation": 10,
+        "Trade": [
+          {
+            "item": "stone",
+            "price": "1"
+          }
+        ]
+      },
+      "groups": {
+        "tags": [
+          {
+            "tagKey": "__other__",
+            "tagKeyOther": "fixture",
+            "tagValue": "yes"
+          }
+        ],
+        "extensions": [
+          {
+            "extGroup": "fixture",
+            "extKey": "note",
+            "extType": "text",
+            "extValue": "external"
+          }
+        ]
+      },
+      "expectedRecord": {
+        "ID": "ZTRP_TEST",
+        "Name": "交易点样例",
+        "Kind": "SHOP",
+        "SKind": "",
+        "SKind2": "",
+        "Interaction": "面对面",
+        "Situation": "开放",
+        "elevation": 10,
+        "tags": {
+          "fixture": "yes"
+        },
+        "extensions": {
+          "fixture": {
+            "note": "external"
+          }
+        },
+        "CoordP": [
+          [
+            10,
+            -64,
+            20
+          ]
+        ],
+        "Type": "Points",
+        "Class": "TRP",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user",
+        "Trade": [
+          {
+            "item": "stone",
+            "price": "1"
+          }
+        ]
+      }
+    }
+  ]
+}
