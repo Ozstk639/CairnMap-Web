@@ -586,6 +586,11 @@ export function validateWorkflowOutput(output: WorkflowOutput, _outputIndex: num
 
 function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3, issues: ConfigValidationIssue[]): void {
   const base = `workflows/${workflow.id}`;
+  const checkIds = (items: Array<{ id: string }>, kind: string) => {
+    const ids = new Set<string>();
+    for (const item of items) { if (!item.id?.trim() || ids.has(item.id)) issue(issues, 'error', 'workflow-id-invalid', base, `${kind}标识必须存在且不能重复。`); ids.add(item.id); }
+  };
+  checkIds(workflow.steps, '页面'); checkIds(workflow.outputs, '输出'); checkIds(controlsFor(workflow), '控件');
   if (workflow.mode === 'external') {
     const allowedComponents = { 'railway-integrated': 'railwayWorkflow', 'station-integrated': 'stationWorkflow', 'trp-integrated': 'tradePointWorkflow' } as const;
     if (!workflow.external?.componentKey || !EXTERNAL_WORKFLOW_REASONS.has(workflow.external.reason) || allowedComponents[workflow.external.reason as keyof typeof allowedComponents] !== workflow.external.componentKey || workflow.steps.length || workflow.outputs.length || !workflow.external.coveredClassifications?.length) issue(issues, 'error', 'external-workflow-invalid', base, '外部整体工作流必须是铁路一体、车站一体或 TRP 一体的受控成品，且必须声明受控分类。');
@@ -607,6 +612,11 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
 
   const slots = new Set<string>();
   const controlList = controlsFor(workflow);
+  const validateOptions = (control: Pick<WorkflowControl, 'kind' | 'options'>, path: string) => {
+    if (control.kind !== 'select') return;
+    const values = (control.options ?? []).map((option) => option.value);
+    if (!values.length || values.some((value) => !value.trim()) || new Set(values).size !== values.length) issue(issues, 'error', 'workflow-select-options-invalid', path, '下拉选项必须具有非空且唯一的保存值。');
+  };
   for (const step of workflow.steps) for (const control of step.controls ?? []) {
     const controlPath = `${base}/steps/${step.id}/controls/${control.id}`;
     if (['notice', 'runtimeValue', 'component'].includes(control.kind)) issue(issues, 'error', 'workflow-control-kind-not-composed', controlPath, '组合式工作流只允许标准表单控件；专有流程应切换为外部整体工作流。');
@@ -614,8 +624,10 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
       if (!/^[A-Z][A-Z0-9_]*$/.test(control.slot) || slots.has(control.slot)) issue(issues, 'error', 'workflow-slot-invalid', controlPath, `输出槽位 ${control.slot} 无效或重复。`);
       slots.add(control.slot);
     }
+    else if (!control.systemManaged) issue(issues, 'error', 'workflow-slot-required', controlPath, '表单输入必须声明输出槽位。');
+    validateOptions(control, controlPath);
     if (control.kind === 'featureSearch' || control.kind === 'coarseSearch') validateSearch(control, config, controlPath, issues);
-    if (control.kind === 'classificationPicker' && control.systemManaged) {
+    if (control.kind === 'classificationPicker') {
       if (!control.outputId || !workflow.outputs.some((output) => output.id === control.outputId)) issue(issues, 'error', 'workflow-classification-output-invalid', controlPath, '系统 Classification 控件必须精确绑定一个工作流输出。');
       if (!control.classificationScope || !isContinuousPath(control.classificationScope) || !hasCategoryNode(config, control.classificationScope)) issue(issues, 'error', 'workflow-classification-scope-invalid', controlPath, '系统 Classification 控件必须选择有效的分类范围。');
     }
@@ -626,11 +638,13 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
         continue;
       }
       const keys = new Set<string>();
+      if (group.storage !== undefined && !['object', 'scalar'].includes(group.storage)) issue(issues, 'error', 'workflow-repeat-group-storage-invalid', controlPath, '重复字段组保存形式无效。');
       if (group.storage === 'scalar' && group.itemFields.length !== 1) issue(issues, 'error', 'workflow-repeat-group-scalar-shape-invalid', controlPath, '纯值数组必须且只能定义一个组字段。');
       for (const field of group.itemFields) {
         const fieldPath = `${controlPath}/group/${field.key}`;
         if (group.storage === 'scalar' ? field.key.trim() !== '' : !/^[A-Za-z][A-Za-z0-9_]*$/.test(field.key) || keys.has(field.key)) issue(issues, 'error', 'workflow-repeat-group-field-invalid', fieldPath, group.storage === 'scalar' ? '纯值数组的唯一组字段必须留空保存键。' : '重复字段组字段名必须以字母开头且不能重复。');
         keys.add(field.key);
+        validateOptions(field, fieldPath);
         if (field.kind === 'featureSearch' || field.kind === 'coarseSearch') validateSearch(field, config, fieldPath, issues);
       }
       if (group.minItems !== undefined && (!Number.isInteger(group.minItems) || group.minItems < 0)) issue(issues, 'error', 'workflow-repeat-group-min-items-invalid', controlPath, '重复字段组的最小项目数必须是非负整数。');
