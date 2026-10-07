@@ -213,6 +213,8 @@ export type LabelRequest = {
   id: string;
   /** 对应 Feature uid（便于回写到 bundle.label） */
   featureUid?: string;
+  partIndex?: number;
+  collisionOwnerUid?: string;
   /** label anchor（世界坐标） */
   anchorLatLng: L.LatLng;
 
@@ -897,7 +899,7 @@ function rectForCandidate(
 function indexedLabelRect(rect: Rect, item: LayoutItem): IndexedRect {
   return {
     ...rect,
-    ownerUid: item.req.featureUid,
+    ownerUid: item.req.collisionOwnerUid ?? item.req.featureUid,
     collisionSource: "label",
     collisionRole: item.collisionRole,
     collisionGroup: item.collisionGroup,
@@ -1125,6 +1127,7 @@ export function layoutLabelsOnMap(
       placementCache: resolveLabelPlacementCacheConfig({
         id: req.id,
         featureUid: req.featureUid,
+        partIndex: req.partIndex,
         text: req.text,
         placement: req.placement,
         zoom: map.getZoom(),
@@ -1841,6 +1844,7 @@ export function layoutLabelsOnMap(
       resolveLabelPlacementCacheConfig({
         id: baseReq.id,
         featureUid: baseReq.featureUid,
+        partIndex: baseReq.partIndex,
         text,
         placement: baseReq.placement,
         zoom: map.getZoom(),

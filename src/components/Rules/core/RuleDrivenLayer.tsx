@@ -1,3 +1,4 @@
+import { featureLabelParts, componentLabelId } from '@/components/Rules/rendering/multipartLabels';
 import { iconBoundsAtAnchor, type LabelPlacement } from '@/components/Rules/rendering/labelPlacement';
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -140,6 +141,7 @@ const Y_FOR_DISPLAY = -64;
 type LayerBundle = {
   main: L.Layer;
   label?: L.Layer;
+  partLabels?: Map<string, LayerBundle>;
   hitProxy?: L.Layer;
   /** Changes whenever a native V3 click-target needs to be rebuilt. */
   hitProxySignature?: string;
@@ -1538,6 +1540,8 @@ function clearBundleLabel(
   root: L.LayerGroup,
   immediate: boolean = false,
 ) {
+  for (const child of bundle.partLabels?.values() ?? []) clearBundleLabel(child, root, immediate);
+  bundle.partLabels?.clear();
   if (bundle.label) fadeRemoveLabelLayer(root, bundle.label, immediate);
   bundle.label = undefined;
   bundle.labelKey = undefined;
@@ -3486,7 +3490,7 @@ export default function RuleDrivenLayer(props: Props) {
           }
         }
         if (labelPlan?.enabled && labelPlan.declutter) {
-          const rawReq = buildLabelRequest(
+          const rawRequests = buildLabelRequests(
             r,
             labelPlan,
             context,
@@ -3497,11 +3501,11 @@ export default function RuleDrivenLayer(props: Props) {
             layoutViewportWorldRectXZ,
             displayPlan,
           );
-          const requests = rawReq ? [applyAdvancedLineTextBudget(
+          const requests = rawRequests.map((rawReq) => applyAdvancedLineTextBudget(
             mergeDisplayCollisionIntoLabelRequest(rawReq, displayPlan),
             displayPlan,
             advancedLineTextBudget,
-          )] : [];
+          ));
           for (const req of requests) {
             if (auditRow) {
               auditRow.expectedLabel = true;
@@ -3600,6 +3604,10 @@ export default function RuleDrivenLayer(props: Props) {
       }
 
       // 统一计算 declutter label 的摆放（避免重叠）
+      const requestedParts = new Set(declutterLabelRequests.filter((req) => req.partIndex !== undefined).map((req) => req.id));
+      for (const bundle of cacheRef.current.values()) {
+        for (const [id, child] of bundle.partLabels ?? []) if (!requestedParts.has(id)) { clearBundleLabel(child, root); bundle.partLabels!.delete(id); }
+      }
       if (declutterLabelRequests.length) {
         const placed = layoutLabelsOnMap(map, declutterLabelRequests, {
           preferNearCenter: true,
@@ -3751,7 +3759,14 @@ export default function RuleDrivenLayer(props: Props) {
 
         for (const req of declutterLabelRequests) {
           const p = placedById.get(req.id);
-          const b = cacheRef.current.get(req.featureUid ?? "");
+          const parentBundle = cacheRef.current.get(req.featureUid ?? "");
+          let b = parentBundle;
+          if (parentBundle && req.partIndex !== undefined) {
+            if (parentBundle.label) clearBundleLabel(parentBundle, root, true);
+            parentBundle.partLabels ??= new Map();
+            b = parentBundle.partLabels.get(req.id);
+            if (!b) { b = { ...parentBundle, label: undefined, labelKey: undefined, partLabels: undefined }; parentBundle.partLabels.set(req.id, b); }
+          }
           if (!b) continue;
 
           // 不可放置/被隐藏 → 移除
@@ -4085,8 +4100,7 @@ export default function RuleDrivenLayer(props: Props) {
         if (root.hasLayer(bundle.main)) root.removeLayer(bundle.main);
         if (bundle.hitProxy && root.hasLayer(bundle.hitProxy))
           root.removeLayer(bundle.hitProxy);
-        if (bundle.label && root.hasLayer(bundle.label))
-          fadeRemoveLabelLayer(root, bundle.label);
+        clearBundleLabel(bundle, root);
       }
 
       if (waitingFirstPaint && !renderCompletionScheduledRef.current) {
@@ -4706,7 +4720,7 @@ function updateLayerBundle(
 
   const rebuildBundle = (): boolean => {
     if (root.hasLayer(bundle.main)) root.removeLayer(bundle.main);
-    if (bundle.label && root.hasLayer(bundle.label)) fadeRemoveLabelLayer(root, bundle.label, true);
+    clearBundleLabel(bundle, root, true);
     if (bundle.hitProxy && root.hasLayer(bundle.hitProxy)) root.removeLayer(bundle.hitProxy);
     const fresh = createLayerBundle(r, symbol, ctx, store, projection, onLabelClick, viewportWorldRectXZ, assistPickActive, deletePickActive, displayPlan, featureInteractionSuppressed);
     if (!fresh) return false;
@@ -4778,7 +4792,7 @@ function updateLayerBundle(
         });
       }
       if (!(resolvedLabelPlan as any)?.declutter) {
-        if (bundle.label) clearBundleLabel(bundle, root);
+        if (bundle.label || bundle.partLabels?.size) clearBundleLabel(bundle, root);
         const labelLayer = buildLabelLayer(r, resolvedLabelPlan, ctx, store, projection, center, labelStyleKey, effectiveClickPlan && clickEnabled ? effectiveClickPlan as any : null, onClick, viewportWorldRectXZ, deletePickTarget, deletePickTarget ? () => dispatchDeletePickFeature(r) : null, displayPlan);
         if (labelLayer) {
           bundle.label = labelLayer;
@@ -4921,7 +4935,7 @@ function updateLayerBundle(
     // label refresh
     // - 若使用 declutter：不在这里动 label，交由 refresh() 的统一布局阶段处理（避免闪烁/卡顿）
     if ((resolvedLabelPlan as any)?.declutter) return;
-    if (bundle.label) clearBundleLabel(bundle, root);
+    if (bundle.label || bundle.partLabels?.size) clearBundleLabel(bundle, root);
     const labelLayer = buildLabelLayer(
       r,
       resolvedLabelPlan,
@@ -4965,8 +4979,7 @@ function updateLayerBundle(
     if (root.hasLayer(bundle.main)) root.removeLayer(bundle.main);
     if (bundle.hitProxy && root.hasLayer(bundle.hitProxy))
       root.removeLayer(bundle.hitProxy);
-    if (bundle.label && root.hasLayer(bundle.label))
-      root.removeLayer(bundle.label);
+    clearBundleLabel(bundle, root, true);
 
     const newBundle = createLayerBundle(
       r,
@@ -5026,7 +5039,7 @@ function updateLayerBundle(
   // label refresh
   // - 若使用 declutter：不在这里动 label，交由 refresh() 的统一布局阶段处理
   if (!(resolvedLabelPlan as any)?.declutter) {
-    if (bundle.label) clearBundleLabel(bundle, root);
+    if (bundle.label || bundle.partLabels?.size) clearBundleLabel(bundle, root);
     const labelLayer = buildLabelLayer(
       r,
       resolvedLabelPlan,
@@ -5150,6 +5163,19 @@ function resolveStructureLabelDisplayPlanForContext(
   }
 
   return plan;
+}
+
+function buildLabelRequests(r: FeatureRecord, labelPlan: any, ctx: RenderContext, store: FeatureStore, projection: DynmapProjection, pointLatLng?: L.LatLng, realViewport?: WorldRectXZ | null, layoutViewport?: WorldRectXZ | null, displayPlan?: FeatureDisplayPlan | null): LabelRequest[] {
+  const mode = displayPlan?.anchor?.multipartMode ?? 'featureBbox';
+  return featureLabelParts(r, mode).flatMap(({ record, partIndex }) => {
+    const anchor = record.type === 'Points'
+      ? (partIndex === undefined && record.multipartGeometry?.parts.length && record.multipartGeometry.parts.length > 1 ? pointRepresentationLatLngs(record, projection, 'featureBbox')[0] : record.p3 ? projection.locationToLatLng(record.p3.x, record.p3.y, record.p3.z) : pointLatLng)
+      : undefined;
+    const req = buildLabelRequest(record, labelPlan, ctx, store, projection, anchor, realViewport, layoutViewport, displayPlan);
+    if (!req) return [];
+    const id = componentLabelId(r.uid, partIndex);
+    return [{ ...req, id, partIndex, collisionOwnerUid: partIndex === undefined ? r.uid : id }];
+  });
 }
 
 // ======================= LabelLayout：从单要素提取 LabelRequest =======================

@@ -19,6 +19,7 @@ export type LabelPlacementCacheKeyMode =
 export type LabelPlacementCacheInput = {
   id: string;
   featureUid?: string;
+  partIndex?: number;
   text: string;
   placement: LabelPlacement;
   zoom: number;
@@ -84,7 +85,7 @@ export function resolveLabelPlacementCacheConfig(
   const keepPreviousAnchor = input.placementKeepPreviousAnchor !== false;
   if (!keepPreviousCandidate && !keepPreviousAnchor) return undefined;
 
-  const featureKey = safeSegment(input.featureUid ?? input.id, input.id || 'label');
+  const featureKey = safeSegment(`${input.featureUid ?? input.id}${input.partIndex === undefined ? '' : `#part-${input.partIndex}`}`, input.id || 'label');
   const textKey = safeSegment(cleanText(input.text), 'empty');
   const placementKey = safeSegment(input.placement, 'placement');
   const groupKey = safeSegment(input.collisionGroup ?? input.groupKey, 'label');
