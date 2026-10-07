@@ -46,7 +46,8 @@ function App() {
   if (isWorkflowStudio) {
     return <WorkflowStudioPage onClose={() => {
       const target = new URL(window.location.href)
-      target.searchParams.set('workspace', 'config-studio')
+      target.searchParams.delete('workspace')
+      target.searchParams.delete('tab')
       window.location.assign(target.toString())
     }} />
   }

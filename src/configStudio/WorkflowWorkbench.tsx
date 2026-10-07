@@ -1,7 +1,7 @@
 import { Download, FileUp, FolderOpen, Plus, Save, ShieldCheck } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ConfigPackageV3, ConfigValidationReport, MountedFeatureRecord, WorkflowDefinition } from './types';
-import { validateWorkflowDefinition } from './runtime';
+import { validateConfigPackage, validateWorkflowDefinition } from './runtime';
 import { canonicalizeWorkflow, V3WorkflowEditor } from './V3WorkflowEditor';
 
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
@@ -26,7 +26,8 @@ type WorkflowArtifact = {
 export interface WorkflowWorkbenchProps {
   config: ConfigPackageV3;
   /** Called only after a workflow has passed its own validation and is saved. */
-  onChange: (config: ConfigPackageV3) => void;
+  onChange: (config: ConfigPackageV3) => boolean | void;
+  onDraftStateChange?: (active: boolean) => void;
   records?: MountedFeatureRecord[];
 }
 
@@ -40,12 +41,14 @@ function downloadArtifact(artifact: WorkflowArtifact): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
-export function WorkflowWorkbench({ config, onChange, records = [] }: WorkflowWorkbenchProps) {
+export function WorkflowWorkbench({ config, onChange, onDraftStateChange, records = [] }: WorkflowWorkbenchProps) {
   const [selectedId, setSelectedId] = useState(config.workflows[0]?.id ?? '');
   const [draft, setDraft] = useState<WorkflowDefinition | null>(null);
   const [report, setReport] = useState<ConfigValidationReport | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const selected = useMemo(() => config.workflows.find((workflow) => workflow.id === selectedId), [config.workflows, selectedId]);
+
+  useEffect(() => { onDraftStateChange?.(draft !== null); }, [draft, onDraftStateChange]);
 
   useEffect(() => {
     if (selectedId && config.workflows.some((workflow) => workflow.id === selectedId)) return;
@@ -79,14 +82,17 @@ export function WorkflowWorkbench({ config, onChange, records = [] }: WorkflowWo
     if (!nextReport.valid) return;
     const existing = config.workflows.find((workflow) => workflow.id === next.id);
     if (existing && !window.confirm(`工作流“${existing.label.zh}”已存在。保存将覆盖该工作流，是否继续？`)) return;
-    onChange({
+    const nextPackage = {
       ...config,
       workflows: existing
         ? config.workflows.map((workflow) => workflow.id === next.id ? next : workflow)
         : [...config.workflows, next],
-    });
+    };
+    const packageReport = validateConfigPackage(nextPackage, records);
+    setReport(packageReport);
+    if (!packageReport.valid || onChange(nextPackage) === false) return;
     setSelectedId(next.id);
-    setDraft(next);
+    setDraft(null);
   };
   const exportDraft = () => {
     if (!draft) return;
@@ -111,7 +117,7 @@ export function WorkflowWorkbench({ config, onChange, records = [] }: WorkflowWo
     }
   };
 
-  return <section className="h-full min-h-0 overflow-y-auto rounded-xl border bg-white p-4">
+  return <section aria-label="工作流编辑区域" className="h-full max-h-full min-h-0 overflow-y-auto overscroll-contain rounded-xl border bg-white p-4">
     <input ref={fileRef} className="hidden" type="file" accept="application/json,.json" onChange={(event) => {
       const file = event.target.files?.[0];
       if (file) void importFile(file);
@@ -132,6 +138,7 @@ export function WorkflowWorkbench({ config, onChange, records = [] }: WorkflowWo
       <button type="button" className="inline-flex items-center gap-1 rounded border px-2 py-1 text-sm" disabled={!draft} onClick={validate}><ShieldCheck className="h-4 w-4" />核验</button>
       <button type="button" className="inline-flex items-center gap-1 rounded bg-blue-600 px-2 py-1 text-sm text-white disabled:opacity-40" disabled={!draft} onClick={save}><Save className="h-4 w-4" />保存</button>
       <button type="button" className="inline-flex items-center gap-1 rounded border px-2 py-1 text-sm" disabled={!draft} onClick={exportDraft}><Download className="h-4 w-4" />导出</button>
+      <button type="button" className="rounded border px-2 py-1 text-sm disabled:opacity-40" disabled={!draft} onClick={() => { if (confirmDiscardDraft('放弃编辑')) clearDraft(); }}>放弃草稿</button>
       <button type="button" className="inline-flex items-center gap-1 rounded border px-2 py-1 text-sm" onClick={() => fileRef.current?.click()}><FileUp className="h-4 w-4" />导入</button>
     </div>
     <p className="mt-2 text-sm text-slate-500">先选择后读取，或新建/导入为独立草稿；核验通过后才能保存到当前配置包。保存或放弃草稿后，才能切回要素设计。</p>
