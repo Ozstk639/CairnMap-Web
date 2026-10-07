@@ -22,6 +22,8 @@ import {
 // 使用相对路径，避免不同构建环境下 @ 别名解析差异导致 TS2307。
 import { loadRailNewIndex, type RailNewIndex } from '@/components/Navigation/railNewIndex';
 import { Navigation, Share2, X } from 'lucide-react';
+import type { ConfigPackageV3 } from '@/configStudio/types';
+import { buildV3CardSections } from '@/configStudio/V3CardRenderer';
 
 type Props = {
   open: boolean;
@@ -43,6 +45,12 @@ type Props = {
 
   /** 可选：覆盖主信息/其他信息分区（用于特殊卡把大段信息挪到自定义模块中） */
   infoSectionsOverride?: { mainRows: CardRow[]; otherRows: CardRow[] };
+  /**
+   * A V3 card package is evaluated here (after the optional rail index has
+   * loaded), so declarative rail chips and normal fields share one renderer.
+   * This is intentionally not a per-Class component fallback.
+   */
+  configRuntimeCard?: ConfigPackageV3;
   /** 渲染模式：floating=桌面悬浮，embedded=嵌入容器（移动端底部抽屉） */
   variant?: 'floating' | 'embedded';
   onOpenJsonPanel?: (payload: { title: string; jsonText: string; filename: string }) => void;
@@ -132,6 +140,20 @@ function renderRichValue(v: any) {
     );
   }
 
+  if (v.kind === 'tag') {
+    const color = String(v.color || '#475569');
+    const tagText = String(v.text || '').trim();
+    if (!tagText) return null;
+    return (
+      <span
+        className="inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold text-white"
+        style={{ backgroundColor: color }}
+      >
+        {tagText}
+      </span>
+    );
+  }
+
   return null;
 }
 
@@ -147,12 +169,11 @@ export default function FeatureInteractionCard(props: Props) {
     pictureItemSize,
     disableFieldRules,
     infoSectionsOverride,
+    configRuntimeCard,
     variant = 'floating',
     onOpenJsonPanel,
     onOpenSharePanel,
   } = props;
-  if (!open) return null;
-
   const title = useMemo(() => pickFeatureDisplayName(feature), [feature]);
 
   const [pictures, setPictures] = useState<string[]>([]);
@@ -243,8 +264,14 @@ export default function FeatureInteractionCard(props: Props) {
     };
   }, [feature]);
 
+  const v3InfoSections = useMemo(() => {
+    if (!configRuntimeCard || !feature) return undefined;
+    return buildV3CardSections(configRuntimeCard, feature, railIndex);
+  }, [configRuntimeCard, feature, railIndex]);
+
   const { mainRows, otherRows } = useMemo(() => {
     if (infoSectionsOverride) return infoSectionsOverride;
+    if (v3InfoSections) return v3InfoSections;
     if (!feature) return { mainRows: [] as CardRow[], otherRows: [] as CardRow[] };
     const { mainRows, otherRows } = buildInfoSectionsForFeature(feature, railIndex, {
       disableFieldRules: !!disableFieldRules,
@@ -271,7 +298,7 @@ export default function FeatureInteractionCard(props: Props) {
       mainRows: (mainRows ?? []).filter((r) => r && !isEmptyOrUnknown((r as any).value)),
       otherRows: (otherRows ?? []).filter((r) => r && !isEmptyOrUnknown((r as any).value)),
     };
-  }, [feature, railIndex, disableFieldRules, infoSectionsOverride]);
+  }, [feature, railIndex, disableFieldRules, infoSectionsOverride, v3InfoSections]);
 
   const [otherOpen, setOtherOpen] = useState(false);
   useEffect(() => {
@@ -417,6 +444,11 @@ export default function FeatureInteractionCard(props: Props) {
       detail: { feature, title: title || '当前要素' },
     }));
   };
+
+  // Keep every hook above unconditional. RuleDrivenLayer leaves the card
+  // mounted while its `open` prop changes, so returning before hooks here
+  // would violate React's hook ordering precisely when a V3 card is opened.
+  if (!open) return null;
 
   const cardBody = (
     <AppCard

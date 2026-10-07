@@ -325,6 +325,14 @@ export type DisplayAnchorCandidate =
 export type DisplayAnchorConfig = {
   strategy: DisplayAnchorStrategy;
 
+  /**
+   * Native V3 multipart rendering policy.  This is intentionally separate
+   * from geo-anchor candidate selection: it controls whether a low-zoom
+   * point representation is emitted once for the whole feature bbox or once
+   * for each canonical geometry part.
+   */
+  multipartMode?: 'featureBbox' | 'perPart';
+
   candidates?: DisplayAnchorCandidate[];
 
   offsetPx?: {

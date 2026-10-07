@@ -1,0 +1,235 @@
+import { useEffect, useMemo, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import { normalizeRuleSourceWorldId } from '@/components/Rules/data/ruleDataSources';
+import type { ClassificationPath, ConfigPackageV3, MountedFeatureRecord, SearchProfile, WorkflowControl, WorkflowDefinition, WorkflowGroupField } from './types';
+import { listCategoryPaths, normalizeSearchProfile, optionLabel, pathMatchesScope, readRecordPath, workflowPathLabel } from './runtime';
+
+export type V3WorkflowValueMap = Record<string, unknown>;
+export type V3WorkflowRunResult = Array<{ outputId: string; classification: ClassificationPath; geometry: string; record: Record<string, unknown> }>;
+export type V3WorkflowInputIssue = { stepId?: string; controlId?: string; message: string };
+export type V3SearchCandidate = { id: string; display: string; returned: unknown; record: MountedFeatureRecord };
+
+function getTokenValue(token: string, slots: V3WorkflowValueMap, system: V3WorkflowValueMap): unknown {
+  const clean = token.trim();
+  if (!clean) return '';
+  if ((clean.startsWith('"') && clean.endsWith('"')) || (clean.startsWith("'") && clean.endsWith("'"))) return clean.slice(1, -1).replace(/\\([\\"'])/g, '$1');
+  if (Object.prototype.hasOwnProperty.call(slots, clean)) return slots[clean];
+  if (Object.prototype.hasOwnProperty.call(system, clean)) return system[clean];
+  return clean;
+}
+
+function splitTopLevel(source: string, delimiter: string): string[] {
+  const values: string[] = []; let current = ''; let quote = ''; let escaped = false; let depth = 0;
+  for (const char of source) {
+    if (escaped) { current += char; escaped = false; continue; }
+    if (char === '\\') { current += char; escaped = true; continue; }
+    if (quote) { current += char; if (char === quote) quote = ''; continue; }
+    if (char === '"' || char === "'") { quote = char; current += char; continue; }
+    if (char === '(') { depth += 1; current += char; continue; }
+    if (char === ')') { depth = Math.max(0, depth - 1); current += char; continue; }
+    if (char === delimiter && depth === 0) { values.push(current); current = ''; continue; }
+    current += char;
+  }
+  values.push(current); return values;
+}
+
+function evaluateJoinExpression(source: string, slots: V3WorkflowValueMap, system: V3WorkflowValueMap): unknown | undefined {
+  const match = /^join\((.*)\)$/s.exec(source.trim());
+  if (!match) return undefined;
+  const args = splitTopLevel(match[1], ',').map((part) => part.trim());
+  if (args.length < 2) return '';
+  const separator = evaluateV3Expression(args[0], slots, system);
+  return args.slice(1).map((part) => evaluateV3Expression(part, slots, system))
+    .filter((value) => value !== undefined && value !== null && String(value).trim())
+    .map((value) => typeof value === 'string' ? value : JSON.stringify(value)).join(String(separator ?? ''));
+}
+
+export function resolveV3WorldPrefix(world: unknown): string {
+  const raw = normalizeV3WorldId(world);
+  const byId: Record<string, string> = { zth: 'Z', naraku: 'N', houtu: 'H', eden: 'E', laputa: 'L', yunduan: 'Y' };
+  return byId[raw] ?? (/^[ZNHELY]$/i.test(raw) ? raw.toUpperCase() : 'Z');
+}
+
+/** One canonical World value is used by workflow output, search, and the
+ * map executor.  Imports may still carry legacy numeric, Chinese, or prefix
+ * values, but they never create a second logical world namespace. */
+export function normalizeV3WorldId(world: unknown): string {
+  return normalizeRuleSourceWorldId(String(world ?? ''));
+}
+
+/** Deliberately non-eval expression language: A+"_"+B and
+ * join("_",WorldPrefix+Class,A) cover the V1 assemblies without running JS. */
+export function evaluateV3Expression(expression: string, slots: V3WorkflowValueMap, system: V3WorkflowValueMap): unknown {
+  const source = String(expression ?? '').trim();
+  if (!source) return '';
+  const joined = evaluateJoinExpression(source, slots, system);
+  if (joined !== undefined) return joined;
+  const tokens = splitTopLevel(source, '+');
+  if (tokens.length === 1) return getTokenValue(tokens[0], slots, system);
+  return tokens.map((token) => {
+    const value = getTokenValue(token, slots, system);
+    return value === null || value === undefined ? '' : typeof value === 'string' ? value : JSON.stringify(value);
+  }).join('');
+}
+
+function setPath(target: Record<string, unknown>, path: string, value: unknown): void {
+  const parts = String(path ?? '').split('.').filter(Boolean); if (!parts.length) return;
+  let cursor = target;
+  for (const key of parts.slice(0, -1)) {
+    if (!cursor[key] || typeof cursor[key] !== 'object' || Array.isArray(cursor[key])) cursor[key] = {};
+    cursor = cursor[key] as Record<string, unknown>;
+  }
+  cursor[parts[parts.length - 1]] = value;
+}
+
+function resolvedClassification(output: WorkflowDefinition['outputs'][number], selections: Record<string, ClassificationPath | undefined>): ClassificationPath {
+  return selections[output.id] ?? output.classification;
+}
+
+function parseStructuredOutput(target: string, value: unknown): unknown {
+  if (target !== 'tags' && target !== 'extensions') return value;
+  if (typeof value !== 'string' || !value.trim()) return value;
+  try { return JSON.parse(value); } catch { return value; }
+}
+
+export function evaluateV3WorkflowOutputs(workflow: WorkflowDefinition, slots: V3WorkflowValueMap, options: { world?: string; classifications?: Record<string, ClassificationPath | undefined> } = {}): V3WorkflowRunResult {
+  const world = normalizeV3WorldId(options.world ?? slots.World ?? 'zth');
+  return workflow.outputs.map((output, outputIndex) => {
+    const classification = resolvedClassification(output, options.classifications ?? {});
+    const system: V3WorkflowValueMap = {
+      World: world, WorldPrefix: resolveV3WorldPrefix(world), Class: classification.class, Kind: classification.kind ?? '', Skind: classification.skind ?? '', Skind2: classification.skind2 ?? '',
+      [`World_${outputIndex + 1}`]: world, [`WorldPrefix_${outputIndex + 1}`]: resolveV3WorldPrefix(world), [`Class_${outputIndex + 1}`]: classification.class, [`Kind_${outputIndex + 1}`]: classification.kind ?? '', [`Skind_${outputIndex + 1}`]: classification.skind ?? '', [`Skind2_${outputIndex + 1}`]: classification.skind2 ?? '',
+    };
+    const record: Record<string, unknown> = { World: world, Class: classification.class, ...(classification.kind ? { Kind: classification.kind } : {}), ...(classification.skind ? { SKind: classification.skind } : {}), ...(classification.skind2 ? { SKind2: classification.skind2 } : {}) };
+    const actor = String(slots.actor ?? '').trim(); if (actor) record.Creator = actor;
+    for (const namespace of ['tags', 'extensions'] as const) {
+      const value = parseStructuredOutput(namespace, slots[namespace]);
+      if (value && typeof value === 'object' && !Array.isArray(value)) record[namespace] = value;
+    }
+    for (const assignment of output.assignments) setPath(record, assignment.target, parseStructuredOutput(assignment.target, evaluateV3Expression(assignment.expression, slots, system)));
+    return { outputId: output.id, classification, geometry: output.geometry.selected, record };
+  });
+}
+
+function empty(value: unknown): boolean { return value === undefined || value === null || (typeof value === 'string' && !value.trim()) || (Array.isArray(value) && value.length === 0); }
+
+function recordPath(record: MountedFeatureRecord): ClassificationPath {
+  return { class: String(record.Class ?? ''), ...(record.Kind ? { kind: String(record.Kind) } : {}), ...(record.Skind ?? record.SKind ? { skind: String(record.Skind ?? record.SKind) } : {}), ...(record.Skind2 ?? record.SKind2 ? { skind2: String(record.Skind2 ?? record.SKind2) } : {}) };
+}
+
+function displaySearchTemplate(template: string, record: MountedFeatureRecord): string {
+  return template.replace(/{{\s*([A-Za-z][A-Za-z0-9_.]*)\s*}}/g, (_all, field: string) => String(readRecordPath(record, field) ?? 'Null'));
+}
+
+/** Query actual mounted records. The returned value is deliberately one field,
+ * while ID/Name are only the human-facing choice label. */
+export function findV3SearchCandidates(records: MountedFeatureRecord[], profile: SearchProfile | undefined, query: string, world?: string): V3SearchCandidate[] {
+  const search = normalizeSearchProfile(profile);
+  const needle = query.trim().toLocaleLowerCase();
+  if (!search || needle.length < (search.minQueryLength ?? 1)) return [];
+  const matches = (value: string) => {
+    const text = value.toLocaleLowerCase();
+    if (search.matcher === 'prefix') return text.startsWith(needle);
+    if (search.matcher === 'token') return text.split(/[\s_\-/.]+/).some((token) => token.startsWith(needle));
+    if (search.matcher === 'fuzzy') { let index = 0; for (const char of text) if (char === needle[index]) index += 1; return index === needle.length; }
+    return text.includes(needle);
+  };
+  return records.filter((record) => {
+    if (world && String(record.World ?? '').trim() && normalizeV3WorldId(record.World) !== normalizeV3WorldId(world)) return false;
+    if (!pathMatchesScope(recordPath(record), search.target)) return false;
+    return (search.queryFields ?? []).some((field) => matches(String(readRecordPath(record, field) ?? '')));
+  }).slice(0, search.maxResults ?? 30).map((record, index) => ({ id: String(record.ID ?? index), display: displaySearchTemplate(search.displayTemplate ?? '{{ID}} ({{Name}})', record), returned: readRecordPath(record, search.returnField ?? 'ID'), record }));
+}
+
+export function validateV3WorkflowInputs(workflow: WorkflowDefinition, slots: V3WorkflowValueMap, steps = workflow.steps): V3WorkflowInputIssue[] {
+  if (workflow.mode !== 'composed') return [];
+  const issues: V3WorkflowInputIssue[] = [];
+  for (const step of steps) for (const control of step.controls ?? []) {
+    const value = slots[control.slot ?? control.id];
+    if (control.required && empty(value)) issues.push({ stepId: step.id, controlId: control.id, message: `${control.label.zh} 为必填项。` });
+    if (control.kind === 'json' && !empty(value)) try { JSON.parse(String(value)); } catch { issues.push({ stepId: step.id, controlId: control.id, message: `${control.label.zh} 必须是有效 JSON。` }); }
+    if ((control.kind === 'featureSearch' || control.kind === 'coarseSearch') && control.required && !empty(value) && !normalizeSearchProfile(control.search)) issues.push({ stepId: step.id, controlId: control.id, message: `${control.label.zh} 缺少受控搜索范围。` });
+    if (control.kind !== 'group') continue;
+    const group = control.group; const scalar = group?.storage === 'scalar';
+    const rows = Array.isArray(value) ? value.map((item) => scalar ? { '': item } : item).filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === 'object' && !Array.isArray(item)) : [];
+    const minItems = Math.max(group?.minItems ?? 0, control.required ? 1 : 0);
+    if (rows.length < minItems) issues.push({ stepId: step.id, controlId: control.id, message: `${control.label.zh} 至少需要 ${minItems} 项。` });
+    for (const [rowIndex, row] of rows.entries()) for (const field of group?.itemFields ?? []) {
+      const itemValue = row[field.key];
+      if (field.required && empty(itemValue)) issues.push({ stepId: step.id, controlId: control.id, message: `${control.label.zh} 第 ${rowIndex + 1} 项的 ${field.label.zh} 为必填项。` });
+      if (field.kind === 'json' && !empty(itemValue)) try { JSON.parse(String(itemValue)); } catch { issues.push({ stepId: step.id, controlId: control.id, message: `${control.label.zh} 第 ${rowIndex + 1} 项的 ${field.label.zh} 必须是有效 JSON。` }); }
+    }
+  }
+  for (const field of ['tags', 'extensions']) { if (!empty(slots[field])) try { JSON.parse(String(slots[field])); } catch { issues.push({ message: `${field} 必须是有效 JSON。` }); } }
+  return issues;
+}
+
+function encodePath(path: ClassificationPath): string { return JSON.stringify(path); }
+function decodePath(value: string): ClassificationPath | undefined { try { const parsed = JSON.parse(value); return parsed?.class ? parsed as ClassificationPath : undefined; } catch { return undefined; } }
+
+function ToggleInput({ value, onChange }: { value: unknown; onChange: (value: boolean) => void }) {
+  return <span className="inline-flex overflow-hidden rounded border text-sm"><button type="button" className={`px-3 py-1 ${value === true ? 'bg-blue-600 text-white' : 'bg-white'}`} onClick={() => onChange(true)}>是</button><button type="button" className={`border-l px-3 py-1 ${value === false ? 'bg-slate-700 text-white' : 'bg-white'}`} onClick={() => onChange(false)}>否</button></span>;
+}
+
+function FeatureSearchInput({ profile, records, value, onChange, placeholder, world }: { profile?: SearchProfile; records: MountedFeatureRecord[]; value: unknown; onChange: (value: unknown) => void; placeholder?: string; world?: string }) {
+  const [query, setQuery] = useState('');
+  const candidates = useMemo(() => findV3SearchCandidates(records, profile, query, world ?? String((records[0] as MountedFeatureRecord | undefined)?.World ?? '')), [records, profile, query, world]);
+  const search = normalizeSearchProfile(profile);
+  return <div className="space-y-1"><input className="w-full rounded border px-2 py-1 text-sm" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={placeholder ?? '输入 ID 或 Name 搜索'} />
+    {query && search ? <div className="max-h-32 overflow-auto rounded border bg-white text-xs shadow-sm">{candidates.length ? candidates.map((candidate) => <button type="button" key={`${candidate.id}-${String(candidate.returned)}`} className="block w-full px-2 py-1 text-left hover:bg-blue-50" onClick={() => { onChange(candidate.returned); setQuery(candidate.display); }}>{candidate.display}</button>) : <p className="px-2 py-1 text-slate-500">无匹配要素</p>}</div> : null}
+    <small className="block text-slate-500">返回：{String(value ?? '') || '（尚未选择）'} · 范围：{search ? `${search.target.class}${search.target.kind ? `/${search.target.kind}` : ''}` : '未配置'}</small></div>;
+}
+
+function fieldInput(field: WorkflowGroupField, value: unknown, onChange: (value: unknown) => void, records: MountedFeatureRecord[], world?: string) {
+  const common = { className: 'w-full rounded border px-2 py-1 text-sm', value: String(value ?? ''), placeholder: field.placeholder, onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => onChange(event.target.value) };
+  if (field.kind === 'textarea' || field.kind === 'json') return <textarea {...common} rows={field.rows ?? (field.kind === 'json' ? 4 : 3)} />;
+  if (field.kind === 'toggle') return <ToggleInput value={value} onChange={onChange} />;
+  if (field.kind === 'select') return <select {...common}><option value="">请选择</option>{(field.options ?? []).map((item) => <option key={item.value} value={item.value}>{optionLabel(item)}</option>)}</select>;
+  if (field.kind === 'featureSearch' || field.kind === 'coarseSearch') return <FeatureSearchInput profile={field.search} records={records} value={value} onChange={onChange} placeholder={field.placeholder} world={world} />;
+  return <input {...common} type={field.kind === 'number' ? 'number' : 'text'} />;
+}
+
+function GroupControlInput({ control, value, onChange, records, world }: { control: WorkflowControl; value: unknown; onChange: (value: unknown) => void; records: MountedFeatureRecord[]; world?: string }) {
+  const group = control.group;
+  if (!group) return <div className="rounded border border-rose-200 bg-rose-50 p-2 text-xs text-rose-700">此重复字段组缺少字段定义。</div>;
+  const scalar = group.storage === 'scalar';
+  const rows = Array.isArray(value) ? value.map((item) => scalar ? { '': item } : item).filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === 'object' && !Array.isArray(item)) : [];
+  const makeRow = () => Object.fromEntries(group.itemFields.map((field) => [field.key, field.defaultValue ?? (field.kind === 'toggle' ? false : '')]));
+  const serialize = (next: Array<Record<string, unknown>>) => scalar ? next.map((row) => row['']) : next;
+  const updateRow = (index: number, key: string, nextValue: unknown) => onChange(serialize(rows.map((row, rowIndex) => rowIndex === index ? { ...row, [key]: nextValue } : row)));
+  return <div className="space-y-2 rounded border border-slate-200 bg-slate-50 p-2">{rows.map((row, index) => <fieldset key={`${control.id}-${index}`} className="rounded border bg-white p-2"><legend className="px-1 text-xs text-slate-500">第 {index + 1} 项</legend><div className="grid gap-2 md:grid-cols-2">{group.itemFields.map((field) => <label key={`${field.key}-${index}`} className="grid gap-1 text-xs"><span>{field.label.zh}{field.required ? ' *' : ''}</span>{fieldInput(field, row[field.key], (nextValue) => updateRow(index, field.key, nextValue), records, world)}</label>)}</div><button type="button" className="mt-2 text-xs text-rose-700" onClick={() => onChange(serialize(rows.filter((_, rowIndex) => rowIndex !== index)))}>删除此项</button></fieldset>)}<button type="button" className="rounded border bg-white px-2 py-1 text-xs" onClick={() => onChange(serialize([...rows, makeRow()]))}>{group.addLabel?.zh ?? `添加${control.label.zh}`}</button></div>;
+}
+
+function ControlInput({ control, value, onChange, config, records, world }: { control: WorkflowControl; value: unknown; onChange: (value: unknown) => void; config: ConfigPackageV3; records: MountedFeatureRecord[]; world?: string }) {
+  if (control.kind === 'group') return <GroupControlInput control={control} value={value} onChange={onChange} records={records} world={world} />;
+  const common = { className: 'w-full rounded border px-2 py-1 text-sm', value: String(value ?? ''), placeholder: control.placeholder, onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => onChange(event.target.value) };
+  if (control.kind === 'textarea' || control.kind === 'json') return <textarea {...common} rows={control.rows ?? (control.kind === 'json' ? 4 : 3)} placeholder={control.kind === 'json' ? '{ }' : control.placeholder} />;
+  if (control.kind === 'toggle') return <ToggleInput value={value} onChange={onChange} />;
+  if (control.kind === 'select') return <select {...common}><option value="">请选择</option>{(control.options ?? []).map((item) => <option key={item.value} value={item.value}>{optionLabel(item)}</option>)}</select>;
+  if (control.kind === 'classificationPicker') {
+    const options = listCategoryPaths(config, control.classificationScope ?? { class: '' }).filter((path) => pathMatchesScope(path, control.classificationScope ?? { class: '' }));
+    return <select className="w-full rounded border px-2 py-1 text-sm" value={String(value ?? '')} onChange={(event) => onChange(event.target.value)}><option value="">请选择分类</option>{options.map((path) => <option key={encodePath(path)} value={encodePath(path)}>{workflowPathLabel(config, path)}</option>)}</select>;
+  }
+  if (control.kind === 'featureSearch' || control.kind === 'coarseSearch') return <FeatureSearchInput profile={control.search} records={records} value={value} onChange={onChange} placeholder={control.placeholder} world={world} />;
+  return <input {...common} type={control.kind === 'number' ? 'number' : 'text'} />;
+}
+
+/** Usable generic runner. It runs V3-composed flows and performs the same
+ * target-scoped search used by saved workflows; external units remain intact. */
+export function V3WorkflowRunner({ config, workflow, records = [], worldId, onSubmit, onRequestExternal, onRequestGeometry }: { config: ConfigPackageV3; workflow: WorkflowDefinition; records?: MountedFeatureRecord[]; worldId?: string; onSubmit?: (result: V3WorkflowRunResult) => void; onRequestExternal?: (workflow: WorkflowDefinition) => void; onRequestGeometry?: (outputId: string, geometry: string) => void }) {
+  const activeWorld = normalizeV3WorldId(worldId ?? records.find((record) => String(record.World ?? '').trim())?.World ?? 'zth');
+  const [page, setPage] = useState(0);
+  const [slots, setSlots] = useState<V3WorkflowValueMap>(() => ({ World: activeWorld, ...Object.fromEntries(workflow.steps.flatMap((step) => step.controls ?? []).flatMap((control) => control.defaultValue === undefined ? [] : [[control.slot ?? control.id, control.defaultValue]])) }));
+  const [classifications, setClassifications] = useState<Record<string, ClassificationPath | undefined>>({}); const [submitted, setSubmitted] = useState<V3WorkflowRunResult | null>(null); const [inputIssues, setInputIssues] = useState<V3WorkflowInputIssue[]>([]);
+  const steps = workflow.mode === 'composed' ? workflow.steps : []; const step = steps[page]; const controls = step?.controls ?? [];
+  const preview = useMemo(() => workflow.mode === 'composed' ? evaluateV3WorkflowOutputs(workflow, slots, { world: activeWorld, classifications }) : [], [workflow, slots, classifications, activeWorld]);
+  useEffect(() => { setSlots((current) => ({ ...Object.fromEntries(workflow.steps.flatMap((item) => item.controls ?? []).flatMap((control) => control.defaultValue === undefined ? [] : [[control.slot ?? control.id, control.defaultValue]])), ...current, World: activeWorld })); }, [workflow, activeWorld]);
+  if (workflow.mode === 'external') return <section className="rounded-lg border border-violet-200 bg-violet-50 p-3 text-sm"><strong>外部整体工作流：{workflow.label.zh}</strong><p className="mt-1 text-slate-600">此工作流保留为完整受控单元，不伪装成模块化表单。</p><button type="button" className="mt-2 rounded bg-violet-700 px-3 py-1.5 text-white" onClick={() => onRequestExternal?.(workflow)}>打开已受控工作流</button></section>;
+  if (!step) return <div className="rounded border border-amber-300 bg-amber-50 p-3 text-sm">工作流没有页面。</div>;
+  const isLast = page === steps.length - 1; const currentIssues = inputIssues.filter((issue) => !issue.stepId || issue.stepId === step.id);
+  const continueTo = (nextPage: number) => { const issues = validateV3WorkflowInputs(workflow, slots, [step]); setInputIssues(issues); if (!issues.length) setPage(nextPage); };
+  const submit = () => { const issues = validateV3WorkflowInputs(workflow, slots); setInputIssues(issues); if (issues.length) return; setSubmitted(preview); onSubmit?.(preview); };
+  return <section className="rounded-lg border bg-white p-3"><div className="mb-3 flex items-center justify-between gap-2"><strong>{step.label.zh}</strong><span className="text-xs text-slate-500">世界：{activeWorld} · 第 {page + 1} / {steps.length} 页</span></div>{step.kind === 'actor' ? <label className="block text-sm">填写人<input className="mt-1 w-full rounded border px-2 py-1" value={String(slots.actor ?? '')} onChange={(event) => setSlots((current) => ({ ...current, actor: event.target.value }))} /></label> : null}{step.kind === 'tagsExtensions' ? <div className="grid gap-2 sm:grid-cols-2"><textarea className="rounded border p-2 text-sm" rows={3} placeholder="tags JSON（可选）" value={String(slots.tags ?? '')} onChange={(event) => setSlots((current) => ({ ...current, tags: event.target.value }))} /><textarea className="rounded border p-2 text-sm" rows={3} placeholder="extensions JSON（可选）" value={String(slots.extensions ?? '')} onChange={(event) => setSlots((current) => ({ ...current, extensions: event.target.value }))} /></div> : null}{step.kind === 'geometry' ? <div className="rounded border border-dashed p-3 text-sm">此绘制页固定类型：{step.geometry?.[0] ?? '未指定'}<button type="button" className="ml-3 rounded border px-2 py-1" onClick={() => onRequestGeometry?.(step.outputId ?? '', step.geometry?.[0] ?? '')}>进入绘制</button></div> : null}{controls.length ? <div className="grid gap-2 md:grid-cols-6">{controls.map((control) => <div key={control.id} className={`grid min-w-0 gap-1 text-sm ${control.columns === 1 ? 'md:col-span-6' : control.columns === 2 ? 'md:col-span-3' : 'md:col-span-2'}`}><span>{control.label.zh}{control.required ? ' *' : ''}</span><ControlInput control={control} value={slots[control.slot ?? control.id]} config={config} records={records} world={activeWorld} onChange={(value) => { if (control.kind === 'classificationPicker') { const path = decodePath(String(value)); const targets = control.outputId ? workflow.outputs.filter((output) => output.id === control.outputId) : workflow.outputs.filter((output) => path && pathMatchesScope(path, control.classificationScope ?? output.classification)); for (const output of targets) if (path) setClassifications((current) => ({ ...current, [output.id]: path })); } setSlots((current) => ({ ...current, [control.slot ?? control.id]: value })); setInputIssues([]); }} /></div>)}</div> : null}{currentIssues.length ? <ul className="mt-3 rounded border border-rose-200 bg-rose-50 p-2 text-xs text-rose-800">{currentIssues.map((issue, index) => <li key={`${issue.stepId ?? 'global'}-${issue.controlId ?? index}`}>{issue.message}</li>)}</ul> : null}<div className="mt-3 flex justify-between"><button type="button" disabled={page === 0} className="rounded border px-3 py-1 disabled:opacity-40" onClick={() => { setInputIssues([]); setPage((value) => Math.max(0, value - 1)); }}>上一页</button>{isLast ? <button type="button" className="rounded bg-emerald-600 px-3 py-1 text-white" onClick={submit}>确认保存输出</button> : <button type="button" className="rounded bg-blue-600 px-3 py-1 text-white" onClick={() => continueTo(Math.min(steps.length - 1, page + 1))}>下一页</button>}</div>{submitted ? <pre className="mt-3 max-h-48 overflow-auto rounded bg-slate-950 p-2 text-xs text-emerald-100">{JSON.stringify(submitted, null, 2)}</pre> : null}</section>;
+}
+
+export default V3WorkflowRunner;

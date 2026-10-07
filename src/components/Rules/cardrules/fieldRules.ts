@@ -16,7 +16,14 @@ export type CardLineChips = {
   items: Array<{ name: string; color: string; text?: string }>;
 };
 
-export type CardRichValue = CardColorChip | CardLineChips | CardInteractiveValue;
+/** A compact neutral tag used by declarative V3 cards. */
+export type CardTag = {
+  kind: 'tag';
+  text: string;
+  color?: string;
+};
+
+export type CardRichValue = CardColorChip | CardLineChips | CardTag | CardInteractiveValue;
 
 export type CardRow = {
   label: string;

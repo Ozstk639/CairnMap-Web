@@ -25,6 +25,7 @@ import AppCard from "@/components/ui/AppCard";
 import SmallDraggablePanel from "@/components/DraggablePanel/SmallDraggablePanel";
 
 import { resolveFeatureCardComponent } from "@/components/Rules/cardrules/featureCardRegistry";
+import FeatureInteractionCard from "@/components/Rules/core/FeatureInteractionCard";
 import type { CardFeatureLinkTarget } from "@/components/Rules/cardrules/cardInteractions";
 import {
   getStructureAreaPriorityBonus,
@@ -100,6 +101,8 @@ import { filterRecordsByRuleButtons } from "@/components/Rules/ButtonRule/button
 import { setRuleSearchPool } from "@/components/Rules/search/ruleSearchRegistry";
 import { useRuleDataStore } from "@/store/ruleDataStore";
 import { useLoadingStore } from "@/store/loadingStore";
+import { resolveConfigRuntimeCardOverride, resolveConfigRuntimeContextForHost, resolveConfigRuntimeContextForRecord, resolveConfigRuntimeRule, resolveConfigRuntimeScreenGate, resolveConfigRuntimeStackOrder } from "@/components/Rules/configRuntime/configPackageAdapter";
+import type { ConfigPackageV3 } from "@/configStudio/types";
 
 const FLOOR_VIEW_MIN_LEVEL = Math.max(0, DEFAULT_FLOOR_VIEW.minLevel);
 
@@ -115,6 +118,20 @@ type Props = {
    * - 用于从预加载池中挑选需要进入渲染/索引的要素子集
    */
   activeButtonIds?: string[];
+  /**
+   * Isolated callers (Config Studio and Config Lab) can inject an in-memory
+   * dataset while keeping the exact same renderer, cards and floor runtime.
+   * The default formal-map path remains backed by ruleDataStore.
+   */
+  runtimeDataset?: { features?: unknown[] } | null;
+  /** Do not mix editor fixtures with local temporary-mount state. */
+  disableTransientSources?: boolean;
+  /** Preview embeds the same floor selector body without a draggable shell. */
+  floorPanelMode?: 'draggable' | 'embedded' | 'hidden';
+  /** Active V3 package used by Config Studio / Config Lab render paths. */
+  configRuntime?: ConfigPackageV3;
+  /** Embedded runtimes should not require the main toolbar's rule groups. */
+  bypassButtonFilter?: boolean;
 };
 
 const Y_FOR_DISPLAY = -64;
@@ -123,6 +140,8 @@ type LayerBundle = {
   main: L.Layer;
   label?: L.Layer;
   hitProxy?: L.Layer;
+  /** Changes whenever a native V3 click-target needs to be rebuilt. */
+  hitProxySignature?: string;
 
   /** 新增：用于 declutter label 复用，避免 refresh 每次重建 marker */
   labelKey?: string;
@@ -231,13 +250,37 @@ function resolveLabelTextForAudit(
   store: FeatureStore,
 ): string {
   if (!labelPlan) return "";
+  let text = "";
   if (typeof labelPlan.textFrom === "function") {
-    return String(labelPlan.textFrom(r, ctx, store) ?? "").trim();
+    text = String(labelPlan.textFrom(r, ctx, store) ?? "").trim();
+  } else if (typeof labelPlan.textFrom === "string") {
+    text = String((r.featureInfo as any)?.[labelPlan.textFrom] ?? "").trim();
   }
-  if (typeof labelPlan.textFrom === "string") {
-    return String((r.featureInfo as any)?.[labelPlan.textFrom] ?? "").trim();
+  if (!text) return "";
+
+  // Native V3.2 label extensions are carried by the same label plan as the
+  // legacy renderer.  When absent this returns byte-for-byte equivalent V1
+  // text; when present it applies the authored truncation/wrap policy before
+  // either normal or declutter rendering sees the text.
+  const explicitMax = Number(labelPlan.maxChars ?? labelPlan.abbreviation?.maxChars);
+  const maxChars = Number.isFinite(explicitMax) && explicitMax > 0 ? Math.floor(explicitMax) : undefined;
+  const suffix = String(labelPlan.abbreviation?.suffix ?? '…');
+  const characters = Array.from(text);
+  if (!labelPlan.multiline) {
+    return maxChars && characters.length > maxChars
+      ? `${characters.slice(0, maxChars).join('')}${suffix}`
+      : text;
   }
-  return "";
+
+  const perLine = maxChars ?? 12;
+  const maxLinesRaw = Number(labelPlan.maxLines);
+  const maxLines = Number.isFinite(maxLinesRaw) && maxLinesRaw > 0 ? Math.floor(maxLinesRaw) : 2;
+  const chunks: string[] = [];
+  for (let offset = 0; offset < characters.length && chunks.length < maxLines; offset += perLine) {
+    chunks.push(characters.slice(offset, offset + perLine).join(''));
+  }
+  if (characters.length > perLine * maxLines && chunks.length) chunks[chunks.length - 1] = `${chunks[chunks.length - 1]}${suffix}`;
+  return chunks.join('\n');
 }
 
 function updateLineAuditBlocked(
@@ -671,6 +714,254 @@ function createDeletePickPointHitProxy(latlng: L.LatLng): L.CircleMarker {
   });
 }
 
+/**
+ * Leaflet's per-path hit area is tied to visible stroke width. V3's typed
+ * click-tolerance must not make the visual stroke thicker, so a transparent
+ * sibling layer owns the expanded pointer target instead. This is only ever
+ * created for an authored V3 display plan; legacy V1 layers keep their exact
+ * original event surface.
+ */
+function nativeHitTolerance(displayPlan?: FeatureDisplayPlan | null): number {
+  const value = Number(displayPlan?.geometry?.hitTolerancePx);
+  return Number.isFinite(value) ? Math.min(80, Math.max(0, value)) : 0;
+}
+
+function nativeHitProxySignature(kind: string, tolerance: number, baseSize: number, enabled: boolean): string | undefined {
+  return enabled && tolerance > 0 ? `${kind}:${tolerance}:${baseSize}` : undefined;
+}
+
+function createNativePointHitProxy(latlngs: L.LatLng[], radius: number): L.Layer {
+  const make = (latlng: L.LatLng) => L.circleMarker(latlng, {
+    pane: 'ria-point-top',
+    radius: Math.max(5, radius),
+    color: '#000000',
+    weight: 1,
+    opacity: 0.001,
+    fillColor: '#000000',
+    fillOpacity: 0.001,
+    interactive: true,
+    className: 'ria-config-hit-proxy',
+  });
+  return latlngs.length === 1 ? make(latlngs[0]) : L.featureGroup(latlngs.map(make));
+}
+
+function createNativePathHitProxy(
+  type: FeatureRecord['type'],
+  lineLatLngs: L.LatLngExpression[],
+  polygonLatLngs: L.LatLngExpression[],
+  pane: string,
+  visibleWeight: number,
+  tolerance: number,
+): L.Layer {
+  const style: L.PathOptions = {
+    pane,
+    color: '#000000',
+    weight: Math.max(1, visibleWeight + tolerance * 2),
+    opacity: 0.001,
+    fillColor: '#000000',
+    fillOpacity: 0.001,
+    interactive: true,
+    className: 'ria-config-hit-proxy',
+  };
+  return type === 'Polyline'
+    ? L.polyline(lineLatLngs, style)
+    : L.polygon(polygonLatLngs, style);
+}
+
+function bindNativeHitProxy(
+  layer: L.Layer,
+  record: FeatureRecord,
+  args: {
+    deletePickTarget: boolean;
+    assistPickTarget: boolean;
+    geometryEnabled: boolean;
+    clickEnabled: boolean;
+    onLabelClick?: (record: FeatureRecord, plan: LabelClickPlan) => void;
+    effectiveClickPlan: LabelClickPlan | null;
+  },
+): void {
+  (layer as any).off?.('click');
+  if (args.deletePickTarget) {
+    bindDeletePick(layer, record);
+    return;
+  }
+  if (args.assistPickTarget) {
+    (layer as any).on?.('click', (event: L.LeafletMouseEvent) => {
+      (event as any)?.originalEvent?.stopPropagation?.();
+      (event as any)?.originalEvent?.preventDefault?.();
+      dispatchAssistPickFeature(record);
+    });
+    return;
+  }
+  if (args.geometryEnabled && args.clickEnabled && args.onLabelClick && args.effectiveClickPlan) {
+    (layer as any).on?.('click', (event: L.LeafletMouseEvent) => {
+      (event as any)?.originalEvent?.stopPropagation?.();
+      args.onLabelClick?.(record, args.effectiveClickPlan!);
+    });
+  }
+}
+
+function screenRingArea(points: L.Point[]): number {
+  if (points.length < 3) return 0;
+  let area = 0;
+  for (let i = 0, j = points.length - 1; i < points.length; j = i++) area += points[j].x * points[i].y - points[i].x * points[j].y;
+  return Math.abs(area) / 2;
+}
+
+/** V3.2 screen gates use actual map pixels and understand canonical multipart geometry. */
+function getNativeScreenMetrics(record: FeatureRecord, projection: DynmapProjection, map: L.Map): { areaPx: number; lengthPx: number } {
+  const project = (point: { x: number; y: number; z: number }): L.Point | null => {
+    try { return map.latLngToContainerPoint(projection.locationToLatLng(point.x, point.y, point.z)); }
+    catch { return null; }
+  };
+  if (record.type === 'Polygon') {
+    const parts = record.multipartGeometry?.type === 'Polygon'
+      ? record.multipartGeometry.parts
+      : record.coords3?.length ? [[record.coords3]] : [];
+    let areaPx = 0;
+    for (const part of parts) {
+      part.forEach((ring, index) => {
+        const points = ring.map(project).filter((point): point is L.Point => Boolean(point));
+        const ringArea = screenRingArea(points);
+        areaPx += index === 0 ? ringArea : -ringArea;
+      });
+    }
+    return { areaPx: Math.max(0, areaPx), lengthPx: 0 };
+  }
+  if (record.type === 'Polyline') {
+    const parts = record.multipartGeometry?.type === 'LineString'
+      ? record.multipartGeometry.parts
+      : record.coords3?.length ? [record.coords3] : [];
+    let lengthPx = 0;
+    for (const part of parts) {
+      const points = part.map(project).filter((point): point is L.Point => Boolean(point));
+      for (let index = 1; index < points.length; index += 1) lengthPx += points[index - 1].distanceTo(points[index]);
+    }
+    return { areaPx: 0, lengthPx };
+  }
+  return { areaPx: 0, lengthPx: 0 };
+}
+
+function passesConfigRuntimeScreenGate(
+  config: ConfigPackageV3 | undefined,
+  record: FeatureRecord,
+  context: RenderContext,
+  projection: DynmapProjection,
+  map: L.Map,
+): boolean {
+  const gate = resolveConfigRuntimeScreenGate(config, record, context);
+  if (!gate || (!gate.minScreenAreaPx && !gate.minScreenLengthPx)) return true;
+  const metrics = getNativeScreenMetrics(record, projection, map);
+  if (gate.minScreenAreaPx !== undefined && metrics.areaPx < gate.minScreenAreaPx) return false;
+  if (gate.minScreenLengthPx !== undefined && metrics.lengthPx < gate.minScreenLengthPx) return false;
+  return true;
+}
+
+function safeSvgColor(value: unknown, fallback: string): string {
+  const color = String(value ?? '').trim();
+  // Colors in a local config still cross an HTML boundary here. Keep the
+  // generated SVG to a conservative CSS-color subset instead of interpolating
+  // arbitrary text into markup.
+  return /^(#[0-9a-f]{3,8}|(?:rgb|hsl)a?\([0-9.,%\s-]+\)|[a-z]+)$/i.test(color) ? color : fallback;
+}
+
+function configShapeSignature(plan: any): string {
+  return `config-shape:${plan?.shape ?? 'square'}:${plan?.radius ?? 6}:${plan?.style?.color ?? ''}:${plan?.style?.fillColor ?? ''}:${plan?.style?.weight ?? ''}:${plan?.style?.opacity ?? ''}:${plan?.style?.fillOpacity ?? ''}`;
+}
+
+function makeConfigShapeMarker(latlng: L.LatLng, plan: any, pane: string, interactive: boolean): L.Marker {
+  const radius = Math.max(2, Number(plan?.radius ?? 6));
+  const size = Math.ceil(radius * 2 + Math.max(0, Number(plan?.style?.weight ?? 0)) * 2 + 4);
+  const center = size / 2;
+  const outer = Math.max(1, radius - 1);
+  const stroke = safeSvgColor(plan?.style?.color, '#111827');
+  const fill = safeSvgColor(plan?.style?.fillColor ?? plan?.style?.color, '#f97316');
+  const strokeWidth = Math.max(0, Number(plan?.style?.weight ?? 1));
+  const opacity = Math.min(1, Math.max(0, Number(plan?.style?.opacity ?? 0.9)));
+  const fillOpacity = Math.min(1, Math.max(0, Number(plan?.style?.fillOpacity ?? 0.6)));
+  const pointsFor = (count: number, rotate = -90) => Array.from({ length: count }, (_, index) => {
+    const angle = ((rotate + index * 360 / count) * Math.PI) / 180;
+    return `${(center + outer * Math.cos(angle)).toFixed(2)},${(center + outer * Math.sin(angle)).toFixed(2)}`;
+  }).join(' ');
+  const shape = String(plan?.shape ?? 'square');
+  const figure = shape === 'triangle'
+    ? `<polygon points="${pointsFor(3)}" />`
+    : shape === 'regular4'
+      ? `<polygon points="${pointsFor(4, -45)}" />`
+      : shape === 'regular5'
+        ? `<polygon points="${pointsFor(5)}" />`
+        : shape === 'regular6'
+          ? `<polygon points="${pointsFor(6, -90)}" />`
+          : `<rect x="${(center - outer).toFixed(2)}" y="${(center - outer).toFixed(2)}" width="${(outer * 2).toFixed(2)}" height="${(outer * 2).toFixed(2)}" />`;
+  const html = `<svg aria-hidden="true" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg"><g stroke="${stroke}" fill="${fill}" stroke-width="${strokeWidth}" stroke-opacity="${opacity}" fill-opacity="${fillOpacity}">${figure}</g></svg>`;
+  return L.marker(latlng, {
+    pane,
+    icon: L.divIcon({ className: 'ria-config-shape-marker', html, iconSize: [size, size], iconAnchor: [center, center] }),
+    interactive,
+    zIndexOffset: Number(plan?.zIndexOffset ?? 0),
+  });
+}
+
+function pointRepresentationLatLng(r: FeatureRecord, projection: DynmapProjection): L.LatLng | null {
+  const coordinates = r.multipartGeometry ? flattenMultipartCoordinates(r.multipartGeometry) : r.coords3 ?? [];
+  if (!coordinates.length) return null;
+  const points = coordinates.map((point) => projection.locationToLatLng(point.x, point.y, point.z));
+  return L.latLngBounds(points).getCenter();
+}
+
+/**
+ * V3 native low-zoom geometry markers respect the profile-level multipart
+ * anchor.  A feature-bbox anchor emits one marker; a per-part anchor emits a
+ * marker for each canonical component.  This remains separate from the
+ * geometry itself, which is still rendered in full at a geometry rule.
+ */
+function pointRepresentationLatLngs(
+  r: FeatureRecord,
+  projection: DynmapProjection,
+  multipartMode: 'featureBbox' | 'perPart' = 'featureBbox',
+): L.LatLng[] {
+  const fallback = pointRepresentationLatLng(r, projection);
+  const geometry = r.multipartGeometry;
+  if (multipartMode !== 'perPart' || !geometry || geometry.parts.length < 2) return fallback ? [fallback] : [];
+
+  if (geometry.type === 'Point') {
+    return geometry.parts.map((point) => projection.locationToLatLng(point.x, point.y, point.z));
+  }
+  if (geometry.type === 'LineString') {
+    return geometry.parts.filter((part) => part.length).map((part) => {
+      if (part.length === 1) return projection.locationToLatLng(part[0].x, part[0].y, part[0].z);
+      const segmentLengths = part.slice(1).map((point, index) => Math.hypot(point.x - part[index].x, point.z - part[index].z));
+      const total = segmentLengths.reduce((sum, length) => sum + length, 0);
+      if (!total) {
+        const point = part[Math.floor(part.length / 2)];
+        return projection.locationToLatLng(point.x, point.y, point.z);
+      }
+      let remaining = total / 2;
+      for (let index = 1; index < part.length; index += 1) {
+        const length = segmentLengths[index - 1];
+        if (remaining <= length) {
+          const left = part[index - 1];
+          const right = part[index];
+          const ratio = remaining / length;
+          return projection.locationToLatLng(
+            left.x + (right.x - left.x) * ratio,
+            left.y + (right.y - left.y) * ratio,
+            left.z + (right.z - left.z) * ratio,
+          );
+        }
+        remaining -= length;
+      }
+      const point = part[part.length - 1];
+      return projection.locationToLatLng(point.x, point.y, point.z);
+    });
+  }
+  return geometry.parts.filter((part) => part[0]?.length).map((part) => {
+    const ring = part[0];
+    const points = ring.map((point) => projection.locationToLatLng(point.x, point.y, point.z));
+    return L.latLngBounds(points).getCenter();
+  });
+}
+
 function pointInPolygonXZ(
   p: { x: number; z: number },
   poly: Array<{ x: number; z: number }>,
@@ -930,6 +1221,34 @@ function supplementFloorIdsByDownwardRefs(
 }
 
 type FloorOption = { value: string; label: string };
+
+/** Shared inner body: main map and the isolated preview use this exact control. */
+function FloorSelectorContents({
+  activeBuildingName,
+  floorOptions,
+  activeFloorIndex,
+  onSelect,
+}: {
+  activeBuildingName: string;
+  floorOptions: FloorOption[];
+  activeFloorIndex: number;
+  onSelect: (index: number) => void;
+}) {
+  return (
+    <AppCard className="bg-white/90 border border-gray-200 p-2 w-28">
+      <div data-small-drag-handle className="select-none">
+        <div className="text-xs font-semibold text-gray-800 mb-1">楼层视角</div>
+        <div className="text-[11px] text-gray-600 mb-2 truncate">{activeBuildingName || '（未命名建筑）'}</div>
+      </div>
+      <div data-no-drag className="flex flex-col gap-1 max-h-[60vh] overflow-auto">
+        {floorOptions.map((opt, idx) => {
+          const on = idx === activeFloorIndex;
+          return <AppButton key={opt.value} type="button" onClick={() => onSelect(idx)} className={`w-full text-left px-2 py-1 rounded text-xs border transition-colors ${on ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}>{opt.label}</AppButton>;
+        })}
+      </div>
+    </AppCard>
+  );
+}
 
 type FloorViewBuildingData = {
   floorIdSet: Set<string>;
@@ -1304,6 +1623,11 @@ export default function RuleDrivenLayer(props: Props) {
     worldId,
     visible,
     activeButtonIds = [],
+    runtimeDataset = null,
+    disableTransientSources = false,
+    floorPanelMode = 'draggable',
+    configRuntime,
+    bypassButtonFilter = false,
   } = props;
 
   const worldDataset = useRuleDataStore((s) => s.datasets[worldId] ?? null);
@@ -1360,6 +1684,10 @@ export default function RuleDrivenLayer(props: Props) {
     null,
   );
   const activeBuildingUidRef = useRef<string | null>(null);
+  // Retains the old state name for the V1 floor UI, but V3.2 binds it to any
+  // configured host category rather than to BUD/STB/SBP.
+  const [activeContextBindingId, setActiveContextBindingId] = useState<string | null>(null);
+  const activeContextBindingIdRef = useRef<string | null>(null);
   const [activeBuildingFloorRefSet, setActiveBuildingFloorRefSet] =
     useState<Set<string> | null>(null);
   const [activeBuildingName, setActiveBuildingName] = useState<string>("");
@@ -1380,6 +1708,10 @@ export default function RuleDrivenLayer(props: Props) {
   useEffect(() => {
     activeBuildingUidRef.current = activeBuildingUid;
   }, [activeBuildingUid]);
+
+  useEffect(() => {
+    activeContextBindingIdRef.current = activeContextBindingId;
+  }, [activeContextBindingId]);
 
   const applyFloorIndexForBuilding = (
     buildingUid: string,
@@ -1678,8 +2010,8 @@ export default function RuleDrivenLayer(props: Props) {
     async function load() {
       if (!mapReady) return;
 
-      let dataset = worldDataset;
-      if (!dataset) {
+      let dataset = runtimeDataset ?? worldDataset;
+      if (!dataset && !runtimeDataset) {
         try {
           dataset = await ensureWorldLoaded(worldId);
         } catch (e) {
@@ -1693,7 +2025,7 @@ export default function RuleDrivenLayer(props: Props) {
       const all: FeatureRecord[] = [];
 
       // 覆盖屏蔽列表：仅当“临时挂载源”处于启用状态时才生效。
-      const enabledTemps = readTempSources(worldId).filter((t) => t.enabled);
+      const enabledTemps = disableTransientSources ? [] : readTempSources(worldId).filter((t) => t.enabled);
       const overrideIds =
         enabledTemps.length > 0
           ? readTempOverrideIds(worldId)
@@ -1765,7 +2097,7 @@ export default function RuleDrivenLayer(props: Props) {
     return () => {
       cancelled = true;
     };
-  }, [mapReady, worldId, worldDataset, ensureWorldLoaded, tempSourceVersion]);
+  }, [mapReady, worldId, worldDataset, ensureWorldLoaded, tempSourceVersion, runtimeDataset, disableTransientSources]);
 
   // =========================
   // SearchBar -> RuleDrivenLayer：按 uid 打开信息卡
@@ -1819,7 +2151,7 @@ export default function RuleDrivenLayer(props: Props) {
 
     // 尽量复用“label click”规则（如果有），保证交互一致；否则仅打开信息卡。
     const curCtx = ctxRef.current;
-    const rule = findFirstRule(rr);
+    const rule = resolveConfigRuntimeRule(configRuntime, rr, curCtx ?? ({ worldId, leafletZoom: map.getZoom(), zoomLevel: toZoomLevel(map.getZoom()), inFloorView: false, activeBuildingUid: null, activeFloorSelector: null, activeBuildingFloorRefSet: null }), configRuntime ? null : findFirstRule(rr), store);
     const rawClick = (rule as any)?.symbol?.labelClick;
     if (rawClick) {
       // 若尚未拿到 RenderContext（例如按钮刚被打开、effect 还未同步），则跳过 labelClick 复用逻辑。
@@ -1881,7 +2213,7 @@ export default function RuleDrivenLayer(props: Props) {
     updateRuleLoadingStage(worldId, "world-filter-apply", "loading");
 
     const all = allRecordsRef.current;
-    const filtered = filterRecordsByRuleButtons(all, activeButtonIds);
+    const filtered = bypassButtonFilter ? all : filterRecordsByRuleButtons(all, activeButtonIds);
 
     recordsRef.current = filtered;
     const store = new FeatureStore(filtered);
@@ -1941,7 +2273,7 @@ export default function RuleDrivenLayer(props: Props) {
     );
     setDataVersion((v) => v + 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapReady, worldId, rawDataVersion, JSON.stringify(activeButtonIds)]);
+  }, [mapReady, worldId, rawDataVersion, JSON.stringify(activeButtonIds), bypassButtonFilter]);
 
   // (3) 总开关：挂载/卸载 root layerGroup
   useEffect(() => {
@@ -1968,13 +2300,16 @@ export default function RuleDrivenLayer(props: Props) {
   const ctx: RenderContext = useMemo(() => {
     const leafletZoom = leafletZoomState;
     const zoomLevel = toZoomLevel(leafletZoom);
+    const contextMinZoom = configRuntime?.contractRevision === 5
+      ? configRuntime.engine?.contextView?.minZoom ?? FLOOR_VIEW_MIN_LEVEL
+      : FLOOR_VIEW_MIN_LEVEL;
     return {
       worldId,
       leafletZoom,
       zoomLevel,
-      //inFloorView: zoomLevel >= DEFAULT_FLOOR_VIEW.minLevel,
-      inFloorView: zoomLevel >= FLOOR_VIEW_MIN_LEVEL,
+      inFloorView: zoomLevel >= contextMinZoom,
       activeBuildingUid,
+      activeContextBindingId,
       activeFloorSelector: floorOptions[activeFloorIndex]?.value ?? null,
       activeBuildingFloorRefSet,
     };
@@ -1982,9 +2317,11 @@ export default function RuleDrivenLayer(props: Props) {
     worldId,
     leafletZoomState,
     activeBuildingUid,
+    activeContextBindingId,
     activeBuildingFloorRefSet,
     floorOptions,
     activeFloorIndex,
+    configRuntime,
   ]);
 
   // 供 SearchBar/MapContainer 的“外部打开信息卡”事件复用 labelClick 逻辑使用。
@@ -1993,8 +2330,32 @@ export default function RuleDrivenLayer(props: Props) {
     ctxRef.current = ctx;
   }, [ctx]);
 
+  const activateConfigRuntimeContext = (record: FeatureRecord): boolean => {
+    if (configRuntime?.contractRevision !== 5) return false;
+    const store = storeRef.current;
+    const resolved = resolveConfigRuntimeContextForRecord(configRuntime, record, store ?? undefined);
+    if (!resolved) return false;
+    const previous = lastFloorSelectionRef.current;
+    const rememberedIndex = previous?.buildingUid === resolved.host.uid
+      ? resolved.options.findIndex((option) => option.value === previous.floorValue)
+      : -1;
+    const nextIndex = rememberedIndex >= 0 ? rememberedIndex : 0;
+    setActiveContextBindingId(resolved.binding.id);
+    activeContextBindingIdRef.current = resolved.binding.id;
+    setActiveBuildingUid(resolved.host.uid);
+    activeBuildingUidRef.current = resolved.host.uid;
+    setActiveBuildingFloorRefSet(resolved.memberUids);
+    setActiveBuildingName(String((resolved.host.featureInfo as any)?.Name ?? resolved.host.meta?.idValue ?? '').trim());
+    setFloorOptions(resolved.options);
+    floorOptionsRef.current = resolved.options;
+    setActiveFloorIndex(nextIndex);
+    if (resolved.options[nextIndex]?.value) lastFloorSelectionRef.current = { buildingUid: resolved.host.uid, floorValue: resolved.options[nextIndex].value };
+    return true;
+  };
+
   const handleLabelClick = (r: FeatureRecord, plan: LabelClickPlan) => {
     if (assistPickActive || deletePickActive) return;
+    activateConfigRuntimeContext(r);
     if (!highlightGroupRef.current) highlightGroupRef.current = L.layerGroup();
     highlightGroupRef.current.clearLayers();
 
@@ -2002,6 +2363,8 @@ export default function RuleDrivenLayer(props: Props) {
       r,
       projection,
       highlightStyleKey: (plan as any)?.highlightStyleKey,
+      highlightPathStyle: (plan as any)?.highlightPathStyle,
+      highlightPointStyle: (plan as any)?.highlightPointStyle,
       pointPinStyleKey: (plan as any)?.pointPinStyleKey,
     });
     if (hl) highlightGroupRef.current.addLayer(hl);
@@ -2098,7 +2461,7 @@ export default function RuleDrivenLayer(props: Props) {
     const store = storeRef.current;
     if (!store) return;
 
-    const rule = findFirstRule(rr);
+    const rule = resolveConfigRuntimeRule(configRuntime, rr, ctx, configRuntime ? null : findFirstRule(rr), store);
     const rawClick = (rule as any)?.symbol?.labelClick;
     if (!rawClick) return;
 
@@ -2115,6 +2478,8 @@ export default function RuleDrivenLayer(props: Props) {
     highlightGroupRef.current?.clearLayers();
     setFeatureCardOpen(false);
     setSelectedFeature(null);
+    setActiveContextBindingId(null);
+    activeContextBindingIdRef.current = null;
   }, [worldId]);
 
   const hasMultipleFloorOptions = floorOptions.length > 1;
@@ -2207,6 +2572,85 @@ export default function RuleDrivenLayer(props: Props) {
     if (!mapReady) return;
     const store = storeRef.current;
     if (!store) return;
+
+    // V3.2 context view deliberately has a separate path from the legacy
+    // BUD/STB/SBP and FLR/STF logic below.  It resolves any author-configured
+    // host/member pair by its classification and reference fields.
+    if (configRuntime?.contractRevision === 5) {
+      const engineContext = configRuntime.engine?.contextView;
+      const clearNativeContext = () => {
+        setActiveContextBindingId(null);
+        activeContextBindingIdRef.current = null;
+        setActiveBuildingUid(null);
+        activeBuildingUidRef.current = null;
+        setActiveBuildingFloorRefSet(null);
+        setActiveBuildingName('');
+        setFloorOptions([]);
+        floorOptionsRef.current = [];
+        setActiveFloorIndex(0);
+      };
+      const hostDistance = (host: FeatureRecord): number | null => {
+        const size = map.getSize();
+        const centerPx = L.point(size.x / 2, size.y / 2);
+        if (host.type === 'Points' && host.p3) {
+          const point = map.latLngToContainerPoint(projection.locationToLatLng(host.p3.x, host.p3.y, host.p3.z));
+          return point.distanceTo(centerPx);
+        }
+        if (!host.coords3?.length) return null;
+        const bounds = getFeatureBoundsLatLng(projection, host.coords3 as any, Y_FOR_DISPLAY);
+        return bounds ? distanceFromViewportCenterToBoundsPx(map, bounds) : null;
+      };
+      const updateNativeContext = () => {
+        const zoomLevel = toZoomLevel(map.getZoom());
+        const minZoom = engineContext?.minZoom ?? FLOOR_VIEW_MIN_LEVEL;
+        if (zoomLevel < minZoom) {
+          clearNativeContext();
+          return;
+        }
+        const contexts = store.all
+          .map((candidate) => resolveConfigRuntimeContextForHost(configRuntime, candidate, store))
+          .filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate));
+        let picked: { context: NonNullable<typeof contexts[number]>; distance: number } | null = null;
+        for (const context of contexts) {
+          const distance = hostDistance(context.host);
+          if (distance === null || distance > (engineContext?.activationRadiusPx ?? FLOOR_PICK_ACTIVATE_PX)) continue;
+          if (!picked || distance < picked.distance) picked = { context, distance };
+        }
+        if (!picked && activeBuildingUidRef.current) {
+          const previous = contexts.find((context) => context.host.uid === activeBuildingUidRef.current && context.binding.id === activeContextBindingIdRef.current);
+          const distance = previous ? hostDistance(previous.host) : null;
+          if (previous && distance !== null && distance <= (engineContext?.retainRadiusPx ?? FLOOR_PICK_KEEP_PX)) picked = { context: previous, distance };
+        }
+        if (!picked) {
+          clearNativeContext();
+          return;
+        }
+        const { context } = picked;
+        if (context.host.uid === activeBuildingUidRef.current && context.binding.id === activeContextBindingIdRef.current) return;
+        const remembered = lastFloorSelectionRef.current;
+        const rememberedIndex = remembered?.buildingUid === context.host.uid
+          ? context.options.findIndex((option) => option.value === remembered.floorValue)
+          : -1;
+        const nextIndex = rememberedIndex >= 0 ? rememberedIndex : 0;
+        setActiveContextBindingId(context.binding.id);
+        activeContextBindingIdRef.current = context.binding.id;
+        setActiveBuildingUid(context.host.uid);
+        activeBuildingUidRef.current = context.host.uid;
+        setActiveBuildingFloorRefSet(context.memberUids);
+        setActiveBuildingName(String((context.host.featureInfo as any)?.Name ?? context.host.meta?.idValue ?? '').trim());
+        setFloorOptions(context.options);
+        floorOptionsRef.current = context.options;
+        setActiveFloorIndex(nextIndex);
+        if (context.options[nextIndex]?.value) lastFloorSelectionRef.current = { buildingUid: context.host.uid, floorValue: context.options[nextIndex].value };
+      };
+      updateNativeContext();
+      map.on('moveend', updateNativeContext);
+      map.on('zoomend', updateNativeContext);
+      return () => {
+        map.off('moveend', updateNativeContext);
+        map.off('zoomend', updateNativeContext);
+      };
+    }
 
     const updateActiveBuilding = () => {
       const leafletZoom = map.getZoom();
@@ -2409,7 +2853,7 @@ export default function RuleDrivenLayer(props: Props) {
       map.off("moveend", updateActiveBuilding);
       map.off("zoomend", updateActiveBuilding);
     };
-  }, [mapReady, map, projection, activeBuildingUid, dataVersion]);
+  }, [mapReady, map, projection, activeBuildingUid, activeContextBindingId, dataVersion, configRuntime]);
 
   // (5) 渲染：根据规则 + zoom + bounds + floor context 进行增量 add/remove
   useEffect(() => {
@@ -2454,6 +2898,7 @@ export default function RuleDrivenLayer(props: Props) {
         worldId,
         dataVersion,
         activeBuildingUid ?? "",
+        activeContextBindingId ?? "",
         floorOptions[activeFloorIndex]?.value ?? "",
         activeBuildingFloorRefSet
           ? Array.from(activeBuildingFloorRefSet).sort().join(",")
@@ -2484,7 +2929,10 @@ export default function RuleDrivenLayer(props: Props) {
       }
       const leafletZoom = map.getZoom();
       const zoomLevel = toZoomLevel(leafletZoom);
-      const inFloorView = zoomLevel >= DEFAULT_FLOOR_VIEW.minLevel;
+      const contextMinZoom = configRuntime?.contractRevision === 5
+        ? configRuntime.engine?.contextView?.minZoom ?? FLOOR_VIEW_MIN_LEVEL
+        : DEFAULT_FLOOR_VIEW.minLevel;
+      const inFloorView = zoomLevel >= contextMinZoom;
 
       const context: RenderContext = {
         worldId,
@@ -2492,6 +2940,7 @@ export default function RuleDrivenLayer(props: Props) {
         zoomLevel,
         inFloorView,
         activeBuildingUid,
+        activeContextBindingId,
         activeFloorSelector: floorOptions[activeFloorIndex]?.value ?? null,
         activeBuildingFloorRefSet,
       };
@@ -2516,7 +2965,50 @@ export default function RuleDrivenLayer(props: Props) {
         Y_FOR_DISPLAY,
       );
       const viewportWorldRectXZ = layoutViewportWorldRectXZ;
-      const records = recordsRef.current;
+      const records = configRuntime?.contractRevision === 5
+        ? [...recordsRef.current].sort((left, right) => {
+            const a = resolveConfigRuntimeStackOrder(configRuntime, left, context);
+            const b = resolveConfigRuntimeStackOrder(configRuntime, right, context);
+            return a.geometryZ - b.geometryZ || a.displayPriority - b.displayPriority || left.uid.localeCompare(right.uid);
+          })
+        : recordsRef.current;
+      // Symbol density is a native V3.2 rule extension.  Reserve each grid
+      // slot for the highest collision/display priority first, independently
+      // from the later painter's z-order (which remains low-to-high).
+      const nativeSymbolDensityAllowed = new Set<string>();
+      if (configRuntime?.contractRevision === 5) {
+        const candidates: Array<{ uid: string; bucket: string; limit: number; priority: number }> = [];
+        for (const candidate of records) {
+          const nativeRule = resolveConfigRuntimeRule(configRuntime, candidate, context, null, store);
+          if (!nativeRule) continue;
+          const plan = resolveFeatureDisplayPlan(candidate, nativeRule, context, store, {
+            selected: selectedFeature?.uid === candidate.uid,
+            searchResult: pendingOpenUidRef.current === candidate.uid,
+          });
+          if (!shouldRenderByDisplayPlan(plan, context)) continue;
+          const density = plan.density;
+          const limit = Number(density?.enabled ? density.maxSymbolsPerGrid : undefined);
+          if (!Number.isFinite(limit) || limit <= 0) {
+            nativeSymbolDensityAllowed.add(candidate.uid);
+            continue;
+          }
+          const center = pointRepresentationLatLng(candidate, projection);
+          if (!center) continue;
+          const projected = map.latLngToContainerPoint(center);
+          const gridSize = Math.max(1, Number(density?.gridSizePx ?? 64));
+          const group = String(plan.collision.group ?? 'config-runtime');
+          const bucket = `${group}:${gridSize}:${Math.floor(projected.x / gridSize)}:${Math.floor(projected.y / gridSize)}`;
+          candidates.push({ uid: candidate.uid, bucket, limit: Math.floor(limit), priority: Number(plan.collision.priority ?? 0) });
+        }
+        const occupied = new Map<string, number>();
+        candidates.sort((left, right) => right.priority - left.priority || left.uid.localeCompare(right.uid));
+        for (const candidate of candidates) {
+          const count = occupied.get(candidate.bucket) ?? 0;
+          if (count >= candidate.limit) continue;
+          occupied.set(candidate.bucket, count + 1);
+          nativeSymbolDensityAllowed.add(candidate.uid);
+        }
+      }
       const realBounds = map.getBounds();
       const lineAuditRows = new Map<string, LineAuditMutableRow>();
       const polygonAuditRows = new Map<string, PolygonAuditMutableRow>();
@@ -2587,7 +3079,7 @@ export default function RuleDrivenLayer(props: Props) {
             "entered render loop",
           );
 
-        const rule = findFirstRule(r);
+        const rule = resolveConfigRuntimeRule(configRuntime, r, context, configRuntime ? null : findFirstRule(r), store);
         if (!rule) {
           updateLineAuditBlocked(
             auditRow,
@@ -2625,15 +3117,16 @@ export default function RuleDrivenLayer(props: Props) {
         if (isSelectedFeature) interactionReasons.push("selected");
         if (isSearchFocus) interactionReasons.push("searchResult");
 
+        // `resolveFeatureDisplayPlan` is only the shared normalizer/layout
+        // bridge.  A V3.2 rule already supplies every visual value, and must
+        // never receive the V1 class-specific structure post-processing.
         const baseDisplayPlan = resolveFeatureDisplayPlan(r, rule, context, store, {
           selected: isSelectedFeature,
           searchResult: isSearchFocus,
         });
-        const displayPlan = resolveStructureLabelDisplayPlanForContext(
-          r,
-          baseDisplayPlan,
-          context,
-        );
+        const displayPlan = configRuntime?.contractRevision === 5
+          ? baseDisplayPlan
+          : resolveStructureLabelDisplayPlanForContext(r, baseDisplayPlan, context);
         if (!shouldRenderByDisplayPlan(displayPlan, context)) {
           updateLineAuditBlocked(
             auditRow,
@@ -2644,6 +3137,34 @@ export default function RuleDrivenLayer(props: Props) {
             polygonAuditRow,
             "feature-filter",
             "display plan hidden by current context",
+          );
+          continue;
+        }
+
+        if (configRuntime?.contractRevision === 5 && !nativeSymbolDensityAllowed.has(r.uid)) {
+          updateLineAuditBlocked(
+            auditRow,
+            "feature-filter",
+            "V3.2 symbol-density gate blocked this feature",
+          );
+          updatePolygonAuditBlocked(
+            polygonAuditRow,
+            "feature-filter",
+            "V3.2 symbol-density gate blocked this feature",
+          );
+          continue;
+        }
+
+        if (configRuntime && !passesConfigRuntimeScreenGate(configRuntime, r, context, projection, map)) {
+          updateLineAuditBlocked(
+            auditRow,
+            "feature-filter",
+            "V3.2 screen-length gate blocked this feature",
+          );
+          updatePolygonAuditBlocked(
+            polygonAuditRow,
+            "feature-filter",
+            "V3.2 screen-area gate blocked this feature",
           );
           continue;
         }
@@ -2967,19 +3488,16 @@ export default function RuleDrivenLayer(props: Props) {
             store,
             projection,
             pointLatLng,
-            effectiveFeatureClickPlan,
             realViewportWorldRectXZ,
             layoutViewportWorldRectXZ,
             displayPlan,
           );
-          const req = rawReq
-            ? applyAdvancedLineTextBudget(
-                mergeDisplayCollisionIntoLabelRequest(rawReq, displayPlan),
-                displayPlan,
-                advancedLineTextBudget,
-              )
-            : null;
-          if (req) {
+          const requests = rawReq ? [applyAdvancedLineTextBudget(
+            mergeDisplayCollisionIntoLabelRequest(rawReq, displayPlan),
+            displayPlan,
+            advancedLineTextBudget,
+          )] : [];
+          for (const req of requests) {
             if (auditRow) {
               auditRow.expectedLabel = true;
               auditRow.labelText = req.text;
@@ -3053,7 +3571,8 @@ export default function RuleDrivenLayer(props: Props) {
               plan: effectiveFeatureClickPlan,
               deletePick: !!(deletePickActive && isDeletePickTargetFeature(r)),
             });
-          } else {
+          }
+          if (!requests.length) {
             updateLineAuditBlocked(
               auditRow,
               "anchor-resolve",
@@ -3675,6 +4194,7 @@ export default function RuleDrivenLayer(props: Props) {
     projection,
     worldId,
     activeBuildingUid,
+    activeContextBindingId,
     activeBuildingFloorRefSet,
     floorOptions,
     activeFloorIndex,
@@ -3683,59 +4203,24 @@ export default function RuleDrivenLayer(props: Props) {
     deletePickActive,
     featureInteractionSuppressed,
     selectedFeature?.uid,
+    configRuntime,
   ]);
 
   const showFloorUI = mobileFloorVisible;
 
   return (
     <>
-      {showFloorUI && (
-        <div className="hidden sm:block">
-          <SmallDraggablePanel
-            id="desktop-floor-view-selector"
-            title="拖动楼层视角面板"
-            defaultPosition={{ x: Math.max(16, window.innerWidth - 152), y: 160 }}
-            zIndex={2147483647}
-            dragHandleSelector="[data-small-drag-handle]"
-          >
-            <AppCard className="bg-white/90 border border-gray-200 p-2 w-28">
-              <div data-small-drag-handle className="select-none">
-                <div className="text-xs font-semibold text-gray-800 mb-1">
-                  楼层视角
-                </div>
-                <div className="text-[11px] text-gray-600 mb-2 truncate">
-                  {activeBuildingName || "（未命名建筑）"}
-                </div>
-              </div>
-
-              <div data-no-drag className="flex flex-col gap-1 max-h-[60vh] overflow-auto">
-                {floorOptions.map((opt, idx) => {
-                  const on = idx === activeFloorIndex;
-                  return (
-                    <AppButton
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setActiveFloorIndexAndRemember(idx)}
-                      className={`w-full text-left px-2 py-1 rounded text-xs border transition-colors ${
-                        on
-                          ? "bg-blue-50 text-blue-700 border-blue-200"
-                          : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                      }`}
-                    >
-                      {opt.label}
-                    </AppButton>
-                  );
-                })}
-              </div>
-            </AppCard>
-          </SmallDraggablePanel>
-        </div>
+      {showFloorUI && floorPanelMode !== 'hidden' && (
+        floorPanelMode === 'embedded'
+          ? <div className="absolute right-3 top-3 z-[1000] hidden sm:block"><FloorSelectorContents activeBuildingName={activeBuildingName} floorOptions={floorOptions} activeFloorIndex={activeFloorIndex} onSelect={setActiveFloorIndexAndRemember} /></div>
+          : <div className="hidden sm:block"><SmallDraggablePanel id="desktop-floor-view-selector" title="拖动楼层视角面板" defaultPosition={{ x: Math.max(16, window.innerWidth - 152), y: 160 }} zIndex={2147483647} dragHandleSelector="[data-small-drag-handle]"><FloorSelectorContents activeBuildingName={activeBuildingName} floorOptions={floorOptions} activeFloorIndex={activeFloorIndex} onSelect={setActiveFloorIndexAndRemember} /></SmallDraggablePanel></div>
       )}
       <div className="hidden sm:block">
         {(() => {
           const cls =
             selectedFeature?.meta?.Class ?? selectedFeature?.featureInfo?.Class;
-          const Card = resolveFeatureCardComponent(cls);
+          const override = selectedFeature ? resolveConfigRuntimeCardOverride(configRuntime, selectedFeature) : undefined;
+          const Card: any = override ? FeatureInteractionCard : resolveFeatureCardComponent(cls);
           return (
             <Card
               open={featureCardOpen}
@@ -3743,6 +4228,7 @@ export default function RuleDrivenLayer(props: Props) {
               onClose={clearSelection}
               resolveFeatureById={resolveFeatureById}
               onTryTriggerLabelClickById={onTryTriggerLabelClickById}
+              {...(override ? { configRuntimeCard: configRuntime, disableFieldRules: true } : {})}
             />
           );
         })()}
@@ -3812,6 +4298,13 @@ function createLayerBundle(
     const multipartPoints = r.multipartGeometry?.type === 'Point'
       ? r.multipartGeometry.parts
       : [r.p3];
+    const pointTolerance = nativeHitTolerance(displayPlan);
+    // Native V3 hit tolerance owns a separate transparent target.  Keeping the
+    // visible marker non-interactive prevents one click from reaching both it
+    // and the proxy, while legacy V1 keeps its original Leaflet event surface.
+    const nativePointHitEnabled = pointTolerance > 0 && (deletePickTarget || geomPointEnabled);
+    const pointInteractive = nativePointHitEnabled ? false : (deletePickTarget ? true : geomPointEnabled);
+    const pointProxyRadius = Math.max(5, Number(plan?.radius ?? 5) + pointTolerance);
 
     if (multipartPoints.length > 1) {
       const mainLayers = multipartPoints.map((point) => {
@@ -3822,20 +4315,39 @@ function createLayerBundle(
             return L.marker(pointLatLng, {
               pane: mainPane,
               icon: L.icon({ iconUrl, iconSize: plan.iconSize ?? [24, 24], iconAnchor: plan.iconAnchor ?? [12, 12] }),
-              interactive: deletePickTarget ? true : geomPointEnabled,
+              interactive: pointInteractive,
               zIndexOffset: (plan as any)?.zIndexOffset ?? 0,
             });
           }
         }
+        if (plan && plan.kind === 'shape') {
+          return makeConfigShapeMarker(pointLatLng, plan, mainPane, pointInteractive);
+        }
         return L.circleMarker(pointLatLng, {
           pane: mainPane,
           radius: plan?.radius ?? 5,
-          interactive: deletePickTarget ? true : undefined,
+          interactive: pointInteractive,
           ...(plan?.style ?? { color: '#111827', weight: 2, opacity: 0.9, fillOpacity: 0.6, fillColor: '#f97316' }),
         });
       });
       const main = L.featureGroup(mainLayers);
-      if (deletePickTarget) bindDeletePick(main, r);
+      let hitProxy: L.Layer | undefined;
+      let hitProxySignature: string | undefined;
+      if (nativePointHitEnabled) {
+        hitProxy = createNativePointHitProxy(
+          multipartPoints.map((point) => projection.locationToLatLng(point.x, point.y, point.z)),
+          pointProxyRadius,
+        );
+        hitProxySignature = nativeHitProxySignature('point', pointTolerance, pointProxyRadius, true);
+        bindNativeHitProxy(hitProxy, r, {
+          deletePickTarget,
+          assistPickTarget: false,
+          geometryEnabled: geomPointEnabled,
+          clickEnabled,
+          onLabelClick,
+          effectiveClickPlan,
+        });
+      } else if (deletePickTarget) bindDeletePick(main, r);
       else if (geomPointEnabled && clickEnabled && onLabelClick) {
         main.on('click', (event: L.LeafletMouseEvent) => {
           (event as any)?.originalEvent?.stopPropagation?.();
@@ -3851,8 +4363,10 @@ function createLayerBundle(
       return {
         main,
         label: labelLayer ?? undefined,
-        kind: plan?.kind === 'icon' ? 'marker' : 'circleMarker',
-        iconUrl: plan?.kind === 'icon' ? (plan.iconUrl ?? (plan.iconUrlFrom ? String((r.featureInfo as any)?.[plan.iconUrlFrom] ?? '').trim() : undefined)) : undefined,
+        hitProxy,
+        hitProxySignature,
+        kind: plan?.kind === 'icon' || plan?.kind === 'shape' ? 'marker' : 'circleMarker',
+        iconUrl: plan?.kind === 'icon' ? (plan.iconUrl ?? (plan.iconUrlFrom ? String((r.featureInfo as any)?.[plan.iconUrlFrom] ?? '').trim() : undefined)) : plan?.kind === 'shape' ? configShapeSignature(plan) : undefined,
         pane: mainPane,
         pointSignature: JSON.stringify(multipartPoints.map((point) => [point.x, point.y, point.z])),
       };
@@ -3876,6 +4390,7 @@ function createLayerBundle(
           weight: 2,
           opacity: 0.9,
           fillOpacity: 0.6,
+          interactive: pointInteractive,
         });
         main = cm;
         kind = "circleMarker";
@@ -3889,16 +4404,20 @@ function createLayerBundle(
           pane: mainPane,
           icon,
           // 仅在开启 geom.point / 删除选择 时让 marker 可点击；默认保持不可交互，避免影响其他逻辑。
-          interactive: deletePickTarget ? true : geomPointEnabled,
+          interactive: pointInteractive,
           zIndexOffset: (plan as any)?.zIndexOffset ?? 0,
         });
         kind = "marker";
       }
+    } else if (plan && plan.kind === 'shape') {
+      main = makeConfigShapeMarker(latlng, plan, mainPane, pointInteractive);
+      kind = 'marker';
+      iconUrl = configShapeSignature(plan);
     } else {
       const cm = L.circleMarker(latlng, {
         pane: mainPane,
         radius: plan?.radius ?? 5,
-        interactive: deletePickTarget ? true : undefined,
+        interactive: pointInteractive,
         ...(plan?.style ?? {
           color: "#111827",
           weight: 2,
@@ -3913,7 +4432,19 @@ function createLayerBundle(
 
     // 【新增】几何点击：点要素本体点击（marker / circleMarker）
     let hitProxy: L.Layer | undefined;
-    if (deletePickTarget) {
+    let hitProxySignature: string | undefined;
+    if (nativePointHitEnabled) {
+      hitProxy = createNativePointHitProxy([latlng], pointProxyRadius);
+      hitProxySignature = nativeHitProxySignature('point', pointTolerance, pointProxyRadius, true);
+      bindNativeHitProxy(hitProxy, r, {
+        deletePickTarget,
+        assistPickTarget: false,
+        geometryEnabled: geomPointEnabled,
+        clickEnabled,
+        onLabelClick,
+        effectiveClickPlan,
+      });
+    } else if (deletePickTarget) {
       bindDeletePick(main, r);
       hitProxy = createDeletePickPointHitProxy(latlng);
       bindDeletePick(hitProxy, r);
@@ -3945,9 +4476,70 @@ function createLayerBundle(
       main,
       label: labelLayer ?? undefined,
       hitProxy,
+      hitProxySignature,
       kind,
       iconUrl,
       pane: mainPane,
+    };
+  }
+
+  // 线/面在低缩放规则中可显式降级为“几何中心点”。它仍保留原要素的
+  // Label、信息卡和点击语义，只替换主几何的呈现方式。
+  if (r.type !== 'Points' && displayPlan?.geometry?.render === 'point') {
+    const centers = pointRepresentationLatLngs(
+      r,
+      projection,
+      displayPlan.anchor?.multipartMode ?? 'featureBbox',
+    );
+    const center = centers[0];
+    if (!center) return null;
+    const plan = typeof symbol.point === 'function' ? symbol.point(r, ctx, store) : symbol.point;
+    const mainPane = (plan as any)?.pane ?? symbol?.pane ?? 'ria-point';
+    const pointTolerance = nativeHitTolerance(displayPlan);
+    const nativePointHitEnabled = pointTolerance > 0 && (deletePickTarget || geomPathEnabled);
+    const interactive = nativePointHitEnabled ? false : (deletePickTarget ? true : geomPathEnabled);
+    const pointProxyRadius = Math.max(5, Number(plan?.radius ?? 5) + pointTolerance);
+    const makeCenterMarker = (latlng: L.LatLng): L.Layer => plan?.kind === 'icon'
+      ? (() => {
+          const iconUrl = plan.iconUrl ?? (plan.iconUrlFrom ? String((r.featureInfo as any)?.[plan.iconUrlFrom] ?? '').trim() : undefined);
+          return iconUrl
+            ? L.marker(latlng, { pane: mainPane, icon: L.icon({ iconUrl, iconSize: plan.iconSize ?? [24, 24], iconAnchor: plan.iconAnchor ?? [12, 12] }), interactive, zIndexOffset: plan.zIndexOffset ?? 0 })
+            : L.circleMarker(latlng, { pane: mainPane, radius: 5, interactive, color: '#111827', weight: 2, opacity: 0.9, fillOpacity: 0.6, fillColor: '#f97316' });
+        })()
+      : plan?.kind === 'shape'
+        ? makeConfigShapeMarker(latlng, plan, mainPane, interactive)
+        : L.circleMarker(latlng, { pane: mainPane, radius: plan?.radius ?? 5, interactive, ...(plan?.style ?? { color: '#111827', weight: 2, opacity: 0.9, fillOpacity: 0.6, fillColor: '#f97316' }) });
+    const main = centers.length === 1 ? makeCenterMarker(center) : L.featureGroup(centers.map(makeCenterMarker));
+    let hitProxy: L.Layer | undefined;
+    let hitProxySignature: string | undefined;
+    if (nativePointHitEnabled) {
+      hitProxy = createNativePointHitProxy(centers, pointProxyRadius);
+      hitProxySignature = nativeHitProxySignature('point-representation', pointTolerance, pointProxyRadius, true);
+      bindNativeHitProxy(hitProxy, r, {
+        deletePickTarget,
+        assistPickTarget,
+        geometryEnabled: geomPathEnabled,
+        clickEnabled,
+        onLabelClick,
+        effectiveClickPlan,
+      });
+    } else if (deletePickTarget) bindDeletePick(main, r);
+    else if (geomPathEnabled && clickEnabled && onLabelClick) {
+      (main as any).on?.('click', (event: L.LeafletMouseEvent) => {
+        (event as any)?.originalEvent?.stopPropagation?.();
+        onLabelClick(r, effectiveClickPlan as any);
+      });
+    }
+    const labelLayer = buildLabelLayer(r, resolvedLabelPlan, ctx, store, projection, center, labelStyleKey, effectiveClickPlan && clickEnabled ? effectiveClickPlan as any : null, onClick, viewportWorldRectXZ, deletePickTarget, deletePickTarget ? () => dispatchDeletePickFeature(r) : null, displayPlan);
+    return {
+      main,
+      label: labelLayer ?? undefined,
+      hitProxy,
+      hitProxySignature,
+      kind: plan?.kind === 'icon' || plan?.kind === 'shape' ? 'marker' : 'circleMarker',
+      iconUrl: plan?.kind === 'icon' ? (plan.iconUrl ?? (plan.iconUrlFrom ? String((r.featureInfo as any)?.[plan.iconUrlFrom] ?? '').trim() : undefined)) : plan?.kind === 'shape' ? configShapeSignature(plan) : undefined,
+      pane: mainPane,
+      pointSignature: JSON.stringify(centers.map((item) => [item.lat, item.lng])),
     };
   }
 
@@ -3968,33 +4560,48 @@ function createLayerBundle(
 
     // pane：symbol.pane > 默认 ria-overlay
     const mainPane = symbol?.pane ?? "ria-overlay";
+    const pathTolerance = nativeHitTolerance(displayPlan);
+    const nativePathHitEnabled = pathTolerance > 0 && (deletePickTarget || assistPickTarget || geomPathEnabled);
+    const mainInteractive = nativePathHitEnabled
+      ? false
+      : (assistPickTarget || deletePickTarget ? true : geomPathEnabled ? true : (style as any)?.interactive);
 
     const main =
       r.type === "Polyline"
         ? L.polyline(lineLatLngs as L.LatLngExpression[], {
             ...(style ?? {}),
             pane: mainPane,
-            interactive:
-              assistPickTarget || deletePickTarget
-                ? true
-                : geomPathEnabled
-                  ? true
-                  : (style as any)?.interactive,
+            interactive: mainInteractive,
           })
         : L.polygon(polygonLatLngs as L.LatLngExpression[], {
             ...(style ?? {}),
             pane: mainPane,
-            interactive:
-              assistPickTarget || deletePickTarget
-                ? true
-                : geomPathEnabled
-                  ? true
-                  : (style as any)?.interactive,
+            interactive: mainInteractive,
           });
 
     // 【新增】几何点击：线/面要素本体点击 / 辅助线专用拾取
     (main as any).off?.("click");
-    if (deletePickTarget) {
+    let hitProxy: L.Layer | undefined;
+    let hitProxySignature: string | undefined;
+    if (nativePathHitEnabled) {
+      hitProxy = createNativePathHitProxy(
+        r.type,
+        lineLatLngs as L.LatLngExpression[],
+        polygonLatLngs as L.LatLngExpression[],
+        'ria-overlay-top',
+        Number((style as any)?.weight ?? 0),
+        pathTolerance,
+      );
+      hitProxySignature = nativeHitProxySignature(`path-${r.type}`, pathTolerance, Number((style as any)?.weight ?? 0), true);
+      bindNativeHitProxy(hitProxy, r, {
+        deletePickTarget,
+        assistPickTarget,
+        geometryEnabled: geomPathEnabled,
+        clickEnabled,
+        onLabelClick,
+        effectiveClickPlan,
+      });
+    } else if (deletePickTarget) {
       bindDeletePick(main, r);
     } else if (assistPickTarget) {
       (main as any).on?.("click", (e: L.LeafletMouseEvent) => {
@@ -4028,6 +4635,8 @@ function createLayerBundle(
     return {
       main,
       label: labelLayer ?? undefined,
+      hitProxy,
+      hitProxySignature,
       kind: "path",
       pane: mainPane,
     };
@@ -4082,6 +4691,99 @@ function updateLayerBundle(
     effectiveClickPlan && onLabelClick
       ? () => onLabelClick(r, effectiveClickPlan as any)
       : undefined;
+
+  const rebuildBundle = (): boolean => {
+    if (root.hasLayer(bundle.main)) root.removeLayer(bundle.main);
+    if (bundle.label && root.hasLayer(bundle.label)) fadeRemoveLabelLayer(root, bundle.label, true);
+    if (bundle.hitProxy && root.hasLayer(bundle.hitProxy)) root.removeLayer(bundle.hitProxy);
+    const fresh = createLayerBundle(r, symbol, ctx, store, projection, onLabelClick, viewportWorldRectXZ, assistPickActive, deletePickActive, displayPlan, featureInteractionSuppressed);
+    if (!fresh) return false;
+    bundle.main = fresh.main;
+    bundle.label = fresh.label;
+    bundle.kind = fresh.kind;
+    bundle.iconUrl = fresh.iconUrl;
+    bundle.hitProxy = fresh.hitProxy;
+    bundle.hitProxySignature = fresh.hitProxySignature;
+    bundle.pane = fresh.pane;
+    bundle.pointSignature = fresh.pointSignature;
+    return true;
+  };
+
+  // A line or polygon can be represented by its stable geometry center at a
+  // low zoom. Keep the same feature/card/label pipeline while maintaining a
+  // point layer instead of a transparent path.
+  if (r.type !== 'Points') {
+    const renderAsPoint = displayPlan?.geometry?.render === 'point';
+    if (renderAsPoint) {
+      const centers = pointRepresentationLatLngs(
+        r,
+        projection,
+        displayPlan?.anchor?.multipartMode ?? 'featureBbox',
+      );
+      const center = centers[0];
+      const plan = typeof symbol.point === 'function' ? symbol.point(r, ctx, store) : symbol.point;
+      const iconUrl = plan?.kind === 'icon' ? (plan.iconUrl ?? (plan.iconUrlFrom ? String((r.featureInfo as any)?.[plan.iconUrlFrom] ?? '').trim() : undefined)) : undefined;
+      const expectedKind: LayerBundle['kind'] = plan?.kind === 'shape' || iconUrl ? 'marker' : 'circleMarker';
+      const expectedSignature = plan?.kind === 'shape' ? configShapeSignature(plan) : iconUrl;
+      const centerSignature = JSON.stringify(centers.map((item) => [item.lat, item.lng]));
+      const pointTolerance = nativeHitTolerance(displayPlan);
+      const nativePointHitEnabled = pointTolerance > 0 && (deletePickTarget || geomPathEnabled);
+      const pointProxyRadius = Math.max(5, Number(plan?.radius ?? 5) + pointTolerance);
+      const expectedHitProxySignature = nativeHitProxySignature('point-representation', pointTolerance, pointProxyRadius, nativePointHitEnabled);
+      if (!center || bundle.kind !== expectedKind || bundle.iconUrl !== expectedSignature || bundle.pointSignature !== centerSignature || bundle.hitProxySignature !== expectedHitProxySignature || (centers.length > 1 && !(bundle.main instanceof L.FeatureGroup))) {
+        rebuildBundle();
+        return;
+      }
+      // A per-part low-zoom representation owns a feature group.  It is
+      // rebuilt on a rule refresh so color/style edits and multipart changes
+      // never leave one component stale.
+      if (centers.length > 1) {
+        rebuildBundle();
+        return;
+      }
+      if (bundle.main instanceof L.CircleMarker) {
+        const style = plan?.kind === 'circle' ? (plan.style ?? {}) : {};
+        bundle.main.setStyle(style);
+        bundle.main.setLatLng(center);
+      } else if (bundle.main instanceof L.Marker) {
+        bundle.main.setLatLng(center);
+      }
+      (bundle.main as any).off?.('click');
+      if (bundle.hitProxy && bundle.hitProxySignature) {
+        bindNativeHitProxy(bundle.hitProxy, r, {
+          deletePickTarget,
+          assistPickTarget,
+          geometryEnabled: geomPathEnabled,
+          clickEnabled,
+          onLabelClick,
+          effectiveClickPlan,
+        });
+      } else if (deletePickTarget) bindDeletePick(bundle.main, r);
+      else if (geomPathEnabled && clickEnabled && onLabelClick) {
+        (bundle.main as any).on?.('click', (event: L.LeafletMouseEvent) => {
+          (event as any)?.originalEvent?.stopPropagation?.();
+          onLabelClick(r, effectiveClickPlan as any);
+        });
+      }
+      if (!(resolvedLabelPlan as any)?.declutter) {
+        if (bundle.label) clearBundleLabel(bundle, root);
+        const labelLayer = buildLabelLayer(r, resolvedLabelPlan, ctx, store, projection, center, labelStyleKey, effectiveClickPlan && clickEnabled ? effectiveClickPlan as any : null, onClick, viewportWorldRectXZ, deletePickTarget, deletePickTarget ? () => dispatchDeletePickFeature(r) : null, displayPlan);
+        if (labelLayer) {
+          bundle.label = labelLayer;
+          root.addLayer(labelLayer);
+          fadeInLabelLayer(labelLayer);
+        }
+      }
+      return;
+    }
+    // The active zoom rule changed from point representation back to the
+    // feature's native line/polygon geometry.
+    if (bundle.kind !== 'path') {
+      rebuildBundle();
+      return;
+    }
+  }
+
   // 点：若 iconUrl 变化，重建
   if (r.type === "Points" && r.p3) {
     const latlng = projection.locationToLatLng(r.p3.x, r.p3.y, r.p3.z);
@@ -4103,19 +4805,27 @@ function updateLayerBundle(
           : undefined);
       nextIconUrl = url || undefined;
       nextKind = url ? "marker" : "circleMarker";
+    } else if (plan && plan.kind === 'shape') {
+      nextKind = 'marker';
+      nextIconUrl = configShapeSignature(plan);
     } else {
       nextKind = "circleMarker";
       nextIconUrl = undefined;
     }
 
-    // marker 的 interactive 不能可靠地原地切换；若 geom.point 开关或删除命中代理变化，直接重建最稳。
-    const nextMarkerInteractive = deletePickTarget ? true : geomPointEnabled;
+    // Marker interactivity cannot reliably be toggled in place.  Native V3
+    // tolerance uses its transparent sibling instead of widening the marker.
+    const pointTolerance = nativeHitTolerance(displayPlan);
+    const nativePointHitEnabled = pointTolerance > 0 && (deletePickTarget || geomPointEnabled);
+    const pointProxyRadius = Math.max(5, Number(plan?.radius ?? 5) + pointTolerance);
+    const nextHitProxySignature = nativeHitProxySignature('point', pointTolerance, pointProxyRadius, nativePointHitEnabled);
+    const nextMarkerInteractive = nativePointHitEnabled ? false : (deletePickTarget ? true : geomPointEnabled);
     const curMarkerInteractive =
       bundle.kind === "marker"
         ? !!(bundle.main as any)?.options?.interactive
         : undefined;
     const curHasHitProxy = !!bundle.hitProxy;
-    const nextHasHitProxy = !!deletePickTarget;
+    const nextHasHitProxy = nativePointHitEnabled || !!deletePickTarget;
 
     if (
       nextKind !== bundle.kind ||
@@ -4123,7 +4833,8 @@ function updateLayerBundle(
       nextIconUrl !== bundle.iconUrl ||
       (bundle.kind === "marker" &&
         curMarkerInteractive !== nextMarkerInteractive) ||
-      curHasHitProxy !== nextHasHitProxy
+      curHasHitProxy !== nextHasHitProxy ||
+      bundle.hitProxySignature !== nextHitProxySignature
     ) {
       // remove old
       if (root.hasLayer(bundle.main)) root.removeLayer(bundle.main);
@@ -4151,6 +4862,7 @@ function updateLayerBundle(
       bundle.kind = newBundle.kind;
       bundle.iconUrl = newBundle.iconUrl;
       bundle.hitProxy = newBundle.hitProxy;
+      bundle.hitProxySignature = newBundle.hitProxySignature;
       bundle.pointSignature = newBundle.pointSignature;
       return;
     }
@@ -4175,7 +4887,16 @@ function updateLayerBundle(
     // 【新增】几何点击：点要素（更新时重绑）
     (bundle.main as any).off?.("click");
     if (bundle.hitProxy) (bundle.hitProxy as any).off?.("click");
-    if (deletePickTarget) {
+    if (bundle.hitProxy && bundle.hitProxySignature) {
+      bindNativeHitProxy(bundle.hitProxy, r, {
+        deletePickTarget,
+        assistPickTarget: false,
+        geometryEnabled: geomPointEnabled,
+        clickEnabled,
+        onLabelClick,
+        effectiveClickPlan,
+      });
+    } else if (deletePickTarget) {
       bindDeletePick(bundle.main, r);
       if (bundle.hitProxy) bindDeletePick(bundle.hitProxy, r);
     } else if (geomPointEnabled && clickEnabled && onLabelClick) {
@@ -4212,10 +4933,23 @@ function updateLayerBundle(
     return;
   }
 
-  const nextPathInteractive =
-    assistPickTarget || deletePickTarget ? true : geomPathEnabled;
+  const nextPathStyle: L.PathOptions =
+    typeof symbol.pathStyle === "function"
+      ? symbol.pathStyle(r, ctx, store)
+      : symbol.pathStyle;
+  const pathTolerance = nativeHitTolerance(displayPlan);
+  const nativePathHitEnabled = pathTolerance > 0 && (deletePickTarget || assistPickTarget || geomPathEnabled);
+  const nextPathInteractive = nativePathHitEnabled
+    ? false
+    : (assistPickTarget || deletePickTarget ? true : geomPathEnabled);
+  const nextHitProxySignature = nativeHitProxySignature(
+    `path-${r.type}`,
+    pathTolerance,
+    Number((nextPathStyle as any)?.weight ?? 0),
+    nativePathHitEnabled,
+  );
   const curPathInteractive = !!(bundle.main as any)?.options?.interactive;
-  if (curPathInteractive !== nextPathInteractive) {
+  if (curPathInteractive !== nextPathInteractive || bundle.hitProxySignature !== nextHitProxySignature) {
     if (root.hasLayer(bundle.main)) root.removeLayer(bundle.main);
     if (bundle.hitProxy && root.hasLayer(bundle.hitProxy))
       root.removeLayer(bundle.hitProxy);
@@ -4241,22 +4975,28 @@ function updateLayerBundle(
     bundle.kind = newBundle.kind;
     bundle.iconUrl = newBundle.iconUrl;
     bundle.hitProxy = newBundle.hitProxy;
+    bundle.hitProxySignature = newBundle.hitProxySignature;
     return;
   }
 
   // 线/面：更新 style
   if (bundle.main instanceof L.Path) {
-    const style: L.PathOptions =
-      typeof symbol.pathStyle === "function"
-        ? symbol.pathStyle(r, ctx, store)
-        : symbol.pathStyle;
-    if (style) bundle.main.setStyle(style);
+    if (nextPathStyle) bundle.main.setStyle(nextPathStyle);
   }
 
   // 【新增】几何点击：线/面（更新时重绑）
   (bundle.main as any).off?.("click");
   bindAssistPickFeature(bundle.main, r);
-  if (deletePickTarget) {
+  if (bundle.hitProxy && bundle.hitProxySignature) {
+    bindNativeHitProxy(bundle.hitProxy, r, {
+      deletePickTarget,
+      assistPickTarget,
+      geometryEnabled: geomPathEnabled,
+      clickEnabled,
+      onLabelClick,
+      effectiveClickPlan,
+    });
+  } else if (deletePickTarget) {
     bindDeletePick(bundle.main, r);
   } else if (assistPickTarget) {
     (bundle.main as any).on?.("click", (e: L.LeafletMouseEvent) => {
@@ -4408,7 +5148,6 @@ function buildLabelRequest(
   store: FeatureStore,
   projection: DynmapProjection,
   pointLatLng?: L.LatLng,
-  clickPlan?: LabelClickPlan | null,
   realViewportWorldRectXZ?: WorldRectXZ | null,
   layoutViewportWorldRectXZ?: WorldRectXZ | null,
   displayPlan?: FeatureDisplayPlan | null,
@@ -4418,55 +5157,22 @@ function buildLabelRequest(
   if (labelPlan.minLevel !== undefined && ctx.zoomLevel < labelPlan.minLevel)
     return null;
 
-  let text = "";
-  if (typeof labelPlan.textFrom === "function") {
-    text = String(labelPlan.textFrom(r, ctx, store) ?? "").trim();
-  } else if (typeof labelPlan.textFrom === "string") {
-    text = String((r.featureInfo as any)?.[labelPlan.textFrom] ?? "").trim();
-  }
+  const text = resolveLabelTextForAudit(r, labelPlan, ctx, store);
   if (!text) return null;
 
-  const effectivePlacement =
-    r.type === "Points" && labelPlan.placement === "center"
-      ? (clickPlan as any)?.mode === "labelOnly"
-        ? "center"
-        : "near"
-      : (labelPlan.placement ?? (r.type === "Points" ? "near" : "center"));
+  const effectivePlacement: "center" | "near" =
+    labelPlan.placement === "near" ||
+    (labelPlan.placement === "center" && r.type === "Points")
+      ? "near"
+      : "center";
 
   const effectiveDisplayAnchor = resolveEffectiveDisplayAnchor(
     displayPlan,
     labelPlan,
   );
 
-  const resolvedAnchor =
-    r.type === "Points" && pointLatLng
-      ? { anchorLatLng: pointLatLng }
-      : resolveLabelAnchorForFeature({
-          feature: r,
-          projection,
-          y: Y_FOR_DISPLAY,
-          viewportWorldRectXZ:
-            layoutViewportWorldRectXZ ?? realViewportWorldRectXZ ?? null,
-          realViewportWorldRectXZ: realViewportWorldRectXZ ?? null,
-          layoutViewportWorldRectXZ: layoutViewportWorldRectXZ ?? null,
-          displayAnchor: effectiveDisplayAnchor,
-          legacyDeclutter: labelPlan.declutter,
-        });
-
-  if (!resolvedAnchor) return null;
-
-  return {
-    id: `${r.uid}#label`,
+  const common = {
     featureUid: r.uid,
-    anchorLatLng: resolvedAnchor.anchorLatLng,
-    anchorCandidatesLatLng: resolvedAnchor.anchorCandidatesLatLng,
-    rotateDeg: resolvedAnchor.rotateDeg,
-    rotateDegCandidates: resolvedAnchor.rotateDegCandidates,
-    anchorCandidateIds: resolvedAnchor.anchorCandidateIds,
-    anchorCandidateSourceIndexes: resolvedAnchor.anchorCandidateSourceIndexes,
-    anchorCandidateDisplayOrders: resolvedAnchor.anchorCandidateDisplayOrders,
-    lineTextPathCandidates: resolvedAnchor.lineTextPathCandidates,
-    geoAnchorDebug: resolvedAnchor.geoAnchorDebug,
     lineTextMode: effectiveDisplayAnchor?.lineTextMode,
     textPathFallback: effectiveDisplayAnchor?.textPathFallback,
     displayAnchor: effectiveDisplayAnchor,
@@ -4476,6 +5182,33 @@ function buildLabelRequest(
     dotAnchorMode: labelPlan.dotAnchorMode,
     offsetY: Number(labelPlan.offsetY ?? 0),
     declutter: labelPlan.declutter,
+  };
+
+  if (pointLatLng) return { ...common, id: `${r.uid}#label`, anchorLatLng: pointLatLng };
+
+  const resolvedAnchor = resolveLabelAnchorForFeature({
+    feature: r,
+    projection,
+    y: Y_FOR_DISPLAY,
+    viewportWorldRectXZ: layoutViewportWorldRectXZ ?? realViewportWorldRectXZ ?? null,
+    realViewportWorldRectXZ: realViewportWorldRectXZ ?? null,
+    layoutViewportWorldRectXZ: layoutViewportWorldRectXZ ?? null,
+    displayAnchor: effectiveDisplayAnchor,
+    legacyDeclutter: labelPlan.declutter,
+  });
+  if (!resolvedAnchor) return null;
+  return {
+    ...common,
+    id: `${r.uid}#label`,
+    anchorLatLng: resolvedAnchor.anchorLatLng,
+    anchorCandidatesLatLng: resolvedAnchor.anchorCandidatesLatLng,
+    rotateDeg: resolvedAnchor.rotateDeg,
+    rotateDegCandidates: resolvedAnchor.rotateDegCandidates,
+    anchorCandidateIds: resolvedAnchor.anchorCandidateIds,
+    anchorCandidateSourceIndexes: resolvedAnchor.anchorCandidateSourceIndexes,
+    anchorCandidateDisplayOrders: resolvedAnchor.anchorCandidateDisplayOrders,
+    lineTextPathCandidates: resolvedAnchor.lineTextPathCandidates,
+    geoAnchorDebug: resolvedAnchor.geoAnchorDebug,
   };
 }
 
@@ -4500,79 +5233,58 @@ function buildLabelLayer(
   if (labelPlan.minLevel !== undefined && ctx.zoomLevel < labelPlan.minLevel)
     return null;
 
-  let text = "";
-  if (typeof labelPlan.textFrom === "function") {
-    text = String(labelPlan.textFrom(r, ctx, store) ?? "").trim();
-  } else if (typeof labelPlan.textFrom === "string") {
-    text = String((r.featureInfo as any)?.[labelPlan.textFrom] ?? "").trim();
-  }
+  const text = resolveLabelTextForAudit(r, labelPlan, ctx, store);
   if (!text) return null;
 
-  const placement = labelPlan.placement ?? "center";
+  const placement = labelPlan.placement === "near" ? "near" : "center";
   const withDot = !!labelPlan.withDot;
   const dotAnchorMode = labelPlan.dotAnchorMode as "inline" | "anchorRight" | undefined;
-  const effectivePlacement =
-    r.type === "Points" && placement === "center"
-      ? (clickPlan as any)?.mode === "labelOnly"
-        ? "center"
-        : "near"
-      : placement;
+  const effectivePlacement = placement;
 
   const effectiveDisplayAnchor = resolveEffectiveDisplayAnchor(
     displayPlan,
     labelPlan,
   );
 
-  const resolvedAnchor =
-    r.type === "Points" && pointLatLng
-      ? { anchorLatLng: pointLatLng }
-      : resolveLabelAnchorForFeature({
-          feature: r,
-          projection,
-          y: Y_FOR_DISPLAY,
-          viewportWorldRectXZ,
-          displayAnchor: effectiveDisplayAnchor,
-          legacyDeclutter: labelPlan.declutter,
-        });
+  const resolvedAnchor = pointLatLng
+    ? null
+    : resolveLabelAnchorForFeature({
+        feature: r,
+        projection,
+        y: Y_FOR_DISPLAY,
+        viewportWorldRectXZ,
+        displayAnchor: effectiveDisplayAnchor,
+        legacyDeclutter: labelPlan.declutter,
+      });
+  const anchor = pointLatLng ?? resolvedAnchor?.anchorLatLng;
+  if (!anchor) return null;
 
-  if (!resolvedAnchor) return null;
-  const ll = resolvedAnchor.anchorLatLng;
-
-  if (deletePickActive && onDeletePickClick) {
-    return makeClickableLabelMarker({
-      latlng: ll,
-      text,
-      placement: effectivePlacement,
-      withDot,
-      dotAnchorMode,
-      offsetY: labelPlan.offsetY,
-      styleKey: (styleKey ?? "bubble-dark") as any,
-      onClick: onDeletePickClick,
-    });
-  }
-
-  if (clickPlan && (clickPlan as any).enabled && onClick) {
-    return makeClickableLabelMarker({
-      latlng: ll,
-      text,
-      placement: effectivePlacement,
-      withDot,
-      dotAnchorMode,
-      offsetY: labelPlan.offsetY,
-      styleKey: (styleKey ??
-        (clickPlan as any).labelStyleKey ??
-        "bubble-dark") as any,
-      onClick,
-    });
-  }
-
-  return makeLabelMarker(
-    ll,
-    text,
-    effectivePlacement,
-    withDot,
-    labelPlan.offsetY,
-    styleKey,
-    dotAnchorMode,
-  );
+  const makeOne = (ll: L.LatLng): L.Layer => {
+    if (deletePickActive && onDeletePickClick) {
+      return makeClickableLabelMarker({
+        latlng: ll,
+        text,
+        placement: effectivePlacement,
+        withDot,
+        dotAnchorMode,
+        offsetY: labelPlan.offsetY,
+        styleKey: (styleKey ?? "bubble-dark") as any,
+        onClick: onDeletePickClick,
+      });
+    }
+    if (clickPlan && (clickPlan as any).enabled && onClick) {
+      return makeClickableLabelMarker({
+        latlng: ll,
+        text,
+        placement: effectivePlacement,
+        withDot,
+        dotAnchorMode,
+        offsetY: labelPlan.offsetY,
+        styleKey: (styleKey ?? (clickPlan as any).labelStyleKey ?? "bubble-dark") as any,
+        onClick,
+      });
+    }
+    return makeLabelMarker(ll, text, effectivePlacement, withDot, labelPlan.offsetY, styleKey, dotAnchorMode);
+  };
+  return makeOne(anchor);
 }

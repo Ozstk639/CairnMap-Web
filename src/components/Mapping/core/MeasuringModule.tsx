@@ -166,6 +166,8 @@ type MeasuringModuleProps = {
 
   // 可选：将启动按钮插入到外部工具栏
   launcherSlot?: (launcher: React.ReactNode) => React.ReactNode;
+  /** Config Lab keeps package export but intentionally hides package upload. */
+  disablePackageUpload?: boolean;
 };
 
 
@@ -188,7 +190,7 @@ export type MeasuringModuleHandle = {
 };
 
 const MeasuringModule = forwardRef<MeasuringModuleHandle, MeasuringModuleProps>((props, ref) => {
-  const { mapReady, leafletMapRef, projectionRef, currentWorldId, closeSignal, openSignal, onBecameActive, launcherSlot } = props;
+  const { mapReady, leafletMapRef, projectionRef, currentWorldId, closeSignal, openSignal, onBecameActive, launcherSlot, disablePackageUpload = false } = props;
 
 
 // ---------- 测绘 & 图层管理状态 ------------
@@ -4726,7 +4728,7 @@ const workflowBridge: WorkflowBridge = {
       )}
 
       {/* 导入数据：仅开始测绘后显示 */}
-      {measuringActive && (
+      {measuringActive && !disablePackageUpload && (
         <AppButton
           onClick={() => setImportPanelOpen(true)}
           className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 transition-colors text-gray-700"

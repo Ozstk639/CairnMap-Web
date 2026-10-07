@@ -20,6 +20,8 @@ export type LabelStyleKey =
   | `bubble-dark-${number}`
   | 'gm-outline'
   | 'gm-outline-bold'
+  | `gm-outline-${number}`
+  | `gm-outline-bold-${number}`
   | 'structure-label'
   | `structure-label-${number}`
   | `gm-bw-${number}`
@@ -40,6 +42,9 @@ export type LabelStyleKeyInput =
       color?: string;
       rotateDeg?: number;
       writingMode?: 'horizontal' | 'vertical';
+      /** Only honoured by text-only GM/structure families. */
+      italic?: boolean;
+      underline?: boolean;
     };
 
 export type LabelPlacement = 'center' | 'near';
@@ -110,8 +115,11 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
   const themeColor = keyObj ? String(keyObj.color ?? '') : '';
   const rotateDeg = keyObj && Number.isFinite(Number(keyObj.rotateDeg)) ? Number(keyObj.rotateDeg) : 0;
   const writingMode: 'horizontal' | 'vertical' = keyObj && (keyObj as any).writingMode === 'vertical' ? 'vertical' : 'horizontal';
+  const italic = Boolean(keyObj?.italic);
+  const underline = Boolean(keyObj?.underline);
 
   const rawText = String(text ?? '');
+  const labelWhiteSpace = writingMode === 'vertical' ? 'normal' : rawText.includes('\n') ? 'pre-line' : 'nowrap';
 
   const buildVerticalTokensHtml = (s: string): string => {
     // 规则：连续 >=4 个英文/数字字符视为一个整体（横置显示），其他字符逐字竖排。
@@ -175,8 +183,11 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
   };
 
   const GM_STATIC: Record<string, { fontSize: number; strokeW: number; fill: string; stroke: string; fontWeight: number }> = {
-    'gm-outline': { fontSize: 17, strokeW: 0.5, fill: '#ffffff', stroke: '#000000', fontWeight: 700 },
-    'gm-outline-bold': { fontSize: 17, strokeW: 0.7, fill: '#ffffff', stroke: '#000000', fontWeight: 800 },
+    // `gm-outline` is the road/network family: black glyph fill with a
+    // white outline.  It is intentionally distinct from `gm-bw`, the
+    // common white-fill / black-outline surface family.
+    'gm-outline': { fontSize: 17, strokeW: 0.5, fill: '#111827', stroke: '#ffffff', fontWeight: 700 },
+    'gm-outline-bold': { fontSize: 17, strokeW: 0.7, fill: '#111827', stroke: '#ffffff', fontWeight: 800 },
     // 保留旧 key 的显式覆盖（避免未来有人调整比例导致历史样式漂移）
     'gm-bw-15': { fontSize: 15, strokeW: 0.5, fill: '#ffffff', stroke: '#000000', fontWeight: 700 },
     'gm-bw-9': { fontSize: 9, strokeW: 0.3, fill: '#ffffff', stroke: '#000000', fontWeight: 700 },
@@ -209,6 +220,21 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
         fontWeight: 700,
       };
     }
+    // gm-outline(-bold)-xx：道路/网络的黑字白描边家族；字号保持为
+    // V3.2 可编辑值，而不再与 gm-bw 的地物面字体混淆。
+    const outline = key.match(/^gm-outline-(bold-)?(\d+(?:\.\d+)?)$/);
+    if (outline) {
+      const size = Number(outline[2]);
+      if (Number.isFinite(size) && size > 0) {
+        return {
+          fontSize: size,
+          strokeW: roundTo(size * GM_STROKE_RATIO, 0.05),
+          fill: '#111827',
+          stroke: '#ffffff',
+          fontWeight: outline[1] ? 800 : 700,
+        };
+      }
+    }
     return null;
   };
 
@@ -234,7 +260,7 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
       <div style="
         transform:${transform};
         margin-top:${extraMarginTop}px;
-        white-space:${writingMode === 'vertical' ? 'normal' : 'nowrap'};
+        white-space:${labelWhiteSpace};
         pointer-events:${pe};
         cursor:${cursor};
         display:inline-flex;
@@ -249,6 +275,8 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
           font-size:${gm.fontSize}px;
           line-height:1.1;
           text-shadow:${shadow};
+          font-style:${italic ? 'italic' : 'normal'};
+          text-decoration:${underline ? 'underline' : 'none'};
           -webkit-font-smoothing:antialiased;
           text-rendering:geometricPrecision;
         ">${safe}</span>
@@ -292,7 +320,7 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
       <div style="
         transform:${transform};
         margin-top:${extraMarginTop}px;
-        white-space:${writingMode === 'vertical' ? 'normal' : 'nowrap'};
+        white-space:${labelWhiteSpace};
         pointer-events:${pe};
         cursor:${cursor};
         display:inline-flex;
@@ -329,7 +357,7 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
       <div style="
         transform:${transform};
         margin-top:${extraMarginTop}px;
-        white-space:${writingMode === 'vertical' ? 'normal' : 'nowrap'};
+        white-space:${labelWhiteSpace};
         pointer-events:${pe};
         cursor:${cursor};
         display:inline-flex;
@@ -375,7 +403,7 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
       <div style="
         transform:${transform};
         margin-top:${extraMarginTop}px;
-        white-space:${writingMode === 'vertical' ? 'normal' : 'nowrap'};
+        white-space:${labelWhiteSpace};
         pointer-events:${pe};
         cursor:${cursor};
         display:inline-flex;
@@ -392,6 +420,8 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
           font-size:${structureSize}px;
           line-height:1.05;
           letter-spacing:0.01em;
+          font-style:${italic ? 'italic' : 'normal'};
+          text-decoration:${underline ? 'underline' : 'none'};
           -webkit-font-smoothing:antialiased;
           text-rendering:geometricPrecision;
         ">
@@ -439,7 +469,7 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
       padding: ${bubblePadY}px ${bubblePadX}px;
       border-radius: ${bubbleRadius}px;
       font-size: ${bubbleSize}px;
-      white-space: nowrap;
+      white-space: ${labelWhiteSpace};
       line-height: 1;
     ">${safe}</span>
   `;
@@ -452,7 +482,7 @@ export function renderLabelHtml(styleKey: LabelStyleKeyInput, text: string, opts
       cursor: ${cursor};
       display: inline-flex;
       align-items: center;
-      white-space: nowrap;
+      white-space: ${labelWhiteSpace};
       background: transparent;
       padding: 0;
     ">${dot}${bubbleSpan}</div>

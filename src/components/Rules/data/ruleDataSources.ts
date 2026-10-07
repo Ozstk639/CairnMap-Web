@@ -48,6 +48,15 @@ export function normalizeRuleSourceWorldId(worldId: string): string {
   const wid = String(worldId ?? '').trim();
   if (!wid) return 'zth';
   if ((RULE_DATA_SOURCES as any)[wid]) return wid;
+  // V1 exports, share links and workflow IDs have all used the one-letter
+  // world prefix at some point.  Normalize it at the data boundary as well as
+  // in V3 so `Z` and `zth` can never split an otherwise identical dataset.
+  const aliases: Record<string, string> = {
+    z: 'zth', n: 'naraku', h: 'houtu', e: 'eden', l: 'laputa', y: 'yunduan',
+  };
+  const lowercase = wid.toLowerCase();
+  if (aliases[lowercase]) return aliases[lowercase];
+  if ((RULE_DATA_SOURCES as any)[lowercase]) return lowercase;
   if (/^\d+$/.test(wid)) {
     const n = parseInt(wid, 10);
     if (n === 0) return 'zth';

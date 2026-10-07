@@ -42,7 +42,7 @@ function assertFilePath(path: string): void {
 }
 
 export function createReviewPackageManifest(draft: ReviewPackageDraft, exportedAt = normalizedTime(draft.exportedAt)): ReviewPackageManifest {
-  const version = draft.packageVersion ?? `draft-${exportedAt.replace(/[-:.TZ]/g, '').slice(0, 14)}`;
+  const version = draft.packageVersion ?? `draft-${exportedAt.replace(/\D/g, '').slice(0, 14)}`;
   return {
     schemaVersion: '1.0.0',
     relayPackageContractVersion: REVIEW_PACKAGE_CONTRACT_VERSION,

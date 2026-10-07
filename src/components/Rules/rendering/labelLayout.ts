@@ -30,6 +30,8 @@ import type {
   DisplayCollisionTarget,
 } from "./display/displayTypes";
 
+type LabelPlacement = "center" | "near" | "N" | "S" | "E" | "W" | "NE" | "NW" | "SE" | "SW" | "aboveLine" | "belowLine";
+
 /**
  * LabelLayout 引擎（屏幕空间去重/避让）
  *
@@ -210,7 +212,6 @@ export type LabelRequest = {
   id: string;
   /** 对应 Feature uid（便于回写到 bundle.label） */
   featureUid?: string;
-
   /** label anchor（世界坐标） */
   anchorLatLng: L.LatLng;
 
@@ -268,7 +269,6 @@ export type LabelRequest = {
   /** 复用现有 makeLabelMarker 的 placement（决定 CSS transform 参考点） */
   placement: "center" | "near";
 
-  /** 你现有规则字段：点位 label 垂直偏移（px） */
   offsetY?: number;
 
   /** 是否带中心点（影响 bbox 宽度估计） */
@@ -616,7 +616,7 @@ function normalizeCandidates(
   });
 }
 
-function defaultCandidates(placement: "center" | "near"): LabelCandidate[] {
+function defaultCandidates(placement: LabelPlacement): LabelCandidate[] {
   if (placement === "center")
     return [
       { name: "C" },
@@ -625,17 +625,9 @@ function defaultCandidates(placement: "center" | "near"): LabelCandidate[] {
       { name: "E" },
       { name: "W" },
     ];
-  // near：优先在点上方（与你现有 near 样式一致），然后尝试斜上/左右/斜下等
-  return [
-    { name: "N" },
-    { name: "NE" },
-    { name: "NW" },
-    { name: "E" },
-    { name: "W" },
-    { name: "SE" },
-    { name: "SW" },
-    { name: "S" },
-  ];
+  const preferred = placement === 'aboveLine' || placement === 'near' ? 'N' : placement === 'belowLine' ? 'S' : placement as LabelCandidateName;
+  const all: LabelCandidateName[] = ['N', 'NE', 'NW', 'E', 'W', 'SE', 'SW', 'S'];
+  return [preferred, ...all.filter((candidate) => candidate !== preferred)].map((name) => ({ name }));
 }
 
 /**
@@ -644,7 +636,7 @@ function defaultCandidates(placement: "center" | "near"): LabelCandidate[] {
  */
 function candidateShift(
   name: LabelCandidateName,
-  placement: "center" | "near",
+  placement: LabelPlacement,
   size: Measured,
   gap: number,
 ): { dx: number; dy: number } {

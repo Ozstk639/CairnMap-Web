@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "prebuild": "npm run verify:config-v32",
     "lint": "eslint .",
     "preview": "vite preview",
     "validate:project-config": "node ./scripts/validate-project-config.mjs",
@@ -32,6 +33,10 @@
     "test:review-package-contract": "tsx ./scripts/review/test-review-package-contract.ts",
     "test:multipart-geometry": "tsx --tsconfig ./tsconfig.app.json ./scripts/geometry/test-multipart-geometry.ts",
     "test:config-studio-v3": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-config-studio-v3.ts",
+    "test:v3-semantic-parity": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-v3-semantic-parity.ts",
+    "test:v1-render-baseline": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-v1-render-baseline.ts",
+    "verify:config-v32": "npm run test:v1-render-baseline && npm run test:config-studio-v3 && npm run test:v3-semantic-parity",
+    "test:config-v32-acceptance": "npm run build",
     "audit:eol": "node ./scripts/quality/check-eol.mjs"
   },
   "dependencies": {

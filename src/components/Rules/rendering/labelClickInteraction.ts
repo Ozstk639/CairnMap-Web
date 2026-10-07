@@ -1,7 +1,7 @@
 import * as L from 'leaflet';
 import type { DynmapProjection } from '@/lib/DynmapProjection';
 import type { FeatureRecord } from '@/components/Rules/rendering/renderRules';
-import { makeLabelDivIcon, type LabelPlacement, type LabelStyleKey } from '@/components/Rules/rendering/labelStyles';
+import { makeLabelDivIcon, type LabelPlacement, type LabelStyleKey, type LabelStyleKeyInput } from '@/components/Rules/rendering/labelStyles';
 
 export type HighlightStyleKey = 'dash' | 'dash-strong' | 'solid' | 'nav-outline';
 export type PointPinStyleKey = 'pin-red' | 'pin-blue' | 'pin-black';
@@ -12,6 +12,10 @@ export type LabelClickPlan = {
   mode: LabelClickMode;
   labelStyleKey?: LabelStyleKey;
   highlightStyleKey?: HighlightStyleKey;
+  /** Native V3.2 package-level selected-state baseline for line/polygon. */
+  highlightPathStyle?: L.PathOptions;
+  /** Native V3.2 package-level selected-state baseline for points. */
+  highlightPointStyle?: L.PathOptions;
   pointPinStyleKey?: PointPinStyleKey;
   openCard?: boolean;
 
@@ -118,7 +122,7 @@ export function makeClickableLabelMarker(args: {
   withDot?: boolean;
   dotAnchorMode?: "inline" | "anchorRight";
   offsetY?: number;
-  styleKey: LabelStyleKey;
+  styleKey: LabelStyleKeyInput;
   onClick: () => void;
 }): L.Marker {
   const { latlng, text, placement, withDot, dotAnchorMode, offsetY, styleKey, onClick } = args;
@@ -150,12 +154,22 @@ export function createHighlightLayerForFeature(args: {
   r: FeatureRecord;
   projection: DynmapProjection;
   highlightStyleKey?: HighlightStyleKey;
+  highlightPathStyle?: L.PathOptions;
+  highlightPointStyle?: L.PathOptions;
   pointPinStyleKey?: PointPinStyleKey;
 }): L.Layer | null {
-  const { r, projection, highlightStyleKey, pointPinStyleKey } = args;
+  const { r, projection, highlightStyleKey, highlightPathStyle, highlightPointStyle, pointPinStyleKey } = args;
 
   if (r.type === 'Points' && r.p3) {
     const ll = projection.locationToLatLng(r.p3.x, r.p3.y, r.p3.z);
+    if (highlightPointStyle) {
+      return L.circleMarker(ll, {
+        pane: 'ria-point-top',
+        radius: Math.max(5, Number(highlightPointStyle.weight ?? 3) * 2.5),
+        interactive: false,
+        ...highlightPointStyle,
+      });
+    }
     return makePointPinMarker(ll, pointPinStyleKey);
   }
 
@@ -216,7 +230,7 @@ export function createHighlightLayerForFeature(args: {
     return null;
   }
 
-  const style = resolveHighlightStyle(highlightStyleKey);
+  const style = highlightPathStyle ?? resolveHighlightStyle(highlightStyleKey);
 
   if (r.type === 'Polyline') {
     return L.polyline(lineLatLngs as any, { ...style, pane: 'ria-overlay-top', interactive: false });

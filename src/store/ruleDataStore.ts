@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { useLoadingStore } from '@/store/loadingStore';
 import { loadWorldRuleDataset } from '@/components/Rules/data/worldRuleDatasetLoader';
+import { normalizeRuleSourceWorldId } from '@/components/Rules/data/ruleDataSources';
 import { loadMapSettings } from '@/lib/cookies';
 import type { RuleWorldDataset } from '@/components/Rules/data/sourceTypes';
 import type { LoadingProgress } from '@/lib/fetchWithMirror';
@@ -31,39 +32,40 @@ export const useRuleDataStore = create<RuleDataState>((set, get) => ({
   loadingWorld: null,
   pending: {},
   ensureWorldLoaded: async (worldId: string) => {
-    const pending = get().pending[worldId];
+    const normalizedWorldId = normalizeRuleSourceWorldId(worldId);
+    const pending = get().pending[normalizedWorldId];
     if (pending) return pending;
 
-    const ruleFlowId = `rule-world:${worldId}`;
+    const ruleFlowId = `rule-world:${normalizedWorldId}`;
     const { startLoading, updateStage, finishLoadingByFlow } = useLoadingStore.getState();
-    startLoading(WORLD_LOADING_STAGES, { flowId: ruleFlowId, ruleWorldId: worldId });
+    startLoading(WORLD_LOADING_STAGES, { flowId: ruleFlowId, ruleWorldId: normalizedWorldId });
     const onProgress = (progress: LoadingProgress) => updateStage(progress.stage, progress.status, progress.message);
 
-    const promise = loadWorldRuleDataset(worldId, onProgress)
+    const promise = loadWorldRuleDataset(normalizedWorldId, onProgress)
       .then((dataset) => {
         set((state) => ({
-          datasets: { ...state.datasets, [worldId]: dataset },
+          datasets: { ...state.datasets, [normalizedWorldId]: dataset },
           loadingWorld: null,
-          pending: { ...state.pending, [worldId]: undefined },
+          pending: { ...state.pending, [normalizedWorldId]: undefined },
         }));
         updateStage('world-ready', 'success', '等待地图首帧显示');
         return dataset;
       })
       .catch((err) => {
         updateStage('world-ready', 'error', String((err as Error)?.message ?? err));
-        set((state) => ({ loadingWorld: null, pending: { ...state.pending, [worldId]: undefined } }));
+        set((state) => ({ loadingWorld: null, pending: { ...state.pending, [normalizedWorldId]: undefined } }));
         setTimeout(() => finishLoadingByFlow(ruleFlowId), 300);
         throw err;
       });
 
-    set((state) => ({ loadingWorld: worldId, pending: { ...state.pending, [worldId]: promise } }));
+    set((state) => ({ loadingWorld: normalizedWorldId, pending: { ...state.pending, [normalizedWorldId]: promise } }));
     return promise;
   },
   refreshWorlds: async (worldIds: string[]) => {
-    const ids = Array.from(new Set((worldIds ?? []).map((id) => String(id ?? '').trim()).filter(Boolean)));
+    const ids = Array.from(new Set((worldIds ?? []).map((id) => normalizeRuleSourceWorldId(String(id ?? '')).trim()).filter(Boolean)));
     if (ids.length === 0) return;
 
-    const currentWorld = String(loadMapSettings()?.currentWorld ?? '').trim();
+    const currentWorld = normalizeRuleSourceWorldId(String(loadMapSettings()?.currentWorld ?? ''));
     const activeWorldId = ids.includes(currentWorld) ? currentWorld : null;
     const orderedIds = activeWorldId ? [activeWorldId, ...ids.filter((id) => id !== activeWorldId)] : ids;
 

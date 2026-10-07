@@ -80,14 +80,17 @@ export function lineTextStyleFromStyleKey(styleKey: any): LineTextStyle {
     };
   }
 
-  if (key === "gm-outline" || key === "gm-outline-bold") {
+  if (key === "gm-outline" || key === "gm-outline-bold" || /^gm-outline-(?:bold-)?\d+(?:\.\d+)?$/.test(key)) {
+    const match = key.match(/^gm-outline-(bold-)?(\d+(?:\.\d+)?)$/);
+    const fontSize = match ? Number(match[2]) : 17;
+    const bold = key === "gm-outline-bold" || Boolean(match?.[1]);
     return {
       className: "ria-line-textpath ria-line-textpath--network",
-      fontSize: 17,
-      fontWeight: key === "gm-outline-bold" ? 800 : 700,
-      fill: "#ffffff",
-      stroke: "#000000",
-      strokeWidth: key === "gm-outline-bold" ? 3.5 : 3,
+      fontSize,
+      fontWeight: bold ? 800 : 700,
+      fill: "#111827",
+      stroke: "#ffffff",
+      strokeWidth: Math.max(2.2, Math.round(fontSize * 0.22 * 10) / 10),
     };
   }
 

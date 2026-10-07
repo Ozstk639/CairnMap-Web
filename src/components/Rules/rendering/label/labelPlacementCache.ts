@@ -8,6 +8,7 @@
  */
 
 import type { LabelCandidateName } from '@/components/Rules/rendering/labelLayout';
+import type { LabelPlacement } from '@/components/Rules/rendering/labelStyles';
 
 export type LabelPlacementCacheKeyMode =
   | 'featureID'
@@ -19,7 +20,7 @@ export type LabelPlacementCacheInput = {
   id: string;
   featureUid?: string;
   text: string;
-  placement: 'center' | 'near';
+  placement: LabelPlacement;
   zoom: number;
 
   collisionGroup?: string;
