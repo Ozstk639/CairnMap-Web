@@ -1,3 +1,4 @@
+import { normalizeImportedText } from './localization';
 import { listClassConfigs } from '@/core/project/classMetadata';
 import { getOpenRIAMapWorkflowConfigs } from '@/core/project/openriamapRiaWorkflows';
 import {
@@ -50,7 +51,7 @@ function localized(value: unknown, fallback: string): LocalizedText {
     const source = value as Record<string, unknown>;
     const zh = source['zh-CN'] ?? source.zh ?? source.cn ?? source.label ?? source.name;
     const en = source['en-US'] ?? source.en ?? source.english;
-    return { zh: String(zh ?? fallback), en: en === undefined || en === null ? '' : String(en) };
+    return normalizeImportedText(zh ?? fallback, en);
   }
   if (typeof value === 'string' && value.trim()) return { zh: value, en: '' };
   return { zh: fallback, en: '' };

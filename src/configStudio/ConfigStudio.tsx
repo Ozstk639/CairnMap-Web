@@ -1,3 +1,4 @@
+import { normalizeImportedLocalization } from './localization';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, ChevronRight, Download, FileUp, Maximize2, Minimize2, Plus, Save, SlidersHorizontal, X } from 'lucide-react';
 import { buildConfigPackageArchive, downloadConfigPackage, migrateV4Package, readConfigPackage } from './package';
@@ -65,7 +66,7 @@ function readLocalConfig(): ConfigPackageV3 | undefined {
   try {
     const value = JSON.parse(sessionStorage.getItem('cairnmap-config-studio-saved') ?? sessionStorage.getItem('cairnmap-config-studio-draft') ?? 'null') as ConfigPackageV3 | null;
     if (value?.schemaVersion !== 'cairnmap.config-package.v3') return undefined;
-    return value.contractRevision === 5 ? value : value.contractRevision === 4 ? migrateV4Package(value) : undefined;
+    return value.contractRevision === 5 ? normalizeImportedLocalization(value) : value.contractRevision === 4 ? migrateV4Package(value) : undefined;
   } catch { return undefined; }
 }
 function updateNode(config: ConfigPackageV3, nodeId: string, updater: (node: CategoryNode) => CategoryNode): ConfigPackageV3 {
@@ -107,7 +108,7 @@ function NumberField({ label, value, onChange, min, max, step = 1, disabled = fa
 /** Keeps the requested numeric entry and visible 0–1 slider in one source of truth. */
 function OpacityField({ label, value, onChange }: { label: string; value: number | undefined; onChange: (value: number) => void }) {
   const resolved = Math.min(1, Math.max(0, Number.isFinite(value) ? Number(value) : 1));
-  return <label className="min-w-0 text-xs">{label}<span className="mt-1 grid min-w-0 grid-cols-[minmax(0,1fr)_5rem] items-center gap-2"><input className="min-w-0" type="range" min="0" max="1" step="0.05" value={resolved} onChange={(event) => onChange(Number(event.target.value))} /><input className="w-full rounded border px-2 py-1" type="number" min="0" max="1" step="0.05" value={resolved} onChange={(event) => onChange(Math.min(1, Math.max(0, Number(event.target.value))))} /></span></label>;
+  return <label className="min-w-0 text-xs">{label}<span className="mt-1 grid min-w-0 grid-cols-1 min-[1600px]:grid-cols-[minmax(0,1fr)_4rem] items-center gap-2"><input className="w-full min-w-0" type="range" min="0" max="1" step="0.05" value={resolved} onChange={(event) => onChange(Number(event.target.value))} /><input className="w-full rounded border px-2 py-1" type="number" min="0" max="1" step="0.05" value={resolved} onChange={(event) => onChange(Math.min(1, Math.max(0, Number(event.target.value))))} /></span></label>;
 }
 
 function ColorBindingEditor({ config, sourcePath: _sourcePath, fields, label, value, onChange, allowExternal = true }: {
@@ -381,8 +382,8 @@ function FieldCard({ field, local, onUpdate, onDelete, onOverride }: { field: Fi
   const scope = fieldScope(field);
   const shortKey = fieldShortKey(field);
   const setShortKey = (next: string) => onUpdate({ key: scope === 'root' ? next : `${scope}.${next}`, scope });
-  return <article className="min-w-0 rounded border bg-white p-2">
-    <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(9rem,1.2fr)_minmax(7rem,.8fr)_minmax(7rem,.7fr)_minmax(8rem,.85fr)]">
+  return <article aria-label={`字段 ${field.key}`} className="min-w-0 rounded border bg-white p-2">
+    <div className="grid min-w-0 gap-2 grid-cols-2 xl:grid-cols-4">
       <label className="min-w-0 text-xs">字段名<input disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={shortKey} onChange={(event) => setShortKey(event.target.value)} /></label>
       <label className="min-w-0 text-xs">数据类型<select disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.type} onChange={(event) => onUpdate({ type: event.target.value as FieldDefinition['type'] })}>{['string', 'number', 'boolean', 'enum', 'json', 'reference'].map((type) => <option key={type} value={type}>{type}</option>)}</select></label>
       <label className="min-w-0 text-xs">值数量<select disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.cardinality} onChange={(event) => onUpdate({ cardinality: event.target.value as FieldDefinition['cardinality'] })}><option value="single">单值</option><option value="multiple">允许多值</option></select></label>
@@ -417,7 +418,7 @@ function FieldEditor({ config, node, onChange }: { config: ConfigPackageV3; node
   };
   const renderScope = (scope: 'root' | 'tags' | 'extensions', title: string, detail: string) => {
     const fields = effective.filter((field) => fieldScope(field) === scope && !(scope !== 'root' && (field.key === scope || field.key === `${scope}.`)));
-    return <section key={scope} className="rounded-lg border bg-slate-50 p-3">
+    return <section key={scope} aria-label={`${scope} 字段组`} className="rounded-lg border bg-slate-50 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div><h4 className="font-medium">{title}</h4><p className="text-xs text-slate-500">{detail}</p></div>
         <button type="button" className="inline-flex items-center gap-1 rounded border bg-white px-2 py-1 text-sm" onClick={() => add(scope)}><Plus className="h-4 w-4" />添加字段</button>

@@ -63,7 +63,7 @@ export function readRecordPath(record: Record<string, unknown>, path: string): u
 }
 
 export function optionLabel(option: SelectOption, locale: keyof SelectOption['label'] = 'zh'): string {
-  return option.label[locale] || option.label.zh || option.value;
+  return locale === 'en' ? option.label.en ?? '' : option.label.zh || option.value;
 }
 
 export function normalizeSelectOptions(value: unknown): SelectOption[] {

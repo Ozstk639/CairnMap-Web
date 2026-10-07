@@ -1,3 +1,4 @@
+import { normalizeImportedLocalization, normalizeImportedText } from './localization';
 import JSZip from 'jszip';
 import { createConfigPackageFromCurrentProject } from './legacyProjectAdapter';
 import type {
@@ -405,7 +406,7 @@ export function migrateV31Package(value: Omit<ConfigPackageV3, 'contractRevision
  * discarded.
  */
 function migrationText(value: unknown, fallback = ''): LocalizedText {
-  if (isRecord(value)) return { zh: String(value.zh ?? fallback), en: String(value.en ?? '') };
+  if (isRecord(value)) return normalizeImportedText(value.zh ?? fallback, value.en);
   return { zh: fallback, en: '' };
 }
 
@@ -501,7 +502,7 @@ export function migrateV4Package(value: Omit<ConfigPackageV3, 'contractRevision'
 
 function asConfig(value: unknown): ConfigPackageV3 {
   assertV3(value);
-  if (value.contractRevision === 5) return value as ConfigPackageV3;
+  if (value.contractRevision === 5) return normalizeImportedLocalization(value as ConfigPackageV3);
   if (value.contractRevision === 4) return migrateV4Package(value);
   if (value.contractRevision === 3) return migrateV4Package(migrateV31Package(value));
   throw new Error('该配置包属于无法读取的旧 V3 契约。请先使用兼容版本导出后再导入。');

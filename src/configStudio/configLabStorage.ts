@@ -1,4 +1,5 @@
 import type { ConfigPackageV3 } from './types';
+import { normalizeImportedLocalization } from './localization';
 
 // V32 deliberately uses a separate store so a partial V3.1 adapter package
 // can never silently become the active native renderer configuration.
@@ -29,7 +30,7 @@ export async function loadLatestConfigLabPackage(): Promise<ConfigPackageV3 | un
     request.onerror = () => reject(request.error ?? new Error('无法读取本地配置。'));
     request.onsuccess = () => {
       const value = request.result as ConfigPackageV3 | undefined;
-      resolve(value?.contractRevision === 5 ? value : undefined);
+      resolve(value?.contractRevision === 5 ? normalizeImportedLocalization(value) : undefined);
     };
   }).finally(() => database.close());
 }
@@ -49,7 +50,7 @@ export async function listConfigLabPackages(): Promise<ConfigPackageV3[]> {
       }
       if (String(cursor.key).startsWith(HISTORY_PREFIX)) {
         const value = cursor.value as ConfigPackageV3;
-        if (value?.schemaVersion === 'cairnmap.config-package.v3' && value.contractRevision === 5) values.push(value);
+        if (value?.schemaVersion === 'cairnmap.config-package.v3' && value.contractRevision === 5) values.push(normalizeImportedLocalization(value));
       }
       cursor.continue();
     };
