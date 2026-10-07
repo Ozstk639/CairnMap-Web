@@ -92,7 +92,7 @@ function coordinatesForExternalHost(type: 'Points' | 'Polyline' | 'Polygon'): Re
   return { CoordG: [[host]] };
 }
 
-function makeFixture(config: ConfigPackageV3, node: CategoryNode, scenario: PreviewScenario): { features: unknown[] } {
+export function makeConfigPreviewFixture(config: ConfigPackageV3, node: CategoryNode, scenario: PreviewScenario): { features: unknown[] } {
   const selectedType = scenarioType(scenario);
   const path = node.path;
   const selected = fixtureFor(path, selectedType, coordinatesFor(scenario), `config-preview-${scenario}`, [path.class, path.kind, path.skind, path.skind2].filter(Boolean).join('/') || path.class);
@@ -177,13 +177,14 @@ export function previewScenarioCompatible(config: ConfigPackageV3, node: Categor
   return Boolean(profile?.enabled && (!definition.multipart || profile.allowMultipleParts));
 }
 
-export function ConfigRuntimePreview({ config, node, scenario, onRuntimeError }: { config: ConfigPackageV3; node: CategoryNode; scenario: PreviewScenario; onRuntimeError?: (error: Error) => void }) {
+export function ConfigRuntimePreview({ config, node, scenario, onRuntimeError, onMapReady }: { config: ConfigPackageV3; node: CategoryNode; scenario: PreviewScenario; onRuntimeError?: (error: Error) => void; onMapReady?: (map: L.Map) => void }) {
   const [map, setMap] = useState<L.Map | null>(null);
   const [tileError, setTileError] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
   const scenarioDefinition = PREVIEW_SCENARIOS.find((item) => item.id === scenario) ?? PREVIEW_SCENARIOS[0];
   const selectedBinding = (config.contextBindings ?? []).find((candidate) => candidate.enabled && samePath(candidate.member.classification, node.path));
-  const dataset = useMemo(() => makeFixture(config, node, scenario), [config, node, scenario]);
+  const dataset = useMemo(() => makeConfigPreviewFixture(config, node, scenario), [config, node, scenario]);
+  useEffect(() => { if (map) onMapReady?.(map); }, [map, onMapReady]);
   const projection = useMemo(() => new DynmapProjection(ZTH_FLAT_CONFIG), []);
   const [zoom, setZoom] = useState(scenarioDefinition.zoom);
   useEffect(() => setZoom(scenarioDefinition.zoom), [scenarioDefinition.zoom]);
