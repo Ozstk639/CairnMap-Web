@@ -38,7 +38,8 @@
     "test:workflow-output-editor": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-workflow-output-editor.ts",
     "test:v1-workflow-output-parity": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-v1-workflow-output-parity.ts",
     "test:label-placement": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-label-placement.ts",
-    "verify:config-v32": "npm run test:v1-render-baseline && npm run test:config-studio-v3 && npm run test:v3-semantic-parity && npm run test:workflow-output-editor && npm run test:v1-workflow-output-parity && npm run test:label-placement",
+    "test:map-zoom": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-map-zoom.ts",
+    "verify:config-v32": "npm run test:v1-render-baseline && npm run test:config-studio-v3 && npm run test:v3-semantic-parity && npm run test:workflow-output-editor && npm run test:v1-workflow-output-parity && npm run test:label-placement && npm run test:map-zoom",
     "test:config-v32-acceptance": "npm run build",
     "audit:eol": "node ./scripts/quality/check-eol.mjs"
   },

@@ -1,3 +1,4 @@
+import { MAP_ZOOM_BOUNDS, TILE_ZOOM_BOUNDS } from '@/lib/mapZoom';
 import { Suspense, lazy, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import MobileBottomSheet from '@/components/Mobile/MobileBottomSheet';
 import MobileQuickDock from '@/components/Mobile/MobileQuickDock';
@@ -731,12 +732,7 @@ useEffect(() => {
 let newTileLayer: L.TileLayer;
 
 
-const tileLayerOptions = {
-  minZoom: -3,
-  maxZoom: map.getMaxZoom(), // =5
-  minNativeZoom: -2,
-  maxNativeZoom: 3
-};
+const tileLayerOptions = { ...TILE_ZOOM_BOUNDS };
 
 if (mapStyle === 'sketch') {
   newTileLayer = createSketchTileLayer(currentWorld, 'flat', tileLayerOptions);
@@ -1283,12 +1279,7 @@ const handleRouteFound = useCallback((route: RouteHighlightData | Array<{ coord:
 
     // 添加新瓦片图层（根据当前风格选择）
     let newTileLayer: L.TileLayer;
-const tileLayerOptions = {
-  minZoom: -3,
-  maxZoom: map.getMaxZoom(), // =5
-  minNativeZoom: -2,
-  maxNativeZoom: 3
-};
+const tileLayerOptions = { ...TILE_ZOOM_BOUNDS };
 
 if (mapStyle === 'sketch') {
   newTileLayer = createSketchTileLayer(normalizedWorldId, 'flat', tileLayerOptions);
@@ -1335,8 +1326,8 @@ if (mapStyle === 'sketch') {
       Number(world.center.z)
     );
 
-const minZoom = -3;                 // 9级：-3..5
-const maxZoom = projection.maxZoom; // 仍然是 5
+const minZoom = MAP_ZOOM_BOUNDS.minZoom;
+const maxZoom = MAP_ZOOM_BOUNDS.maxZoom;
 
 const map = L.map(mapRef.current, {
   crs: crs,
@@ -1365,12 +1356,7 @@ const map = L.map(mapRef.current, {
 
     // 添加 Dynmap 瓦片图层 - 使用保存的世界和风格
     const savedMapStyle = loadMapSettings()?.mapStyle ?? 'default';
-const tileLayerOptions = {
-  minZoom: -3,
-  maxZoom: projection.maxZoom, // 5
-  minNativeZoom: -2,           // 允许请求 zzzz/zzzzz（zoom<0 时仍命中真实瓦片）
-  maxNativeZoom: 3             // 保持你现有 Dynmap 行为
-};
+const tileLayerOptions = { ...TILE_ZOOM_BOUNDS };
 
 let tileLayer: L.TileLayer;
 if (savedMapStyle === 'sketch') {

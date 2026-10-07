@@ -1,3 +1,4 @@
+import { MAP_ZOOM_BOUNDS, TILE_ZOOM_BOUNDS } from '@/lib/mapZoom';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type * as L from 'leaflet';
 import { MapContainer, useMap } from 'react-leaflet';
@@ -121,13 +122,15 @@ function makeFixture(config: ConfigPackageV3, node: CategoryNode, scenario: Prev
   return { features: [peer, selectedWithRelation] };
 }
 
-function TileLayer() {
+function TileLayer({ onError }: { onError: (message: string) => void }) {
   const map = useMap();
   useEffect(() => {
-    const layer = createDynmapTileLayer('zth', 'flat', { maxRetries: 1 });
+    const layer = createDynmapTileLayer('zth', 'flat', { ...TILE_ZOOM_BOUNDS, maxRetries: 1 });
+    layer.on('tileerror', () => onError('部分底图瓦片加载失败，请检查当前瓦片源。'));
+    layer.on('loading', () => onError(''));
     layer.addTo(map);
     return () => { layer.remove(); };
-  }, [map]);
+  }, [map, onError]);
   return null;
 }
 
@@ -176,6 +179,7 @@ export function previewScenarioCompatible(config: ConfigPackageV3, node: Categor
 
 export function ConfigRuntimePreview({ config, node, scenario, onRuntimeError }: { config: ConfigPackageV3; node: CategoryNode; scenario: PreviewScenario; onRuntimeError?: (error: Error) => void }) {
   const [map, setMap] = useState<L.Map | null>(null);
+  const [tileError, setTileError] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
   const scenarioDefinition = PREVIEW_SCENARIOS.find((item) => item.id === scenario) ?? PREVIEW_SCENARIOS[0];
   const selectedBinding = (config.contextBindings ?? []).find((candidate) => candidate.enabled && samePath(candidate.member.classification, node.path));
@@ -204,11 +208,12 @@ export function ConfigRuntimePreview({ config, node, scenario, onRuntimeError }:
     return () => { cancelAnimationFrame(frame); observer.disconnect(); };
   }, [map]);
   return <div ref={containerRef} className="relative h-full min-h-[300px] w-full min-w-0 overflow-hidden rounded-xl border border-slate-300 bg-slate-950">
-    <MapContainer center={[0, 0]} zoom={leafletZoom} minZoom={-3} maxZoom={5} zoomControl={false} attributionControl crs={createDynmapCRS(ZTH_FLAT_CONFIG)} className="absolute inset-0 h-full min-h-[300px] w-full" dragging={false} touchZoom={false} doubleClickZoom={false} boxZoom={false} keyboard={false} scrollWheelZoom={false} zoomSnap={1} zoomDelta={1}>
-      <TileLayer />
+    <MapContainer center={[0, 0]} zoom={leafletZoom} minZoom={MAP_ZOOM_BOUNDS.minZoom} maxZoom={MAP_ZOOM_BOUNDS.maxZoom} zoomControl={false} attributionControl crs={createDynmapCRS(ZTH_FLAT_CONFIG)} className="absolute inset-0 h-full min-h-[300px] w-full" dragging={false} touchZoom={false} doubleClickZoom={false} boxZoom={false} keyboard={false} scrollWheelZoom={false} zoomSnap={1} zoomDelta={1}>
+      <TileLayer onError={setTileError} />
       <LockedViewport zoom={leafletZoom} onReady={setMap} onZoom={(value) => setZoom(toZoomLevel(value))} />
       {map ? <RuleDrivenLayer mapReady map={map} projection={projection} worldId="zth" visible activeButtonIds={[]} bypassButtonFilter runtimeDataset={dataset} disableTransientSources configRuntime={config} floorPanelMode={selectedBinding ? 'embedded' : 'hidden'} /> : null}
     </MapContainer>
+    {tileError ? <p role="alert" className="absolute bottom-3 left-3 right-3 z-[1100] rounded bg-rose-50/95 p-2 text-xs text-rose-800">{tileError}</p> : null}
     <div className="absolute left-3 top-3 z-[1100] flex overflow-hidden rounded border border-slate-300 bg-white/95 shadow">
       <button type="button" className="px-3 py-1 text-lg hover:bg-slate-100" aria-label="缩小验证器" onClick={() => setZoom((value) => Math.max(0, value - 1))}>−</button>
       <span aria-live="polite" className="min-w-20 border-x px-2 py-1 text-center text-xs leading-6">规则 Zoom {zoom}</span>

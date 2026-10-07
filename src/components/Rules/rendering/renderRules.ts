@@ -351,25 +351,7 @@ export function buildFeatureMeta(featureInfo: any, cls: string, type: GeoType, s
 // zoom 映射（与你现有“leafletZoom(-3..5) ↔ level(0..8)”接口兼容）
 // ------------------------------
 
-/**
- * 将 Leaflet zoom（允许负数）映射到整数 ZoomLevel。
- *
- * 说明：
- * - 这里按你的“9 级整数缩放：level(0..8) ↔ leafletZoom(-3..5)”约定。
- * - 若你后续改映射，只需要改这里一处。
- */
-export function toZoomLevel(leafletZoom: number): ZoomLevel {
-  // level = leafletZoom + 3, clamp to 0..8
-  const lvl = Math.round(leafletZoom + 3);
-  return Math.max(0, Math.min(8, lvl));
-}
-
-/** The inverse used by V3's fixed-centre rule preview. Keeping this next to
- * `toZoomLevel` prevents a preview control from silently using map zoom as a
- * logical V3 rule zoom. */
-export function toLeafletZoom(level: ZoomLevel | number): number {
-  return Math.max(-3, Math.min(5, Math.round(Number(level)) - 3));
-}
+export { toZoomLevel, toLeafletZoom } from '@/lib/mapZoom';
 export const RENDER_RULES: RenderRule[] = FEATURE_RENDER_RULES;
 
 
