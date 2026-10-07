@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
 import { featureLabelParts, componentLabelId, filterFeatureGeometryParts } from '../../src/components/Rules/rendering/multipartLabels';
+import type { LabelRequest } from '../../src/components/Rules/rendering/labelLayout';
+import type { FeatureDisplayPlan } from '../../src/components/Rules/rendering/display/displayTypes';
 import type { FeatureRecord } from '../../src/components/Rules/rendering/renderRules';
 import type { MultipartGeometry } from '../../src/core/geometry/multipartGeometry';
 import { resolveLabelPlacementCacheConfig } from '../../src/components/Rules/rendering/label/labelPlacementCache';
+import { mergeDisplayCollisionIntoLabelRequest } from '../../src/components/Rules/rendering/label/labelCollision';
 
 const point = (x: number) => ({ x, y: -64, z: 0 });
 for (const geometry of [
@@ -27,3 +30,7 @@ for (const geometry of [
   assert.equal(new Set(keys).size, each.length);
 }
 console.log('multipart-labels: independent component geometries/ids/caches and shared feature identity: OK');
+const component = { partIndex: 0, declutter: { enabled: true, priority: 12 } } as unknown as LabelRequest;
+const plan = { collision: { priority: 999 } } as unknown as FeatureDisplayPlan;
+assert.equal(mergeDisplayCollisionIntoLabelRequest(component, plan).declutter.priority, 12);
+assert.equal(mergeDisplayCollisionIntoLabelRequest({ ...component, partIndex: undefined } as never, plan).declutter.priority, 999);

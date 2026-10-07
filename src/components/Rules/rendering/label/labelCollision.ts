@@ -104,8 +104,10 @@ export function mergeDisplayCollisionIntoLabelRequest(
   request: LabelRequest,
   plan: FeatureDisplayPlan,
 ): LabelRequest {
+  const declutter = mergeDisplayCollisionIntoDeclutter(request.declutter, plan) ?? request.declutter;
   return {
     ...request,
-    declutter: mergeDisplayCollisionIntoDeclutter(request.declutter, plan) ?? request.declutter,
+    // A component metric is already evaluated against its own geometry.
+    declutter: request.partIndex === undefined ? declutter : { ...declutter, priority: request.declutter.priority },
   };
 }
