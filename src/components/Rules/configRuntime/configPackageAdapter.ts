@@ -521,6 +521,9 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
   const fallback = active.extensions?.fallback;
   const labelText = active.extensions?.labelText;
   const ruleDisplayPriority = dynamicPriority(record, active);
+  const collisionPriority = config.contractRevision === 6
+    ? dynamicPriority(record, { ...active, priority: { mode: 'add', base: label.collision.basePriority, metric: label.collision.metric } })
+    : label.collision.basePriority + ruleDisplayPriority;
   const iconSource = style.icon ? String(featureValue(record, style.icon.source) ?? '').trim() : '';
   if (style.icon && !iconSource && style.icon.fallback === 'hide') return null;
   const pointPlan = style.icon && iconSource
@@ -573,7 +576,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
           enabled: label.collision.hideWhenColliding,
           ...(anchor?.candidates ? { candidates: anchor.candidates } : {}),
           group: label.collision.collisionGroup ?? 'config-runtime',
-          priority: label.collision.basePriority + ruleDisplayPriority,
+          priority: collisionPriority,
           role: label.collision.role,
         },
       },
@@ -739,7 +742,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
       },
       collision: {
         role: label.collision.role,
-        priority: label.collision.basePriority + ruleDisplayPriority,
+        priority: collisionPriority,
         group: label.collision.collisionGroup as any,
         allowHide: label.collision.hideWhenColliding,
         collideWith: collisionExtensions?.collideWith,

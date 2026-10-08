@@ -10,6 +10,9 @@ import type { CairnMapClassConfig, CairnMapClassFieldConfig } from '@/core/proje
 import type { CairnMapWorkflowBlock, CairnMapWorkflowConfig } from '@/core/project/workflowTypes';
 import { FEATURE_CARD_REGISTRY } from '@/components/Rules/cardrules/featureCardRegistry';
 import { FEATURE_RENDER_RULES } from '@/components/Rules/rendering/featureRenderRules';
+import { resolveFeatureDisplayPlan } from '@/components/Rules/rendering/display/displayRuleResolver';
+import { FeatureStore } from '@/components/Rules/data/featureStore';
+import type { FeatureRecord } from '@/components/Rules/rendering/renderRules';
 import type { FeatureDisplayRuleDraft } from '@/components/Rules/rendering/display/displayTypes';
 import { WORKFLOW_EDITOR_SCHEMAS, projectRegistryScene } from '@/components/Common/workflowEditorRegistry';
 import cardLayoutsJson from '../../project-config/presets/core-structures/shared/card/cardLayouts.json';
@@ -318,7 +321,10 @@ function extensionsFromV1(display: FeatureDisplayRuleDraft | undefined): RenderR
 function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath = { class: config.classCode }): GeometryProfile {
   const geometry = config.geometry.type as GeometryKind;
   const v1Rule = legacyRenderRuleFor(config);
-  const display = v1Rule?.display as FeatureDisplayRuleDraft | undefined;
+  const sample = { uid: 'v1-migration-probe', type: geometry === 'Point' ? 'Points' : geometry === 'LineString' ? 'Polyline' : 'Polygon', meta: { Class: path.class, Type: geometry === 'Point' ? 'Points' : geometry === 'LineString' ? 'Polyline' : 'Polygon', World: 'zth', idValue: 'v1-migration-probe', sig: {} }, featureInfo: { Class: path.class, Kind: path.kind, SKind: path.skind, SKind2: path.skind2, World: 'zth', Name: 'Migration' }, p3: { x: 0, y: -64, z: 0 }, coords3: [{ x: 0, y: -64, z: 0 }, { x: 20, y: -64, z: 0 }, { x: 20, y: -64, z: 20 }] } as unknown as FeatureRecord;
+  // Config overlays can make display a function. Read its effective plan,
+  // rather than losing its collision/candidate settings in an object cast.
+  const display = v1Rule ? resolveFeatureDisplayPlan(sample, v1Rule, { worldId: 'zth', leafletZoom: 3, zoomLevel: 6, inFloorView: false, activeBuildingUid: null, activeFloorSelector: null, activeBuildingFloorRefSet: null }, new FeatureStore([sample])) as FeatureDisplayRuleDraft : undefined;
   const geometryConfig = display?.geometry ?? {};
   const symbolConfig = display?.symbol ?? {};
   const labelConfig = display?.label ?? {};
@@ -350,6 +356,9 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
     },
   };
   const extensions = extensionsFromV1(display);
+  if (geometry !== 'LineString') delete extensions.lineLabel;
+  const rawClick = v1Rule?.symbol?.labelClick;
+  const click = typeof rawClick === 'function' ? rawClick(sample, { worldId: 'zth', leafletZoom: 3, zoomLevel: 6, inFloorView: false, activeBuildingUid: null, activeFloorSelector: null, activeBuildingFloorRefSet: null }, new FeatureStore([sample])) : rawClick;
   const representation = geometry === 'Point' || geometryConfig.render === 'none' ? 'point' as const : 'geometry' as const;
   const fullPriority = { mode: 'replace' as const, base: Number(collision.priority ?? zLevel) };
   const makeRule = (id: string, minZoom: number, maxZoom: number, patch: Partial<ZoomPriorityRule> = {}): ZoomPriorityRule => ({
@@ -378,8 +387,15 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
     enabled: true,
     allowMultipleParts: true,
     anchor: 'featureBbox',
-    interaction: { triggers: triggersFor(geometry) },
-    zoomPriority: { rules },
+    interaction: { triggers: click ? { label: click.enabled, point: geometry === 'Point' && click.geom?.point === true, line: geometry === 'LineString' && click.geom?.path === true, boundary: geometry === 'Polygon' && click.geom?.path === true, interior: geometry === 'Polygon' && click.geom?.path === true } : triggersFor(geometry) },
+    zoomPriority: { rules: rules.map(rule => {
+      if (!rule.label) return rule;
+      const structure = config.classCode === 'BUD' || config.classCode === 'STB';
+      return { ...rule, label: { ...rule.label, collision: { ...rule.label.collision,
+        ...(structure ? { basePriority: Number(rule.priority?.base ?? rule.label.collision.basePriority), metric: rule.priority?.metric }
+          : { role: collision.role ?? rule.label.collision.role, basePriority: Number(collision.priority ?? rule.label.collision.basePriority), collisionGroup: collision.group ?? rule.label.collision.collisionGroup, hideWhenColliding: collision.allowHide !== false }),
+      } } };
+    }) },
   });
 
   // V1 static visual constants promoted into V3 styles.  The editor can now
@@ -445,10 +461,10 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
   }
 
   if (config.classCode === 'ROD' && geometry === 'LineString') {
-    const roadLabel = labeled({ visible: true, style: { family: 'gm-outline', size: 12 }, source: 'Name', placement: 'center', withDot: false, offsetY: 0, collision: { role: 'important', basePriority: 10, collisionGroup: 'networkLabel', hideWhenColliding: true } });
+    const roadLabel = labeled({ visible: true, style: { family: 'gm-bw', size: 12 }, source: 'Name', placement: 'center', withDot: false, offsetY: 0, collision: { role: 'important', basePriority: 3600, collisionGroup: 'networkLabel', hideWhenColliding: true } });
     return profile([
       hidden('v1-road-hidden', 0, 5),
-      makeRule('v1-road-low', 6, 6, { style: { ...roadLineStyle, strokeOpacity: 0.25 }, label: roadLabel, priority: { mode: 'replace', base: 3600 } }),
+      makeRule('v1-road-low', 6, 6, { style: { ...roadLineStyle, strokeOpacity: 0.35 }, label: roadLabel, priority: { mode: 'replace', base: 3600 } }),
       makeRule('v1-road-high', 7, 8, { style: roadLineStyle, label: roadLabel, priority: { mode: 'replace', base: 3600 } }),
     ]);
   }
@@ -521,8 +537,8 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
     const ispLabel = labeled({ visible: true, style: { family: 'bubble-dark', size: 14 }, source: 'Name', placement: 'center', withDot: false, collision: { role: 'optional', basePriority: 2500, collisionGroup: 'poiLabel', hideWhenColliding: true } });
     const ispExtensions: RenderRuleExtensions = { ...clone(extensions), pane: 'point-top', anchor: { ...(extensions.anchor ?? {}), strategy: 'featureCenter', candidates: [...pointCandidates] }, labelText: { ...(extensions.labelText ?? {}), maxChars: 10, abbreviationEnabled: true, suffix: '…' }, collision: { ...(extensions.collision ?? {}), paddingPx: 6, hidePolicy: 'abbreviateThenHide' } };
     return profile([
-      makeRule('v1-generic-point-symbol', 0, 3, { style: ispStyle, label: labeled({ visible: false }), extensions: ispExtensions, geometryStack: { zLevel: 420 }, priority: { mode: 'replace', base: 2500 } }),
-      makeRule('v1-generic-point-label', 4, 8, { style: ispStyle, label: ispLabel, extensions: ispExtensions, geometryStack: { zLevel: 420 }, priority: { mode: 'replace', base: 2500 } }),
+      makeRule('v1-generic-point-symbol', 0, 3, { representation: 'hidden', style: ispStyle, label: labeled({ visible: false }), extensions: ispExtensions, geometryStack: { zLevel: 420 }, priority: { mode: 'replace', base: 2500 } }),
+      makeRule('v1-generic-point-label', 4, 8, { representation: 'labelOnly', style: ispStyle, label: ispLabel, extensions: ispExtensions, geometryStack: { zLevel: 420 }, priority: { mode: 'replace', base: 2500 } }),
     ]);
   }
 
@@ -530,7 +546,7 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
     const isWaterway = path.kind === 'NGF' && path.skind === 'WTR' && (path.skind2 === 'RVR' || path.skind2 === 'CAN');
     const lineLabel = labeled({ visible: true, style: isWaterway ? { family: 'gm-wtb', size: 16 } : { family: 'gm-outline', size: 17 }, source: 'Name', placement: 'center', collision: { role: 'important', basePriority: 3800, collisionGroup: 'networkLabel', hideWhenColliding: true } });
     const lineStyle = styled({ weight: 1, stroke: { mode: 'fixed', color: '#111827' }, strokeOpacity: 0.85 });
-    return profile([makeRule('v1-generic-line', 0, 8, { representation: 'geometry', style: lineStyle, label: lineLabel, geometryStack: { zLevel: 320 }, priority: { mode: 'replace', base: 3800 } })]);
+    return profile([makeRule('v1-generic-line', 0, 8, { representation: 'labelOnly', style: lineStyle, label: lineLabel, geometryStack: { zLevel: 320 }, priority: { mode: 'replace', base: 3800 } })]);
   }
 
   if (config.classCode === 'ISG' && geometry === 'Polygon') {
@@ -552,7 +568,7 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
     })();
     const surfaceLabel = labeled({ visible: true, style: labelStyle, source: 'Name', placement: 'center', collision: { role: 'important', basePriority: 5000, collisionGroup: 'surfaceLabel', hideWhenColliding: false } });
     const surfaceExtensions: RenderRuleExtensions = { ...clone(extensions), labelText: { ...(extensions.labelText ?? {}), maxChars: 10, abbreviationEnabled: true, suffix: '…' }, collision: { ...(extensions.collision ?? {}), paddingPx: 8, hidePolicy: 'forceShow' } };
-    const shown = (id: string, min: number, max: number, extra: Partial<ZoomPriorityRule> = {}) => profile(withVisibleRange(id, min, max, { representation: 'geometry', style: surfaceStyle, label: surfaceLabel, extensions: surfaceExtensions, geometryStack: { zLevel: 300 }, priority: { mode: 'replace', base: 5000 }, ...extra }));
+    const shown = (id: string, min: number, max: number, extra: Partial<ZoomPriorityRule> = {}) => profile(withVisibleRange(id, min, max, { representation: 'labelOnly', style: surfaceStyle, label: surfaceLabel, extensions: surfaceExtensions, geometryStack: { zLevel: 300 }, priority: { mode: 'replace', base: 5000 }, ...extra }));
     if (key === 'NGF/LAD/CON') return shown('v1-isg-land-continent', 0, 4);
     if (key === 'NGF/LAD/PEN' || key === 'NGF/LAD/ISD' || key === 'NGF/LAD/IST') return shown('v1-isg-land-medium', 3, 8);
     if (key.startsWith('NGF/LAD/')) return shown('v1-isg-land-detail', 5, 8);
@@ -563,7 +579,7 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
     if (key === 'ADM/DBZ/L2' || key === 'ADM/PLZ/L2') return shown('v1-isg-admin-l2', 6, 6);
     if (key === 'ADM/DBZ/L3' || key === 'ADM/PLZ/L3') return shown('v1-isg-admin-l3', 8, 8);
     if (key === 'ADM/PLZ/UP' || key === 'ADM/PLZ/UC') return profile([hidden('v1-isg-admin-hidden', 0, 8)]);
-    return profile([makeRule('v1-generic-surface', 0, 8, { representation: 'geometry', style: surfaceStyle, label: surfaceLabel, extensions: surfaceExtensions, geometryStack: { zLevel: 300 }, priority: { mode: 'replace', base: 5000 } })]);
+    return profile([makeRule('v1-generic-surface', 0, 8, { representation: 'labelOnly', style: surfaceStyle, label: surfaceLabel, extensions: surfaceExtensions, geometryStack: { zLevel: 300 }, priority: { mode: 'replace', base: 5000 } })]);
   }
 
   if ((config.classCode === 'TRP' || config.classCode === 'TPP' || config.classCode === 'WRP') && geometry === 'Point') {

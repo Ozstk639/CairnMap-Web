@@ -1,4 +1,5 @@
 import { FeatureStore } from '../../src/components/Rules/data/featureStore';
+import { FEATURE_RENDER_RULES } from '../../src/components/Rules/rendering/featureRenderRules';
 import { resolveConfigRuntimeRule, resolveConfigRuntimeStackOrder } from '../../src/components/Rules/configRuntime/configPackageAdapter';
 import { buildV3CardSections } from '../../src/configStudio/V3CardRenderer';
 import { createConfigPackageFromCurrentProject } from '../../src/configStudio/legacyProjectAdapter';
@@ -142,7 +143,11 @@ expect(rleLine.visible(rleOverlay, runtimeContext(6), railwayStore) === false, '
 const rodRuntime = probe(rod, 'LineString', { ID: 'road-1', color: '#f59e0b' });
 const rodLow = resolveConfigRuntimeRule(config, rodRuntime, runtimeContext(6), null) as any;
 const rodHigh = resolveConfigRuntimeRule(config, rodRuntime, runtimeContext(7), null) as any;
-expect(rodLow.display.geometry.strokeOpacity === 0.25 && rodHigh.display.geometry.strokeOpacity === 0.35, 'ROD Zoom-dependent opacity was not preserved.');
+const v1RoadStyle = FEATURE_RENDER_RULES.find(rule => rule.match.Class === 'ROD')!.symbol!.pathStyle!;
+for (const [zoom, native] of [[6, rodLow], [7, rodHigh]] as const) {
+  const legacy = typeof v1RoadStyle === 'function' ? v1RoadStyle(rodRuntime as any, runtimeContext(zoom), new FeatureStore([rodRuntime])) : v1RoadStyle;
+  expect(native.display.geometry.strokeOpacity === legacy.opacity, 'ROD opacity differs from the frozen V1 rule at the same logical Zoom.');
+}
 
 const pfb = root(config, 'PFB');
 const pfbRuntime = probe(pfb, 'Polygon', { ID: 'pfb-1', LineID: 'rle-primary' });
