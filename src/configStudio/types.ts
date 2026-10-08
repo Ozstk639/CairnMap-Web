@@ -410,6 +410,9 @@ export type LabelCollisionPolicy = {
   densityLimit?: number;
   /** Collision metric belongs here, separately from geometry/display ordering. */
   metric?: RenderPriority['metric'];
+  /** Explicit preservation for an imported r5 rule with intersecting conditional
+   * collision/display overrides. Newly authored rules remain independent. */
+  compatibility?: 'r5DisplayPriority';
 };
 export type RenderPriority = {
   mode: 'add' | 'replace';
@@ -558,6 +561,7 @@ export type ConfigEngineSettings = {
     Polygon: GeometryInteractionBaseline;
   };
   paneDefaults: Record<Exclude<ConfigPane, 'auto'>, string>;
+  renderDefaults?: Partial<Record<GeometryKind, RenderRuleExtensions>>;
 };
 
 /**
@@ -761,6 +765,7 @@ export type ControlledRegistryItem = {
   optionSchema?: Array<{ key: string; label: LocalizedText; type: 'text' | 'number' | 'boolean' | 'select'; options?: string[] }>;
 };
 export type ConfigRegistries = {
+  optionSets?: Array<{ id: string; label: LocalizedText; options: SelectOption[] }>;
   cardLayouts: ControlledRegistryItem[];
   cardComponents: ControlledRegistryItem[];
   displayProfiles: ControlledRegistryItem[];

@@ -1,3 +1,4 @@
+import { validateConfigPackage } from './runtime';
 import { isNativeConfigRevision } from './contract';
 import { normalizeImportedLocalization, normalizeImportedText } from './localization';
 import JSZip from 'jszip';
@@ -48,6 +49,8 @@ async function sha256(value: Uint8Array): Promise<string> {
 }
 
 export async function buildConfigPackageArchive(config: ConfigPackageV3, report: ConfigValidationReport): Promise<Blob> {
+  report = validateConfigPackage(config);
+  if (!report.valid) throw new Error('配置无效，不能归档导出。请先修复校验报告中的错误。');
   const parity = config.parity ?? {
     schemaVersion: 'cairnmap.v1-parity-report.v2' as const,
     generatedAt: new Date().toISOString(),
@@ -506,12 +509,35 @@ export function migrateV5Package(value: ConfigPackageV3): ConfigPackageV3 {
   if (value.contractRevision !== 5) return normalizeImportedLocalization(value);
   const config = normalizeImportedLocalization(structuredClone(value));
   config.contractRevision = 6;
+  const sources = new Map(createConfigPackageFromCurrentProject().registries.optionSets?.map(set => [set.id,set]) ?? []);
+  const sets = new Map(config.registries.optionSets?.map(set => [set.id,set]) ?? []);
+  for (const field of config.nodes.flatMap(node => node.fields)) if (field.optionSource && !sets.has(field.optionSource.registryKey)) {
+    const id = field.optionSource.registryKey; const known = sources.get(id);
+    if (field.options?.length) sets.set(id, { id, label: field.labels, options: structuredClone(field.options) });
+    else if (known) sets.set(id, structuredClone(known));
+  }
+  for (const control of config.workflows.flatMap(workflow => workflow.steps.flatMap(step => step.controls ?? []))) if (control.optionSource && control.options?.length) {
+    // r5 executed the explicit options. Preserve those authored choices;
+    // the source identifier remains in the auditable migration report.
+    config.parity?.entries.push({ kind: 'shared', id: `r5-options-${control.id}`, source: control.optionSource.registryKey, status: 'registryReference', details: 'r5 使用本地静态选项；升级保留该列表，避免新选项来源覆盖用户修改。' });
+    delete control.optionSource;
+  }
+  config.registries.optionSets = [...sets.values()];
   for (const node of config.nodes) for (const profile of Object.values(node.geometryProfiles)) {
     for (const rule of profile?.zoomPriority.rules ?? []) {
       if (!rule.label) continue;
-      rule.label.collision.basePriority += Number(rule.priority?.base ?? 0);
-      if (rule.priority?.metric) rule.label.collision.metric = structuredClone(rule.priority.metric);
+      rule.label.withDot = false;
+      if (rule.conditionalOverrides?.some(override => override.priority || override.label)) {
+        rule.label.collision.compatibility = 'r5DisplayPriority';
+        for (const override of rule.conditionalOverrides) if (override.label) { override.label.collision.compatibility = 'r5DisplayPriority'; override.label.withDot = false; }
+      } else {
+        rule.label.collision.basePriority += rule.priority?.metric && rule.priority.mode === 'replace' ? 0 : Number(rule.priority?.base ?? 0);
+        if (rule.priority?.metric) rule.label.collision.metric = structuredClone(rule.priority.metric);
+      }
     }
+  }
+  if (config.engine) for (const visual of Object.values(config.engine.interactionBaselines.Point)) {
+    if (typeof visual === 'object' && !visual.symbol) visual.symbol = { kind: 'circle', radius: Math.max(5, visual.strokeWidth * 2.5) };
   }
   return config;
 }

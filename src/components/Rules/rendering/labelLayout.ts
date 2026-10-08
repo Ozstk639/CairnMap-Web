@@ -226,6 +226,8 @@ export type LabelRequest = {
    * - 布局引擎会按顺序依次尝试，找到可放置的位置即停。
    */
   anchorCandidatesLatLng?: L.LatLng[];
+  /** Native polygon anchor containment policy, including holes and parts. */
+  acceptsAnchor?: (screenPoint: L.Point) => boolean;
 
   /** label 文本 */
   text: string;
@@ -286,6 +288,9 @@ export type LabelRequest = {
   worldId?: string;
   displayMode?: string;
   geometrySignature?: string;
+  runtimeStability?: import('@/configStudio/types').RenderStabilityExtension;
+  densityImportance?: number;
+  symbolDensityBlocked?: boolean;
 
   /** 是否带中心点（影响 bbox 宽度估计） */
   withDot?: boolean;
@@ -1094,6 +1099,8 @@ export function layoutLabelsOnMap(
 
     /** 新增：需要避让的屏幕矩形（点图标/其它遮挡物） */
     avoidRectsPx?: AvoidRectPx[];
+    /** Cached visible labels must still consume density and group budgets. */
+    reservedLabels?: Array<{ request: LabelRequest; rect: Rect }>;
 
     /** 新增：对 avoidRects 额外膨胀（px），用于给图标留出更大缓冲区 */
     avoidSpacingPx?: number;
@@ -1195,6 +1202,7 @@ export function layoutLabelsOnMap(
     const roleDiff =
       collisionRoleOrder(b.collisionRole) - collisionRoleOrder(a.collisionRole);
     if (roleDiff !== 0) return roleDiff;
+    if (a.req.densityImportance !== undefined || b.req.densityImportance !== undefined) { const importance = (b.req.densityImportance ?? 0) - (a.req.densityImportance ?? 0); if (importance) return importance; }
     if (b.priority !== a.priority) return b.priority - a.priority;
     if (opts?.preferNearCenter !== false) {
       if (a.centerDist2 !== b.centerDist2) return a.centerDist2 - b.centerDist2;
@@ -1224,6 +1232,11 @@ export function layoutLabelsOnMap(
 
   const groupCount = new Map<string, number>();
   const densityLimiter = new LabelDensityLimiter();
+  for (const { request, rect } of opts?.reservedLabels ?? []) {
+    const decl = request.declutter ?? {};
+    if (decl.groupKey) groupCount.set(decl.groupKey, (groupCount.get(decl.groupKey) ?? 0) + 1);
+    densityLimiter.commit(rect, resolveLabelDensityConfig({ ...decl, selected: request.selected }));
+  }
 
   const maybeTextPathMetrics = (
     item: LayoutItem,
@@ -1675,7 +1688,7 @@ export function layoutLabelsOnMap(
         const hits = index.query(expanded);
         let ok = true;
         for (const h of hits) {
-          if (h.ownerUid && h.ownerUid === baseReq.featureUid) continue;
+          if (h.ownerUid && h.ownerUid === (baseReq.collisionOwnerUid ?? baseReq.featureUid)) continue;
           if (
             h.collisionSource === "geometry" &&
             (anchor.lineTextAvoidLineGeometry ?? false) === false
@@ -1982,6 +1995,7 @@ export function layoutLabelsOnMap(
         const dx = (c.dx ?? 0) + baseDeltaX;
         const dy = (c.dy ?? 0) + baseDeltaY;
 
+        if (baseReq.acceptsAnchor && !baseReq.acceptsAnchor(L.point(item.anchorPx.x + dx, item.anchorPx.y + dy))) continue;
         const trial = rectForCandidate(item, measured, anchorPxCand, c);
         const textPathMetrics = maybeTextPathMetrics(item, text, ac);
         const rect = textPathMetrics?.metrics?.collisionRect ?? trial.rect;
@@ -2018,7 +2032,7 @@ export function layoutLabelsOnMap(
         let collisionBlockedBy: PolygonLayoutCandidateAudit["collisionBlockedBy"] | undefined;
         for (const h of hits) {
           // 忽略“自己的点图标占用区”，否则 near label 会必然撞到自己
-          if (h.ownerUid && h.ownerUid === baseReq.featureUid) continue;
+          if (h.ownerUid && h.ownerUid === (baseReq.collisionOwnerUid ?? baseReq.featureUid)) continue;
 
           if (rectIntersects(expanded, h) && shouldCollisionBlock(item, h)) {
             ok = false;
@@ -2237,6 +2251,7 @@ export function layoutLabelsOnMap(
 
     for (const ac of anchorCandidates) {
       for (const c of candidates) {
+        if (baseReq.acceptsAnchor && !baseReq.acceptsAnchor(L.point(ac.px.x + (c.dx ?? 0), ac.px.y + (c.dy ?? 0)))) continue;
         const nextBase = rectForCandidate(item, measured, ac.px, c);
         const textPathMetrics = maybeTextPathMetrics(item, text, ac);
         const nextRect =
@@ -2269,6 +2284,7 @@ export function layoutLabelsOnMap(
         break;
     }
 
+    if (!fallback && baseReq.acceptsAnchor) return { id: baseReq.id, hidden: true, text: baseReq.text, dx: 0, dy: 0, priority: item.priority, hiddenReason: 'collision' };
     if (!fallback) {
       const c = candidates[0] ?? {
         name: "C" as LabelCandidateName,
@@ -2366,7 +2382,7 @@ export function layoutLabelsOnMap(
     // 放不下
     getDefaultLabelPlacementCache().noteFailure(item.placementCache, item.lastFailureReason);
     let hideSymbol = false;
-    let keepGeometry = false;
+    let keepGeometry = item.hidePolicy === 'geometryOnly';
     if (item.lastFailureReason === 'densityLimit') for (const action of densityOrder ?? []) {
       if (action === 'hideSymbols') hideSymbol = true;
       if (action === 'geometryOnly') { keepGeometry = true; hideSymbol = false; break; }

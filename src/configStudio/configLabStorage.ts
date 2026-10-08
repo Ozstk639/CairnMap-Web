@@ -1,6 +1,6 @@
 import { isNativeConfigRevision } from './contract';
 import type { ConfigPackageV3 } from './types';
-import { normalizeImportedLocalization } from './localization';
+import { prepareConfigForActivation } from './configActivation';
 
 // V32 deliberately uses a separate store so a partial V3.1 adapter package
 // can never silently become the active native renderer configuration.
@@ -31,13 +31,14 @@ export async function loadLatestConfigLabPackage(): Promise<ConfigPackageV3 | un
     request.onerror = () => reject(request.error ?? new Error('无法读取本地配置。'));
     request.onsuccess = () => {
       const value = request.result as ConfigPackageV3 | undefined;
-      resolve(isNativeConfigRevision(value?.contractRevision) ? normalizeImportedLocalization(value) : undefined);
+      try { resolve(value ? prepareConfigForActivation(value) : undefined); }
+      catch (error) { reject(error); }
     };
   }).finally(() => database.close());
 }
 
 /** Lists locally saved versions without mutating the currently loaded lab package. */
-export async function listConfigLabPackages(): Promise<ConfigPackageV3[]> {
+export async function listConfigLabPackages(onRejected?: (diagnostic: string) => void): Promise<ConfigPackageV3[]> {
   const database = await db();
   return new Promise<ConfigPackageV3[]>((resolve, reject) => {
     const values: ConfigPackageV3[] = [];
@@ -51,7 +52,9 @@ export async function listConfigLabPackages(): Promise<ConfigPackageV3[]> {
       }
       if (String(cursor.key).startsWith(HISTORY_PREFIX)) {
         const value = cursor.value as ConfigPackageV3;
-        if (value?.schemaVersion === 'cairnmap.config-package.v3' && isNativeConfigRevision(value.contractRevision)) values.push(normalizeImportedLocalization(value));
+        if (value?.schemaVersion === 'cairnmap.config-package.v3' && isNativeConfigRevision(value.contractRevision)) {
+          try { values.push(prepareConfigForActivation(value)); } catch (error) { onRejected?.(`${String(cursor.key)}：${error instanceof Error ? error.message : '无效历史包'}（已保留原始记录）`); }
+        } else onRejected?.(`${String(cursor.key)}：未知配置契约，不能启用（已保留原始记录）`);
       }
       cursor.continue();
     };
@@ -59,12 +62,22 @@ export async function listConfigLabPackages(): Promise<ConfigPackageV3[]> {
 }
 
 export async function saveConfigLabPackage(config: ConfigPackageV3): Promise<void> {
+  config = prepareConfigForActivation(config);
   const database = await db();
   await new Promise<void>((resolve, reject) => {
     const transaction = database.transaction(STORE, 'readwrite');
     const store = transaction.objectStore(STORE);
-    store.put(config, packageKey(config));
-    store.put(config, LATEST);
+    const existing = store.get(packageKey(config));
+    existing.onsuccess = () => {
+      if (existing.result) {
+        try {
+          const previous = prepareConfigForActivation(existing.result);
+          const stable = (value: unknown): string => JSON.stringify(value, (_key, item) => item && typeof item === 'object' && !Array.isArray(item) ? Object.fromEntries(Object.entries(item).sort(([a],[b]) => a.localeCompare(b))) : item);
+          if (stable(previous) !== stable(config)) { transaction.abort(); reject(new Error('此包 ID/revision 已保存不同内容。请在工作台增加 revision 后保存，历史版本不会被覆盖。')); return; }
+        } catch (error) { transaction.abort(); reject(error); return; }
+      }
+      store.put(config, packageKey(config)); store.put(config, LATEST);
+    };
     transaction.onerror = () => reject(transaction.error ?? new Error('无法保存本地配置。'));
     transaction.oncomplete = () => resolve();
   }).finally(() => database.close());

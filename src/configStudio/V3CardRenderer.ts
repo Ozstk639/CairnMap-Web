@@ -1,3 +1,4 @@
+import { normalizeRuleSourceWorldId } from '@/components/Rules/data/ruleDataSources';
 import { isNativeConfigRevision } from './contract';
 import type { CardItem, ClassificationPath, ConfigPackageV3 } from './types';
 import { resolveCardConfiguration, resolveEffectiveFields } from './runtime';
@@ -139,10 +140,10 @@ function rowFor(item: CardItem, record: FeatureRecord, config: ConfigPackageV3, 
     const field = resolveEffectiveFields(config, classificationFor(record)).find(field => field.key === item.source);
     return { label, value: field?.options?.find(option => String(option.value) === rawText)?.label.zh || rawText };
   }
-  if (item.options?.format === 'world') return { label, value: rawText };
+  if (item.options?.format === 'world') return { label, value: normalizeRuleSourceWorldId(rawText) };
   if (item.options?.format === 'date') {
     const compact = /^(\d{4})(\d{2})(\d{2})$/.exec(rawText);
-    const date = new Date(compact ? `${compact[1]}-${compact[2]}-${compact[3]}T00:00:00Z` : rawText);
+    const date = new Date(typeof raw === 'number' ? raw : compact ? `${compact[1]}-${compact[2]}-${compact[3]}T00:00:00Z` : rawText);
     return { label, value: Number.isNaN(date.getTime()) ? rawText : date.toISOString().slice(0, 10) };
   }
   if (item.options?.format === 'plain') return { label, value: rawText || '未知' };

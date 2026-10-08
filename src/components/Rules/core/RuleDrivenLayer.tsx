@@ -21,6 +21,7 @@ import {
 import {
   layoutLabelsOnMap,
   type LabelRequest,
+  type PlacedLabel,
   type AvoidRectPx,
 } from "@/components/Rules/rendering/labelLayout";
 import AppButton from "@/components/ui/AppButton";
@@ -83,6 +84,7 @@ import {
   type PolygonLabelAuditRow,
   type PolygonLabelAuditSnapshot,
 } from "@/components/Rules/debug/polygonLabelAudit";
+import { shouldReuseNativePlacement } from '@/components/Rules/rendering/label/labelRuntimeStability';
 import { setTempMountedPictureEntries, type FeaturePictureEntry } from "@/components/Rules/cardrules/pictureRules";
 import {
   viewportWorldRectXZFromBounds,
@@ -141,6 +143,7 @@ const Y_FOR_DISPLAY = -64;
 
 type LayerBundle = {
   nativeSymbol?: { screenOffsetPx?: { x: number; y: number }; followLabelAnchor?: boolean; visibility?: 'independent' | 'withLabel' };
+  nativeSymbolOrigins?: L.LatLng[];
   nativeMainParts?: L.Layer[];
   nativeHitParts?: L.Layer[];
   nativeMainRoot?: L.Layer;
@@ -170,13 +173,19 @@ function nativeSymbolParts(bundle: LayerBundle, proxy = false): L.Layer[] {
   if (bundle[rootKey] !== layer) { bundle[rootKey] = layer; bundle[key] = undefined; }
   return bundle[key] ??= layer instanceof L.LayerGroup ? layer.getLayers() : [layer];
 }
-function placeNativeSymbol(map: L.Map, bundle: LayerBundle, anchor?: L.LatLng, partIndex?: number) {
+function placeNativeSymbol(map: L.Map, bundle: LayerBundle, anchor?: L.LatLng, partIndex?: number, originalAnchor?: L.LatLng) {
   const offset = bundle.nativeSymbol?.screenOffsetPx;
   if (!offset && !anchor) return;
+  if (!anchor) bundle.nativeSymbolOrigins = nativeSymbolParts(bundle).map(layer => layer instanceof L.Marker || layer instanceof L.CircleMarker ? layer.getLatLng() : L.latLng(0,0));
   for (const proxy of [false, true]) nativeSymbolParts(bundle, proxy).forEach((layer, index) => {
     if (partIndex !== undefined && index !== partIndex) return;
     if (!(layer instanceof L.Marker || layer instanceof L.CircleMarker)) return;
-    const point = map.latLngToContainerPoint(anchor ?? layer.getLatLng());
+    let point = map.latLngToContainerPoint(anchor ?? layer.getLatLng());
+    if (anchor && originalAnchor && partIndex === undefined && (bundle.nativeSymbolOrigins?.length ?? 0) > 1) {
+      const base = map.latLngToContainerPoint(bundle.nativeSymbolOrigins![index]);
+      const origin = map.latLngToContainerPoint(originalAnchor);
+      point = L.point(base.x + point.x - origin.x, base.y + point.y - origin.y);
+    }
     layer.setLatLng(map.containerPointToLatLng(L.point(point.x + (offset?.x ?? 0), point.y + (offset?.y ?? 0))));
   });
 }
@@ -1698,6 +1707,7 @@ export default function RuleDrivenLayer(props: Props) {
   const stateVisualGroupRef = useRef<L.LayerGroup>(L.layerGroup());
   const stateHoverBoundRef = useRef<WeakSet<L.Layer>>(new WeakSet());
   const [hoveredUid, setHoveredUid] = useState<string | null>(null);
+  const [searchFocusedUid, setSearchFocusedUid] = useState<string | null>(null);
   const transientInteractionRef = useRef({ editing: new Set<string>(), deletion: new Set<string>() });
 
   const [selectedFeature, setSelectedFeature] = useState<FeatureRecord | null>(
@@ -1724,6 +1734,8 @@ export default function RuleDrivenLayer(props: Props) {
   }, []);
 
   const cacheRef = useRef<Map<string, LayerBundle>>(new Map());
+  const nativePlacementRef = useRef(new Map<string, { signature: string; placed: PlacedLabel; anchor: L.LatLng; center: L.LatLng; zoom: number; size?: { x: number; y: number; w: number; h: number } }>());
+  const livePlacementRef = useRef(false);
   const allRecordsRef = useRef<FeatureRecord[]>([]);
   const recordsRef = useRef<FeatureRecord[]>([]);
   const storeRef = useRef<FeatureStore | null>(null);
@@ -1737,7 +1749,7 @@ export default function RuleDrivenLayer(props: Props) {
   const labelZoomSettleTimerRef = useRef<number | null>(null);
   const labelZoomAnimatingRef = useRef(false);
   const pendingZoomRefreshReasonRef = useRef<
-    "moveend" | "zoomend" | "state" | null
+    "move" | "moveend" | "zoomend" | "state" | null
   >(null);
 
   // floor UI
@@ -2112,7 +2124,7 @@ export default function RuleDrivenLayer(props: Props) {
         const source = dataset?.features?.find((item: any) => String(item.ID ?? '') === id);
         if (source) {
           const sample = buildRecordsFromJson([source] as any[], `rule-world:${worldId}`)[0];
-          if (sample && configRuntime.engine?.interactionBaselines[sample.type === 'Points' ? 'Point' : sample.type === 'Polyline' ? 'LineString' : 'Polygon'].deletionMarked.enabled) excludeIds.delete(id);
+          if (sample && resolveConfigInteractionVisual(configRuntime, sample, { worldId, leafletZoom: map.getZoom(), zoomLevel: toZoomLevel(map.getZoom()), inFloorView: false, activeBuildingUid: null, activeFloorSelector: null, activeBuildingFloorRefSet: null }, 'deletionMarked').enabled) excludeIds.delete(id);
         }
       }
 
@@ -2233,7 +2245,7 @@ export default function RuleDrivenLayer(props: Props) {
             ? rawClick(rr, curCtx, store)
             : rawClick;
         if (clickPlan && clickPlan.enabled) {
-          handleLabelClick(rr, clickPlan as any);
+          handleLabelClick(rr, clickPlan as any, true);
           return true;
         }
       }
@@ -2241,6 +2253,7 @@ export default function RuleDrivenLayer(props: Props) {
 
     // fallback：仅打开信息卡（高亮逻辑保持为空）
     setSelectedFeature(rr);
+    if (configRuntime) setSearchFocusedUid(rr.uid);
     setFeatureCardOpen(true);
     return true;
   };
@@ -2425,9 +2438,10 @@ export default function RuleDrivenLayer(props: Props) {
     return true;
   };
 
-  const handleLabelClick = (r: FeatureRecord, plan: LabelClickPlan) => {
+  const handleLabelClick = (r: FeatureRecord, plan: LabelClickPlan, fromSearch = false) => {
     if (assistPickActive || deletePickActive) return;
     activateConfigRuntimeContext(r);
+    if (configRuntime) setSearchFocusedUid(fromSearch ? r.uid : null);
     if (!highlightGroupRef.current) highlightGroupRef.current = L.layerGroup();
     highlightGroupRef.current.clearLayers();
 
@@ -2459,6 +2473,7 @@ export default function RuleDrivenLayer(props: Props) {
     highlightGroupRef.current?.clearLayers();
     setFeatureCardOpen(false);
     setSelectedFeature(null);
+    setSearchFocusedUid(null);
   };
 
   // =========================
@@ -2961,7 +2976,7 @@ export default function RuleDrivenLayer(props: Props) {
     if (!store) return;
 
     const refresh = (
-      reason: "initial" | "moveend" | "zoomend" | "state" = "state",
+      reason: "initial" | "move" | "moveend" | "zoomend" | "state" = "state",
     ) => {
       const waitingFirstPaint =
         pendingRuleFirstPaintWorldRef.current === worldId &&
@@ -2989,6 +3004,7 @@ export default function RuleDrivenLayer(props: Props) {
         return;
       }
       stateVisualGroupRef.current.clearLayers();
+      const stateOverlays: Array<{ layer: L.Layer; z: number }> = [];
       if (configRuntime && !root.hasLayer(stateVisualGroupRef.current)) root.addLayer(stateVisualGroupRef.current);
 
       // RB_SLU_24: do not skip moveend refreshes. Line labels depend on the
@@ -3054,14 +3070,15 @@ export default function RuleDrivenLayer(props: Props) {
       // slot for the highest collision/display priority first, independently
       // from the later painter's z-order (which remains low-to-high).
       const nativeSymbolDensityAllowed = new Set<string>();
+      const nativeSymbolPartBudget = new Map<string, Set<number>>();
       if (isNativeConfigRevision(configRuntime?.contractRevision)) {
-        const candidates: Array<{ uid: string; bucket: string; limit: number; priority: number }> = [];
+        const candidates: Array<{ uid: string; partIndex: number; bucket: string; limit: number; priority: number; importance: number }> = [];
         for (const candidate of records) {
           const nativeRule = resolveConfigRuntimeRule(configRuntime, candidate, context, null, store);
           if (!nativeRule) continue;
           const plan = resolveFeatureDisplayPlan(candidate, nativeRule, context, store, {
             selected: selectedFeature?.uid === candidate.uid,
-            searchResult: pendingOpenUidRef.current === candidate.uid,
+            searchResult: searchFocusedUid === candidate.uid || pendingOpenUidRef.current === candidate.uid,
           });
           if (!shouldRenderByDisplayPlan(plan, context)) continue;
           const density = plan.density;
@@ -3070,21 +3087,27 @@ export default function RuleDrivenLayer(props: Props) {
             nativeSymbolDensityAllowed.add(candidate.uid);
             continue;
           }
-          const center = pointRepresentationLatLng(candidate, projection);
-          if (!center) continue;
-          const projected = map.latLngToContainerPoint(center);
-          const gridSize = Math.max(1, Number(density?.gridSizePx ?? 64));
-          const group = String(plan.collision.group ?? 'config-runtime');
-          const bucket = `${group}:${gridSize}:${Math.floor(projected.x / gridSize)}:${Math.floor(projected.y / gridSize)}`;
-          candidates.push({ uid: candidate.uid, bucket, limit: Math.floor(limit), priority: Number(plan.collision.priority ?? 0) });
+          if (plan.geometry.render !== 'point' && candidate.type !== 'Points' || plan.geometry.render === 'none' || selectedFeature?.uid === candidate.uid && density?.preserveSelected !== false || plan.collision.role === 'required' && density?.preserveRequired !== false) { nativeSymbolDensityAllowed.add(candidate.uid); continue; }
+          const centers = candidate.type === 'Points'
+            ? (candidate.multipartGeometry?.type === 'Point' ? candidate.multipartGeometry.parts : candidate.p3 ? [candidate.p3] : []).map(point => projection.locationToLatLng(point.x,point.y,point.z))
+            : pointRepresentationLatLngs(candidate, projection, plan.anchor.multipartMode ?? 'featureBbox', plan.anchor);
+          nativeSymbolPartBudget.set(candidate.uid, new Set());
+          centers.forEach((center,partIndex) => {
+            const projected = map.latLngToContainerPoint(center);
+            const gridSize = Math.max(1, Number(density?.gridSizePx ?? 64));
+            const group = String(plan.collision.group ?? 'config-runtime');
+            const bucket = `${group}:${gridSize}:${Math.floor(projected.x / gridSize)}:${Math.floor(projected.y / gridSize)}`;
+            candidates.push({ uid: candidate.uid, partIndex, bucket, limit: Math.floor(limit), priority: Number(plan.collision.priority ?? 0), importance: density?.importanceField ? Number(getFeatureValueByPath(candidate, density.importanceField)) || 0 : 0 });
+          });
         }
         const occupied = new Map<string, number>();
-        candidates.sort((left, right) => right.priority - left.priority || left.uid.localeCompare(right.uid));
+        candidates.sort((left, right) => right.importance - left.importance || right.priority - left.priority || left.uid.localeCompare(right.uid));
         for (const candidate of candidates) {
           const count = occupied.get(candidate.bucket) ?? 0;
           if (count >= candidate.limit) continue;
           occupied.set(candidate.bucket, count + 1);
           nativeSymbolDensityAllowed.add(candidate.uid);
+          nativeSymbolPartBudget.get(candidate.uid)?.add(candidate.partIndex);
         }
       }
       const realBounds = map.getBounds();
@@ -3193,7 +3216,7 @@ export default function RuleDrivenLayer(props: Props) {
         const interactionReasons: DisplayInteractionReason[] = [];
         const activeState = (state: import('@/configStudio/types').InteractionState) => !configRuntime || resolveConfigInteractionVisual(configRuntime, r, context, state, store).enabled;
         const isSelectedFeature = selectedFeature?.uid === r.uid && activeState('selected');
-        const isSearchFocus = pendingOpenUidRef.current === r.uid && activeState('searchResult');
+        const isSearchFocus = (searchFocusedUid === r.uid || pendingOpenUidRef.current === r.uid) && activeState('searchResult');
         const isHovered = hoveredUid === r.uid && activeState('hover');
         const recordId = String(r.featureInfo.ID ?? '');
         const isEditing = transientInteractionRef.current.editing.has(recordId) && activeState('editing');
@@ -3228,19 +3251,7 @@ export default function RuleDrivenLayer(props: Props) {
           continue;
         }
 
-        if (isNativeConfigRevision(configRuntime?.contractRevision) && !nativeSymbolDensityAllowed.has(r.uid)) {
-          updateLineAuditBlocked(
-            auditRow,
-            "feature-filter",
-            "V3.2 symbol-density gate blocked this feature",
-          );
-          updatePolygonAuditBlocked(
-            polygonAuditRow,
-            "feature-filter",
-            "V3.2 symbol-density gate blocked this feature",
-          );
-          continue;
-        }
+        const symbolDensityBlocked = Boolean(configRuntime && !nativeSymbolDensityAllowed.has(r.uid));
 
         if (configRuntime && displayPlan.anchor?.multipartMode === 'perPart') {
           const filtered = filterFeatureGeometryParts(r, (part) => passesConfigRuntimeScreenGate(configRuntime, part, context, projection, map));
@@ -3361,7 +3372,8 @@ export default function RuleDrivenLayer(props: Props) {
         const symbolAnchors = r.type === 'Points'
           ? (r.multipartGeometry?.type === 'Point' ? r.multipartGeometry.parts : r.p3 ? [r.p3] : []).map((point) => projection.locationToLatLng(point.x, point.y, point.z))
           : displayPlan.geometry?.render === 'point' ? pointRepresentationLatLngs(r, projection, displayPlan.anchor?.multipartMode ?? 'featureBbox', displayPlan.anchor) : [];
-        for (const symbolAnchor of labelOnly ? [] : symbolAnchors) {
+        for (const [symbolIndex, symbolAnchor] of (labelOnly || symbolDensityBlocked ? [] : symbolAnchors).entries()) {
+          if (nativeSymbolPartBudget.has(r.uid) && !nativeSymbolPartBudget.get(r.uid)!.has(symbolIndex)) continue;
           const pt = map.latLngToContainerPoint(symbolAnchor);
 
           const sym = rule.symbol;
@@ -3406,7 +3418,7 @@ export default function RuleDrivenLayer(props: Props) {
           const bounds = pointPlan?.kind === 'icon'
             ? iconBoundsAtAnchor(pt, [w, h], pointPlan.iconAnchor ?? [w / 2, h / 2])
             : { x: pt.x - w / 2, y: pt.y - h / 2, w, h };
-          avoidRectsPx.push({ ...bounds, ownerUid: r.uid });
+          avoidRectsPx.push({ ...bounds, ownerUid: displayPlan.anchor.multipartMode === 'perPart' ? componentLabelId(r.uid, symbolIndex) : r.uid });
         }
 
         shouldShow.add(r.uid);
@@ -3446,6 +3458,9 @@ export default function RuleDrivenLayer(props: Props) {
             } as any)
           : (rule.symbol as any);
 
+        if (configRuntime && typeof rule.symbol?.pane === 'string' && !map.getPane(rule.symbol.pane)) {
+          const pane = map.createPane(rule.symbol.pane); pane.style.zIndex = String(r.type === 'Points' || displayPlan.geometry.render === 'point' ? 650 : 400);
+        }
         // 确保 layer 存在
         const existing = cacheRef.current.get(r.uid);
         if (!existing) {
@@ -3506,11 +3521,11 @@ export default function RuleDrivenLayer(props: Props) {
             if (layer instanceof L.LayerGroup) layer.eachLayer(bindHover);
           };
           [nativeBundle.main, nativeBundle.hitProxy, nativeBundle.label].filter(Boolean).forEach(layer => bindHover(layer!));
-          const state = isDeletionMarked ? 'deletionMarked' : isEditing ? 'editing' : isSelectedFeature ? 'selected' : isSearchFocus ? 'searchResult' : isHovered ? 'hover' : undefined;
+          const state = isDeletionMarked ? 'deletionMarked' : isEditing ? 'editing' : isSearchFocus ? 'searchResult' : isSelectedFeature ? 'selected' : isHovered ? 'hover' : undefined;
           if (state) {
             const visual = resolveConfigInteractionVisual(configRuntime, r, context, state, store);
             const overlay = createHighlightLayerForFeature({ r, projection, nativeVisual: visual });
-            if (overlay) stateVisualGroupRef.current.addLayer(overlay);
+            if (overlay) stateOverlays.push({ layer: overlay, z: visual.zIndexOffset ?? 0 });
           }
         }
         const nativeSymbolPlan = typeof rule.symbol?.point === 'function' ? rule.symbol.point(r, context, store) : rule.symbol?.point;
@@ -3520,6 +3535,10 @@ export default function RuleDrivenLayer(props: Props) {
         }
 
         // LabelLayout：仅对声明了 labelPlan.declutter 的规则生效；其余 label 走旧逻辑
+        if (nativeBundle?.nativeSymbol) {
+          if (nativeSymbolPartBudget.has(r.uid)) nativeSymbolParts(nativeBundle).forEach((_,index) => setNativeSymbolVisible(root, nativeBundle, nativeSymbolPartBudget.get(r.uid)!.has(index), index));
+          else if (symbolDensityBlocked) { root.removeLayer(nativeBundle.main); if (nativeBundle.hitProxy) root.removeLayer(nativeBundle.hitProxy); }
+        }
         const rawLabelPlan = rule.symbol?.label;
         const labelPlan =
           typeof rawLabelPlan === "function"
@@ -3623,11 +3642,20 @@ export default function RuleDrivenLayer(props: Props) {
             advancedLineTextBudget,
           ));
           for (const req of requests) {
+            req.collisionOwnerUid = req.partIndex === undefined ? req.featureUid : componentLabelId(r.uid, req.partIndex);
             req.selected = selectedFeature?.uid === req.featureUid;
+            req.symbolDensityBlocked = symbolDensityBlocked || req.partIndex !== undefined && nativeSymbolPartBudget.has(r.uid) && !nativeSymbolPartBudget.get(r.uid)!.has(req.partIndex);
+            req.runtimeStability = configRuntime ? displayPlan.stability : undefined;
+            if (configRuntime && sourceRecord.type === 'Polygon' && (displayPlan.anchor.requireInsideGeometry || displayPlan.anchor.allowOutsideGeometry === false)) {
+              const allParts = sourceRecord.multipartGeometry?.type === 'Polygon' ? sourceRecord.multipartGeometry.parts : [[sourceRecord.coords3 ?? []]];
+              const parts = req.partIndex === undefined ? allParts : allParts.slice(req.partIndex, req.partIndex + 1);
+              req.acceptsAnchor = screen => { const point = projection.latLngToLocation(map.containerPointToLatLng(screen), Y_FOR_DISPLAY); return parts.some(rings => rings[0]?.length && pointInPolygonXZ(point,rings[0]) && !rings.slice(1).some(hole => pointInPolygonXZ(point,hole))); };
+            }
+            req.densityImportance = displayPlan.density?.importanceField ? Number(getFeatureValueByPath(r, displayPlan.density.importanceField)) || 0 : undefined;
             req.worldId = worldId;
             req.displayMode = context.inFloorView ? 'floor' : 'normal';
             req.geometrySignature = configRuntime ? JSON.stringify(sourceRecord.multipartGeometry ?? sourceRecord.coords3 ?? sourceRecord.p3) : undefined;
-            if (nativeBundle?.nativeSymbol?.visibility === 'withLabel') req.symbolBounds = { radius: Number((nativeSymbolPlan as any)?.radius ?? 0) + Number((nativeSymbolPlan as any)?.style?.weight ?? 0) / 2, offsetX: nativeBundle.nativeSymbol.screenOffsetPx?.x ?? 0, offsetY: nativeBundle.nativeSymbol.screenOffsetPx?.y ?? 0 };
+            if (!req.symbolDensityBlocked && nativeBundle?.nativeSymbol?.visibility === 'withLabel') req.symbolBounds = { radius: Number((nativeSymbolPlan as any)?.radius ?? 0) + Number((nativeSymbolPlan as any)?.style?.weight ?? 0) / 2, offsetX: nativeBundle.nativeSymbol.screenOffsetPx?.x ?? 0, offsetY: nativeBundle.nativeSymbol.screenOffsetPx?.y ?? 0 };
             if (auditRow) {
               auditRow.expectedLabel = true;
               auditRow.labelText = req.text;
@@ -3724,20 +3752,49 @@ export default function RuleDrivenLayer(props: Props) {
         }
       }
 
+      stateOverlays.sort((a,b) => a.z - b.z).forEach(({ layer }) => stateVisualGroupRef.current.addLayer(layer));
+
       // 统一计算 declutter label 的摆放（避免重叠）
       const requestedParts = new Set(declutterLabelRequests.filter((req) => req.partIndex !== undefined).map((req) => req.id));
       for (const bundle of cacheRef.current.values()) {
         for (const [id, child] of bundle.partLabels ?? []) if (!requestedParts.has(id)) { clearBundleLabel(child, root); bundle.partLabels!.delete(id); }
       }
       if (declutterLabelRequests.length) {
-        const placed = layoutLabelsOnMap(map, declutterLabelRequests, {
+        const frozen: PlacedLabel[] = [];
+        const reservedLabels: Array<{ request: LabelRequest; rect: { x: number; y: number; w: number; h: number } }> = [];
+        const fresh: LabelRequest[] = [];
+        const signatures = new Map<string,string>();
+        const retained = new Set(declutterLabelRequests.map(req => req.id));
+        for (const id of nativePlacementRef.current.keys()) if (!retained.has(id)) nativePlacementRef.current.delete(id);
+        for (const req of declutterLabelRequests) {
+          const signature = JSON.stringify([stabilitySignature, req.worldId, req.displayMode, req.geometrySignature, req.text, req.font, req.placement, req.offsetX, req.offsetY, req.withDot, req.candidateOffsetsPx, req.symbolBounds, req.declutter, req.displayAnchor, req.runtimeStability]);
+          signatures.set(req.id, signature);
+          const previous = nativePlacementRef.current.get(req.id);
+          const panDistancePx = previous ? map.latLngToContainerPoint(previous.center).distanceTo(map.latLngToContainerPoint(map.getCenter())) : Infinity;
+          if (previous && shouldReuseNativePlacement({ settings: req.runtimeStability, reason, sameContent: previous.signature === signature, panDistancePx, sameZoom: previous.zoom === map.getZoom() })) {
+            req.anchorLatLng = previous.anchor;
+            frozen.push(previous.placed);
+            if (!previous.placed.hidden && previous.size) {
+              const point = map.latLngToContainerPoint(previous.anchor);
+              reservedLabels.push({ request: req, rect: { ...previous.size, x: point.x + previous.size.x, y: point.y + previous.size.y } });
+              avoidRectsPx.push({ ...previous.size, x: point.x + previous.size.x, y: point.y + previous.size.y, ownerUid: req.collisionOwnerUid ?? req.featureUid, collisionSource: 'label', collisionRole: previous.placed.collisionRole, collisionGroup: previous.placed.collisionGroup, priority: previous.placed.priority });
+            }
+          } else fresh.push(req);
+        }
+        const placed = [...frozen, ...layoutLabelsOnMap(map, fresh, {
           preferNearCenter: true,
+          reservedLabels,
           avoidRectsPx,
           // 可选：给点图标再留一圈缓冲（像素）
           avoidSpacingPx: 1,
           // RB_SLU_15：在 padded layout window 中提前布局视口外 label。
           viewportPaddingPx: labelLayoutViewportPaddingPx,
-        });
+        })];
+        if (configRuntime) for (const req of fresh) {
+          const p = placed.find(item => item.id === req.id);
+          if (p) nativePlacementRef.current.set(req.id, { signature: signatures.get(req.id)!, placed: p, anchor: req.anchorLatLng, center: map.getCenter(), zoom: map.getZoom() });
+        }
+        livePlacementRef.current = declutterLabelRequests.some(req => req.runtimeStability?.enabled && req.runtimeStability.freezeDuringPan === false);
 
         const placedById = new Map<string, (typeof placed)[number]>();
         for (const p of placed) placedById.set(p.id, p);
@@ -3892,7 +3949,7 @@ export default function RuleDrivenLayer(props: Props) {
 
           // 不可放置/被隐藏 → 移除
           if (!p || p.hidden) {
-            if (parentBundle?.nativeSymbol && (parentBundle.nativeSymbol.visibility === 'withLabel' || p?.hideSymbol || p?.keepGeometry)) setNativeSymbolVisible(root, parentBundle, Boolean(p?.keepGeometry && !p?.hideSymbol), req.partIndex);
+            if (parentBundle?.nativeSymbol && (parentBundle.nativeSymbol.visibility === 'withLabel' || p?.hideSymbol || p?.keepGeometry)) setNativeSymbolVisible(root, parentBundle, Boolean(p?.keepGeometry && !p?.hideSymbol && !req.symbolDensityBlocked), req.partIndex);
             const row = lineAuditRows.get(req.featureUid ?? "");
             const polygonRow = polygonAuditRows.get(req.featureUid ?? "");
             if (row && p?.hidden) {
@@ -3926,9 +3983,9 @@ export default function RuleDrivenLayer(props: Props) {
           const anchorPx = map.latLngToContainerPoint(req.anchorLatLng);
           const shifted = L.point(anchorPx.x + p.dx, anchorPx.y + p.dy);
           const ll = map.containerPointToLatLng(shifted);
-          if (parentBundle?.nativeSymbol?.followLabelAnchor) {
+          if (parentBundle?.nativeSymbol?.followLabelAnchor && !req.symbolDensityBlocked) {
             setNativeSymbolVisible(root, parentBundle, true, req.partIndex);
-            placeNativeSymbol(map, parentBundle, ll, req.partIndex);
+            placeNativeSymbol(map, parentBundle, ll, req.partIndex, req.anchorLatLng);
           }
 
           const meta = declutterLabelMeta.get(req.id);
@@ -4194,6 +4251,20 @@ export default function RuleDrivenLayer(props: Props) {
             b.label.on('mouseover', () => setHoveredUid(uid));
             b.label.on('mouseout', () => setHoveredUid(value => value === uid ? null : value));
           }
+          const savedPlacement = nativePlacementRef.current.get(req.id);
+          if (savedPlacement && b.label) {
+            const element = (b.label as L.Marker).getElement?.();
+            const rect = element?.querySelector('span')?.getBoundingClientRect() ?? element?.getBoundingClientRect();
+            if (rect?.width && rect.height) {
+              const mapRect = map.getContainer().getBoundingClientRect(); const anchor = map.latLngToContainerPoint(savedPlacement.anchor);
+              let bounds = { x: rect.x - mapRect.x - anchor.x, y: rect.y - mapRect.y - anchor.y, w: rect.width, h: rect.height };
+              if (req.symbolBounds && !req.symbolDensityBlocked) {
+                const r = req.symbolBounds.radius; const x = savedPlacement.placed.dx + req.symbolBounds.offsetX - r; const y = savedPlacement.placed.dy + req.symbolBounds.offsetY - r;
+                const left = Math.min(bounds.x,x), top = Math.min(bounds.y,y); bounds = { x:left, y:top, w:Math.max(bounds.x+bounds.w,x+2*r)-left, h:Math.max(bounds.y+bounds.h,y+2*r)-top };
+              }
+              savedPlacement.size = bounds;
+            }
+          }
           const row = lineAuditRows.get(req.featureUid ?? "");
           if (row && b.label && root.hasLayer(b.label)) {
             row.displayed = true;
@@ -4293,6 +4364,8 @@ export default function RuleDrivenLayer(props: Props) {
     };
 
     refresh("initial");
+    let moveFrame = 0;
+    const refreshOnMove = () => { if (!livePlacementRef.current || moveFrame) return; moveFrame = requestAnimationFrame(() => { moveFrame = 0; refresh('move'); }); };
     const refreshOnMoveEnd = () => refresh("moveend");
     const refreshOnZoomStart = () => {
       labelZoomAnimatingRef.current = true;
@@ -4331,6 +4404,7 @@ export default function RuleDrivenLayer(props: Props) {
         LABEL_ZOOM_SETTLE_DELAY_MS,
       );
     };
+    map.on("move", refreshOnMove);
     map.on("moveend", refreshOnMoveEnd);
     map.on("zoomstart", refreshOnZoomStart);
     map.on("zoomend", refreshOnZoomEnd);
@@ -4344,6 +4418,8 @@ export default function RuleDrivenLayer(props: Props) {
       }
       labelZoomAnimatingRef.current = false;
       pendingZoomRefreshReasonRef.current = null;
+      cancelAnimationFrame(moveFrame);
+      map.off("move", refreshOnMove);
       map.off("moveend", refreshOnMoveEnd);
       map.off("zoomstart", refreshOnZoomStart);
       map.off("zoomend", refreshOnZoomEnd);
@@ -4365,6 +4441,7 @@ export default function RuleDrivenLayer(props: Props) {
     featureInteractionSuppressed,
     selectedFeature?.uid,
     hoveredUid,
+    searchFocusedUid,
     configRuntime,
   ]);
 

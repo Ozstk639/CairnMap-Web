@@ -16,6 +16,7 @@ import type { FeatureRecord } from '@/components/Rules/rendering/renderRules';
 import type { FeatureDisplayRuleDraft } from '@/components/Rules/rendering/display/displayTypes';
 import { WORKFLOW_EDITOR_SCHEMAS, projectRegistryScene, resolveClassificationDisplayName } from '@/components/Common/workflowEditorRegistry';
 import { resolveCardRegistryLayout } from '@/components/Rules/cardrules/cardRegistry';
+import { getFormatDef, type FeatureKey } from '@/components/Common/featureFormats';
 import cardLayoutsJson from '../../project-config/presets/core-structures/shared/card/cardLayouts.json';
 import workflowBlocksJson from '../../project-config/presets/core-structures/shared/workflow/workflowBlocks.json';
 import type {
@@ -89,7 +90,22 @@ function buildRegistries(workflows: CairnMapWorkflowConfig[]): ConfigRegistries 
   }
   const registeredWorkflowBlocks = textRegistry(workflowBlocks, 'workflow-block');
   for (const key of workflowComponentKeys) if (key && !registeredWorkflowBlocks.some((item) => item.id === key)) registeredWorkflowBlocks.push({ id: key, label: { zh: `${key} 工作流组件`, en: `${key} workflow component` } });
+  const optionSets = new Map<string, { id: string; label: LocalizedText; options: import('./types').SelectOption[] }>();
+  for (const config of listClassConfigs()) {
+    const definition = getFormatDef(config.sourceFeatureKey as FeatureKey);
+    for (const field of config.fields.filter(field => field.type === 'select')) {
+      const runtime = definition.fields.find(candidate => candidate.key === (field.sourceRuntimeField ?? field.key));
+      const options = field.options?.length ? field.options.map(option => ({ value: String(option.value), label: localized(option.label, String(option.value)) })) : runtime?.options?.map(option => ({ value: String(option.value), label: { zh: option.label, en: '' } })) ?? [];
+      optionSets.set(`v1-field-options:${config.classCode}:${field.key}`, { id: `v1-field-options:${config.classCode}:${field.key}`, label: localized(field.label, field.key), options });
+    }
+  }
+  for (const schema of WORKFLOW_EDITOR_SCHEMAS) for (const field of projectRegistryScene(schema, 'workflow').fields) if (field.selectSource) {
+    const configured = listClassConfigs().find(config => config.classCode === schema.match.classCode)?.fields.find(candidate => candidate.key === field.key || candidate.key === field.path);
+    const options = configured?.options?.map(option => ({ value: String(option.value), label: localized(option.label, String(option.value)) })) ?? optionSets.get(`v1-field-options:${schema.match.classCode}:${field.key}`)?.options ?? [];
+    if (!optionSets.has(field.selectSource)) optionSets.set(field.selectSource, { id: field.selectSource, label: { zh: field.label, en: '' }, options });
+  }
   return {
+    optionSets: [...optionSets.values()],
     cardLayouts: textRegistry(layouts, 'layout'),
     cardComponents: Object.keys(FEATURE_CARD_REGISTRY).map((key) => ({
       id: key,

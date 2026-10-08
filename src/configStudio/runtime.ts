@@ -25,6 +25,7 @@ import type {
 } from './types';
 import { isSafeWorkflowTarget, parseWorkflowExpression, workflowExpressionTokens, WORKFLOW_SYSTEM_TOKENS, PROTECTED_WORKFLOW_TARGETS, workflowOutputAssemblyOrder, workflowCaptureSlots, workflowDerivedPointTokens } from './workflowExpression';
 import { createBlankV32Package } from './v32Defaults';
+import { validateNativeStructure } from './nativeContractValidation';
 
 const GEOMETRIES: GeometryKind[] = ['Point', 'LineString', 'Polygon'];
 const SYSTEM_FIELD_KEYS = new Set([
@@ -176,13 +177,19 @@ export function resolveEffectiveFields(config: ConfigPackageV3, path: Classifica
   let inherited = true;
   for (const [index, node] of resolveCategoryNodes(config, path).entries()) {
     if (index > 0 && !inherited) values.clear();
+    if (index > 0) for (const [key,field] of values) if (field.inheritance === 'localOnly') values.delete(key);
     for (const field of node.fields) {
       const key = field.overrideOf || field.key;
-      values.set(key, { ...field, key });
+      if (values.get(key)?.inheritance === 'sealed') continue;
+      values.set(key, { ...field, key, ...(field.optionSource ? { options: config.registries.optionSets?.find(set => set.id === field.optionSource?.registryKey)?.options ?? field.options } : {}) });
     }
     inherited = inheritanceControls(node).fields;
   }
   return [...values.values()];
+}
+
+export function resolveWorkflowSelectOptions(config: ConfigPackageV3, control: Pick<WorkflowControl, 'options' | 'optionSource'>): SelectOption[] {
+  return control.optionSource ? config.registries.optionSets?.find(set => set.id === control.optionSource?.registryKey)?.options ?? [] : control.options ?? [];
 }
 
 function systemFieldDefinition(key: string): FieldDefinition {
@@ -228,6 +235,21 @@ export function resolveGeometryProfile(config: ConfigPackageV3, path: Classifica
   return resolveInheritedValue(config, path, 'display', (node) => node.geometryProfiles[geometry]);
 }
 
+export function resolveRenderExtensions(config: ConfigPackageV3, geometry: GeometryKind, local?: import('./types').RenderRuleExtensions): import('./types').RenderRuleExtensions {
+  const result = structuredClone(config.engine?.renderDefaults?.[geometry] ?? {});
+  for (const [key,value] of Object.entries(local ?? {})) {
+    if (value === undefined) continue;
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      const object = value as Record<string, unknown>;
+      if (object.mode === 'inherit') continue;
+      const previous = (result as Record<string, unknown>)[key];
+      const patch = Object.fromEntries(Object.entries(object).filter(([,item]) => item !== undefined && item !== 'inherit'));
+      (result as Record<string, unknown>)[key] = { ...(previous && typeof previous === 'object' ? previous : {}), ...patch };
+    } else (result as Record<string, unknown>)[key] = value;
+  }
+  return result;
+}
+
 export function resolveCardConfiguration(config: ConfigPackageV3, path: ClassificationPath): CardConfiguration | undefined {
   return resolveInheritedValue(config, path, 'card', (node) => node.card);
 }
@@ -262,6 +284,7 @@ function validateField(field: FieldDefinition, path: string, known: Set<string>,
   const rootKey = /^(?!tags\.)(?!extensions\.)[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)*$/;
   const nestedKey = /^(?:tags|extensions)\.[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)*$/;
   if (!(scope === 'root' ? rootKey.test(field.key) : nestedKey.test(field.key) && field.key.startsWith(`${scope}.`))) issue(issues, 'error', 'field-key-invalid', path, `字段路径 ${field.key || '（空）'} 必须与所属字段组一致。`, { field: field.key });
+  if (field.key === 'tags' || field.key === 'extensions') issue(issues, 'error', 'field-group-redefined', path, 'tags/extensions 是固定字段组，不能定义为普通字段或删除。');
   if (PROTECTED_FIELD_KEYS.has(field.key)) issue(issues, 'error', 'system-field-redefined', path, `系统字段 ${field.key} 不能在分类配置中重新定义。`, { field: field.key });
   if (known.has(field.key)) issue(issues, 'error', 'field-key-duplicate', path, `字段 ${field.key} 在同一分类节点中重复。`, { field: field.key });
   known.add(field.key);
@@ -272,7 +295,14 @@ function validateField(field: FieldDefinition, path: string, known: Set<string>,
     if (!option.value.trim() || optionValues.has(option.value)) issue(issues, 'error', 'field-option-invalid', path, '下拉选项的存储值不能为空且不能重复。', { field: field.key });
     optionValues.add(option.value);
   }
+  if (!isSafeWorkflowTarget(field.key)) issue(issues, 'error', 'field-key-unsafe', path, '字段路径包含不安全的属性名。');
   field.requiredWhen?.forEach((item, index) => validateCondition(item, `${path}/requiredWhen/${index}`, issues));
+  if (field.overrideOf && field.key !== field.overrideOf) issue(issues, 'error', 'field-override-key-invalid', path, '继承覆盖不能更改字段路径；请新增另一个字段。');
+  if (field.requiredWhen?.some(condition => condition.kind === 'zoomRange' || condition.kind === 'bboxArea')) issue(issues, 'error', 'field-required-context-unsupported', path, '条件必填使用字段条件；Zoom/面积条件属于显示规则。');
+  if (field.defaultValue !== undefined) {
+    const values = field.cardinality === 'multiple' && Array.isArray(field.defaultValue) ? field.defaultValue : [field.defaultValue];
+    if (field.cardinality === 'multiple' && !Array.isArray(field.defaultValue) || values.some(value => field.type === 'number' ? typeof value !== 'number' || !Number.isFinite(value) : field.type === 'boolean' ? typeof value !== 'boolean' : ['string','reference','enum'].includes(field.type) ? typeof value !== 'string' : false)) issue(issues, 'error', 'field-default-invalid', path, '默认值与字段类型/值数量不一致。');
+  }
 }
 
 function validateRenderColorBinding(binding: unknown, config: ConfigPackageV3, sourcePath: ClassificationPath, path: string, issues: ConfigValidationIssue[]): void {
@@ -360,6 +390,8 @@ function validateRuleLabel(
 function validateRuleExtensions(rule: ZoomPriorityRule, geometry: GeometryKind, rulePath: string, config: ConfigPackageV3, sourcePath: ClassificationPath, issues: ConfigValidationIssue[]): void {
   const extensions = rule.extensions;
   if (!extensions) return;
+  if (extensions.fallback?.whenRuleMissing && !['geometryOnly','hidden'].includes(extensions.fallback.whenRuleMissing)) issue(issues, 'error', 'fallback-rule-unsupported', rulePath, '原生规则缺失仅支持隐藏或通用几何；不支持旧规则或调试渲染器回退。');
+  if (extensions.fallback?.whenGeometryInvalid && extensions.fallback.whenGeometryInvalid !== 'skip') issue(issues, 'error', 'fallback-geometry-unsupported', rulePath, '无有效几何时只能跳过；错误标记和仅调试尚未实现，不能保存为有效配置。');
   const screen = extensions.screenGate;
   if (screen && screen.mode !== 'inherit' && screen.mode !== 'override') issue(issues, 'error', 'screen-gate-mode-invalid', rulePath, '屏幕阈值必须选择继承全局或本规则覆盖。');
   if (screen?.mode === 'override') {
@@ -493,7 +525,7 @@ function validateProfile(profile: GeometryProfile, geometry: GeometryKind, path:
     if (metric && !allowedMetrics(geometry).has(metric.kind)) issue(issues, 'error', 'dynamic-priority-metric-geometry-invalid', rulePath, `${metric.kind} 不适用于 ${geometry}。`);
     if (metric && (!Number.isFinite(metric.multiplier) || (metric.divisor !== undefined && (!Number.isFinite(metric.divisor) || metric.divisor === 0)) || (metric.min !== undefined && metric.max !== undefined && metric.min > metric.max))) issue(issues, 'error', 'dynamic-priority-invalid', rulePath, '动态优先级的倍率、除数或上下界无效。');
     if (metric?.kind === 'field' && !metric.field?.trim()) issue(issues, 'error', 'dynamic-priority-field-required', rulePath, '字段型动态优先级必须指定字段。');
-    validateRuleExtensions(rule, geometry, rulePath, config, sourcePath, issues);
+    validateRuleExtensions({ ...rule, extensions: resolveRenderExtensions(config, geometry, rule.extensions) }, geometry, rulePath, config, sourcePath, issues);
     const overrideIds = new Set<string>();
     for (const [overrideIndex, override] of (rule.conditionalOverrides ?? []).entries()) {
       const overridePath = `${rulePath}/conditionalOverrides/${override.id || overrideIndex + 1}`;
@@ -609,7 +641,7 @@ export function validateWorkflowOutput(output: WorkflowOutput, _outputIndex: num
   const base = `workflows/${workflow.id}/outputs/${output.id}`;
   if (!isContinuousPath(output.classification) || !hasCategoryNode(config, output.classification)) issue(issues, 'error', 'workflow-output-classification-invalid', base, '工作流输出必须选择存在且连续的目标分类。');
   if (!output.geometry.selected) issue(issues, 'error', 'workflow-output-geometry-required', base, '每个工作流输出必须选择固定绘制类型。');
-  else if (!resolveGeometryProfile(config, output.classification, output.geometry.selected)?.enabled) issue(issues, 'error', 'workflow-output-geometry-disabled', base, `输出分类没有启用 ${output.geometry.selected} 绘制类型。`);
+  else if (!listCategoryPaths(config, output.classification).some(path => !hasDescendants(config,path) && resolveGeometryProfile(config,path,output.geometry.selected)?.enabled)) issue(issues, 'error', 'workflow-output-geometry-disabled', base, `输出范围没有最终分类启用 ${output.geometry.selected} 绘制类型。`);
   const fields = new Set(resolveEffectiveFields(config, output.classification).map((field) => field.key));
   const tokens = new Set([...WORKFLOW_SYSTEM_TOKENS, ...workflow.outputs.flatMap((_, index) => WORKFLOW_SYSTEM_TOKENS.map((item) => `${item}_${index + 1}`)), ...slots, ...workflowDerivedPointTokens(workflow)]);
   const assignmentIds = new Set<string>();
@@ -641,7 +673,7 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
   try { workflowOutputAssemblyOrder(workflow); } catch (error) { issue(issues, 'error', 'workflow-output-dependency-invalid', base, error instanceof Error ? error.message : '输出依赖无效。'); }
   const checkIds = (items: Array<{ id: string }>, kind: string) => {
     const ids = new Set<string>();
-    for (const item of items) { if (!item.id?.trim() || ids.has(item.id)) issue(issues, 'error', 'workflow-id-invalid', base, `${kind}标识必须存在且不能重复。`); ids.add(item.id); }
+    for (const item of items ?? []) { if (!item.id?.trim() || ids.has(item.id)) issue(issues, 'error', 'workflow-id-invalid', base, `${kind}标识必须存在且不能重复。`); ids.add(item.id); }
   };
   checkIds(workflow.steps, '页面'); checkIds(workflow.outputs, '输出'); checkIds(controlsFor(workflow), '控件');
   if (workflow.mode === 'external') {
@@ -678,7 +710,8 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
   for (const step of workflow.steps) for (const point of step.drawing?.auxiliaryPoints ?? []) validateWorkflowValueCondition(point.when, allTokens, `${base}/steps/${step.id}/drawing/${point.id}`, issues);
   const validateOptions = (control: Pick<WorkflowControl, 'kind' | 'options'>, path: string) => {
     if (control.kind !== 'select') return;
-    const values = (control.options ?? []).map((option) => option.value);
+    const options = 'optionSource' in control ? resolveWorkflowSelectOptions(config, control as WorkflowControl) : control.options ?? [];
+    const values = options.map((option) => option.value);
     if (!values.length || values.some((value) => !value.trim()) || new Set(values).size !== values.length) issue(issues, 'error', 'workflow-select-options-invalid', path, '下拉选项必须具有非空且唯一的保存值。');
   };
   for (const step of workflow.steps) for (const control of step.controls ?? []) {
@@ -693,7 +726,7 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
     validateOptions(control, controlPath);
     if (control.rows !== undefined && (!Number.isInteger(control.rows) || control.rows < 1)) issue(issues, 'error', 'workflow-control-rows-invalid', controlPath, '输入行数必须为正整数。');
     if (control.defaultValue !== undefined) {
-      if (control.kind === 'number' && !Number.isFinite(Number(control.defaultValue)) || control.kind === 'toggle' && typeof control.defaultValue !== 'boolean' || control.kind === 'select' && !control.options?.some(option => option.value === control.defaultValue)) issue(issues, 'error', 'workflow-default-invalid', controlPath, '默认值与输入类型/选项不一致。');
+      if (control.kind === 'number' && !Number.isFinite(Number(control.defaultValue)) || control.kind === 'toggle' && typeof control.defaultValue !== 'boolean' || control.kind === 'select' && !resolveWorkflowSelectOptions(config, control).some(option => option.value === control.defaultValue)) issue(issues, 'error', 'workflow-default-invalid', controlPath, '默认值与输入类型/选项不一致。');
       if (control.kind === 'json') try { if (typeof control.defaultValue === 'string') JSON.parse(control.defaultValue); } catch { issue(issues, 'error', 'workflow-default-invalid', controlPath, '默认值必须为有效 JSON。'); }
     }
     if (control.kind === 'featureSearch' || control.kind === 'coarseSearch') validateSearch(control, config, controlPath, issues);
@@ -805,6 +838,7 @@ function validateEngine(config: ConfigPackageV3, issues: ConfigValidationIssue[]
   for (const [key, value] of Object.entries(engine.screenGateDefaults)) {
     if (value !== undefined && (!Number.isFinite(value) || Number(value) < 0)) issue(issues, 'error', 'screen-gate-default-invalid', `engine/screenGateDefaults/${key}`, '全局屏幕阈值必须是非负数。');
   }
+  for (const [key,value] of Object.entries(engine.paneDefaults)) if (!/^[A-Za-z][A-Za-z0-9_-]{0,79}$/.test(value)) issue(issues, 'error', 'pane-name-invalid', `engine/paneDefaults/${key}`, 'Pane 名称只能使用字母、数字、下划线或连字符。');
   for (const geometry of GEOMETRIES) {
     const baseline = engine.interactionBaselines[geometry];
     const baselinePath = `engine/interactionBaselines/${geometry}`;
@@ -883,6 +917,8 @@ function validateContextBindings(config: ConfigPackageV3, issues: ConfigValidati
 
 export function validateConfigPackage(config: ConfigPackageV3, mountedRecords: MountedFeatureRecord[] = []): ConfigValidationReport {
   const issues: ConfigValidationIssue[] = [];
+  const structure = validateNativeStructure(config);
+  if (structure.length) return { schemaVersion: 'cairnmap.config-validation-report.v3', valid: false, createdAt: new Date().toISOString(), issues: structure.map(item => ({ severity: 'error', code: 'native-contract-structure-invalid', ...item })) };
   if (config.schemaVersion !== 'cairnmap.config-package.v3') issue(issues, 'error', 'schema-version-invalid', 'manifest', '配置包不是 cairnmap.config-package.v3。');
   if (!isNativeConfigRevision(config.contractRevision)) issue(issues, 'error', 'contract-revision-invalid', 'manifest', '配置包必须使用 V3.2 原生契约 revision 5/6。');
   validateEngine(config, issues);
@@ -890,7 +926,7 @@ export function validateConfigPackage(config: ConfigPackageV3, mountedRecords: M
   if (!Number.isSafeInteger(config.revision) || config.revision < 1) issue(issues, 'error', 'revision-invalid', 'manifest', '包 revision 必须是正整数。');
   for (const [registryName, items] of Object.entries(config.registries)) {
     const ids = new Set<string>();
-    for (const item of items) {
+    for (const item of items ?? []) {
       if (!item.id || ids.has(item.id)) issue(issues, 'error', 'registry-id-invalid', `registries/${registryName}`, `${registryName} 中存在空或重复的注册表键。`);
       ids.add(item.id);
     }
@@ -899,6 +935,16 @@ export function validateConfigPackage(config: ConfigPackageV3, mountedRecords: M
   const paths = new Set<string>();
   for (const node of config.nodes) {
     const base = `nodes/${node.nodeId}`;
+    const parentScope = parentClassificationPath(node.path);
+    const inheritedFields = parentScope ? resolveEffectiveFields(config, parentScope) : [];
+    for (const field of node.fields) {
+      if (inheritedFields.some(inherited => inherited.key === (field.overrideOf ?? field.key) && inherited.inheritance === 'sealed')) issue(issues, 'error', 'field-sealed-override', base, `字段 ${field.key} 已锁定继承，不能覆盖。`);
+      if (field.optionSource && !config.registries.optionSets?.some(set => set.id === field.optionSource?.registryKey)) issue(issues, 'error', 'field-option-source-invalid', base, `字段 ${field.key} 的共享选项来源不存在。`);
+      if (field.reference) {
+        const target = { class: field.reference.classCode };
+        if (!hasCategoryNode(config,target) || !resolveSelectableFields(config,target).some(candidate => candidate.key === field.reference?.matchField)) issue(issues, 'error', 'field-reference-invalid', base, `字段 ${field.key} 的引用分类或匹配字段无效。`);
+      }
+    }
     const pathKey = classificationPathKey(node.path);
     if (nodeIds.has(node.nodeId)) issue(issues, 'error', 'node-id-duplicate', base, '分类节点 ID 重复。');
     nodeIds.add(node.nodeId);

@@ -236,6 +236,7 @@ const [measuringVariant, setMeasuringVariant] = useState<'full'|'workflow'>('ful
 const [workflowKey, setWorkflowKey] = useState<WorkflowKey>('railway');
 const [workflowRunning, setWorkflowRunning] = useState(false);
 const [nativeWorkflowSnapshot, setNativeWorkflowSnapshot] = useState<{config: ConfigPackageV3; workflow: WorkflowDefinition} | null>(null);
+const [nativeHostElement] = useState(() => document.createElement('div'));
 useEffect(() => { if (configRuntime && !workflowRunning && !configRuntime.workflows.some(workflow => workflow.id === workflowKey)) setWorkflowKey((configRuntime.workflows[0]?.id ?? 'railway') as WorkflowKey); }, [configRuntime, workflowRunning, workflowKey]);
 
 
@@ -5312,6 +5313,7 @@ const measuringWindowActions = (
 
   return (
     <>
+      {nativeWorkflowSnapshot ? createPortal(<NativeWorkflowHost key={nativeWorkflowSnapshot.workflow.id} config={nativeWorkflowSnapshot.config} workflow={nativeWorkflowSnapshot.workflow} bridge={workflowBridge} registry={legacyWorkflowRegistry} onCommit={commitNativeWorkflow} onExit={stopWorkflowToSelector} />, nativeHostElement) : null}
       {rightDockNode}
 
       {/* =========================
@@ -5626,7 +5628,7 @@ onChange={(e) => {
   onPointerDownCapture={(e) => e.stopPropagation()}
   onTouchStartCapture={(e) => e.stopPropagation()}
 >
-  {nativeWorkflowSnapshot ? (measureDropdownDesktop ? <NativeWorkflowHost key={nativeWorkflowSnapshot.workflow.id} config={nativeWorkflowSnapshot.config} workflow={nativeWorkflowSnapshot.workflow} bridge={workflowBridge} registry={legacyWorkflowRegistry} onCommit={commitNativeWorkflow} onExit={stopWorkflowToSelector} /> : null) : <WorkflowHost
+  {nativeWorkflowSnapshot ? (measureDropdownDesktop ? <div ref={node => { if (node && nativeHostElement.parentElement !== node) node.appendChild(nativeHostElement); }} /> : null) : <WorkflowHost
     workflowKey={workflowKey}
     bridge={workflowBridge}
     registry={workflowRegistry}
@@ -5942,7 +5944,7 @@ onChange={(e) => {
   onPointerDownCapture={(e) => e.stopPropagation()}
   onTouchStartCapture={(e) => e.stopPropagation()}
 >
-  {nativeWorkflowSnapshot ? (!measureDropdownDesktop ? <NativeWorkflowHost key={nativeWorkflowSnapshot.workflow.id} config={nativeWorkflowSnapshot.config} workflow={nativeWorkflowSnapshot.workflow} bridge={workflowBridge} registry={legacyWorkflowRegistry} onCommit={commitNativeWorkflow} onExit={stopWorkflowToSelector} /> : null) : <WorkflowHost
+  {nativeWorkflowSnapshot ? (!measureDropdownDesktop ? <div ref={node => { if (node && nativeHostElement.parentElement !== node) node.appendChild(nativeHostElement); }} /> : null) : <WorkflowHost
     workflowKey={workflowKey}
     bridge={workflowBridge}
     registry={workflowRegistry}

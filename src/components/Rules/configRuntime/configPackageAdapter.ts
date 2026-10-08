@@ -14,7 +14,8 @@ import type {
   RenderLabelVisualStyle,
   ZoomPriorityRule,
 } from '@/configStudio/types';
-import { resolveGeometryProfile, resolveZoomRule } from '@/configStudio/runtime';
+import { createDefaultGeometryProfile } from '@/configStudio/v32Defaults';
+import { resolveGeometryProfile, resolveZoomRule, resolveRenderExtensions } from '@/configStudio/runtime';
 import { buildV3CardSections } from '@/configStudio/V3CardRenderer';
 import type { FeatureStore } from '@/components/Rules/data/featureStore';
 import type { FeatureRecord, RenderContext, RenderRule } from '@/components/Rules/rendering/renderRules';
@@ -41,7 +42,7 @@ export function resolveConfigInteractionVisual(config: ConfigPackageV3, record: 
   const geometry = geometryFor(record);
   const profile = resolveGeometryProfile(config, pathFor(record), geometry);
   const active = profile ? activeRuleFor(profile, record, ctx) : undefined;
-  const visual: InteractionVisual = { enabled: false, strokeColor: '#000000', strokeWidth: 0, strokeOpacity: 0, ...config.engine?.interactionBaselines[geometry][state], ...active?.extensions?.interaction?.[state] };
+  const visual: InteractionVisual = { enabled: false, strokeColor: '#000000', strokeWidth: 0, strokeOpacity: 0, ...config.engine?.interactionBaselines[geometry][state], ...resolveRenderExtensions(config, geometry, active?.extensions).interaction?.[state] };
   if (visual.strokeColorBinding) visual.strokeColor = resolveColor(record, visual.strokeColorBinding, visual.strokeColor, store);
   return visual;
 }
@@ -481,7 +482,12 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
   const featureWorld = rawFeatureWorld ? normalizeRuleSourceWorldId(rawFeatureWorld) : activeWorld;
   if (featureWorld !== activeWorld) return null;
 
-  const active = activeRuleFor(profile, record, ctx);
+  let resolved = activeRuleFor(profile, record, ctx);
+  if (!resolved && resolveRenderExtensions(config, geometry).fallback?.whenRuleMissing === 'geometryOnly') {
+    const base = createDefaultGeometryProfile(geometry).zoomPriority.rules[0];
+    resolved = { ...base, label: base.label ? { ...base.label, visible: false } : undefined };
+  }
+  const active = resolved ? { ...resolved, extensions: resolveRenderExtensions(config, geometry, resolved.extensions) } : undefined;
   // A label is an optional part of a render rule.  Earlier r5 code returned
   // null for the *whole feature* when a rule intentionally hid/omitted its
   // label style, which is why a valid V3 polygon or line could disappear.
@@ -494,7 +500,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
     collision: { role: 'optional' as const, basePriority: 0, hideWhenColliding: true },
   };
   const nativeLabelStyle = label.style ?? { family: 'gm-outline' as const, size: 14 };
-  const pane = paneFor(config, geometry, active.extensions?.pane);
+  const pane = active.geometryStack.pane || paneFor(config, geometry, active.extensions?.pane);
   const triggers = profile.interaction?.triggers ?? {};
   const pathInteractive = (active.representation === 'point' && style.symbolVisibility === 'withLabel' && Boolean(triggers.label)) || (geometry === 'Polygon'
     ? Boolean(triggers.boundary || triggers.interior)
@@ -531,16 +537,16 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
   const fallback = active.extensions?.fallback;
   const labelText = active.extensions?.labelText;
   const ruleDisplayPriority = dynamicPriority(record, active);
-  const collisionPriority = config.contractRevision === 6
+  const collisionPriority = config.contractRevision === 6 && label.collision.compatibility !== 'r5DisplayPriority'
     ? dynamicPriority(record, { ...active, priority: { mode: 'add', base: label.collision.basePriority, metric: label.collision.metric } })
     : label.collision.basePriority + ruleDisplayPriority;
   const iconSource = style.icon ? String(featureValue(record, style.icon.source) ?? '').trim() : '';
   if (style.icon && !iconSource && style.icon.fallback === 'hide') return null;
   const pointPlan = style.icon && iconSource
-    ? { kind: 'icon' as const, iconUrlFrom: style.icon.source, iconSize: style.icon.size, iconAnchor: style.icon.anchor, pane, zIndexOffset: active.geometryStack.zLevel + ruleDisplayPriority }
+    ? { kind: 'icon' as const, iconUrlFrom: style.icon.source, iconSize: style.icon.size, iconAnchor: style.icon.anchor, pane, zIndexOffset: active.geometryStack.zLevel + (active.geometryStack.zIndexOffset ?? 0) + ruleDisplayPriority }
     : style.pointShape === 'circle' || !style.pointShape
-      ? { kind: 'circle' as const, radius: style.size ?? Math.max(4, Number(style.weight ?? 2) * 3), style: pathStyle, pane, zIndexOffset: active.geometryStack.zLevel + ruleDisplayPriority }
-      : { kind: 'shape' as const, shape: style.pointShape, radius: style.size ?? Math.max(4, Number(style.weight ?? 2) * 3), style: pathStyle, pane, zIndexOffset: active.geometryStack.zLevel + ruleDisplayPriority };
+      ? { kind: 'circle' as const, radius: style.size ?? Math.max(4, Number(style.weight ?? 2) * 3), style: pathStyle, pane, zIndexOffset: active.geometryStack.zLevel + (active.geometryStack.zIndexOffset ?? 0) + ruleDisplayPriority }
+      : { kind: 'shape' as const, shape: style.pointShape, radius: style.size ?? Math.max(4, Number(style.weight ?? 2) * 3), style: pathStyle, pane, zIndexOffset: active.geometryStack.zLevel + (active.geometryStack.zIndexOffset ?? 0) + ruleDisplayPriority };
   const selectedVisual = resolveConfigInteractionVisual(config, record, ctx, 'selected', store);
   const nativePointPlan = { ...pointPlan, screenOffsetPx: style.symbolOffsetPx, followLabelAnchor: style.symbolAnchor === 'label', visibility: style.symbolVisibility };
 
@@ -567,7 +573,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
               return format === 'floorLabel' ? fmtFloorLabel(value) : value;
             }
           }
-          return '';
+          return fallback?.whenNoLabelText === 'showID' ? String(featureValue(candidate, 'ID') ?? '') : fallback?.whenNoLabelText === 'showClassKind' ? [path.class,path.kind,path.skind,path.skind2].filter(Boolean).join('/') : fallback?.whenNoLabelText === 'placeholder' ? '—' : '';
         },
         ...(labelText?.maxChars !== undefined ? { maxChars: labelText.maxChars, abbreviation: { enabled: labelText.abbreviationEnabled !== false, maxChars: labelText.maxChars, suffix: labelText.suffix ?? '…' } } : {}),
         ...(labelText?.minChars !== undefined ? { minChars: labelText.minChars } : {}),
@@ -590,6 +596,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
           group: label.collision.collisionGroup ?? 'config-runtime',
           priority: collisionPriority,
           role: label.collision.role,
+          maxPerScreen: label.collision.densityLimit,
         },
       },
       labelClick: {
@@ -762,7 +769,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
         blocks: collisionExtensions?.blocks,
         allowOverlap: collisionExtensions?.allowOverlap,
         paddingPx: collisionExtensions?.paddingPx,
-        hidePolicy: collisionExtensions?.hidePolicy,
+        hidePolicy: collisionExtensions?.hidePolicy ?? (fallback?.whenCollisionFailed === 'forceShow' ? 'forceShow' : fallback?.whenCollisionFailed === 'abbreviate' ? 'abbreviateThenHide' : fallback?.whenCollisionFailed === 'showGeometryOnly' ? 'geometryOnly' : undefined),
       },
       density: {
         enabled: density?.mode === 'override',
@@ -831,7 +838,7 @@ export function resolveConfigRuntimeScreenGate(config: ConfigPackageV3 | undefin
   const profile = resolveGeometryProfile(config, pathFor(record), geometry);
   const active = profile ? activeRuleFor(profile, record, ctx) : undefined;
   if (!profile?.enabled || !active) return undefined;
-  const screen = active.extensions?.screenGate;
+  const screen = resolveRenderExtensions(config, geometry, active.extensions).screenGate;
   return {
     ...(geometry === 'Polygon' ? { minScreenAreaPx: screen?.mode === 'override' ? screen.minScreenAreaPx : config.engine.screenGateDefaults.polygonMinScreenAreaPx } : {}),
     ...(geometry === 'LineString' ? { minScreenLengthPx: screen?.mode === 'override' ? screen.minScreenLengthPx : config.engine.screenGateDefaults.lineMinScreenLengthPx } : {}),

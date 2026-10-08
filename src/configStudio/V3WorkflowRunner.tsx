@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { normalizeRuleSourceWorldId } from '@/components/Rules/data/ruleDataSources';
 import type { ClassificationPath, ConfigPackageV3, MountedFeatureRecord, SearchProfile, WorkflowControl, WorkflowDefinition, WorkflowGroupField, WorkflowStep } from './types';
-import { listCategoryPaths, normalizeSearchProfile, optionLabel, pathMatchesScope, readRecordPath, workflowPathLabel, hasCategoryNode, resolveGeometryProfile, resolveEffectiveFields } from './runtime';
+import { listCategoryPaths, normalizeSearchProfile, optionLabel, pathMatchesScope, readRecordPath, workflowPathLabel, hasCategoryNode, hasDescendants, resolveGeometryProfile, resolveEffectiveFields, resolveWorkflowSelectOptions } from './runtime';
 
 import { finalizeV3WorkflowRecord } from './workflowRecord';
 import { multipartGeometryFromSinglePath, validateMultipartGeometry, type MultipartCoord } from '../core/geometry/multipartGeometry';
@@ -90,7 +90,7 @@ export function evaluateV3WorkflowOutputs(workflow: WorkflowDefinition, slots: V
     const classification = resolvedClassification(output, options.classifications ?? {});
     const system = workflowOutputSystem(workflow, slots, { ...options, world }, output.id);
     for (const [otherIndex, result] of assembled) system[`ID_${otherIndex + 1}`] = result.record.ID ?? '';
-    if (options.config && (!hasCategoryNode(options.config, classification) || !pathMatchesScope(classification, output.classification) || !resolveGeometryProfile(options.config, classification, output.geometry.selected)?.enabled)) throw new Error(`输出 ${output.id} 的分类或几何无效。`);
+    if (options.config && (!hasCategoryNode(options.config, classification) || hasDescendants(options.config, classification) || !pathMatchesScope(classification, output.classification) || !resolveGeometryProfile(options.config, classification, output.geometry.selected)?.enabled)) throw new Error(`输出 ${output.id} 必须选择最终分类与有效几何。`);
     const record: Record<string, unknown> = { World: world, Class: classification.class, ...(classification.kind ? { Kind: classification.kind } : {}), ...(classification.skind ? { SKind: classification.skind } : {}), ...(classification.skind2 ? { SKind2: classification.skind2 } : {}) };
     const actor = String(slots.actor ?? '').trim(); if (actor) record.Creator = actor;
     for (const namespace of ['tags', 'extensions'] as const) {
@@ -147,7 +147,7 @@ export function findV3SearchCandidates(records: MountedFeatureRecord[], profile:
   }).slice(0, search.maxResults ?? 30).map((record, index) => ({ id: String(record.ID ?? index), display: displaySearchTemplate(search.displayTemplate ?? '{{ID}} ({{Name}})', record), returned: readRecordPath(record, search.returnField ?? 'ID'), record }));
 }
 
-export function validateV3WorkflowInputs(workflow: WorkflowDefinition, slots: V3WorkflowValueMap, steps = workflow.steps): V3WorkflowInputIssue[] {
+export function validateV3WorkflowInputs(workflow: WorkflowDefinition, slots: V3WorkflowValueMap, steps = workflow.steps, config?: ConfigPackageV3): V3WorkflowInputIssue[] {
   if (workflow.mode !== 'composed') return [];
   const issues: V3WorkflowInputIssue[] = [];
   for (const step of steps) if (step.kind === 'actor' && workflow.actor?.required !== false && empty(slots.actor)) issues.push({ stepId: step.id, message: '填写人为必填项。' });
@@ -162,7 +162,7 @@ export function validateV3WorkflowInputs(workflow: WorkflowDefinition, slots: V3
     if (!workflowConditionMatches(control.when, slots)) continue;
     const value = slots[control.slot ?? control.id];
     const report = (message: string) => issues.push({ stepId: step.id, controlId: control.id, message });
-    validateValue(control, value, report);
+    validateValue(config && control.kind === 'select' ? { ...control, options: resolveWorkflowSelectOptions(config, control) } : control, value, report);
     if (control.kind !== 'group') continue;
     const group = control.group; const scalar = group?.storage === 'scalar';
     const rows = Array.isArray(value) ? value : [];
@@ -255,9 +255,9 @@ function ControlInput({ control, value, onChange, config, records, world }: { co
   const common = { className: 'w-full rounded border px-2 py-1 text-sm', value: String(value ?? ''), placeholder: control.placeholder, onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => onChange(event.target.value) };
   if (control.kind === 'textarea' || control.kind === 'json') return <textarea {...common} rows={control.rows ?? (control.kind === 'json' ? 4 : 3)} placeholder={control.kind === 'json' ? '{ }' : control.placeholder} />;
   if (control.kind === 'toggle') return <ToggleInput value={value} onChange={onChange} />;
-  if (control.kind === 'select') return <select {...common}><option value="">请选择</option>{(control.options ?? []).map((item) => <option key={item.value} value={item.value}>{optionLabel(item)}</option>)}</select>;
+  if (control.kind === 'select') return <select {...common}><option value="">请选择</option>{resolveWorkflowSelectOptions(config, control).map((item) => <option key={item.value} value={item.value}>{optionLabel(item)}</option>)}</select>;
   if (control.kind === 'classificationPicker') {
-    const options = listCategoryPaths(config, control.classificationScope ?? { class: '' }).filter((path) => pathMatchesScope(path, control.classificationScope ?? { class: '' }));
+    const options = listCategoryPaths(config, control.classificationScope ?? { class: '' }).filter((path) => !hasDescendants(config, path) && pathMatchesScope(path, control.classificationScope ?? { class: '' }));
     return <select className="w-full rounded border px-2 py-1 text-sm" value={String(value ?? '')} onChange={(event) => onChange(event.target.value)}><option value="">请选择分类</option>{options.map((path) => <option key={encodePath(path)} value={encodePath(path)}>{workflowPathLabel(config, path)}</option>)}</select>;
   }
   if (control.kind === 'featureSearch' || control.kind === 'coarseSearch') return <FeatureSearchInput profile={control.search} records={records} value={value} onChange={onChange} placeholder={control.placeholder} world={world} />;
@@ -317,7 +317,7 @@ export function V3WorkflowRunner({ config, workflow, records = [], worldId, init
     catch (error) { setGeometryErrors(current => ({ ...current, [outputId]: error instanceof Error ? error.message : '几何无效。' })); }
   };
   const next = () => {
-    const issues = validateV3WorkflowInputs(workflow, slots, [step]);
+    const issues = validateV3WorkflowInputs(workflow, slots, [step], config);
     if (step.kind === 'geometry') {
       const error = geometryErrors[step.outputId!] || validateMultipartGeometry(multipartGeometryFromSinglePath(step.geometry![0], coordinates[step.outputId!] ?? []));
       if (error) issues.push({ stepId: step.id, message: error });
@@ -331,7 +331,7 @@ export function V3WorkflowRunner({ config, workflow, records = [], worldId, init
       const error = geometryErrors[output.id] || validateMultipartGeometry(multipartGeometryFromSinglePath(output.geometry.selected, coordinates[output.id] ?? []));
       return error ? [{ message: `输出 ${output.id}：${error}` }] : [];
     });
-    const issues = [...validateV3WorkflowInputs(workflow, slots), ...geometryIssues, ...(previewState.error ? [{ message: previewState.error }] : []), ...validateV3WorkflowRecords(config, workflow, previewState.outputs)];
+    const issues = [...validateV3WorkflowInputs(workflow, slots, workflow.steps, config), ...geometryIssues, ...(previewState.error ? [{ message: previewState.error }] : []), ...validateV3WorkflowRecords(config, workflow, previewState.outputs)];
     setInputIssues(issues);
     if (issues.length) return;
     savingRef.current = true; setSaving(true);
