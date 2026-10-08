@@ -6,6 +6,7 @@ import type {
   ContextBinding,
   GeometryKind,
   InteractionVisual,
+  InteractionState,
   LabelStyleFamily,
   RenderColorBinding,
   RenderDashPreset,
@@ -34,6 +35,15 @@ export type ConfigRuntimeScreenGate = {
 
 function geometryFor(record: FeatureRecord): GeometryKind {
   return record.type === 'Points' ? 'Point' : record.type === 'Polyline' ? 'LineString' : 'Polygon';
+}
+
+export function resolveConfigInteractionVisual(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderContext, state: InteractionState, store?: FeatureStore): InteractionVisual {
+  const geometry = geometryFor(record);
+  const profile = resolveGeometryProfile(config, pathFor(record), geometry);
+  const active = profile ? activeRuleFor(profile, record, ctx) : undefined;
+  const visual: InteractionVisual = { enabled: false, strokeColor: '#000000', strokeWidth: 0, strokeOpacity: 0, ...config.engine?.interactionBaselines[geometry][state], ...active?.extensions?.interaction?.[state] };
+  if (visual.strokeColorBinding) visual.strokeColor = resolveColor(record, visual.strokeColorBinding, visual.strokeColor, store);
+  return visual;
 }
 
 function pathFor(record: FeatureRecord): RuntimePath {
@@ -531,7 +541,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
     : style.pointShape === 'circle' || !style.pointShape
       ? { kind: 'circle' as const, radius: style.size ?? Math.max(4, Number(style.weight ?? 2) * 3), style: pathStyle, pane, zIndexOffset: active.geometryStack.zLevel + ruleDisplayPriority }
       : { kind: 'shape' as const, shape: style.pointShape, radius: style.size ?? Math.max(4, Number(style.weight ?? 2) * 3), style: pathStyle, pane, zIndexOffset: active.geometryStack.zLevel + ruleDisplayPriority };
-  const selectedVisual = config.engine.interactionBaselines[geometry].selected;
+  const selectedVisual = resolveConfigInteractionVisual(config, record, ctx, 'selected', store);
   const nativePointPlan = { ...pointPlan, screenOffsetPx: style.symbolOffsetPx, followLabelAnchor: style.symbolAnchor === 'label', visibility: style.symbolVisibility };
 
   return {
@@ -590,6 +600,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
         highlightPathStyle: interactionVisualToPathStyle(selectedVisual),
         highlightPointStyle: interactionVisualToPathStyle(selectedVisual),
         pointPinStyleKey: 'pin-blue',
+        nativeVisual: selectedVisual,
         openCard: true,
         geom: { point: geometry === 'Point' && pathInteractive, path: geometry !== 'Point' && pathInteractive },
       },
@@ -783,9 +794,9 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
       } : undefined,
       interaction: {
         hover: {
-          raiseZIndex: config.engine.interactionBaselines[geometry].hover.enabled && Number(config.engine.interactionBaselines[geometry].hover.zIndexOffset ?? 0) > 0,
-          showLabel: config.engine.interactionBaselines[geometry].hover.enabled && config.engine.interactionBaselines[geometry].hover.forceShowLabel !== false,
-          highlightGeometry: config.engine.interactionBaselines[geometry].hover.enabled,
+          raiseZIndex: resolveConfigInteractionVisual(config, record, ctx, 'hover', store).enabled && Number(resolveConfigInteractionVisual(config, record, ctx, 'hover', store).zIndexOffset ?? 0) > 0,
+          showLabel: resolveConfigInteractionVisual(config, record, ctx, 'hover', store).enabled && resolveConfigInteractionVisual(config, record, ctx, 'hover', store).forceShowLabel !== false,
+          highlightGeometry: resolveConfigInteractionVisual(config, record, ctx, 'hover', store).enabled,
         },
         selected: {
           forceShowGeometry: selectedVisual.enabled,
@@ -794,19 +805,19 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
           zIndexOverride: selectedVisual.enabled ? selectedVisual.zIndexOffset : undefined,
         },
         searchResult: {
-          forceShowLabel: config.engine.interactionBaselines[geometry].searchResult.enabled && config.engine.interactionBaselines[geometry].searchResult.forceShowLabel !== false,
-          pulseSymbol: config.engine.interactionBaselines[geometry].searchResult.enabled,
-          priorityOverride: config.engine.interactionBaselines[geometry].searchResult.enabled ? config.engine.interactionBaselines[geometry].searchResult.labelPriority : undefined,
+          forceShowLabel: resolveConfigInteractionVisual(config, record, ctx, 'searchResult', store).enabled && resolveConfigInteractionVisual(config, record, ctx, 'searchResult', store).forceShowLabel !== false,
+          pulseSymbol: resolveConfigInteractionVisual(config, record, ctx, 'searchResult', store).enabled,
+          priorityOverride: resolveConfigInteractionVisual(config, record, ctx, 'searchResult', store).enabled ? resolveConfigInteractionVisual(config, record, ctx, 'searchResult', store).labelPriority : undefined,
         },
         editing: {
-          forceShowVertices: config.engine.interactionBaselines[geometry].editing.enabled,
-          forceShowLabel: config.engine.interactionBaselines[geometry].editing.enabled && config.engine.interactionBaselines[geometry].editing.forceShowLabel !== false,
-          renderDraftStyle: config.engine.interactionBaselines[geometry].editing.enabled,
-          priorityOverride: config.engine.interactionBaselines[geometry].editing.enabled ? config.engine.interactionBaselines[geometry].editing.labelPriority : undefined,
+          forceShowVertices: resolveConfigInteractionVisual(config, record, ctx, 'editing', store).enabled,
+          forceShowLabel: resolveConfigInteractionVisual(config, record, ctx, 'editing', store).enabled && resolveConfigInteractionVisual(config, record, ctx, 'editing', store).forceShowLabel !== false,
+          renderDraftStyle: resolveConfigInteractionVisual(config, record, ctx, 'editing', store).enabled,
+          priorityOverride: resolveConfigInteractionVisual(config, record, ctx, 'editing', store).enabled ? resolveConfigInteractionVisual(config, record, ctx, 'editing', store).labelPriority : undefined,
         },
         deletionMarked: {
-          renderDeleteStyle: config.engine.interactionBaselines[geometry].deletionMarked.enabled,
-          forceShowLabel: config.engine.interactionBaselines[geometry].deletionMarked.enabled && config.engine.interactionBaselines[geometry].deletionMarked.forceShowLabel !== false,
+          renderDeleteStyle: resolveConfigInteractionVisual(config, record, ctx, 'deletionMarked', store).enabled,
+          forceShowLabel: resolveConfigInteractionVisual(config, record, ctx, 'deletionMarked', store).enabled && resolveConfigInteractionVisual(config, record, ctx, 'deletionMarked', store).forceShowLabel !== false,
         },
       },
     },

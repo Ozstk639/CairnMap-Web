@@ -1199,6 +1199,19 @@ export function createConfigPackageFromCurrentProject(): ConfigPackageV3 {
   // Frozen V1 uses Leaflet's natural symbol/path hit area. Extra tolerance
   // stays editable, but must not silently widen the migrated project.
   for (const baseline of Object.values(engine.interactionBaselines)) baseline.hitTolerancePx = 0;
+  for (const [geometry, baseline] of Object.entries(engine.interactionBaselines)) {
+    baseline.hover.enabled = false;
+    baseline.editing.enabled = false;
+    baseline.deletionMarked.enabled = false;
+    baseline.selected = geometry === 'Point'
+      ? { enabled: true, strokeColor: '#111827', strokeWidth: 1, strokeOpacity: 1, fillColor: '#3b82f6', fillOpacity: 1, symbol: { kind: 'pin', size: [26, 26] }, forceShowLabel: true, labelPriority: 10000, zIndexOffset: 10000 }
+      : { enabled: true, strokeColor: '#60a5fa', strokeWidth: 3, strokeOpacity: 1, fillOpacity: 0, dashArray: '8 6', forceShowLabel: true, labelPriority: 10000, zIndexOffset: 10000 };
+    baseline.searchResult = { ...clone(baseline.selected), labelPriority: 9500 };
+  }
+  for (const node of nodes.filter(item => item.path.class === 'ROD')) for (const profile of Object.values(node.geometryProfiles)) for (const rule of profile?.zoomPriority.rules ?? []) {
+    const road = { strokeColor: '#2196F3', strokeColorBinding: { mode: 'field' as const, field: 'color', fallbackColor: '#2196F3' }, strokeWidth: 6, dashArray: '', outline: { color: '#ffffff', width: 9, opacity: 0.85 } };
+    rule.extensions = { ...rule.extensions, interaction: { selected: road, searchResult: clone(road) } };
+  }
   return {
     schemaVersion: 'cairnmap.config-package.v3',
     contractRevision: 6,

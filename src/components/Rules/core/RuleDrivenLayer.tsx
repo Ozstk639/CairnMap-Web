@@ -104,7 +104,7 @@ import { filterRecordsByRuleButtons } from "@/components/Rules/ButtonRule/button
 import { setRuleSearchPool } from "@/components/Rules/search/ruleSearchRegistry";
 import { useRuleDataStore } from "@/store/ruleDataStore";
 import { useLoadingStore } from "@/store/loadingStore";
-import { resolveConfigRuntimeCardOverride, resolveConfigRuntimeContextForHost, resolveConfigRuntimeContextForRecord, resolveConfigRuntimeRule, resolveConfigRuntimeScreenGate, resolveConfigRuntimeStackOrder } from "@/components/Rules/configRuntime/configPackageAdapter";
+import { resolveConfigInteractionVisual, resolveConfigRuntimeCardOverride, resolveConfigRuntimeContextForHost, resolveConfigRuntimeContextForRecord, resolveConfigRuntimeRule, resolveConfigRuntimeScreenGate, resolveConfigRuntimeStackOrder } from "@/components/Rules/configRuntime/configPackageAdapter";
 import type { ConfigPackageV3 } from "@/configStudio/types";
 
 const FLOOR_VIEW_MIN_LEVEL = Math.max(0, DEFAULT_FLOOR_VIEW.minLevel);
@@ -1695,6 +1695,10 @@ export default function RuleDrivenLayer(props: Props) {
 
   const rootRef = useRef<L.LayerGroup | null>(null);
   const highlightGroupRef = useRef<L.LayerGroup | null>(null);
+  const stateVisualGroupRef = useRef<L.LayerGroup>(L.layerGroup());
+  const stateHoverBoundRef = useRef<WeakSet<L.Layer>>(new WeakSet());
+  const [hoveredUid, setHoveredUid] = useState<string | null>(null);
+  const transientInteractionRef = useRef({ editing: new Set<string>(), deletion: new Set<string>() });
 
   const [selectedFeature, setSelectedFeature] = useState<FeatureRecord | null>(
     null,
@@ -2103,6 +2107,14 @@ export default function RuleDrivenLayer(props: Props) {
       }
       setTempMountedPictureEntries(worldId, tempPicturesById);
       const excludeIds = new Set<string>([...overrideIds, ...deleteIds]);
+      transientInteractionRef.current = { editing: overrideIds, deletion: deleteIds };
+      if (configRuntime) for (const id of deleteIds) {
+        const source = dataset?.features?.find((item: any) => String(item.ID ?? '') === id);
+        if (source) {
+          const sample = buildRecordsFromJson([source] as any[], `rule-world:${worldId}`)[0];
+          if (sample && configRuntime.engine?.interactionBaselines[sample.type === 'Points' ? 'Point' : sample.type === 'Polyline' ? 'LineString' : 'Polygon'].deletionMarked.enabled) excludeIds.delete(id);
+        }
+      }
 
       // (A) 当前 world 的 Rule 数据集（由 ruleDataStore 负责版本校验与缓存）
       const datasetItems = Array.isArray(dataset?.features)
@@ -2157,7 +2169,7 @@ export default function RuleDrivenLayer(props: Props) {
     return () => {
       cancelled = true;
     };
-  }, [mapReady, worldId, worldDataset, ensureWorldLoaded, tempSourceVersion, runtimeDataset, disableTransientSources]);
+  }, [mapReady, worldId, worldDataset, ensureWorldLoaded, tempSourceVersion, runtimeDataset, disableTransientSources, configRuntime]);
 
   // =========================
   // SearchBar -> RuleDrivenLayer：按 uid 打开信息卡
@@ -2419,15 +2431,18 @@ export default function RuleDrivenLayer(props: Props) {
     if (!highlightGroupRef.current) highlightGroupRef.current = L.layerGroup();
     highlightGroupRef.current.clearLayers();
 
-    const hl = createHighlightLayerForFeature({
+    const hl = configRuntime ? null : createHighlightLayerForFeature({
       r,
       projection,
       highlightStyleKey: (plan as any)?.highlightStyleKey,
       highlightPathStyle: (plan as any)?.highlightPathStyle,
       highlightPointStyle: (plan as any)?.highlightPointStyle,
       pointPinStyleKey: (plan as any)?.pointPinStyleKey,
+      nativeVisual: plan.nativeVisual,
     });
     if (hl) highlightGroupRef.current.addLayer(hl);
+
+    if (configRuntime) setSelectedFeature(r);
 
     if ((plan as any)?.openCard) {
       setSelectedFeature(r);
@@ -2966,12 +2981,15 @@ export default function RuleDrivenLayer(props: Props) {
         assistPickActive ? "assist" : "",
         deletePickActive ? "delete" : "",
         selectedFeature?.uid ?? "",
+        hoveredUid ?? '',
       ].join("|");
 
       if (labelZoomAnimatingRef.current && reason !== "initial") {
         pendingZoomRefreshReasonRef.current = reason;
         return;
       }
+      stateVisualGroupRef.current.clearLayers();
+      if (configRuntime && !root.hasLayer(stateVisualGroupRef.current)) root.addLayer(stateVisualGroupRef.current);
 
       // RB_SLU_24: do not skip moveend refreshes. Line labels depend on the
       // current visible path segment, collision field and container geometry;
@@ -3173,8 +3191,13 @@ export default function RuleDrivenLayer(props: Props) {
         }
 
         const interactionReasons: DisplayInteractionReason[] = [];
-        const isSelectedFeature = selectedFeature?.uid === r.uid;
-        const isSearchFocus = pendingOpenUidRef.current === r.uid;
+        const activeState = (state: import('@/configStudio/types').InteractionState) => !configRuntime || resolveConfigInteractionVisual(configRuntime, r, context, state, store).enabled;
+        const isSelectedFeature = selectedFeature?.uid === r.uid && activeState('selected');
+        const isSearchFocus = pendingOpenUidRef.current === r.uid && activeState('searchResult');
+        const isHovered = hoveredUid === r.uid && activeState('hover');
+        const recordId = String(r.featureInfo.ID ?? '');
+        const isEditing = transientInteractionRef.current.editing.has(recordId) && activeState('editing');
+        const isDeletionMarked = transientInteractionRef.current.deletion.has(recordId) && activeState('deletionMarked');
         if (isSelectedFeature) interactionReasons.push("selected");
         if (isSearchFocus) interactionReasons.push("searchResult");
 
@@ -3184,6 +3207,9 @@ export default function RuleDrivenLayer(props: Props) {
         const baseDisplayPlan = resolveFeatureDisplayPlan(r, rule, context, store, {
           selected: isSelectedFeature,
           searchResult: isSearchFocus,
+          hovered: isHovered,
+          editing: isEditing,
+          deletionMarked: isDeletionMarked,
         });
         const displayPlan = isNativeConfigRevision(configRuntime?.contractRevision)
           ? baseDisplayPlan
@@ -3471,6 +3497,22 @@ export default function RuleDrivenLayer(props: Props) {
         }
 
         const nativeBundle = cacheRef.current.get(r.uid);
+        if (configRuntime && nativeBundle) {
+          const bindHover = (layer: L.Layer) => {
+            if (stateHoverBoundRef.current.has(layer)) return;
+            stateHoverBoundRef.current.add(layer);
+            layer.on('mouseover', () => setHoveredUid(r.uid));
+            layer.on('mouseout', () => setHoveredUid(value => value === r.uid ? null : value));
+            if (layer instanceof L.LayerGroup) layer.eachLayer(bindHover);
+          };
+          [nativeBundle.main, nativeBundle.hitProxy, nativeBundle.label].filter(Boolean).forEach(layer => bindHover(layer!));
+          const state = isDeletionMarked ? 'deletionMarked' : isEditing ? 'editing' : isSelectedFeature ? 'selected' : isSearchFocus ? 'searchResult' : isHovered ? 'hover' : undefined;
+          if (state) {
+            const visual = resolveConfigInteractionVisual(configRuntime, r, context, state, store);
+            const overlay = createHighlightLayerForFeature({ r, projection, nativeVisual: visual });
+            if (overlay) stateVisualGroupRef.current.addLayer(overlay);
+          }
+        }
         const nativeSymbolPlan = typeof rule.symbol?.point === 'function' ? rule.symbol.point(r, context, store) : rule.symbol?.point;
         if (nativeBundle && configRuntime && (r.type === 'Points' || displayPlan.geometry.render === 'point')) {
           nativeBundle.nativeSymbol = nativeSymbolPlan as LayerBundle['nativeSymbol'];
@@ -4146,6 +4188,12 @@ export default function RuleDrivenLayer(props: Props) {
             root.addLayer(b.label);
             fadeInLabelLayer(b.label);
           }
+          if (configRuntime && b.label && !stateHoverBoundRef.current.has(b.label)) {
+            const uid = req.featureUid ?? '';
+            stateHoverBoundRef.current.add(b.label);
+            b.label.on('mouseover', () => setHoveredUid(uid));
+            b.label.on('mouseout', () => setHoveredUid(value => value === uid ? null : value));
+          }
           const row = lineAuditRows.get(req.featureUid ?? "");
           if (row && b.label && root.hasLayer(b.label)) {
             row.displayed = true;
@@ -4316,6 +4364,7 @@ export default function RuleDrivenLayer(props: Props) {
     deletePickActive,
     featureInteractionSuppressed,
     selectedFeature?.uid,
+    hoveredUid,
     configRuntime,
   ]);
 

@@ -369,6 +369,12 @@ function validateRuleExtensions(rule: ZoomPriorityRule, geometry: GeometryKind, 
     if (geometry !== 'LineString' && screen.minScreenLengthPx !== undefined) issue(issues, 'warning', 'screen-gate-length-ignored', rulePath, '屏幕长度阈值只适用于线要素。');
   }
   if (extensions.hitTolerancePx !== undefined && (!Number.isFinite(extensions.hitTolerancePx) || extensions.hitTolerancePx < 0 || extensions.hitTolerancePx > 80)) issue(issues, 'error', 'hit-tolerance-invalid', rulePath, '点击容差必须介于 0 到 80 像素。');
+  for (const [state, override] of Object.entries(extensions.interaction ?? {})) {
+    if (!['hover','selected','searchResult','editing','deletionMarked'].includes(state)) issue(issues, 'error', 'interaction-state-invalid', rulePath, '交互状态无效。');
+    const visual = { ...config.engine?.interactionBaselines[geometry][state as import('./types').InteractionState], ...override } as import('./types').InteractionVisual;
+    validateInteractionShape(visual, `${rulePath}/interaction/${state}`, issues);
+    if (visual.strokeColorBinding) validateRenderColorBinding(visual.strokeColorBinding, config, sourcePath, `${rulePath}/interaction/${state}/strokeColorBinding`, issues);
+  }
   if (extensions.pane && !['auto', 'overlay', 'overlay-top', 'point', 'point-top'].includes(extensions.pane)) issue(issues, 'error', 'pane-invalid', rulePath, 'Pane 覆盖值无效。');
   const labelText = extensions.labelText;
   if (labelText?.maxChars !== undefined && (!Number.isInteger(labelText.maxChars) || labelText.maxChars < 1)) issue(issues, 'error', 'label-max-chars-invalid', rulePath, 'Label 最大字符数必须是正整数。');
@@ -745,6 +751,13 @@ function aggregateMountedIssues(records: MountedFeatureRecord[], config: ConfigP
   });
 }
 
+function validateInteractionShape(visual: import('./types').InteractionVisual, path: string, issues: ConfigValidationIssue[]): void {
+  if (typeof visual.enabled !== 'boolean' || !visual.strokeColor?.trim() || !Number.isFinite(visual.strokeWidth) || visual.strokeWidth < 0 || !Number.isFinite(visual.strokeOpacity) || visual.strokeOpacity < 0 || visual.strokeOpacity > 1 || visual.fillOpacity !== undefined && (!Number.isFinite(visual.fillOpacity) || visual.fillOpacity < 0 || visual.fillOpacity > 1)) issue(issues, 'error', 'interaction-visual-invalid', path, '交互颜色、线宽和透明度无效。');
+  if (visual.symbol && (!['circle','pin'].includes(visual.symbol.kind) || visual.symbol.radius !== undefined && (!Number.isFinite(visual.symbol.radius) || visual.symbol.radius <= 0) || visual.symbol.size?.some(value => !Number.isFinite(value) || value <= 0))) issue(issues, 'error', 'interaction-symbol-invalid', path, '交互符号类型、半径和尺寸无效。');
+  if (visual.outline && (!visual.outline.color?.trim() || !Number.isFinite(visual.outline.width) || visual.outline.width < 0 || !Number.isFinite(visual.outline.opacity) || visual.outline.opacity < 0 || visual.outline.opacity > 1)) issue(issues, 'error', 'interaction-outline-invalid', path, '外描边参数无效。');
+  if (visual.dashArray && !/^\d+(?:\.\d+)?(?:[ ,]+\d+(?:\.\d+)?)*$/.test(visual.dashArray)) issue(issues, 'error', 'interaction-dash-invalid', path, '虚线必须为非负数字序列。');
+}
+
 function validateEngine(config: ConfigPackageV3, issues: ConfigValidationIssue[]): void {
   const engine = config.engine;
   if (!engine) {
@@ -776,6 +789,7 @@ function validateEngine(config: ConfigPackageV3, issues: ConfigValidationIssue[]
     for (const state of ['hover', 'selected', 'searchResult', 'editing', 'deletionMarked'] as const) {
       const visual = baseline[state];
       const path = `${baselinePath}/${state}`;
+      if (visual) validateInteractionShape(visual, path, issues);
       if (!visual || typeof visual.enabled !== 'boolean' || !String(visual.strokeColor ?? '').trim() || !Number.isFinite(visual.strokeWidth) || visual.strokeWidth < 0 || !Number.isFinite(visual.strokeOpacity) || visual.strokeOpacity < 0 || visual.strokeOpacity > 1) {
         issue(issues, 'error', 'interaction-visual-invalid', path, '交互视觉必须包含启用状态、描边颜色、非负描边粗细和 0–1 描边透明度。');
       }

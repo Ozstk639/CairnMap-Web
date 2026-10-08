@@ -1,4 +1,5 @@
 import * as L from 'leaflet';
+import type { InteractionVisual } from '@/configStudio/types';
 import type { DynmapProjection } from '@/lib/DynmapProjection';
 import type { FeatureRecord } from '@/components/Rules/rendering/renderRules';
 import { makeLabelDivIcon, type LabelPlacement, type LabelStyleKey, type LabelStyleKeyInput } from '@/components/Rules/rendering/labelStyles';
@@ -17,6 +18,7 @@ export type LabelClickPlan = {
   /** Native V3.2 package-level selected-state baseline for points. */
   highlightPointStyle?: L.PathOptions;
   pointPinStyleKey?: PointPinStyleKey;
+  nativeVisual?: InteractionVisual;
   openCard?: boolean;
 
   /**
@@ -159,8 +161,29 @@ export function createHighlightLayerForFeature(args: {
   highlightPathStyle?: L.PathOptions;
   highlightPointStyle?: L.PathOptions;
   pointPinStyleKey?: PointPinStyleKey;
+  nativeVisual?: InteractionVisual;
 }): L.Layer | null {
   const { r, projection, highlightStyleKey, highlightPathStyle, highlightPointStyle, pointPinStyleKey } = args;
+  const visual = args.nativeVisual;
+  if (visual && !visual.enabled) return null;
+  if (visual) {
+    const style: L.PathOptions = { color: visual.strokeColor, weight: visual.strokeWidth, opacity: visual.strokeOpacity, fillColor: visual.fillColor, fillOpacity: visual.fillOpacity ?? 0, dashArray: visual.dashArray, pane: 'ria-overlay-top', interactive: false, lineCap: 'round', lineJoin: 'round' };
+    if (r.type === 'Points' && r.p3) {
+      const ll = projection.locationToLatLng(r.p3.x, r.p3.y, r.p3.z);
+      if (visual.symbol?.kind === 'pin') {
+        const [w, h] = visual.symbol.size ?? [26, 26];
+        const escape = (value: string) => value.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+        const html = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z" fill="${escape(visual.fillColor ?? visual.strokeColor)}" fill-opacity="${visual.fillOpacity ?? 1}" stroke="${escape(visual.strokeColor)}" stroke-width="${visual.strokeWidth}" stroke-opacity="${visual.strokeOpacity}"/><circle cx="12" cy="10" r="2.6" fill="#ffffff" opacity="0.95"/></svg>`;
+        return L.marker(ll, { pane: 'ria-point-top', interactive: false, zIndexOffset: visual.zIndexOffset, icon: L.divIcon({ className: '', html, iconSize: [w, h], iconAnchor: [w / 2, h] }) });
+      }
+      return L.circleMarker(ll, { ...style, pane: 'ria-point-top', radius: visual.symbol?.radius ?? 8 });
+    }
+    if (!r.coords3?.length) return null;
+    const project = (p: { x: number; y: number; z: number }) => projection.locationToLatLng(p.x, p.y, p.z);
+    const points = r.multipartGeometry?.type === 'LineString' ? r.multipartGeometry.parts.map(part => part.map(project)) : r.multipartGeometry?.type === 'Polygon' ? r.multipartGeometry.parts.map(part => part.map(ring => ring.map(project))) : r.coords3.map(project);
+    const create = (options: L.PathOptions) => r.type === 'Polyline' ? L.polyline(points as any, options) : L.polygon(points as any, options);
+    return visual.outline ? L.layerGroup([create({ ...style, color: visual.outline.color, weight: visual.outline.width, opacity: visual.outline.opacity, fillOpacity: 0 }), create(style)]) : create(style);
+  }
 
   if (r.type === 'Points' && r.p3) {
     const ll = projection.locationToLatLng(r.p3.x, r.p3.y, r.p3.z);

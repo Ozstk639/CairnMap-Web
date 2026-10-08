@@ -395,6 +395,7 @@ export type RenderRuleExtensions = {
   density?: RenderDensityExtension;
   fallback?: RenderFallbackExtension;
   visibility?: RenderVisibilityExtension;
+  interaction?: Partial<Record<InteractionState, Partial<InteractionVisual>>>;
 };
 
 /** 区块 A：Leaflet pane / vector stacking order only. */
@@ -527,6 +528,8 @@ export type InteractionVisual = {
   labelPriority?: number;
   symbol?: { kind: 'circle' | 'pin'; radius?: number; size?: [number, number] };
   outline?: { color: string; width: number; opacity: number };
+  dashArray?: string;
+  strokeColorBinding?: RenderColorBinding;
 };
 export type GeometryInteractionBaseline = Record<InteractionState, InteractionVisual> & {
   hitTolerancePx: number;
