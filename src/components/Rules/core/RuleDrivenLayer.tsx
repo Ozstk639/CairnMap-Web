@@ -3938,6 +3938,8 @@ export default function RuleDrivenLayer(props: Props) {
                     : Number((req as any).rotateDeg ?? 0) || 0,
                 onClick: onLineTextClick,
                 cacheKeyHint: renderSessionKey,
+                offsetX: req.offsetX,
+                offsetY: req.offsetY,
               })
             : null;
           const glyphPathMarker = glyphResult?.marker ?? null;
@@ -3977,6 +3979,8 @@ export default function RuleDrivenLayer(props: Props) {
                       : Number((req as any).rotateDeg ?? 0) || 0,
                   onClick: onLineTextClick,
                   cacheKeyHint: renderSessionKey,
+                  offsetX: req.offsetX,
+                  offsetY: req.offsetY,
                 })
               : null;
           const textPathMarker = textPathResult?.marker ?? null;
