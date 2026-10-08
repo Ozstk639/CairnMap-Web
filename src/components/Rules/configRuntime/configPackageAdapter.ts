@@ -486,9 +486,9 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
   const nativeLabelStyle = label.style ?? { family: 'gm-outline' as const, size: 14 };
   const pane = paneFor(config, geometry, active.extensions?.pane);
   const triggers = profile.interaction?.triggers ?? {};
-  const pathInteractive = geometry === 'Polygon'
+  const pathInteractive = (active.representation === 'point' && style.symbolVisibility === 'withLabel' && Boolean(triggers.label)) || (geometry === 'Polygon'
     ? Boolean(triggers.boundary || triggers.interior)
-    : geometry === 'LineString' ? Boolean(triggers.line) : Boolean(triggers.point);
+    : geometry === 'LineString' ? Boolean(triggers.line) : Boolean(triggers.point));
   const stroke = resolveColor(record, style.stroke, '#334155', store);
   const fill = resolveColor(record, style.fill, stroke, store);
   const hitTolerancePx = active.extensions?.hitTolerancePx ?? config.engine.interactionBaselines[geometry].hitTolerancePx;
@@ -532,6 +532,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
       ? { kind: 'circle' as const, radius: style.size ?? Math.max(4, Number(style.weight ?? 2) * 3), style: pathStyle, pane, zIndexOffset: active.geometryStack.zLevel + ruleDisplayPriority }
       : { kind: 'shape' as const, shape: style.pointShape, radius: style.size ?? Math.max(4, Number(style.weight ?? 2) * 3), style: pathStyle, pane, zIndexOffset: active.geometryStack.zLevel + ruleDisplayPriority };
   const selectedVisual = config.engine.interactionBaselines[geometry].selected;
+  const nativePointPlan = { ...pointPlan, screenOffsetPx: style.symbolOffsetPx, followLabelAnchor: style.symbolAnchor === 'label', visibility: style.symbolVisibility };
 
   return {
     name: `config-v32:${path.class}:${geometry}:${active.id}`,
@@ -541,7 +542,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
     symbol: {
       pane,
       pathStyle,
-      point: pointPlan,
+      point: nativePointPlan,
       label: {
         enabled: label.visible,
         textFrom: (candidate: FeatureRecord) => {
@@ -568,9 +569,10 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
         ...(label.offsetY !== undefined ? { offsetY: label.offsetY } : {}),
         offsetX: label.offsetX ?? 0,
         screenOffsets: true,
-        // r5 deliberately does not synthesize a label-anchor decoration dot.
-        // Point visibility is the authored point render rule itself; legacy
-        // withDot/dotAnchorMode values remain import-only compatibility data.
+        candidatePlacement: anchor?.candidatePlacement,
+        ...(config.contractRevision === 6 && label.withDot ? { withDot: true, dotAnchorMode: label.dotAnchorMode ?? 'inline' } : {}),
+        // A decoration may accompany a genuine Point symbol in r6. Structures
+        // represented by points use the native symbol/Label coupling instead.
         styleKey: labelKey as any,
         declutter: {
           enabled: label.collision.hideWhenColliding,

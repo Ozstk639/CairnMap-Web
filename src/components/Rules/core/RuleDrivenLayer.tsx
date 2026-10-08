@@ -140,6 +140,11 @@ type Props = {
 const Y_FOR_DISPLAY = -64;
 
 type LayerBundle = {
+  nativeSymbol?: { screenOffsetPx?: { x: number; y: number }; followLabelAnchor?: boolean; visibility?: 'independent' | 'withLabel' };
+  nativeMainParts?: L.Layer[];
+  nativeHitParts?: L.Layer[];
+  nativeMainRoot?: L.Layer;
+  nativeHitRoot?: L.Layer;
   main: L.Layer;
   label?: L.Layer;
   partLabels?: Map<string, LayerBundle>;
@@ -156,6 +161,36 @@ type LayerBundle = {
   /** Present only when a Point feature owns multiple independently rendered markers. */
   pointSignature?: string;
 };
+
+function nativeSymbolParts(bundle: LayerBundle, proxy = false): L.Layer[] {
+  const layer = proxy ? bundle.hitProxy : bundle.main;
+  if (!layer) return [];
+  const key = proxy ? 'nativeHitParts' : 'nativeMainParts';
+  const rootKey = proxy ? 'nativeHitRoot' : 'nativeMainRoot';
+  if (bundle[rootKey] !== layer) { bundle[rootKey] = layer; bundle[key] = undefined; }
+  return bundle[key] ??= layer instanceof L.LayerGroup ? layer.getLayers() : [layer];
+}
+function placeNativeSymbol(map: L.Map, bundle: LayerBundle, anchor?: L.LatLng, partIndex?: number) {
+  const offset = bundle.nativeSymbol?.screenOffsetPx;
+  if (!offset && !anchor) return;
+  for (const proxy of [false, true]) nativeSymbolParts(bundle, proxy).forEach((layer, index) => {
+    if (partIndex !== undefined && index !== partIndex) return;
+    if (!(layer instanceof L.Marker || layer instanceof L.CircleMarker)) return;
+    const point = map.latLngToContainerPoint(anchor ?? layer.getLatLng());
+    layer.setLatLng(map.containerPointToLatLng(L.point(point.x + (offset?.x ?? 0), point.y + (offset?.y ?? 0))));
+  });
+}
+function setNativeSymbolVisible(root: L.LayerGroup, bundle: LayerBundle, visible: boolean, partIndex?: number) {
+  for (const proxy of [false, true]) {
+    const group = proxy ? bundle.hitProxy : bundle.main;
+    if (!group) continue;
+    const parts = nativeSymbolParts(bundle, proxy);
+    if (group instanceof L.LayerGroup && partIndex !== undefined) {
+      const layer = parts[partIndex]; if (!layer) continue;
+      if (visible) { group.addLayer(layer); root.addLayer(group); } else group.removeLayer(layer);
+    } else if (visible) root.addLayer(group); else root.removeLayer(group);
+  }
+}
 
 type LineAuditMutableRow = LineLabelAuditRow & {
   _bounds?: L.LatLngBounds;
@@ -932,7 +967,15 @@ function pointRepresentationLatLngs(
   r: FeatureRecord,
   projection: DynmapProjection,
   multipartMode: 'featureBbox' | 'perPart' = 'featureBbox',
+  displayAnchor?: FeatureDisplayPlan['anchor'],
 ): L.LatLng[] {
+  if (r.type === 'Polygon' && displayAnchor?.strategy === 'fixedInterior') {
+    const parts = multipartMode === 'perPart' ? featureLabelParts(r, multipartMode).map(part => part.record) : [r];
+    return parts.flatMap(feature => {
+      const resolved = resolveLabelAnchorForFeature({ feature, projection, y: Y_FOR_DISPLAY, displayAnchor, viewportWorldRectXZ: null });
+      return resolved?.anchorLatLng ? [resolved.anchorLatLng] : [];
+    });
+  }
   const fallback = pointRepresentationLatLng(r, projection);
   const geometry = r.multipartGeometry;
   if (multipartMode !== 'perPart' || !geometry) return fallback ? [fallback] : [];
@@ -3291,7 +3334,7 @@ export default function RuleDrivenLayer(props: Props) {
         // ✅ 新增：把点符号当作“硬占用区”，用于 label 避让
         const symbolAnchors = r.type === 'Points'
           ? (r.multipartGeometry?.type === 'Point' ? r.multipartGeometry.parts : r.p3 ? [r.p3] : []).map((point) => projection.locationToLatLng(point.x, point.y, point.z))
-          : displayPlan.geometry?.render === 'point' ? pointRepresentationLatLngs(r, projection, displayPlan.anchor?.multipartMode ?? 'featureBbox') : [];
+          : displayPlan.geometry?.render === 'point' ? pointRepresentationLatLngs(r, projection, displayPlan.anchor?.multipartMode ?? 'featureBbox', displayPlan.anchor) : [];
         for (const symbolAnchor of labelOnly ? [] : symbolAnchors) {
           const pt = map.latLngToContainerPoint(symbolAnchor);
 
@@ -3300,6 +3343,9 @@ export default function RuleDrivenLayer(props: Props) {
             typeof sym?.point === "function"
               ? sym.point(r, context, store)
               : sym?.point;
+          if ((pointPlan as any)?.visibility === 'withLabel') continue;
+          const symbolOffset = (pointPlan as any)?.screenOffsetPx;
+          if (symbolOffset) { pt.x += Number(symbolOffset.x ?? 0); pt.y += Number(symbolOffset.y ?? 0); }
 
           // 默认占用尺寸（可按视觉调）
           let w = 28;
@@ -3424,12 +3470,23 @@ export default function RuleDrivenLayer(props: Props) {
           }
         }
 
+        const nativeBundle = cacheRef.current.get(r.uid);
+        const nativeSymbolPlan = typeof rule.symbol?.point === 'function' ? rule.symbol.point(r, context, store) : rule.symbol?.point;
+        if (nativeBundle && configRuntime && (r.type === 'Points' || displayPlan.geometry.render === 'point')) {
+          nativeBundle.nativeSymbol = nativeSymbolPlan as LayerBundle['nativeSymbol'];
+          placeNativeSymbol(map, nativeBundle, undefined);
+        }
+
         // LabelLayout：仅对声明了 labelPlan.declutter 的规则生效；其余 label 走旧逻辑
         const rawLabelPlan = rule.symbol?.label;
         const labelPlan =
           typeof rawLabelPlan === "function"
             ? rawLabelPlan(r, context, store)
             : rawLabelPlan;
+        if (nativeBundle?.nativeSymbol?.visibility === 'withLabel' && (!labelPlan?.enabled || !resolveLabelTextForAudit(r, labelPlan, context, store))) {
+          root.removeLayer(nativeBundle.main);
+          if (nativeBundle.hitProxy) root.removeLayer(nativeBundle.hitProxy);
+        }
         if (auditRow) {
           const labelText = resolveLabelTextForAudit(
             r,
@@ -3524,6 +3581,7 @@ export default function RuleDrivenLayer(props: Props) {
             advancedLineTextBudget,
           ));
           for (const req of requests) {
+            if (nativeBundle?.nativeSymbol?.visibility === 'withLabel') req.symbolBounds = { radius: Number((nativeSymbolPlan as any)?.radius ?? 0) + Number((nativeSymbolPlan as any)?.style?.weight ?? 0) / 2, offsetX: nativeBundle.nativeSymbol.screenOffsetPx?.x ?? 0, offsetY: nativeBundle.nativeSymbol.screenOffsetPx?.y ?? 0 };
             if (auditRow) {
               auditRow.expectedLabel = true;
               auditRow.labelText = req.text;
@@ -3788,6 +3846,7 @@ export default function RuleDrivenLayer(props: Props) {
 
           // 不可放置/被隐藏 → 移除
           if (!p || p.hidden) {
+            if (parentBundle?.nativeSymbol?.visibility === 'withLabel') setNativeSymbolVisible(root, parentBundle, false, req.partIndex);
             const row = lineAuditRows.get(req.featureUid ?? "");
             const polygonRow = polygonAuditRows.get(req.featureUid ?? "");
             if (row && p?.hidden) {
@@ -3821,6 +3880,10 @@ export default function RuleDrivenLayer(props: Props) {
           const anchorPx = map.latLngToContainerPoint(req.anchorLatLng);
           const shifted = L.point(anchorPx.x + p.dx, anchorPx.y + p.dy);
           const ll = map.containerPointToLatLng(shifted);
+          if (parentBundle?.nativeSymbol?.followLabelAnchor) {
+            setNativeSymbolVisible(root, parentBundle, true, req.partIndex);
+            placeNativeSymbol(map, parentBundle, ll, req.partIndex);
+          }
 
           const meta = declutterLabelMeta.get(req.id);
           const plan = meta?.plan ?? null;
@@ -4537,6 +4600,7 @@ function createLayerBundle(
       r,
       projection,
       displayPlan.anchor?.multipartMode ?? 'featureBbox',
+      displayPlan.anchor,
     );
     const center = centers[0];
     if (!center) return null;
@@ -4766,6 +4830,7 @@ function updateLayerBundle(
         r,
         projection,
         displayPlan?.anchor?.multipartMode ?? 'featureBbox',
+        displayPlan?.anchor,
       );
       const center = centers[0];
       const plan = typeof symbol.point === 'function' ? symbol.point(r, ctx, store) : symbol.point;
@@ -5190,7 +5255,7 @@ function buildLabelRequests(r: FeatureRecord, labelPlan: any, ctx: RenderContext
   const mode = displayPlan?.anchor?.multipartMode ?? 'featureBbox';
   return featureLabelParts(r, mode).flatMap(({ record, partIndex }) => {
     const anchor = displayPlan?.geometry?.render === 'point'
-      ? pointRepresentationLatLngs(record, projection, mode)[0]
+      ? pointRepresentationLatLngs(record, projection, mode, displayPlan?.anchor)[0]
       : record.type === 'Points'
         ? (partIndex === undefined && record.multipartGeometry?.parts.length && record.multipartGeometry.parts.length > 1 ? pointRepresentationLatLngs(record, projection, 'featureBbox')[0] : record.p3 ? projection.locationToLatLng(record.p3.x, record.p3.y, record.p3.z) : pointLatLng)
         : undefined;
@@ -5199,7 +5264,7 @@ function buildLabelRequests(r: FeatureRecord, labelPlan: any, ctx: RenderContext
     const ownLabel = partRule?.symbol?.label;
     const partLabelPlan = typeof ownLabel === 'function' ? ownLabel(record, ctx, store) : ownLabel ?? labelPlan;
     const id = componentLabelId(r.uid, partIndex);
-    const req = buildLabelRequest(record, partLabelPlan, ctx, store, projection, anchor, realViewport, layoutViewport, displayPlan, id);
+    const req = buildLabelRequest(record, partLabelPlan, ctx, store, projection, anchor, realViewport, layoutViewport, displayPlan, partIndex === undefined ? undefined : id);
     if (!req) return [];
     return [{ ...req, id, partIndex, collisionOwnerUid: partIndex === undefined ? r.uid : id }];
   });
@@ -5226,7 +5291,7 @@ function buildLabelRequest(
   const text = resolveLabelTextForAudit(r, labelPlan, ctx, store);
   if (!text) return null;
 
-  const effectivePlacement: LabelPlacement = labelPlan.placement ?? 'center';
+  const effectivePlacement: LabelPlacement = !labelPlan.screenOffsets && r.type === 'Points' && labelPlan.placement === 'center' ? 'near' : labelPlan.placement ?? 'center';
 
   const effectiveDisplayAnchor = resolveEffectiveDisplayAnchor(
     displayPlan,
@@ -5245,6 +5310,7 @@ function buildLabelRequest(
     offsetY: Number(labelPlan.offsetY ?? 0),
     offsetX: Number(labelPlan.offsetX ?? 0),
     screenOffsets: Boolean(labelPlan.screenOffsets),
+    candidatePlacement: labelPlan.candidatePlacement,
     declutter: labelPlan.declutter,
   };
 
@@ -5303,7 +5369,7 @@ function buildLabelLayer(
   const placement: LabelPlacement = labelPlan.placement ?? 'center';
   const withDot = !!labelPlan.withDot;
   const dotAnchorMode = labelPlan.dotAnchorMode as "inline" | "anchorRight" | undefined;
-  const effectivePlacement = placement;
+  const effectivePlacement = !labelPlan.screenOffsets && r.type === 'Points' && placement === 'center' ? 'near' : placement;
 
   const effectiveDisplayAnchor = resolveEffectiveDisplayAnchor(
     displayPlan,

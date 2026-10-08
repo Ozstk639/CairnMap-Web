@@ -36,7 +36,7 @@ function Harness() {
   }, [map, config, dataset, node, scenario]);
   return <main style={{ height: 900, width: 1200, margin: 20 }}>
     {params.get('mode') === 'preview' ? <ConfigRuntimePreview config={config} node={node} scenario={scenario} onMapReady={setMap} /> :
-      <MapContainer style={{ height: '100%', width: '100%' }} center={[0, 0]} zoom={toLeafletZoom(6)} {...MAP_ZOOM_BOUNDS} crs={createDynmapCRS(ZTH_FLAT_CONFIG)}><Ready ready={setMap} />
+      <MapContainer style={{ height: '100%', width: '100%' }} center={[0, 0]} zoom={toLeafletZoom(6)} zoomAnimation={false} fadeAnimation={false} {...MAP_ZOOM_BOUNDS} crs={createDynmapCRS(ZTH_FLAT_CONFIG)}><Ready ready={setMap} />
         {map ? <RuleDrivenLayer mapReady map={map} projection={projection} worldId="zth" visible activeButtonIds={[]} bypassButtonFilter runtimeDataset={dataset} disableTransientSources configRuntime={params.get('mode') === 'v1' ? undefined : config} floorPanelMode="hidden" /> : null}
       </MapContainer>}
   </main>;

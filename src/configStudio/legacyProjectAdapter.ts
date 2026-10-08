@@ -326,6 +326,8 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
   // rather than losing its collision/candidate settings in an object cast.
   const display = v1Rule ? resolveFeatureDisplayPlan(sample, v1Rule, { worldId: 'zth', leafletZoom: 3, zoomLevel: 6, inFloorView: false, activeBuildingUid: null, activeFloorSelector: null, activeBuildingFloorRefSet: null }, new FeatureStore([sample])) as FeatureDisplayRuleDraft : undefined;
   const geometryConfig = display?.geometry ?? {};
+  const rawLabel = v1Rule?.symbol?.label;
+  const sourceLabel = typeof rawLabel === 'function' ? rawLabel(sample, { worldId: 'zth', leafletZoom: 3, zoomLevel: 6, inFloorView: false, activeBuildingUid: null, activeFloorSelector: null, activeBuildingFloorRefSet: null }, new FeatureStore([sample])) : rawLabel;
   const symbolConfig = display?.symbol ?? {};
   const labelConfig = display?.label ?? {};
   const collision = display?.collision ?? {};
@@ -345,6 +347,8 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
     lineJoin: geometryConfig.lineJoin ?? 'round' as const,
   };
   const label: RenderLabelStyle = {
+    ...(sourceLabel?.withDot ? { withDot: true, dotAnchorMode: sourceLabel.dotAnchorMode ?? 'inline' } : {}),
+    ...(geometry === 'Point' ? { placement: 'near' as const, offsetY: -Number(sourceLabel?.offsetY ?? 0) } : {}),
     visible: labelConfig.enabled !== false,
     style: visualStyleFromV1(labelConfig.styleKey, geometry),
     source: labelConfig.source === 'custom' ? 'Name' : String(labelConfig.source ?? 'Name'),
@@ -356,6 +360,11 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
     },
   };
   const extensions = extensionsFromV1(display);
+  const sourceCandidates = sourceLabel?.declutter?.candidates;
+  if (sourceCandidates?.length) {
+    const candidates = sourceCandidates.map(candidate => typeof candidate === 'string' ? candidate : candidate.name).filter((name): name is 'C' | 'N' | 'S' | 'E' | 'W' | 'NE' | 'NW' | 'SE' | 'SW' => ['C', 'N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW'].includes(name));
+    extensions.anchor = { ...extensions.anchor, candidates, candidatePlacement: 'aroundAnchor' };
+  }
   if (geometry !== 'LineString') delete extensions.lineLabel;
   const rawClick = v1Rule?.symbol?.labelClick;
   const click = typeof rawClick === 'function' ? rawClick(sample, { worldId: 'zth', leafletZoom: 3, zoomLevel: 6, inFloorView: false, activeBuildingUid: null, activeFloorSelector: null, activeBuildingFloorRefSet: null }, new FeatureStore([sample])) : rawClick;
@@ -477,10 +486,10 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
   if ((config.classCode === 'BUD' || config.classCode === 'STB') && geometry === 'Polygon') {
     // V3 renders the low-Zoom structure marker as an ordinary authored point.
     // It no longer relies on a nearly invisible geometry plus a label-only dot.
-    const lowPointStyle = styled({ pointShape: 'circle', size: 6, weight: 1, stroke: { mode: 'fixed', color: '#111827' }, strokeOpacity: 0.9, fill: { mode: 'fixed', color: '#9ca3af' }, fillOpacity: 0.82 });
+    const lowPointStyle = styled({ pointShape: 'circle', size: 4.5, weight: 3, stroke: { mode: 'fixed', color: '#000000' }, strokeOpacity: 0.85, fill: { mode: 'fixed', color: '#ffffff' }, fillOpacity: 1, symbolOffsetPx: { x: 0, y: 3.7 }, symbolAnchor: 'label', symbolVisibility: 'withLabel' });
     const structureStyle = styled({ weight: 1, stroke: { mode: 'fixed', color: '#111827' }, strokeOpacity: 0.28, fill: { mode: 'fixed', color: '#9ca3af' }, fillOpacity: 0.08 });
-    const lowLabel = labeled({ visible: true, style: { family: 'structure-label', size: 12 }, source: 'Name', placement: 'N', offsetY: 0, collision: { role: 'optional', basePriority: 2400, collisionGroup: 'structureLabel', hideWhenColliding: true } });
-    const highLabel = labeled({ visible: true, style: { family: 'structure-label', size: 12 }, source: 'Name', placement: 'center', offsetY: 0, collision: { role: 'important', basePriority: 3600, collisionGroup: 'structureLabel', hideWhenColliding: true } });
+    const lowLabel = labeled({ visible: true, style: { family: 'structure-label', size: 12 }, source: 'Name', placement: 'E', offsetX: 11, offsetY: 3.7, collision: { role: 'optional', basePriority: 2400, collisionGroup: 'structureLabel', hideWhenColliding: true } });
+    const highLabel = labeled({ visible: true, style: { family: 'structure-label', size: 12 }, source: 'Name', placement: 'center', offsetY: 3, collision: { role: 'important', basePriority: 3600, collisionGroup: 'structureLabel', hideWhenColliding: true } });
     const lowExtensions: RenderRuleExtensions = { ...clone(extensions), anchor: { ...(extensions.anchor ?? {}), strategy: 'interior', candidates: ['C'] }, labelText: { ...(extensions.labelText ?? {}), maxChars: 10, abbreviationEnabled: true, suffix: '…' }, collision: { ...(extensions.collision ?? {}), paddingPx: 3, hidePolicy: 'abbreviateThenHide' }, density: { mode: 'override', gridSizePx: 104, maxLabelsPerGrid: 2, reduceOrder: ['abbreviateOptionalLabels', 'hideOptionalLabels'], preserveSelected: true, preserveRequired: true } };
     const highExtensions: RenderRuleExtensions = { ...clone(lowExtensions), anchor: { ...(lowExtensions.anchor ?? {}), candidates: ['C', 'N', 'S', 'E', 'W'] }, collision: { ...(lowExtensions.collision ?? {}), paddingPx: 4 }, density: { mode: 'override', gridSizePx: 104, maxLabelsPerGrid: 3, reduceOrder: ['abbreviateOptionalLabels', 'hideOptionalLabels'], preserveSelected: true, preserveRequired: true } };
     const areaMetric = { kind: 'area' as const, multiplier: 1, divisor: 10, rounding: 'floor' as const, min: 0, max: 999 };
@@ -493,7 +502,7 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
 
   if (config.classCode === 'STA' && geometry === 'Point') {
     const stationStyle = transportPointStyle({ mode: 'relatedLine', strategy: 'stationFirstPlatform', fallbackColor: '#0ea5e9' });
-    const stationLabel = labeled({ visible: true, style: { family: 'bubble-dark', size: 14 }, source: 'Name', placement: 'center', withDot: false, offsetY: 0, collision: { role: 'important', basePriority: 6000, collisionGroup: 'transportLabel', hideWhenColliding: true } });
+    const stationLabel = labeled({ visible: true, style: { family: 'bubble-dark', size: 14 }, source: 'Name', placement: 'near', withDot: false, offsetY: 0, collision: { role: 'important', basePriority: 6000, collisionGroup: 'transportLabel', hideWhenColliding: true } });
     const stationExtensions: RenderRuleExtensions = { ...clone(extensions), pane: 'point-top', anchor: { ...(extensions.anchor ?? {}), strategy: 'featureCenter', candidates: [...pointCandidates] }, labelText: { ...(extensions.labelText ?? {}), maxChars: 6, abbreviationEnabled: true, suffix: '…' }, collision: { ...(extensions.collision ?? {}), paddingPx: 6, hidePolicy: 'abbreviateThenHide' } };
     return profile([
       hidden('v1-station-hidden', 0, 3),
@@ -534,7 +543,7 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
 
   if (config.classCode === 'ISP' && geometry === 'Point') {
     const ispStyle = poiPointStyle('#f97316');
-    const ispLabel = labeled({ visible: true, style: { family: 'bubble-dark', size: 14 }, source: 'Name', placement: 'center', withDot: false, collision: { role: 'optional', basePriority: 2500, collisionGroup: 'poiLabel', hideWhenColliding: true } });
+    const ispLabel = labeled({ visible: true, style: { family: 'bubble-dark', size: 14 }, source: 'Name', placement: 'near', withDot: false, collision: { role: 'optional', basePriority: 2500, collisionGroup: 'poiLabel', hideWhenColliding: true } });
     const ispExtensions: RenderRuleExtensions = { ...clone(extensions), pane: 'point-top', anchor: { ...(extensions.anchor ?? {}), strategy: 'featureCenter', candidates: [...pointCandidates] }, labelText: { ...(extensions.labelText ?? {}), maxChars: 10, abbreviationEnabled: true, suffix: '…' }, collision: { ...(extensions.collision ?? {}), paddingPx: 6, hidePolicy: 'abbreviateThenHide' } };
     return profile([
       makeRule('v1-generic-point-symbol', 0, 3, { representation: 'hidden', style: ispStyle, label: labeled({ visible: false }), extensions: ispExtensions, geometryStack: { zLevel: 420 }, priority: { mode: 'replace', base: 2500 } }),
@@ -584,7 +593,7 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
 
   if ((config.classCode === 'TRP' || config.classCode === 'TPP' || config.classCode === 'WRP') && geometry === 'Point') {
     const pointColor = config.classCode === 'TRP' ? '#22c55e' : '#f97316';
-    const pointLabel = labeled({ visible: true, style: { family: 'bubble-dark', size: 14 }, source: 'Name', placement: 'center', collision: { role: 'optional', basePriority: 2500, collisionGroup: 'poiLabel', hideWhenColliding: true } });
+    const pointLabel = labeled({ visible: true, style: { family: 'bubble-dark', size: 14 }, source: 'Name', placement: 'near', collision: { role: 'optional', basePriority: 2500, collisionGroup: 'poiLabel', hideWhenColliding: true } });
     const pointExtensions: RenderRuleExtensions = { ...clone(extensions), pane: 'point-top', anchor: { ...(extensions.anchor ?? {}), strategy: 'featureCenter', candidates: [...pointCandidates] }, labelText: { ...(extensions.labelText ?? {}), maxChars: 6, abbreviationEnabled: true, suffix: '…' }, collision: { ...(extensions.collision ?? {}), paddingPx: 6, hidePolicy: 'abbreviateThenHide' } };
     return profile(withVisibleRange(`v1-${config.classCode.toLowerCase()}-point`, 5, 8, { style: poiPointStyle(pointColor), label: pointLabel, extensions: pointExtensions, geometryStack: { zLevel: 420 }, priority: { mode: 'replace', base: 2500 } }));
   }
@@ -1186,6 +1195,10 @@ export function createConfigPackageFromCurrentProject(): ConfigPackageV3 {
   const classes = listClassConfigs();
   const workflows = getOpenRIAMapWorkflowConfigs();
   const nodes = classes.flatMap(nodesFor);
+  const engine = createV32EngineDefaults();
+  // Frozen V1 uses Leaflet's natural symbol/path hit area. Extra tolerance
+  // stays editable, but must not silently widen the migrated project.
+  for (const baseline of Object.values(engine.interactionBaselines)) baseline.hitTolerancePx = 0;
   return {
     schemaVersion: 'cairnmap.config-package.v3',
     contractRevision: 6,
@@ -1193,7 +1206,7 @@ export function createConfigPackageFromCurrentProject(): ConfigPackageV3 {
     projectId: 'openriamap-ria',
     revision: 1,
     displayName: { zh: 'V3.2：V1 真实语义迁移', en: 'V3.2 V1 semantic migration' },
-    engine: createV32EngineDefaults(),
+    engine,
     registries: buildRegistries(workflows),
     nodes,
     contextBindings: [

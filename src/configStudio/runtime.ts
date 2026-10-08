@@ -441,6 +441,8 @@ function validateProfile(profile: GeometryProfile, geometry: GeometryKind, path:
     const stack = rule.geometryStack;
     if (!stack || !Number.isInteger(stack.zLevel) || stack.zLevel < 0 || stack.zLevel > 9999) issue(issues, 'error', 'geometry-zlevel-invalid', rulePath, '每个渲染规则的几何 zLevel 必须是 0 到 9999 之间的整数。');
     const style = rule.style;
+    if (style?.symbolOffsetPx && (!Number.isFinite(style.symbolOffsetPx.x) || !Number.isFinite(style.symbolOffsetPx.y))) issue(issues, 'error', 'render-symbol-offset-invalid', rulePath, '符号偏移必须为有限像素值。');
+    if (style?.symbolAnchor && !['geometry', 'label'].includes(style.symbolAnchor) || style?.symbolVisibility && !['independent', 'withLabel'].includes(style.symbolVisibility)) issue(issues, 'error', 'render-symbol-policy-invalid', rulePath, '符号锚点或可见性策略无效。');
     if (rule.representation !== 'hidden' && !style) issue(issues, 'error', 'render-style-required', rulePath, '非隐藏渲染规则必须定义显示效果。');
     if (style) {
       if (style.size !== undefined && (!Number.isFinite(style.size) || style.size <= 0)) issue(issues, 'error', 'render-size-invalid', rulePath, '点符号大小必须为正数。');

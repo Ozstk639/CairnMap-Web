@@ -275,6 +275,9 @@ export type LabelRequest = {
   offsetY?: number;
   offsetX?: number;
   screenOffsets?: boolean;
+  /** A true point may participate in its label's combined collision box. */
+  symbolBounds?: { radius: number; offsetX: number; offsetY: number };
+  candidatePlacement?: 'relativeToPlacement' | 'aroundAnchor';
 
   /** 是否带中心点（影响 bbox 宽度估计） */
   withDot?: boolean;
@@ -604,7 +607,7 @@ function normalizeCandidates(
   return list.map((c, idx) => {
     if (typeof c.dx === "number" && typeof c.dy === "number") return c;
 
-    const { dx, dy } = (req.screenOffsets ? labelCandidateShift : candidateShift)(
+    const { dx, dy } = (req.screenOffsets && req.candidatePlacement !== 'aroundAnchor' ? labelCandidateShift : candidateShift)(
       c.name,
       req.placement,
       size,
@@ -885,7 +888,7 @@ function rectForCandidate(
   const dx = (candidate.dx ?? 0) + baseDeltaX;
   const dy = (candidate.dy ?? 0) + baseDeltaY;
   const anchor = L.point(item.anchorPx.x + dx, item.anchorPx.y + dy);
-  const rect = computeLabelRect(
+  let rect = computeLabelRect(
     anchor,
     measured,
     baseReq.placement,
@@ -894,6 +897,14 @@ function rectForCandidate(
     Number(baseReq.offsetX ?? 0),
     baseReq.screenOffsets,
   );
+  if (baseReq.symbolBounds) {
+    const symbol = baseReq.symbolBounds;
+    const left = Math.min(rect.x, anchor.x + symbol.offsetX - symbol.radius);
+    const top = Math.min(rect.y, anchor.y + symbol.offsetY - symbol.radius);
+    const right = Math.max(rect.x + rect.w, anchor.x + symbol.offsetX + symbol.radius);
+    const bottom = Math.max(rect.y + rect.h, anchor.y + symbol.offsetY + symbol.radius);
+    rect = { x: left, y: top, w: right - left, h: bottom - top };
+  }
   return { rect, dx, dy };
 }
 

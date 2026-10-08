@@ -107,6 +107,7 @@ export type RenderStyle = {
   symbolOffsetPx?: { x: number; y: number };
   /** True symbols may follow their label's visibility, without decorating text. */
   symbolVisibility?: 'independent' | 'withLabel';
+  symbolAnchor?: 'geometry' | 'label';
   pointShape?: RenderPointShape;
   /** An authored external icon overrides pointShape for this Zoom rule. */
   icon?: RenderPointIcon;
@@ -262,6 +263,7 @@ export type RenderLineLabelExtension = {
   viewportCandidateMinIntervalPx?: number;
 };
 export type RenderAnchorExtension = {
+  candidatePlacement?: 'relativeToPlacement' | 'aroundAnchor';
   strategy?: 'inherit' | 'featureCenter' | 'interior' | 'visibleInterior' | 'lineCenter' | 'lineCandidates';
   candidates?: Array<'C' | 'N' | 'S' | 'E' | 'W' | 'NE' | 'NW' | 'SE' | 'SW'>;
   offsetPx?: { x: number; y: number };
