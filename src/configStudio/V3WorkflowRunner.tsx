@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { normalizeRuleSourceWorldId } from '@/components/Rules/data/ruleDataSources';
-import type { ClassificationPath, ConfigPackageV3, MountedFeatureRecord, SearchProfile, WorkflowControl, WorkflowDefinition, WorkflowGroupField, WorkflowStep } from './types';
+import type { ClassificationPath, GeometryKind, ConfigPackageV3, MountedFeatureRecord, SearchProfile, WorkflowControl, WorkflowDefinition, WorkflowGroupField, WorkflowStep } from './types';
 import { listCategoryPaths, normalizeSearchProfile, optionLabel, pathMatchesScope, readRecordPath, workflowPathLabel, hasCategoryNode, hasDescendants, resolveGeometryProfile, resolveEffectiveFields, resolveWorkflowSelectOptions } from './runtime';
 
 import { finalizeV3WorkflowRecord } from './workflowRecord';
@@ -231,7 +231,7 @@ function FeatureSearchInput({ profile, records, value, onChange, placeholder, wo
 }
 
 function fieldInput(field: WorkflowGroupField, value: unknown, onChange: (value: unknown) => void, records: MountedFeatureRecord[], world?: string) {
-  const common = { className: 'w-full rounded border px-2 py-1 text-sm', value: String(value ?? ''), placeholder: field.placeholder, onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => onChange(event.target.value) };
+  const common = { className: 'w-full rounded border px-2 py-1 text-sm', value: field.kind === 'json' && value && typeof value === 'object' ? JSON.stringify(value) : String(value ?? ''), placeholder: field.placeholder, onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => onChange(event.target.value) };
   if (field.kind === 'textarea' || field.kind === 'json') return <textarea {...common} rows={field.rows ?? (field.kind === 'json' ? 4 : 3)} />;
   if (field.kind === 'toggle') return <ToggleInput value={value} onChange={onChange} />;
   if (field.kind === 'select') return <select {...common}><option value="">请选择</option>{(field.options ?? []).map((item) => <option key={item.value} value={item.value}>{optionLabel(item)}</option>)}</select>;
@@ -250,14 +250,14 @@ function GroupControlInput({ control, value, onChange, records, world }: { contr
   return <div className="space-y-2 rounded border border-slate-200 bg-slate-50 p-2">{rows.map((row, index) => <fieldset key={`${control.id}-${index}`} className="rounded border bg-white p-2"><legend className="px-1 text-xs text-slate-500">第 {index + 1} 项</legend><div className="grid gap-2 md:grid-cols-2">{group.itemFields.map((field) => <label key={`${field.key}-${index}`} className="grid gap-1 text-xs"><span>{field.label.zh}{field.required ? ' *' : ''}</span>{fieldInput(field, row[field.key], (nextValue) => updateRow(index, field.key, nextValue), records, world)}</label>)}</div><button type="button" className="mt-2 text-xs text-rose-700" onClick={() => onChange(serialize(rows.filter((_, rowIndex) => rowIndex !== index)))}>删除此项</button></fieldset>)}<button type="button" className="rounded border bg-white px-2 py-1 text-xs" onClick={() => onChange(serialize([...rows, makeRow()]))}>{group.addLabel?.zh ?? `添加${control.label.zh}`}</button></div>;
 }
 
-function ControlInput({ control, value, onChange, config, records, world }: { control: WorkflowControl; value: unknown; onChange: (value: unknown) => void; config: ConfigPackageV3; records: MountedFeatureRecord[]; world?: string }) {
+function ControlInput({ control, value, onChange, config, records, world, fixedGeometry }: { control: WorkflowControl; value: unknown; onChange: (value: unknown) => void; config: ConfigPackageV3; records: MountedFeatureRecord[]; world?: string; fixedGeometry?: GeometryKind }) {
   if (control.kind === 'group') return <GroupControlInput control={control} value={value} onChange={onChange} records={records} world={world} />;
-  const common = { className: 'w-full rounded border px-2 py-1 text-sm', value: String(value ?? ''), placeholder: control.placeholder, onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => onChange(event.target.value) };
+  const common = { className: 'w-full rounded border px-2 py-1 text-sm', value: control.kind === 'json' && value && typeof value === 'object' ? JSON.stringify(value) : String(value ?? ''), placeholder: control.placeholder, onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => onChange(event.target.value) };
   if (control.kind === 'textarea' || control.kind === 'json') return <textarea {...common} rows={control.rows ?? (control.kind === 'json' ? 4 : 3)} placeholder={control.kind === 'json' ? '{ }' : control.placeholder} />;
   if (control.kind === 'toggle') return <ToggleInput value={value} onChange={onChange} />;
   if (control.kind === 'select') return <select {...common}><option value="">请选择</option>{resolveWorkflowSelectOptions(config, control).map((item) => <option key={item.value} value={item.value}>{optionLabel(item)}</option>)}</select>;
   if (control.kind === 'classificationPicker') {
-    const options = listCategoryPaths(config, control.classificationScope ?? { class: '' }).filter((path) => !hasDescendants(config, path) && pathMatchesScope(path, control.classificationScope ?? { class: '' }));
+    const options = listCategoryPaths(config, control.classificationScope ?? { class: '' }).filter((path) => !hasDescendants(config, path) && pathMatchesScope(path, control.classificationScope ?? { class: '' }) && (!fixedGeometry || resolveGeometryProfile(config,path,fixedGeometry)?.enabled));
     return <select className="w-full rounded border px-2 py-1 text-sm" value={String(value ?? '')} onChange={(event) => onChange(event.target.value)}><option value="">请选择分类</option>{options.map((path) => <option key={encodePath(path)} value={encodePath(path)}>{workflowPathLabel(config, path)}</option>)}</select>;
   }
   if (control.kind === 'featureSearch' || control.kind === 'coarseSearch') return <FeatureSearchInput profile={control.search} records={records} value={value} onChange={onChange} placeholder={control.placeholder} world={world} />;
@@ -363,7 +363,7 @@ export function V3WorkflowRunner({ config, workflow, records = [], worldId, init
       return <fieldset key={point.id} className="mt-3 rounded border p-2 text-sm"><legend>{point.label.zh}{point.required ? ' *' : ''}</legend>{onCaptureGeometry ? <><button type="button" className="rounded border px-2 py-1" disabled={!coordinates[step.outputId!]?.length} onClick={() => { void onRequestGeometry?.(`auxiliary:${point.id}`, 'Point'); }}>进入{point.label.zh}绘制</button><button type="button" className="ml-2 rounded border px-2 py-1" onClick={() => { try { const capture = onCaptureGeometry(`auxiliary:${point.id}`, 'Point'); const raw = Array.isArray(capture) ? capture[0] : capture.point; if (!raw || !Number.isFinite(raw.x) || !Number.isFinite(raw.z)) throw new Error('请先绘制目标点。'); update(raw); setInputIssues([]); } catch (error) { setInputIssues([{ stepId: step.id, message: error instanceof Error ? error.message : '辅助点无效。' }]); } }}>采用{point.label.zh}</button></> : <div className="grid grid-cols-3 gap-2">{(['x','y','z'] as const).map(axis => <label key={axis}>{axis.toUpperCase()}<input type="number" className="w-full rounded border" value={value?.[axis] ?? ''} onChange={event => update({ ...value, [axis]: event.target.value === '' ? undefined : Number(event.target.value) })} /></label>)}</div>}<p className="mt-1 text-xs">{value ? `已采用：X=${value.x}，Z=${value.z}${value.y === undefined ? '' : `，Y=${value.y}`}` : '尚未采用坐标'}</p></fieldset>;
     })}
     {step.controls?.length ? <div className="grid gap-2 md:grid-cols-6">{step.controls.filter(control => workflowConditionMatches(control.when, slots)).map(control => <div key={control.id} data-workflow-control={control.id} className={`grid min-w-0 gap-1 text-sm ${control.columns === 1 ? 'md:col-span-6' : control.columns === 2 ? 'md:col-span-3' : 'md:col-span-2'}`}>
-      <span>{control.label.zh}{control.required ? ' *' : ''}</span><ControlInput control={control} value={slots[control.slot ?? control.id]} config={config} records={records} world={activeWorld} onChange={value => {
+      <span>{control.label.zh}{control.required ? ' *' : ''}</span><ControlInput control={control} fixedGeometry={workflow.outputs.find(output => output.id === control.outputId)?.geometry.selected} value={slots[control.slot ?? control.id]} config={config} records={records} world={activeWorld} onChange={value => {
         if (control.kind === 'classificationPicker') { const classification = decodePath(String(value)); if (classification && control.outputId) setClassifications(current => ({ ...current, [control.outputId!]: classification })); }
         setSlots(current => ({ ...current, [control.slot ?? control.id]: value })); setInputIssues([]);
       }} />

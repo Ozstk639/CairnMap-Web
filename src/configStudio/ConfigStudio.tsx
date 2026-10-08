@@ -73,7 +73,8 @@ function readMountedRecords(): MountedFeatureRecord[] {
 function readLocalConfig(): ConfigPackageV3 | undefined {
   try {
     const value = JSON.parse(sessionStorage.getItem('cairnmap-config-studio-saved') ?? sessionStorage.getItem('cairnmap-config-studio-draft') ?? 'null') as ConfigPackageV3 | null;
-    if (value?.schemaVersion !== 'cairnmap.config-package.v3') return undefined;
+    if (value === null) return undefined;
+    if (value?.schemaVersion !== 'cairnmap.config-package.v3') throw new Error('本地配置 schemaVersion 无效；原始 JSON 已保留用于恢复。');
     return prepareConfigForActivation(value);
   } catch (error) {
     try { const raw = sessionStorage.getItem('cairnmap-config-studio-saved') ?? sessionStorage.getItem('cairnmap-config-studio-draft'); if (raw) sessionStorage.setItem('cairnmap-config-studio-rejected-recovery', raw); sessionStorage.setItem('cairnmap-config-studio-recovery-issue', error instanceof Error ? error.message : '本地配置无效。'); } catch { /* storage unavailable */ }

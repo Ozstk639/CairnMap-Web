@@ -37,6 +37,7 @@ export function ConfigLab({ onClose }: { onClose: () => void }) {
     try {
       const draft = sessionStorage.getItem('cairnmap-config-studio-draft');
       const parsed = draft ? JSON.parse(draft) as ConfigPackageV3 : undefined;
+      if (parsed && parsed.schemaVersion !== 'cairnmap.config-package.v3') throw new Error('会话草案的 schemaVersion 无效。');
       if (parsed?.schemaVersion === 'cairnmap.config-package.v3') {
         const active = prepareConfigForActivation(parsed);
         setConfig(active);
