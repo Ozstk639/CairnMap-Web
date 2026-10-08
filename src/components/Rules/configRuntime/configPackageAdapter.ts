@@ -1,3 +1,4 @@
+import { isNativeConfigRevision } from '../../../configStudio/contract';
 import type {
   ConfigPackageV3,
   ConfigPane,
@@ -99,7 +100,7 @@ export function resolveConfigRuntimeContextForHost(
   host: FeatureRecord,
   store?: FeatureStore,
 ): ConfigRuntimeContext | undefined {
-  if (!config || config.contractRevision !== 5 || !store) return undefined;
+  if (!config || !isNativeConfigRevision(config.contractRevision) || !store) return undefined;
   const binding = (config.contextBindings ?? []).find((candidate) => candidate.enabled && matchesTargetPath(host, candidate.host.classification));
   if (!binding) return undefined;
   const members = store.all.filter((candidate) => relatedByBinding(host, candidate, binding));
@@ -122,7 +123,7 @@ export function resolveConfigRuntimeContextForRecord(
   record: FeatureRecord,
   store?: FeatureStore,
 ): ConfigRuntimeContext | undefined {
-  if (!config || config.contractRevision !== 5 || !store) return undefined;
+  if (!config || !isNativeConfigRevision(config.contractRevision) || !store) return undefined;
   const direct = resolveConfigRuntimeContextForHost(config, record, store);
   if (direct) return direct;
   for (const binding of config.contextBindings ?? []) {
@@ -389,7 +390,7 @@ function labelStyleKey(style: RenderLabelVisualStyle, record: FeatureRecord, sto
 }
 
 function renderMode(geometry: GeometryKind, rule: ZoomPriorityRule): 'none' | 'point' | 'polyline' | 'polygonFillOutline' {
-  if (rule.representation === 'hidden') return 'none';
+  if (rule.representation === 'hidden' || rule.representation === 'labelOnly') return 'none';
   if (rule.representation === 'point') return 'point';
   return geometry === 'LineString' ? 'polyline' : geometry === 'Polygon' ? 'polygonFillOutline' : 'point';
 }
@@ -444,7 +445,7 @@ export function resolveConfigRuntimeStackOrder(
   record: FeatureRecord,
   ctx: RenderContext,
 ): { geometryZ: number; displayPriority: number } {
-  if (!config || config.contractRevision !== 5) return { geometryZ: 0, displayPriority: 0 };
+  if (!config || !isNativeConfigRevision(config.contractRevision)) return { geometryZ: 0, displayPriority: 0 };
   const profile = resolveGeometryProfile(config, pathFor(record), geometryFor(record));
   const active = profile ? activeRuleFor(profile, record, ctx) : undefined;
   return {
@@ -454,7 +455,7 @@ export function resolveConfigRuntimeStackOrder(
 }
 
 function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderContext, store?: FeatureStore): RenderRule | null {
-  if (config.contractRevision !== 5 || !config.engine) return null;
+  if (!isNativeConfigRevision(config.contractRevision) || !config.engine) return null;
   const geometry = geometryFor(record);
   const path = pathFor(record);
   const profile = resolveGeometryProfile(config, path, geometry);
@@ -578,7 +579,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
       },
       labelClick: {
         enabled: Boolean(triggers.label || pathInteractive),
-        mode: 'normal',
+        mode: active.representation === 'labelOnly' ? 'labelOnly' : 'normal',
         labelStyleKey: labelKey as any,
         highlightStyleKey: 'dash',
         highlightPathStyle: interactionVisualToPathStyle(selectedVisual),
@@ -809,7 +810,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
 
 /** Called by the render loop once a map and projection exist for pixel metrics. */
 export function resolveConfigRuntimeScreenGate(config: ConfigPackageV3 | undefined, record: FeatureRecord, ctx: RenderContext): ConfigRuntimeScreenGate | undefined {
-  if (!config || config.contractRevision !== 5 || !config.engine) return undefined;
+  if (!config || !isNativeConfigRevision(config.contractRevision) || !config.engine) return undefined;
   const geometry = geometryFor(record);
   const profile = resolveGeometryProfile(config, pathFor(record), geometry);
   const active = profile ? activeRuleFor(profile, record, ctx) : undefined;

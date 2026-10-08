@@ -53,7 +53,7 @@ export type FieldDefinition = {
 
 export type LabelRole = 'ignore' | 'soft' | 'optional' | 'important' | 'required';
 export type LabelAnchor = 'perPart' | 'featureBbox';
-export type DisplayRepresentation = 'hidden' | 'geometry' | 'point';
+export type DisplayRepresentation = 'hidden' | 'geometry' | 'point' | 'labelOnly';
 export type PriorityMetric = 'area' | 'length' | 'partCount' | 'field';
 
 /** A colour may be literal, read from the feature itself, or resolved through
@@ -103,6 +103,10 @@ export type RenderLabelVisualStyle = {
 /** @deprecated Read-only compatibility for contract revisions <= 3. */
 export type RenderFont = 'whiteBlackOutline' | 'blue' | 'capsule';
 export type RenderStyle = {
+  /** Screen pixels; does not modify source/world geometry. */
+  symbolOffsetPx?: { x: number; y: number };
+  /** True symbols may follow their label's visibility, without decorating text. */
+  symbolVisibility?: 'independent' | 'withLabel';
   pointShape?: RenderPointShape;
   /** An authored external icon overrides pointShape for this Zoom rule. */
   icon?: RenderPointIcon;
@@ -400,6 +404,8 @@ export type LabelCollisionPolicy = {
   collisionGroup?: string;
   hideWhenColliding: boolean;
   densityLimit?: number;
+  /** Collision metric belongs here, separately from geometry/display ordering. */
+  metric?: RenderPriority['metric'];
 };
 export type RenderPriority = {
   mode: 'add' | 'replace';
@@ -517,6 +523,8 @@ export type InteractionVisual = {
   zIndexOffset?: number;
   forceShowLabel?: boolean;
   labelPriority?: number;
+  symbol?: { kind: 'circle' | 'pin'; radius?: number; size?: [number, number] };
+  outline?: { color: string; width: number; opacity: number };
 };
 export type GeometryInteractionBaseline = Record<InteractionState, InteractionVisual> & {
   hitTolerancePx: number;
@@ -583,14 +591,15 @@ export type CardItem = {
     lineChipSource?: 'platform' | 'station' | 'stationBuilding';
     /** A small set of V1 field-formatters that remains reusable rather than a
      * code-card escape hatch. */
-    format?: 'plain' | 'externalLink' | 'boolean' | 'json';
+    format?: 'plain' | 'externalLink' | 'boolean' | 'json' | 'classification' | 'enum' | 'date' | 'world';
+    linkText?: 'raw' | 'href';
   };
   relation?: CardRelation;
 };
 
 /** A layout and a code component remain mutually exclusive. */
 export type CardConfiguration =
-  | { mode: 'fields'; items: CardItem[] }
+  | { mode: 'fields'; items: CardItem[]; remaining?: { enabled: boolean; section: CardSection; includeSystem: boolean; exclude?: string[] } }
   | { mode: 'layout'; layoutId: string; options?: Record<string, unknown> }
   | { mode: 'component'; componentKey: string; options?: Record<string, unknown> };
 
@@ -722,6 +731,7 @@ export type WorkflowDefinition = {
   id: string;
   label: LocalizedText;
   mode: 'composed' | 'external';
+  actor?: { required: boolean };
   /** V3.0 compatibility target; composed flows resolve target through outputs[0]. */
   target?: ClassificationPath;
   steps: WorkflowStep[];
@@ -761,7 +771,7 @@ export type ParityReport = { schemaVersion: 'cairnmap.v1-parity-report.v2'; sour
 export type ConfigPackageV3 = {
   schemaVersion: 'cairnmap.config-package.v3';
   /** Contract revision is API compatibility, not the user-facing package revision. */
-  contractRevision: 3 | 4 | 5;
+  contractRevision: 3 | 4 | 5 | 6;
   packageId: string;
   projectId: string;
   /** Persistence version only; the save dialog requires a monotonic integer. */

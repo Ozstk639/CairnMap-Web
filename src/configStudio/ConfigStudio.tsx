@@ -1,3 +1,4 @@
+import { isNativeConfigRevision } from './contract';
 import { normalizeImportedLocalization } from './localization';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, ChevronRight, Download, FileUp, Maximize2, Minimize2, Plus, Save, SlidersHorizontal, X } from 'lucide-react';
@@ -66,7 +67,7 @@ function readLocalConfig(): ConfigPackageV3 | undefined {
   try {
     const value = JSON.parse(sessionStorage.getItem('cairnmap-config-studio-saved') ?? sessionStorage.getItem('cairnmap-config-studio-draft') ?? 'null') as ConfigPackageV3 | null;
     if (value?.schemaVersion !== 'cairnmap.config-package.v3') return undefined;
-    return value.contractRevision === 5 ? normalizeImportedLocalization(value) : value.contractRevision === 4 ? migrateV4Package(value) : undefined;
+    return isNativeConfigRevision(value.contractRevision) ? normalizeImportedLocalization(value) : value.contractRevision === 4 ? migrateV4Package(value) : undefined;
   } catch { return undefined; }
 }
 function updateNode(config: ConfigPackageV3, nodeId: string, updater: (node: CategoryNode) => CategoryNode): ConfigPackageV3 {
@@ -150,9 +151,9 @@ function ConditionalOverridesEditor({ config, path, geometry, rule, onChange }: 
   const fields = allFieldKeys(config, path);
   const overrides = rule.conditionalOverrides ?? [];
   const representations = geometry === 'Polygon'
-    ? [['hidden', '隐藏'], ['point', '面内中点'], ['geometry', '显示面']]
-    : geometry === 'LineString' ? [['hidden', '隐藏'], ['geometry', '显示线']]
-      : [['hidden', '隐藏'], ['geometry', '显示点']];
+    ? [['hidden', '隐藏'], ['point', '面内中点'], ['geometry', '显示面'], ['labelOnly', '仅标签']]
+    : geometry === 'LineString' ? [['hidden', '隐藏'], ['geometry', '显示线'], ['labelOnly', '仅标签']]
+      : [['hidden', '隐藏'], ['geometry', '显示点'], ['labelOnly', '仅标签']];
   const patch = (index: number, next: RenderRuleConditionalOverride) => onChange({ ...rule, conditionalOverrides: overrides.map((item, current) => current === index ? next : item) });
   const add = () => {
     const baseLabel = rule.label ? clone(rule.label) : defaultLabel(geometry);
@@ -256,10 +257,10 @@ function LegacyRenderRuleEditor({ config, path, geometry, profile, onChange }: {
     });
   };
   const representationOptions = geometry === 'Polygon'
-    ? [['hidden', '隐藏'], ['point', '面内中点'], ['geometry', '显示面']]
+    ? [['hidden', '隐藏'], ['point', '面内中点'], ['geometry', '显示面'], ['labelOnly', '仅标签']]
     : geometry === 'LineString'
-      ? [['hidden', '隐藏'], ['geometry', '显示线']]
-      : [['hidden', '隐藏'], ['geometry', '显示点']];
+      ? [['hidden', '隐藏'], ['geometry', '显示线'], ['labelOnly', '仅标签']]
+      : [['hidden', '隐藏'], ['geometry', '显示点'], ['labelOnly', '仅标签']];
   return <section className="space-y-3"><div><h4 className="font-semibold">渲染规则</h4><p className="mt-1 text-xs text-slate-500">规则 Zoom 区间是唯一的渲染规则对象（沿用 V1 的 round(Leaflet Zoom + 3)、0–8 映射）。每条规则独立拥有样式、Label、层级、优先级及扩展覆盖；渲染规则 1 不可删除。</p></div>
     {rules.map((rule, index) => {
       const style = rule.style ?? defaultStyle(geometry);
@@ -306,8 +307,8 @@ function RenderRuleEditor({ config, path, geometry, profile, onChange }: { confi
   const representations: Array<[ZoomPriorityRule['representation'], string]> = geometry === 'Polygon'
     ? [['hidden', '隐藏'], ['point', '面内中点'], ['geometry', '显示面']]
     : geometry === 'LineString'
-      ? [['hidden', '隐藏'], ['geometry', '显示线']]
-      : [['hidden', '隐藏'], ['geometry', '显示点']];
+      ? [['hidden', '隐藏'], ['geometry', '显示线'], ['labelOnly', '仅标签']]
+      : [['hidden', '隐藏'], ['geometry', '显示点'], ['labelOnly', '仅标签']];
   const updateRule = (id: string, patch: Partial<ZoomPriorityRule>) => onChange({
     ...profile,
     zoomPriority: { rules: rules.map((rule) => rule.id === id ? { ...rule, ...patch } : rule) },

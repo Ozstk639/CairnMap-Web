@@ -1,3 +1,4 @@
+import { isNativeConfigRevision } from '../../configStudio/contract';
 import { MAP_ZOOM_BOUNDS, TILE_ZOOM_BOUNDS } from '@/lib/mapZoom';
 import { Suspense, lazy, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import MobileBottomSheet from '@/components/Mobile/MobileBottomSheet';
@@ -237,7 +238,7 @@ function MapContainer({ configRuntime, configLab = false }: { configRuntime?: Co
   // features must not be visually mixed with the old railway/landmark layers
   // or be filtered by the V1 rule-button registry.  The V1 lab and ordinary
   // map deliberately keep their existing paths unchanged.
-  const nativeConfigLabActive = Boolean(configLab && configRuntime?.contractRevision === 5);
+  const nativeConfigLabActive = Boolean(configLab && isNativeConfigRevision(configRuntime?.contractRevision));
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<L.Map | null>(null);
   const projectionRef = useRef<DynmapProjection | null>(null);

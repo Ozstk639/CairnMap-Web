@@ -1,3 +1,4 @@
+import { isNativeConfigRevision } from './contract';
 import type { CardItem, ClassificationPath, ConfigPackageV3 } from './types';
 import { resolveCardConfiguration, resolveEffectiveFields } from './runtime';
 import type { FeatureRecord } from '@/components/Rules/rendering/renderRules';
@@ -137,7 +138,7 @@ export function buildV3CardSections(
   record: FeatureRecord,
   railIndex?: RailNewIndex | null,
 ): InfoSections | undefined {
-  if (!config || config.contractRevision !== 5) return undefined;
+  if (!config || !isNativeConfigRevision(config.contractRevision)) return undefined;
   const path = classificationFor(record);
   const card = resolveCardConfiguration(config, path);
   if (!card || card.mode === 'component') return undefined;

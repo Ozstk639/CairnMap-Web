@@ -1,3 +1,4 @@
+import { isNativeConfigRevision } from '../../../configStudio/contract';
 import { featureLabelParts, componentLabelId, filterFeatureGeometryParts } from '@/components/Rules/rendering/multipartLabels';
 import { iconBoundsAtAnchor, type LabelPlacement } from '@/components/Rules/rendering/labelPlacement';
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -2316,7 +2317,7 @@ export default function RuleDrivenLayer(props: Props) {
   const ctx: RenderContext = useMemo(() => {
     const leafletZoom = leafletZoomState;
     const zoomLevel = toZoomLevel(leafletZoom);
-    const contextMinZoom = configRuntime?.contractRevision === 5
+    const contextMinZoom = isNativeConfigRevision(configRuntime?.contractRevision)
       ? configRuntime.engine?.contextView?.minZoom ?? FLOOR_VIEW_MIN_LEVEL
       : FLOOR_VIEW_MIN_LEVEL;
     return {
@@ -2347,7 +2348,7 @@ export default function RuleDrivenLayer(props: Props) {
   }, [ctx]);
 
   const activateConfigRuntimeContext = (record: FeatureRecord): boolean => {
-    if (configRuntime?.contractRevision !== 5) return false;
+    if (!isNativeConfigRevision(configRuntime?.contractRevision)) return false;
     const store = storeRef.current;
     const resolved = resolveConfigRuntimeContextForRecord(configRuntime, record, store ?? undefined);
     if (!resolved) return false;
@@ -2592,7 +2593,7 @@ export default function RuleDrivenLayer(props: Props) {
     // V3.2 context view deliberately has a separate path from the legacy
     // BUD/STB/SBP and FLR/STF logic below.  It resolves any author-configured
     // host/member pair by its classification and reference fields.
-    if (configRuntime?.contractRevision === 5) {
+    if (isNativeConfigRevision(configRuntime?.contractRevision)) {
       const engineContext = configRuntime.engine?.contextView;
       const clearNativeContext = () => {
         setActiveContextBindingId(null);
@@ -2945,7 +2946,7 @@ export default function RuleDrivenLayer(props: Props) {
       }
       const leafletZoom = map.getZoom();
       const zoomLevel = toZoomLevel(leafletZoom);
-      const contextMinZoom = configRuntime?.contractRevision === 5
+      const contextMinZoom = isNativeConfigRevision(configRuntime?.contractRevision)
         ? configRuntime.engine?.contextView?.minZoom ?? FLOOR_VIEW_MIN_LEVEL
         : DEFAULT_FLOOR_VIEW.minLevel;
       const inFloorView = zoomLevel >= contextMinZoom;
@@ -2981,7 +2982,7 @@ export default function RuleDrivenLayer(props: Props) {
         Y_FOR_DISPLAY,
       );
       const viewportWorldRectXZ = layoutViewportWorldRectXZ;
-      const records = configRuntime?.contractRevision === 5
+      const records = isNativeConfigRevision(configRuntime?.contractRevision)
         ? [...recordsRef.current].sort((left, right) => {
             const a = resolveConfigRuntimeStackOrder(configRuntime, left, context);
             const b = resolveConfigRuntimeStackOrder(configRuntime, right, context);
@@ -2992,7 +2993,7 @@ export default function RuleDrivenLayer(props: Props) {
       // slot for the highest collision/display priority first, independently
       // from the later painter's z-order (which remains low-to-high).
       const nativeSymbolDensityAllowed = new Set<string>();
-      if (configRuntime?.contractRevision === 5) {
+      if (isNativeConfigRevision(configRuntime?.contractRevision)) {
         const candidates: Array<{ uid: string; bucket: string; limit: number; priority: number }> = [];
         for (const candidate of records) {
           const nativeRule = resolveConfigRuntimeRule(configRuntime, candidate, context, null, store);
@@ -3141,7 +3142,7 @@ export default function RuleDrivenLayer(props: Props) {
           selected: isSelectedFeature,
           searchResult: isSearchFocus,
         });
-        const displayPlan = configRuntime?.contractRevision === 5
+        const displayPlan = isNativeConfigRevision(configRuntime?.contractRevision)
           ? baseDisplayPlan
           : resolveStructureLabelDisplayPlanForContext(r, baseDisplayPlan, context);
         if (!shouldRenderByDisplayPlan(displayPlan, context)) {
@@ -3158,7 +3159,7 @@ export default function RuleDrivenLayer(props: Props) {
           continue;
         }
 
-        if (configRuntime?.contractRevision === 5 && !nativeSymbolDensityAllowed.has(r.uid)) {
+        if (isNativeConfigRevision(configRuntime?.contractRevision) && !nativeSymbolDensityAllowed.has(r.uid)) {
           updateLineAuditBlocked(
             auditRow,
             "feature-filter",

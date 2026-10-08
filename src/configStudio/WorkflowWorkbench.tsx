@@ -17,7 +17,7 @@ const blankWorkflow = (): WorkflowDefinition => ({
 
 type WorkflowArtifact = {
   schemaVersion: 'cairnmap.workflow-design.v3';
-  contractRevision: 5;
+  contractRevision: 5 | 6;
   exportedAt: string;
   projectId: string;
   workflow: WorkflowDefinition;
@@ -98,7 +98,7 @@ export function WorkflowWorkbench({ config, onChange, onDraftStateChange, record
     if (!draft) return;
     downloadArtifact({
       schemaVersion: 'cairnmap.workflow-design.v3',
-      contractRevision: 5,
+      contractRevision: config.contractRevision as 5 | 6,
       exportedAt: new Date().toISOString(),
       projectId: config.projectId,
       workflow: canonicalizeWorkflow(draft, config),
@@ -108,6 +108,7 @@ export function WorkflowWorkbench({ config, onChange, onDraftStateChange, record
     try {
       const raw = JSON.parse(await file.text()) as Partial<WorkflowArtifact>;
       if (raw.schemaVersion !== 'cairnmap.workflow-design.v3' || !raw.workflow) throw new Error('文件不是标准 V3 工作流设计稿。');
+      if (raw.contractRevision !== 5 && raw.contractRevision !== 6) throw new Error('未知工作流契约版本。');
       if (!confirmDiscardDraft('导入工作流设计稿')) return;
       setDraft(canonicalizeWorkflow(raw.workflow, config));
       setSelectedId('');

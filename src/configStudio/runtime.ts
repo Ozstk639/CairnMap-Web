@@ -1,3 +1,4 @@
+import { isNativeConfigRevision } from './contract';
 import type {
   AffectedFeature,
   CardConfiguration,
@@ -334,11 +335,11 @@ function validateRuleLabel(
     if (!['plain', 'floorLabel'].includes(format)) issue(issues, 'error', 'render-label-fallback-format-invalid', rulePath, '回退 Label 格式无效。', { field: source });
   }
   const visual = label.style;
-  if (config.contractRevision === 5 && (label.font !== undefined || label.size !== undefined || label.italic !== undefined || label.underline !== undefined)) {
+  if (isNativeConfigRevision(config.contractRevision) && (label.font !== undefined || label.size !== undefined || label.italic !== undefined || label.underline !== undefined)) {
     issue(issues, 'error', 'legacy-label-field-forbidden', rulePath, 'V3.2 必须使用 style.family / style.size / style.modifiers，不能混入旧字体字段。');
   }
   if (!visual) {
-    if (config.contractRevision === 5) issue(issues, 'error', 'label-style-required', rulePath, 'V3.2 原生规则必须选择一个 Label 样式。');
+    if (isNativeConfigRevision(config.contractRevision)) issue(issues, 'error', 'label-style-required', rulePath, 'V3.2 原生规则必须选择一个 Label 样式。');
     return;
   }
   if (!Number.isFinite(visual.size) || visual.size < 6 || visual.size > 72) issue(issues, 'error', 'label-style-size-invalid', rulePath, 'Label 样式字号必须介于 6 到 72。');
@@ -418,7 +419,7 @@ function validateRuleExtensions(rule: ZoomPriorityRule, geometry: GeometryKind, 
 }
 
 function validateProfile(profile: GeometryProfile, geometry: GeometryKind, path: string, config: ConfigPackageV3, sourcePath: ClassificationPath, issues: ConfigValidationIssue[]): void {
-  if (config.contractRevision === 5 && (profile.color !== undefined || profile.style !== undefined || profile.geometryStack !== undefined || profile.label !== undefined || profile.legacyDisplay !== undefined)) {
+  if (isNativeConfigRevision(config.contractRevision) && (profile.color !== undefined || profile.style !== undefined || profile.geometryStack !== undefined || profile.label !== undefined || profile.legacyDisplay !== undefined)) {
     issue(issues, 'error', 'legacy-profile-field-forbidden', path, 'V3.2 的显示值必须位于各 Zoom 渲染规则内，不能使用旧几何层级或 label 配置字段。');
   }
   if (!profile.allowMultipleParts && profile.anchor === 'perPart') issue(issues, 'error', 'anchor-requires-multipart', path, '仅允许多部件时才能选择“各部件”锚点。');
@@ -433,6 +434,8 @@ function validateProfile(profile: GeometryProfile, geometry: GeometryKind, path:
     const min = rule.minZoom;
     const max = rule.maxZoom;
     if (!rule.representation) issue(issues, 'error', 'render-representation-required', rulePath, '渲染规则必须选择显示种类。');
+    else if (!['hidden', 'geometry', 'point', 'labelOnly'].includes(rule.representation)) issue(issues, 'error', 'render-representation-invalid', rulePath, '未知显示种类。');
+    if (rule.representation === 'labelOnly' && config.contractRevision !== 6) issue(issues, 'error', 'render-contract-capability-invalid', rulePath, '仅标签显示需要原生契约 revision 6。');
     if (min !== undefined && max !== undefined && min > max) issue(issues, 'error', 'zoom-interval-invalid', rulePath, '显示区间必须符合下界 ≤ Zoom ≤ 上界。');
     intervals.push({ id: rule.id, min: min ?? -Infinity, max: max ?? Infinity });
     const stack = rule.geometryStack;
@@ -479,7 +482,7 @@ function validateProfile(profile: GeometryProfile, geometry: GeometryKind, path:
       if (override.label) validateRuleLabel({ ...rule, label: override.label }, overridePath, config, sourcePath, issues);
       if (override.extensions) validateRuleExtensions({ ...rule, extensions: override.extensions }, geometry, overridePath, config, sourcePath, issues);
     }
-    if (config.contractRevision === 5 && rule.advanced && Object.keys(rule.advanced).some((key) => {
+    if (isNativeConfigRevision(config.contractRevision) && rule.advanced && Object.keys(rule.advanced).some((key) => {
       const value = rule.advanced?.[key as keyof NonNullable<typeof rule.advanced>];
       return value !== undefined && (typeof value !== 'object' || value === null || Object.keys(value as object).length > 0);
     })) issue(issues, 'error', 'legacy-advanced-forbidden', rulePath, 'V3.2 原生规则只能使用类型化“扩展规则”，不得保留 V1 advanced/JSON 回退。');
@@ -508,7 +511,7 @@ function validateCard(node: CategoryNode, config: ConfigPackageV3, issues: Confi
     // A blank r5 package may intentionally contain only rendering rules.
     // Treat that as a warning so authors can test native rendering first;
     // the semantic V1 migration path supplies declarative cards separately.
-    issue(issues, config.contractRevision === 5 ? 'warning' : 'error', config.contractRevision === 5 ? 'card-migration-pending' : 'card-inheritance-missing', path, config.contractRevision === 5 ? '信息卡迁移尚未执行；本轮原生渲染包不附带卡片定义。' : '该分类没有本地信息卡，且没有可继承的信息卡。');
+    issue(issues, isNativeConfigRevision(config.contractRevision) ? 'warning' : 'error', isNativeConfigRevision(config.contractRevision) ? 'card-migration-pending' : 'card-inheritance-missing', path, isNativeConfigRevision(config.contractRevision) ? '信息卡迁移尚未执行；本轮原生渲染包不附带卡片定义。' : '该分类没有本地信息卡，且没有可继承的信息卡。');
     return;
   }
   const fields = new Set(resolveEffectiveFields(config, node.path).map((field) => field.key));
@@ -806,7 +809,7 @@ function validateContextBindings(config: ConfigPackageV3, issues: ConfigValidati
 export function validateConfigPackage(config: ConfigPackageV3, mountedRecords: MountedFeatureRecord[] = []): ConfigValidationReport {
   const issues: ConfigValidationIssue[] = [];
   if (config.schemaVersion !== 'cairnmap.config-package.v3') issue(issues, 'error', 'schema-version-invalid', 'manifest', '配置包不是 cairnmap.config-package.v3。');
-  if (config.contractRevision !== 5) issue(issues, 'error', 'contract-revision-invalid', 'manifest', '配置包必须使用 V3.2 原生契约 revision 5。');
+  if (!isNativeConfigRevision(config.contractRevision)) issue(issues, 'error', 'contract-revision-invalid', 'manifest', '配置包必须使用 V3.2 原生契约 revision 5/6。');
   validateEngine(config, issues);
   if (!/^[a-z][a-z0-9-]{2,80}$/.test(config.packageId)) issue(issues, 'error', 'package-id-invalid', 'manifest', '配置包 ID 格式无效。');
   if (!Number.isSafeInteger(config.revision) || config.revision < 1) issue(issues, 'error', 'revision-invalid', 'manifest', '包 revision 必须是正整数。');
@@ -842,7 +845,7 @@ export function validateConfigPackage(config: ConfigPackageV3, mountedRecords: M
       if (parentNode?.geometryType && node.geometryType && parentNode.geometryType !== node.geometryType) issue(issues, 'error', 'geometry-type-inheritance-invalid', `${base}/geometry`, '父分类已指定几何类型时，子分类必须使用相同类型。');
     }
     if (node.containment?.enabled) {
-      if (config.contractRevision === 5) issue(issues, 'error', 'legacy-containment-forbidden', `${base}/containment`, 'V3.2 原生包必须将包含关系迁移到 contextBindings，不能使用节点内旧绑定。');
+      if (isNativeConfigRevision(config.contractRevision)) issue(issues, 'error', 'legacy-containment-forbidden', `${base}/containment`, 'V3.2 原生包必须将包含关系迁移到 contextBindings，不能使用节点内旧绑定。');
       if (!node.containment.role) issue(issues, 'error', 'containment-role-required', `${base}/containment`, '包含关系绑定已启用，但尚未选择主结构或附属结构。');
       const fields = new Set(resolveEffectiveFields(config, node.path).map((field) => field.key));
       if (node.containment.role === 'child' && (!node.containment.parentReferenceField || !fields.has(node.containment.parentReferenceField))) issue(issues, 'error', 'containment-parent-field-invalid', `${base}/containment`, '附属结构必须选择一个当前有效的主结构引用字段。');

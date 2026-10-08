@@ -1,3 +1,4 @@
+import { isNativeConfigRevision } from './contract';
 import { normalizeImportedLocalization, normalizeImportedText } from './localization';
 import JSZip from 'jszip';
 import { createConfigPackageFromCurrentProject } from './legacyProjectAdapter';
@@ -21,7 +22,7 @@ import { createV32EngineDefaults } from './v32Defaults';
 
 type PackageManifestV3 = {
   schemaVersion: 'cairnmap.config-package-manifest.v3';
-  contractRevision: 3 | 4 | 5;
+  contractRevision: 3 | 4 | 5 | 6;
   packageId: string;
   projectId: string;
   revision: number;
@@ -500,11 +501,26 @@ export function migrateV4Package(value: Omit<ConfigPackageV3, 'contractRevision'
   } as ConfigPackageV3;
 }
 
+/** Preserve authored r5 visuals when separating collision and display priority. */
+export function migrateV5Package(value: ConfigPackageV3): ConfigPackageV3 {
+  if (value.contractRevision !== 5) return normalizeImportedLocalization(value);
+  const config = normalizeImportedLocalization(structuredClone(value));
+  config.contractRevision = 6;
+  for (const node of config.nodes) for (const profile of Object.values(node.geometryProfiles)) {
+    for (const rule of profile?.zoomPriority.rules ?? []) {
+      if (!rule.label) continue;
+      rule.label.collision.basePriority += Number(rule.priority?.base ?? 0);
+      if (rule.priority?.metric) rule.label.collision.metric = structuredClone(rule.priority.metric);
+    }
+  }
+  return config;
+}
+
 function asConfig(value: unknown): ConfigPackageV3 {
   assertV3(value);
-  if (value.contractRevision === 5) return normalizeImportedLocalization(value as ConfigPackageV3);
-  if (value.contractRevision === 4) return migrateV4Package(value);
-  if (value.contractRevision === 3) return migrateV4Package(migrateV31Package(value));
+  if (isNativeConfigRevision(value.contractRevision)) return migrateV5Package(value as ConfigPackageV3);
+  if (value.contractRevision === 4) return migrateV5Package(migrateV4Package(value));
+  if (value.contractRevision === 3) return migrateV5Package(migrateV4Package(migrateV31Package(value)));
   throw new Error('该配置包属于无法读取的旧 V3 契约。请先使用兼容版本导出后再导入。');
 }
 

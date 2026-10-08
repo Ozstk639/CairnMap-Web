@@ -1,3 +1,4 @@
+import { isNativeConfigRevision } from './contract';
 import type { ConfigPackageV3 } from './types';
 import { normalizeImportedLocalization } from './localization';
 
@@ -30,7 +31,7 @@ export async function loadLatestConfigLabPackage(): Promise<ConfigPackageV3 | un
     request.onerror = () => reject(request.error ?? new Error('无法读取本地配置。'));
     request.onsuccess = () => {
       const value = request.result as ConfigPackageV3 | undefined;
-      resolve(value?.contractRevision === 5 ? normalizeImportedLocalization(value) : undefined);
+      resolve(isNativeConfigRevision(value?.contractRevision) ? normalizeImportedLocalization(value) : undefined);
     };
   }).finally(() => database.close());
 }
@@ -50,7 +51,7 @@ export async function listConfigLabPackages(): Promise<ConfigPackageV3[]> {
       }
       if (String(cursor.key).startsWith(HISTORY_PREFIX)) {
         const value = cursor.value as ConfigPackageV3;
-        if (value?.schemaVersion === 'cairnmap.config-package.v3' && value.contractRevision === 5) values.push(normalizeImportedLocalization(value));
+        if (value?.schemaVersion === 'cairnmap.config-package.v3' && isNativeConfigRevision(value.contractRevision)) values.push(normalizeImportedLocalization(value));
       }
       cursor.continue();
     };

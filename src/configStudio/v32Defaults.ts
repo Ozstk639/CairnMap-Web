@@ -142,7 +142,7 @@ export function createDefaultGeometryProfile(geometry: GeometryKind, enabled = t
 export function createBlankV32Package(): ConfigPackageV3 {
   return {
     schemaVersion: 'cairnmap.config-package.v3',
-    contractRevision: 5,
+    contractRevision: 6,
     packageId: 'cairnmap-config-v32',
     projectId: 'default',
     revision: 1,

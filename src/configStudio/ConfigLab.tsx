@@ -1,3 +1,4 @@
+import { isNativeConfigRevision } from './contract';
 import { Component, type ErrorInfo, type ReactNode, useEffect, useRef, useState } from 'react';
 import { Download, FileUp, FlaskConical, Pencil, Save, X } from 'lucide-react';
 import MapContainer from '@/components/Map/MapContainer';
@@ -35,7 +36,7 @@ export function ConfigLab({ onClose }: { onClose: () => void }) {
     try {
       const draft = sessionStorage.getItem('cairnmap-config-studio-draft');
       const parsed = draft ? JSON.parse(draft) as ConfigPackageV3 : undefined;
-      if (parsed?.schemaVersion === 'cairnmap.config-package.v3' && parsed.contractRevision === 5) {
+      if (parsed?.schemaVersion === 'cairnmap.config-package.v3' && isNativeConfigRevision(parsed.contractRevision)) {
         setConfig(parsed);
         setMessage(`已恢复本会话编辑的 V3.2 原生配置 ${parsed.packageId} r${parsed.revision}。`);
         return;

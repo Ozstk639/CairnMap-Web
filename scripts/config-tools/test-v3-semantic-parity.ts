@@ -72,7 +72,7 @@ function styleKey(rule: any): string {
 const config = createConfigPackageFromCurrentProject();
 const report = validateConfigPackage(config);
 const errors = report.issues.filter((issue) => issue.severity === 'error');
-expect(config.contractRevision === 5, 'Semantic migration did not create contract r5.');
+expect(config.contractRevision === 6, 'Semantic migration did not create contract r6.');
 expect(errors.length === 0, `Semantic migration contains ${errors.length} validation errors: ${errors.slice(0, 12).map((issue) => `${issue.code}@${issue.path}`).join(', ')}`);
 const migratedFields = config.nodes.flatMap((node) => node.fields);
 expect(!migratedFields.some((field) => field.key === 'tags' || field.key === 'extensions'), 'Optional tags/extensions groups were migrated as synthetic root text fields.');

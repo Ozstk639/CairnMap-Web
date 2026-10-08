@@ -1172,7 +1172,7 @@ export function createConfigPackageFromCurrentProject(): ConfigPackageV3 {
   const nodes = classes.flatMap(nodesFor);
   return {
     schemaVersion: 'cairnmap.config-package.v3',
-    contractRevision: 5,
+    contractRevision: 6,
     packageId: 'cairnmap-config-v32-semantic',
     projectId: 'openriamap-ria',
     revision: 1,
