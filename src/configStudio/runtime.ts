@@ -23,7 +23,7 @@ import type {
   SelectOption,
   ZoomPriorityRule,
 } from './types';
-import { isSafeWorkflowTarget, parseWorkflowExpression, workflowExpressionTokens, WORKFLOW_SYSTEM_TOKENS } from './workflowExpression';
+import { isSafeWorkflowTarget, parseWorkflowExpression, workflowExpressionTokens, WORKFLOW_SYSTEM_TOKENS, PROTECTED_WORKFLOW_TARGETS, workflowOutputAssemblyOrder } from './workflowExpression';
 import { createBlankV32Package } from './v32Defaults';
 
 const GEOMETRIES: GeometryKind[] = ['Point', 'LineString', 'Polygon'];
@@ -560,6 +560,7 @@ function validateSearch(control: Pick<WorkflowControl, 'kind' | 'search'>, confi
   if (!templateFields.length) issue(issues, 'error', 'workflow-search-display-template-invalid', path, '展示格式必须至少引用一个字段，例如 {{ID}} ({{Name}})。');
   for (const field of templateFields) if (!selectable.has(field)) issue(issues, 'error', 'workflow-search-display-field-invalid', path, `展示格式字段 ${field} 不在目标分类的有效字段集中。`, { field });
   if (!['contains', 'prefix', 'token', 'fuzzy'].includes(search.matcher ?? '')) issue(issues, 'error', 'workflow-search-matcher-invalid', path, '搜索匹配方式无效。');
+  if (!['world', 'loadedWorlds'].includes(search.cacheScope) || search.debounceMs !== undefined && (!Number.isInteger(search.debounceMs) || search.debounceMs < 0)) issue(issues, 'error', 'workflow-search-cache-invalid', path, '搜索范围或延迟无效。');
   if (!Number.isInteger(search.minQueryLength) || Number(search.minQueryLength) < 0 || !Number.isInteger(search.maxResults) || Number(search.maxResults) < 1) issue(issues, 'error', 'workflow-search-options-invalid', path, '搜索必须配置有效的最短输入长度和结果上限。');
 }
 
@@ -577,6 +578,10 @@ export function validateWorkflowOutput(output: WorkflowOutput, _outputIndex: num
   const assignmentIds = new Set<string>();
   for (const assignment of output.assignments) {
     const assignmentPath = `${base}/assignments/${assignment.id}`;
+    if (PROTECTED_WORKFLOW_TARGETS.has(assignment.target.split('.')[0])) {
+      const token = assignment.target === 'SKind' ? 'Skind' : assignment.target === 'SKind2' ? 'Skind2' : assignment.target;
+      if (assignment.expression.trim() !== token || !WORKFLOW_SYSTEM_TOKENS.includes(token as typeof WORKFLOW_SYSTEM_TOKENS[number])) issue(issues, 'error', 'workflow-system-target-protected', assignmentPath, `系统字段 ${assignment.target} 不能由字段组装覆盖。`);
+    }
     if (!assignment.target.trim() || !assignment.expression.trim()) issue(issues, 'error', 'workflow-assignment-invalid', assignmentPath, '字段组装必须同时指定目标和表达式。');
     if (!isSafeWorkflowTarget(assignment.target) || (!fields.has(assignment.target) && !/^tags\.[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)*$/.test(assignment.target) && !/^extensions\.[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)*$/.test(assignment.target) && !SYSTEM_FIELD_KEYS.has(assignment.target))) issue(issues, 'error', 'workflow-assignment-target-invalid', assignmentPath, `字段组装目标 ${assignment.target} 不是有效字段、tags 或 extensions 路径。`);
     if (!assignment.id || assignmentIds.has(assignment.id)) issue(issues, 'error', 'workflow-assignment-id-invalid', assignmentPath, '组装行标识必须存在且不能重复。');
@@ -589,6 +594,7 @@ export function validateWorkflowOutput(output: WorkflowOutput, _outputIndex: num
 
 function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3, issues: ConfigValidationIssue[]): void {
   const base = `workflows/${workflow.id}`;
+  try { workflowOutputAssemblyOrder(workflow); } catch (error) { issue(issues, 'error', 'workflow-output-dependency-invalid', base, error instanceof Error ? error.message : '输出依赖无效。'); }
   const checkIds = (items: Array<{ id: string }>, kind: string) => {
     const ids = new Set<string>();
     for (const item of items) { if (!item.id?.trim() || ids.has(item.id)) issue(issues, 'error', 'workflow-id-invalid', base, `${kind}标识必须存在且不能重复。`); ids.add(item.id); }
@@ -624,11 +630,16 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
     const controlPath = `${base}/steps/${step.id}/controls/${control.id}`;
     if (['notice', 'runtimeValue', 'component'].includes(control.kind)) issue(issues, 'error', 'workflow-control-kind-not-composed', controlPath, '组合式工作流只允许标准表单控件；专有流程应切换为外部整体工作流。');
     if (control.slot) {
-      if (!/^[A-Z][A-Z0-9_]*$/.test(control.slot) || slots.has(control.slot)) issue(issues, 'error', 'workflow-slot-invalid', controlPath, `输出槽位 ${control.slot} 无效或重复。`);
+      if (!/^[A-Z][A-Z0-9_]*$/.test(control.slot) || slots.has(control.slot) || WORKFLOW_SYSTEM_TOKENS.some(token => control.slot === token || new RegExp(`^${token}_\\d+$`).test(control.slot!))) issue(issues, 'error', 'workflow-slot-invalid', controlPath, `输出槽位 ${control.slot} 无效、重复或与系统 token 冲突。`);
       slots.add(control.slot);
     }
     else if (!control.systemManaged) issue(issues, 'error', 'workflow-slot-required', controlPath, '表单输入必须声明输出槽位。');
     validateOptions(control, controlPath);
+    if (control.rows !== undefined && (!Number.isInteger(control.rows) || control.rows < 1)) issue(issues, 'error', 'workflow-control-rows-invalid', controlPath, '输入行数必须为正整数。');
+    if (control.defaultValue !== undefined) {
+      if (control.kind === 'number' && !Number.isFinite(Number(control.defaultValue)) || control.kind === 'toggle' && typeof control.defaultValue !== 'boolean' || control.kind === 'select' && !control.options?.some(option => option.value === control.defaultValue)) issue(issues, 'error', 'workflow-default-invalid', controlPath, '默认值与输入类型/选项不一致。');
+      if (control.kind === 'json') try { if (typeof control.defaultValue === 'string') JSON.parse(control.defaultValue); } catch { issue(issues, 'error', 'workflow-default-invalid', controlPath, '默认值必须为有效 JSON。'); }
+    }
     if (control.kind === 'featureSearch' || control.kind === 'coarseSearch') validateSearch(control, config, controlPath, issues);
     if (control.kind === 'classificationPicker') {
       if (!control.outputId || !workflow.outputs.some((output) => output.id === control.outputId)) issue(issues, 'error', 'workflow-classification-output-invalid', controlPath, '系统 Classification 控件必须精确绑定一个工作流输出。');

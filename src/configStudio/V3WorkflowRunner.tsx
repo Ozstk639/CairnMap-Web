@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { normalizeRuleSourceWorldId } from '@/components/Rules/data/ruleDataSources';
 import type { ClassificationPath, ConfigPackageV3, MountedFeatureRecord, SearchProfile, WorkflowControl, WorkflowDefinition, WorkflowGroupField } from './types';
-import { listCategoryPaths, normalizeSearchProfile, optionLabel, pathMatchesScope, readRecordPath, workflowPathLabel } from './runtime';
+import { listCategoryPaths, normalizeSearchProfile, optionLabel, pathMatchesScope, readRecordPath, workflowPathLabel, hasCategoryNode, resolveGeometryProfile, resolveEffectiveFields } from './runtime';
 
 import { finalizeV3WorkflowRecord } from './workflowRecord';
 import { multipartGeometryFromSinglePath, validateMultipartGeometry, type MultipartCoord } from '../core/geometry/multipartGeometry';
-import { evaluateWorkflowExpression, isSafeWorkflowTarget } from './workflowExpression';
+import { evaluateWorkflowExpression, isSafeWorkflowTarget, PROTECTED_WORKFLOW_TARGETS, workflowOutputAssemblyOrder } from './workflowExpression';
 
 export type V3WorkflowValueMap = Record<string, unknown>;
 export type V3WorkflowRunResult = Array<{ outputId: string; classification: ClassificationPath; geometry: string; record: Record<string, unknown> }>;
@@ -75,9 +75,13 @@ export function workflowOutputSystem(workflow: WorkflowDefinition, slots: V3Work
 export function evaluateV3WorkflowOutputs(workflow: WorkflowDefinition, slots: V3WorkflowValueMap, options: { world?: string; classifications?: Record<string, ClassificationPath | undefined>; config?: ConfigPackageV3; coordinates?: Record<string, MultipartCoord[]>; now?: Date } = {}): V3WorkflowRunResult {
   slots = normalizeV3WorkflowSlots(workflow, slots);
   const world = normalizeV3WorldId(options.world ?? slots.World ?? 'zth');
-  return workflow.outputs.map((output) => {
+  const assembled = new Map<number, V3WorkflowRunResult[number]>();
+  for (const index of workflowOutputAssemblyOrder(workflow)) {
+    const output = workflow.outputs[index];
     const classification = resolvedClassification(output, options.classifications ?? {});
     const system = workflowOutputSystem(workflow, slots, { ...options, world }, output.id);
+    for (const [otherIndex, result] of assembled) system[`ID_${otherIndex + 1}`] = result.record.ID ?? '';
+    if (options.config && (!hasCategoryNode(options.config, classification) || !pathMatchesScope(classification, output.classification) || !resolveGeometryProfile(options.config, classification, output.geometry.selected)?.enabled)) throw new Error(`输出 ${output.id} 的分类或几何无效。`);
     const record: Record<string, unknown> = { World: world, Class: classification.class, ...(classification.kind ? { Kind: classification.kind } : {}), ...(classification.skind ? { SKind: classification.skind } : {}), ...(classification.skind2 ? { SKind2: classification.skind2 } : {}) };
     const actor = String(slots.actor ?? '').trim(); if (actor) record.Creator = actor;
     for (const namespace of ['tags', 'extensions'] as const) {
@@ -85,13 +89,20 @@ export function evaluateV3WorkflowOutputs(workflow: WorkflowDefinition, slots: V
       if (value && typeof value === 'object' && !Array.isArray(value)) record[namespace] = value;
     }
     for (const assignment of output.assignments) {
+      if (PROTECTED_WORKFLOW_TARGETS.has(assignment.target.split('.')[0])) {
+        const source = assignment.target === 'SKind' ? 'Skind' : assignment.target === 'SKind2' ? 'Skind2' : assignment.target;
+        if (assignment.expression.trim() === source && source in system) continue;
+        throw new Error(`系统字段 ${assignment.target} 不能由组装覆盖。`);
+      }
       setPath(record, assignment.target, parseStructuredOutput(assignment.target, evaluateV3Expression(assignment.expression, slots, system)));
       system.ID = record.ID ?? '';
+      system[`ID_${index + 1}`] = record.ID ?? '';
     }
     record.World = world;
     const finalized = options.config && options.coordinates?.[output.id] ? finalizeV3WorkflowRecord(options.config, { ...output, classification }, record, { coords: options.coordinates[output.id], now: options.now ?? new Date() }) : record;
-    return { outputId: output.id, classification, geometry: output.geometry.selected, record: finalized };
-  });
+    assembled.set(index, { outputId: output.id, classification, geometry: output.geometry.selected, record: finalized });
+  }
+  return workflow.outputs.map((_, index) => assembled.get(index)!);
 }
 
 function empty(value: unknown): boolean { return value === undefined || value === null || (typeof value === 'string' && !value.trim()) || (Array.isArray(value) && value.length === 0); }
@@ -118,7 +129,7 @@ export function findV3SearchCandidates(records: MountedFeatureRecord[], profile:
     return text.includes(needle);
   };
   return records.filter((record) => {
-    if (world && String(record.World ?? '').trim() && normalizeV3WorldId(record.World) !== normalizeV3WorldId(world)) return false;
+    if (search.cacheScope !== 'loadedWorlds' && world && String(record.World ?? '').trim() && normalizeV3WorldId(record.World) !== normalizeV3WorldId(world)) return false;
     if (!pathMatchesScope(recordPath(record), search.target)) return false;
     return (search.queryFields ?? []).some((field) => matches(String(readRecordPath(record, field) ?? '')));
   }).slice(0, search.maxResults ?? 30).map((record, index) => ({ id: String(record.ID ?? index), display: displaySearchTemplate(search.displayTemplate ?? '{{ID}} ({{Name}})', record), returned: readRecordPath(record, search.returnField ?? 'ID'), record }));
@@ -127,6 +138,7 @@ export function findV3SearchCandidates(records: MountedFeatureRecord[], profile:
 export function validateV3WorkflowInputs(workflow: WorkflowDefinition, slots: V3WorkflowValueMap, steps = workflow.steps): V3WorkflowInputIssue[] {
   if (workflow.mode !== 'composed') return [];
   const issues: V3WorkflowInputIssue[] = [];
+  for (const step of steps) if (step.kind === 'actor' && workflow.actor?.required !== false && empty(slots.actor)) issues.push({ stepId: step.id, message: '填写人为必填项。' });
   const validateValue = (field: WorkflowControl | WorkflowGroupField, value: unknown, report: (message: string) => void) => {
     if (field.required && empty(value)) report(`${field.label.zh} 为必填项。`);
     if (empty(value)) return;
@@ -142,7 +154,7 @@ export function validateV3WorkflowInputs(workflow: WorkflowDefinition, slots: V3
     const group = control.group; const scalar = group?.storage === 'scalar';
     const rows = Array.isArray(value) ? value : [];
     if (!empty(value) && !Array.isArray(value)) report(`${control.label.zh} 必须是数组。`);
-    const minItems = Math.max(group?.minItems ?? 0, control.required ? 1 : 0);
+    const minItems = Math.max(group?.minItems ?? 0, control.required || group?.optional === false ? 1 : 0);
     if (rows.length < minItems) report(`${control.label.zh} 至少需要 ${minItems} 项。`);
     for (const [rowIndex, row] of rows.entries()) {
       if (!scalar && (!row || typeof row !== 'object' || Array.isArray(row))) { report(`${control.label.zh} 第 ${rowIndex + 1} 项必须是字段对象。`); continue; }
@@ -160,6 +172,28 @@ export function validateV3WorkflowInputs(workflow: WorkflowDefinition, slots: V3
   return issues;
 }
 
+/** Creation validates the assembled record, not only its form slots. */
+export function validateV3WorkflowRecords(config: ConfigPackageV3, workflow: WorkflowDefinition, result: V3WorkflowRunResult): V3WorkflowInputIssue[] {
+  const issues: V3WorkflowInputIssue[] = [];
+  for (const output of result) {
+    const definition = workflow.outputs.find(item => item.id === output.outputId);
+    if (!definition || !hasCategoryNode(config, output.classification) || !pathMatchesScope(output.classification, definition.classification)) { issues.push({ message: `输出 ${output.outputId} 的分类无效。` }); continue; }
+    if (!String(output.record.ID ?? '').trim()) issues.push({ message: `输出 ${output.outputId} 缺少有效 ID。` });
+    for (const field of resolveEffectiveFields(config, output.classification)) {
+      const value = readRecordPath(output.record, field.key);
+      const required = field.required || field.requiredWhen?.some(condition => condition.kind === 'always' || condition.kind === 'fieldPresent' && !empty(readRecordPath(output.record, condition.field)) === condition.present || condition.kind === 'fieldEquals' && String(readRecordPath(output.record, condition.field) ?? '') === condition.value || condition.kind === 'fieldIn' && condition.values.includes(String(readRecordPath(output.record, condition.field) ?? '')));
+      if (required && empty(value)) issues.push({ message: `输出 ${output.outputId} 的 ${field.key} 为必填项。` });
+      if (empty(value)) continue;
+      const values = field.cardinality === 'multiple' ? Array.isArray(value) ? value : [value] : [value];
+      if (field.cardinality === 'multiple' && !Array.isArray(value)) issues.push({ message: `${field.key} 必须是数组。` });
+      if (field.type === 'number' && values.some(item => typeof item !== 'number' || !Number.isFinite(item))) issues.push({ message: `${field.key} 必须是有限数值。` });
+      if (field.type === 'boolean' && values.some(item => typeof item !== 'boolean')) issues.push({ message: `${field.key} 必须是布尔值。` });
+      if (field.type === 'enum' && field.options?.length && values.some(item => !field.options!.some(option => option.value === String(item)))) issues.push({ message: `${field.key} 不是有效选项值。` });
+    }
+  }
+  return issues;
+}
+
 function encodePath(path: ClassificationPath): string { return JSON.stringify(path); }
 function decodePath(value: string): ClassificationPath | undefined { try { const parsed = JSON.parse(value); return parsed?.class ? parsed as ClassificationPath : undefined; } catch { return undefined; } }
 
@@ -169,7 +203,9 @@ function ToggleInput({ value, onChange }: { value: unknown; onChange: (value: bo
 
 function FeatureSearchInput({ profile, records, value, onChange, placeholder, world }: { profile?: SearchProfile; records: MountedFeatureRecord[]; value: unknown; onChange: (value: unknown) => void; placeholder?: string; world?: string }) {
   const [query, setQuery] = useState('');
-  const candidates = useMemo(() => findV3SearchCandidates(records, profile, query, world ?? String((records[0] as MountedFeatureRecord | undefined)?.World ?? '')), [records, profile, query, world]);
+  const [settledQuery, setSettledQuery] = useState('');
+  useEffect(() => { const timer = window.setTimeout(() => setSettledQuery(query), profile?.debounceMs ?? 180); return () => window.clearTimeout(timer); }, [query, profile?.debounceMs]);
+  const candidates = useMemo(() => findV3SearchCandidates(records, profile, settledQuery, world ?? String((records[0] as MountedFeatureRecord | undefined)?.World ?? '')), [records, profile, settledQuery, world]);
   const search = normalizeSearchProfile(profile);
   return <div className="space-y-1"><input className="w-full rounded border px-2 py-1 text-sm" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={placeholder ?? '输入 ID 或 Name 搜索'} />
     {query && search ? <div className="max-h-32 overflow-auto rounded border bg-white text-xs shadow-sm">{candidates.length ? candidates.map((candidate) => <button type="button" key={`${candidate.id}-${String(candidate.returned)}`} className="block w-full px-2 py-1 text-left hover:bg-blue-50" onClick={() => { onChange(candidate.returned); setQuery(candidate.display); }}>{candidate.display}</button>) : <p className="px-2 py-1 text-slate-500">无匹配要素</p>}</div> : null}

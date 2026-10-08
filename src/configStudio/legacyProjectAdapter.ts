@@ -882,7 +882,7 @@ function blockControl(block: CairnMapWorkflowBlock, index: number): WorkflowCont
     matcher: 'contains' as const,
     minQueryLength: 1,
     maxResults: 30,
-    cacheScope: 'loadedWorlds' as const,
+    cacheScope: 'world' as const,
     debounceMs: 180,
   } : undefined;
   return {
@@ -982,7 +982,7 @@ function schemaSearch(target: ClassificationPath, _coarse = false, searchConfigK
     minQueryLength: 1,
     maxResults: 30,
     debounceMs: 180,
-    cacheScope: 'loadedWorlds',
+    cacheScope: 'world',
   };
 }
 

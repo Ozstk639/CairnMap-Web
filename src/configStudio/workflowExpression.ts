@@ -6,6 +6,32 @@ export type WorkflowExpression =
   | { kind: 'join'; args: WorkflowExpression[] };
 
 export const WORKFLOW_SYSTEM_TOKENS = ['ID', 'World', 'WorldPrefix', 'Class', 'Kind', 'Skind', 'Skind2', 'Creator'] as const;
+export const PROTECTED_WORKFLOW_TARGETS = new Set(['World', 'Class', 'Kind', 'Skind', 'Skind2', 'SKind', 'SKind2', 'Type', 'Creator', 'CreateBy', 'CreateTime', 'EditBy', 'EditTime', 'CoordP', 'CoordL', 'CoordG', 'Geometry']);
+
+/** Resolve final-ID dependencies by stable output identity, retaining display order. */
+export function workflowOutputAssemblyOrder(workflow: { outputs: Array<{ id: string; assignments: Array<{ target: string; expression: string }> }> }): number[] {
+  const dependencies = workflow.outputs.map((output, index) => new Set(output.assignments.flatMap(assignment => workflowExpressionTokens(parseWorkflowExpression(assignment.expression)).flatMap(token => {
+    const match = /^ID_(\d+)$/.exec(token);
+    if (!match) return [];
+    const target = Number(match[1]) - 1;
+    if (target < 0 || target >= workflow.outputs.length) throw new Error(`不存在输出 token ${token}。`);
+    if (target === index) {
+      if (assignment.target === 'ID') throw new Error(`输出 ${output.id} 的 ID 不能依赖自身最终 ID。`);
+      return [];
+    }
+    return [target];
+  }))));
+  const visiting = new Set<number>(); const done = new Set<number>(); const order: number[] = [];
+  const visit = (index: number) => {
+    if (done.has(index)) return;
+    if (visiting.has(index)) throw new Error('工作流输出 ID 依赖形成循环。');
+    visiting.add(index);
+    for (const dependency of dependencies[index]) visit(dependency);
+    visiting.delete(index); done.add(index); order.push(index);
+  };
+  workflow.outputs.forEach((_, index) => visit(index));
+  return order;
+}
 const unsafeSegments = new Set(['__proto__', 'prototype', 'constructor']);
 export function isSafeWorkflowTarget(path: string): boolean {
   return /^[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)*$/.test(path) && !path.split('.').some((part) => unsafeSegments.has(part));
