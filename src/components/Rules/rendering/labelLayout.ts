@@ -158,6 +158,8 @@ export type LabelDeclutterConfig = {
   densityGridSizePx?: number;
   densityMaxLabelsPerGrid?: number;
   densityPreserveRequired?: boolean;
+  densityPreserveSelected?: boolean;
+  placementInvalidateWhen?: string[];
   densityGroupKey?: string;
   densityReduceOrder?: LabelDensityReduceStep[];
 
@@ -278,6 +280,12 @@ export type LabelRequest = {
   /** A true point may participate in its label's combined collision box. */
   symbolBounds?: { radius: number; offsetX: number; offsetY: number };
   candidatePlacement?: 'relativeToPlacement' | 'aroundAnchor';
+  candidateOffsetsPx?: Array<{ name: string; x: number; y: number }>;
+  anchorOffsetPx?: { x: number; y: number };
+  selected?: boolean;
+  worldId?: string;
+  displayMode?: string;
+  geometrySignature?: string;
 
   /** 是否带中心点（影响 bbox 宽度估计） */
   withDot?: boolean;
@@ -316,6 +324,8 @@ export type PlacedLabel = {
   dx: number;
   dy: number;
   hidden: boolean;
+  hideSymbol?: boolean;
+  keepGeometry?: boolean;
   /** RB_SLU_6: 调试/审计用隐藏原因；渲染层可忽略。 */
   hiddenReason?: LabelHiddenReason;
 
@@ -586,7 +596,7 @@ function normalizeCandidates(
   size: Measured,
   params: LabelLayoutParams,
 ): LabelCandidate[] {
-  const raw = req.declutter.candidates;
+  const raw = req.candidateOffsetsPx?.length ? req.candidateOffsetsPx.map(offset => ({ name: offset.name as LabelCandidateName, dx: offset.x, dy: offset.y })) : req.declutter.candidates;
 
   const asCandidate = (
     c: LabelCandidate | LabelCandidateName,
@@ -605,7 +615,7 @@ function normalizeCandidates(
 
   // 将 name 转为 dx/dy（若用户未给 dx/dy）
   return list.map((c, idx) => {
-    if (typeof c.dx === "number" && typeof c.dy === "number") return c;
+    if (typeof c.dx === "number" && typeof c.dy === "number") return { ...c, dx: c.dx + (req.anchorOffsetPx?.x ?? 0), dy: c.dy + (req.anchorOffsetPx?.y ?? 0) };
 
     const { dx, dy } = (req.screenOffsets && req.candidatePlacement !== 'aroundAnchor' ? labelCandidateShift : candidateShift)(
       c.name,
@@ -613,7 +623,7 @@ function normalizeCandidates(
       size,
       params.gapPx,
     );
-    return { ...c, dx, dy, score: (c.score ?? 0) + (list.length - idx) * 0.01 };
+    return { ...c, dx: dx + (req.anchorOffsetPx?.x ?? 0), dy: dy + (req.anchorOffsetPx?.y ?? 0), score: (c.score ?? 0) + (list.length - idx) * 0.01 };
   });
 }
 
@@ -1135,7 +1145,7 @@ export function layoutLabelsOnMap(
       abbrev: decl.abbrev,
       groupKey: decl.groupKey,
       maxPerScreen: decl.maxPerScreen,
-      density: resolveLabelDensityConfig(decl),
+      density: resolveLabelDensityConfig({ ...decl, selected: req.selected }),
       placementCache: resolveLabelPlacementCacheConfig({
         id: req.id,
         featureUid: req.featureUid,
@@ -1151,6 +1161,10 @@ export function layoutLabelsOnMap(
         placementZoomBucketSize: decl.placementZoomBucketSize,
         placementKeepPreviousCandidate: decl.placementKeepPreviousCandidate,
         placementKeepPreviousAnchor: decl.placementKeepPreviousAnchor,
+        placementInvalidateWhen: decl.placementInvalidateWhen,
+        worldId: req.worldId,
+        displayMode: req.displayMode,
+        geometrySignature: req.geometrySignature,
       }),
       collisionRole: normalizeCollisionRole(decl.collisionRole),
       collisionGroup: decl.collisionGroup ?? decl.groupKey,
@@ -1870,6 +1884,10 @@ export function layoutLabelsOnMap(
           baseReq.declutter?.placementKeepPreviousCandidate,
         placementKeepPreviousAnchor:
           baseReq.declutter?.placementKeepPreviousAnchor,
+        placementInvalidateWhen: baseReq.declutter?.placementInvalidateWhen,
+        worldId: baseReq.worldId,
+        displayMode: baseReq.displayMode,
+        geometrySignature: baseReq.geometrySignature,
       }) ?? item.placementCache;
 
     const cachedPlacement = placementCache.get(placementCacheConfig);
@@ -2328,14 +2346,15 @@ export function layoutLabelsOnMap(
     let p = tryPlace(item, item.req.text);
 
     // 再尝试缩略
-    if (!p && item.allowAbbrev && item.abbrev) {
+    const densityOrder = item.lastFailureReason === 'densityLimit' ? item.density?.reduceOrder : undefined;
+    if (!p && item.allowAbbrev && item.abbrev && (!densityOrder || densityOrder.includes('abbreviateOptionalLabels') && item.collisionRole === 'optional')) {
       const short = item.abbrev(item.req.text);
       if (short && short !== item.req.text) {
         p = tryPlace(item, short);
       }
     }
 
-    if (!p && shouldForceShow(item)) {
+    if (!p && shouldForceShow(item) && item.lastFailureReason !== 'densityLimit') {
       p = forcePlace(item, item.req.text);
     }
 
@@ -2345,13 +2364,23 @@ export function layoutLabelsOnMap(
     }
 
     // 放不下
+    getDefaultLabelPlacementCache().noteFailure(item.placementCache, item.lastFailureReason);
+    let hideSymbol = false;
+    let keepGeometry = false;
+    if (item.lastFailureReason === 'densityLimit') for (const action of densityOrder ?? []) {
+      if (action === 'hideSymbols') hideSymbol = true;
+      if (action === 'geometryOnly') { keepGeometry = true; hideSymbol = false; break; }
+      if (action === 'hideSoftLabels' && item.collisionRole === 'soft' || action === 'hideOptionalLabels' && item.collisionRole === 'optional') break;
+    }
     placed.push({
       id: item.req.id,
       featureUid: item.req.featureUid,
       text: item.req.text,
       dx: 0,
       dy: 0,
-      hidden: item.allowHide,
+      hidden: item.allowHide || item.lastFailureReason === 'densityLimit',
+      hideSymbol,
+      keepGeometry,
       hiddenReason: item.lastFailureReason ?? "notPlaced",
       collisionRole: item.collisionRole,
       collisionGroup: item.collisionGroup,

@@ -16,7 +16,7 @@ class Browser:
     def __init__(self):
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         pages = json.loads(opener.open('http://127.0.0.1:9238/json').read())
-        page = next(item for item in pages if item['type'] == 'page' and (item['url'] == 'about:blank' or item['url'].startswith('http://127.0.0.1:5188')))
+        page = next(item for item in pages if item['type'] == 'page' and (item['url'] == 'about:blank' or item['url'].startswith(('http://127.0.0.1:5188', 'http://127.0.0.1:5189'))))
         self.ws = websocket.create_connection(page['webSocketDebuggerUrl'], origin='http://127.0.0.1:9238', timeout=30)
         self.seq = 0
         self.errors = []

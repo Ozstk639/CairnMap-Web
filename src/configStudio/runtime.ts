@@ -326,6 +326,13 @@ function validateRuleLabel(
   for (const axis of ['offsetX', 'offsetY'] as const) if (label[axis] !== undefined && !Number.isFinite(label[axis])) issue(issues, 'error', 'label-offset-invalid', rulePath, `${axis} 必须是有限数字。`);
   if (label.placement && !['center', 'near', 'N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW', 'aboveLine', 'belowLine'].includes(label.placement)) issue(issues, 'error', 'label-placement-invalid', rulePath, 'Label 位置无效。');
   if (!Number.isFinite(label.collision.basePriority)) issue(issues, 'error', 'label-base-priority-invalid', rulePath, 'Label 基础优先级必须是有限数字。');
+  const metric = label.collision.metric;
+  if (metric) {
+    if (!['area', 'length', 'partCount', 'field'].includes(metric.kind)) issue(issues, 'error', 'label-metric-kind-invalid', rulePath, '碰撞指标类型无效。');
+    for (const key of ['multiplier', 'divisor', 'min', 'max'] as const) if (metric[key] !== undefined && (!Number.isFinite(metric[key]) || key === 'divisor' && metric[key] === 0)) issue(issues, 'error', 'label-metric-value-invalid', rulePath, '碰撞指标参数必须为有限数字，除数不可为零。');
+    if (metric.min !== undefined && metric.max !== undefined && metric.min > metric.max) issue(issues, 'error', 'label-metric-range-invalid', rulePath, '碰撞指标下限不能大于上限。');
+    if (metric.kind === 'field' && !resolveEffectiveFields(config, sourcePath).some(field => field.key === metric.field)) issue(issues, 'error', 'label-metric-field-invalid', rulePath, '碰撞指标字段不存在。');
+  }
   const fields = new Set(resolveEffectiveFields(config, sourcePath).map((field) => field.key));
   if (label.source && !sourceExists(label.source, fields)) issue(issues, 'error', 'render-label-source-invalid', rulePath, 'Label 来源必须是当前分类的有效字段、tags.xxx 或 extensions.xxx。', { field: label.source });
   for (const fallback of label.fallbackSources ?? []) if (!sourceExists(fallback, fields)) issue(issues, 'error', 'render-label-fallback-source-invalid', rulePath, 'Label 回退来源必须是当前分类的有效字段、tags.xxx 或 extensions.xxx。', { field: fallback });
@@ -375,6 +382,21 @@ function validateRuleExtensions(rule: ZoomPriorityRule, geometry: GeometryKind, 
       : new Set(['inherit', 'featureCenter', 'interior', 'visibleInterior']);
   if (anchor?.strategy && !allowedAnchorStrategies.has(anchor.strategy)) issue(issues, 'error', 'anchor-strategy-geometry-invalid', rulePath, '当前几何类型不能使用该候选锚点策略。');
   if (anchor?.candidates && new Set(anchor.candidates).size !== anchor.candidates.length) issue(issues, 'error', 'anchor-candidates-duplicate', rulePath, '候选锚点方向不能重复。');
+  if (anchor?.candidateOffsetsPx) {
+    const names = new Set<string>();
+    for (const offset of anchor.candidateOffsetsPx) {
+      if (!offset.name.trim() || names.has(offset.name) || !Number.isFinite(offset.x) || !Number.isFinite(offset.y)) issue(issues, 'error', 'candidate-offset-invalid', rulePath, '候选名称必须非空且唯一，X/Y 必须为有限数字。');
+      names.add(offset.name);
+    }
+  }
+  if (anchor?.offsetPx && (!Number.isFinite(anchor.offsetPx.x) || !Number.isFinite(anchor.offsetPx.y))) issue(issues, 'error', 'anchor-offset-invalid', rulePath, '锚点 X/Y 必须为有限数字。');
+  const lists: Array<[string, string[] | undefined, string[]]> = [
+    ['invalidateWhen', extensions.stability?.invalidateWhen, ['zoomBucketChanged','featureGeometryChanged','featureTextChanged','modeChanged','worldChanged','labelOutOfViewport','collisionFailedRepeatedly']],
+    ['reduceOrder', extensions.density?.reduceOrder, ['hideSoftLabels','abbreviateOptionalLabels','hideOptionalLabels','hideSymbols','geometryOnly']],
+    ['collideWith', extensions.collision?.collideWith, ['symbol','requiredLabel','importantLabel','optionalLabel','softLabel','geometry']],
+    ['blocks', extensions.collision?.blocks, ['optionalLabel','softLabel','poiLabel','structureLabel']],
+  ];
+  for (const [name, values, allowed] of lists) if (values && (new Set(values).size !== values.length || values.some(value => !allowed.includes(value)))) issue(issues, 'error', 'extension-list-invalid', `${rulePath}/${name}`, '策略列表存在重复或未知值。');
   const density = extensions.density;
   if (density && density.mode !== 'inherit' && density.mode !== 'override') issue(issues, 'error', 'density-mode-invalid', rulePath, '密度预算必须选择继承或本规则覆盖。');
   if (density?.mode === 'override') {

@@ -3581,6 +3581,10 @@ export default function RuleDrivenLayer(props: Props) {
             advancedLineTextBudget,
           ));
           for (const req of requests) {
+            req.selected = selectedFeature?.uid === req.featureUid;
+            req.worldId = worldId;
+            req.displayMode = context.inFloorView ? 'floor' : 'normal';
+            req.geometrySignature = configRuntime ? JSON.stringify(sourceRecord.multipartGeometry ?? sourceRecord.coords3 ?? sourceRecord.p3) : undefined;
             if (nativeBundle?.nativeSymbol?.visibility === 'withLabel') req.symbolBounds = { radius: Number((nativeSymbolPlan as any)?.radius ?? 0) + Number((nativeSymbolPlan as any)?.style?.weight ?? 0) / 2, offsetX: nativeBundle.nativeSymbol.screenOffsetPx?.x ?? 0, offsetY: nativeBundle.nativeSymbol.screenOffsetPx?.y ?? 0 };
             if (auditRow) {
               auditRow.expectedLabel = true;
@@ -3846,7 +3850,7 @@ export default function RuleDrivenLayer(props: Props) {
 
           // 不可放置/被隐藏 → 移除
           if (!p || p.hidden) {
-            if (parentBundle?.nativeSymbol?.visibility === 'withLabel') setNativeSymbolVisible(root, parentBundle, false, req.partIndex);
+            if (parentBundle?.nativeSymbol && (parentBundle.nativeSymbol.visibility === 'withLabel' || p?.hideSymbol || p?.keepGeometry)) setNativeSymbolVisible(root, parentBundle, Boolean(p?.keepGeometry && !p?.hideSymbol), req.partIndex);
             const row = lineAuditRows.get(req.featureUid ?? "");
             const polygonRow = polygonAuditRows.get(req.featureUid ?? "");
             if (row && p?.hidden) {
@@ -5311,6 +5315,8 @@ function buildLabelRequest(
     offsetX: Number(labelPlan.offsetX ?? 0),
     screenOffsets: Boolean(labelPlan.screenOffsets),
     candidatePlacement: labelPlan.candidatePlacement,
+    candidateOffsetsPx: effectiveDisplayAnchor?.candidateOffsetsPx,
+    anchorOffsetPx: effectiveDisplayAnchor?.offsetPx,
     declutter: labelPlan.declutter,
   };
 

@@ -83,6 +83,7 @@ export function mergeDisplayCollisionIntoDeclutter(
       ? plan.density.maxLabelsPerGrid
       : declutter.densityMaxLabelsPerGrid,
     densityPreserveRequired: plan.density?.preserveRequired ?? declutter.densityPreserveRequired,
+    densityPreserveSelected: plan.density?.preserveSelected ?? declutter.densityPreserveSelected,
     densityGroupKey: plan.collision?.group ?? declutter.densityGroupKey,
     densityReduceOrder: getDisplayDensityReduceOrder(plan) ?? declutter.densityReduceOrder,
 
@@ -94,6 +95,7 @@ export function mergeDisplayCollisionIntoDeclutter(
       : declutter.placementZoomBucketSize,
     placementKeepPreviousCandidate: plan.stability?.keepPreviousCandidate ?? declutter.placementKeepPreviousCandidate,
     placementKeepPreviousAnchor: plan.stability?.keepPreviousAnchor ?? declutter.placementKeepPreviousAnchor,
+    placementInvalidateWhen: plan.stability?.invalidateWhen ?? declutter.placementInvalidateWhen,
 
     // RB_SLU_13: network labels should stay attached to their source polyline.
     lineLabelMode: plan.anchor?.lineLabelMode ?? declutter.lineLabelMode,
