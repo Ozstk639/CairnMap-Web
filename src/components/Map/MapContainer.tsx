@@ -2129,6 +2129,7 @@ case 'players':
                 launcherSlot={(launcher) => <div className="hidden sm:block">{launcher}</div>}
               />
               <LazyMeasuringModule
+                configRuntime={configRuntime}
                 ref={measuringModuleRef}
                 mapReady={mapReady}
                 leafletMapRef={leafletMapRef}

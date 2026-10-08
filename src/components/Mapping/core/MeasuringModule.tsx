@@ -1,3 +1,9 @@
+import { NativeWorkflowHost } from '../Workflow/NativeWorkflowHost';
+import { prepareNativeWorkflowCommit } from '@/configStudio/nativeWorkflowCommit';
+import { validateConfigPackage } from '@/configStudio/runtime';
+import { getClassConfigByCode } from '@/core/project/classMetadata';
+import type { ConfigPackageV3, WorkflowDefinition } from '@/configStudio/types';
+import type { V3WorkflowRunResult } from '@/configStudio/V3WorkflowRunner';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type ChangeEvent } from 'react';
 import { createPortal } from 'react-dom';
 import * as L from 'leaflet';
@@ -146,6 +152,7 @@ import {
  * 这属于 React 组件间通过 props 传值的常规做法。:contentReference[oaicite:1]{index=1}
  */
 type MeasuringModuleProps = {
+  configRuntime?: ConfigPackageV3;
   mapReady: boolean;
   leafletMapRef: React.MutableRefObject<L.Map | null>;
   projectionRef: React.MutableRefObject<DynmapProjection | null>;
@@ -182,6 +189,8 @@ function sanitizeFilenamePart(value: string): string {
 }
 
 export type MeasuringModuleHandle = {
+  /** Read-only integration surface, preserving complete native records. */
+  getCommittedFeatures: () => Record<string, unknown>[];
   /**
    * 在切换世界等场景下使用：若用户取消确认，则返回 false 并阻止上层继续执行。
    * 内部会负责：先关闭“临时挂载”，再清除测绘图层并退出测绘。
@@ -190,7 +199,7 @@ export type MeasuringModuleHandle = {
 };
 
 const MeasuringModule = forwardRef<MeasuringModuleHandle, MeasuringModuleProps>((props, ref) => {
-  const { mapReady, leafletMapRef, projectionRef, currentWorldId, closeSignal, openSignal, onBecameActive, launcherSlot, disablePackageUpload = false } = props;
+  const { mapReady, leafletMapRef, projectionRef, currentWorldId, closeSignal, openSignal, onBecameActive, launcherSlot, disablePackageUpload = false, configRuntime } = props;
 
 
 // ---------- 测绘 & 图层管理状态 ------------
@@ -226,6 +235,8 @@ const [measuringVariant, setMeasuringVariant] = useState<'full'|'workflow'>('ful
 // 工作流选择与运行态（快捷模式使用）
 const [workflowKey, setWorkflowKey] = useState<WorkflowKey>('railway');
 const [workflowRunning, setWorkflowRunning] = useState(false);
+const [nativeWorkflowSnapshot, setNativeWorkflowSnapshot] = useState<{config: ConfigPackageV3; workflow: WorkflowDefinition} | null>(null);
+useEffect(() => { if (configRuntime && !workflowRunning && !configRuntime.workflows.some(workflow => workflow.id === workflowKey)) setWorkflowKey((configRuntime.workflows[0]?.id ?? 'railway') as WorkflowKey); }, [configRuntime, workflowRunning, workflowKey]);
 
 
 // 当前临时点集合（临时绘制的坐标）
@@ -1245,6 +1256,7 @@ const confirmExitAndClear = (actionLabel: string) => {
 };
 
 useImperativeHandle(ref, () => ({
+  getCommittedFeatures: () => layersRef.current.flatMap(layer => layer.jsonInfo?.featureInfo ? [structuredClone(layer.jsonInfo.featureInfo)] : []),
   requestCloseAndClear: (actionLabel?: string) => {
     const label = (actionLabel ?? '关闭测绘').trim() || '关闭测绘';
 
@@ -4397,12 +4409,13 @@ const LEGACY_WORKFLOW_SELECT_OPTIONS: Array<{ key: WorkflowKey; label: string; h
 
 const workflowRegistry: WorkflowRegistry = getConfigDrivenWorkflowRegistry(legacyWorkflowRegistry);
 const WORKFLOW_SELECT_OPTIONS: Array<{ key: WorkflowKey; label: string; hidden?: boolean }> =
-  getConfigDrivenWorkflowSelectOptions(LEGACY_WORKFLOW_SELECT_OPTIONS);
+  configRuntime ? configRuntime.workflows.map(workflow => ({ key: workflow.id as WorkflowKey, label: workflow.label.zh })) : getConfigDrivenWorkflowSelectOptions(LEGACY_WORKFLOW_SELECT_OPTIONS);
 
 
 const stopWorkflowToSelector = () => {
   // 回到“工作流初始选择页面”（不退出测绘）
   setWorkflowRunning(false);
+  setNativeWorkflowSnapshot(null);
 
   // 清空草稿与预览（保留 fixed 图层不动）
   workflowRootRef.current?.clearLayers();
@@ -4421,6 +4434,12 @@ const stopWorkflowToSelector = () => {
 const startWorkflow = () => {
   if (guardTempMountReadonly()) return;
   if (workflowRunning) return;
+  if (configRuntime) {
+    const report = validateConfigPackage(configRuntime);
+    const workflow = configRuntime.workflows.find(item => item.id === workflowKey);
+    if (!report.valid || !workflow) { window.alert('工作流或当前配置包无效，请在工作台修复。'); return; }
+    setNativeWorkflowSnapshot({ config: structuredClone(configRuntime), workflow: structuredClone(workflow) });
+  }
 
   try {
     void describeWorkflowRuntimeSelection(workflowKey);
@@ -4580,6 +4599,23 @@ const commitFeatureFromWorkflow = (args: WorkflowCommitArgs) => {
   });
 
   return { ok: true as const, layerId: id };
+};
+
+const commitNativeWorkflow = (config: ConfigPackageV3, workflow: WorkflowDefinition, outputs: V3WorkflowRunResult) => {
+  if (!leafletMapRef.current || !projectionRef.current) throw new Error('地图未就绪。');
+  const prepared = prepareNativeWorkflowCommit(config, workflow, outputs, currentWorldId);
+  const existing = new Set(layers.map(layer => String(layer.jsonInfo?.featureInfo?.ID ?? '')));
+  if (prepared.some(item => existing.has(String(item.record.ID)))) throw new Error('输出 ID 已存在于当前测绘图层。');
+  const firstId = nextLayerId.current;
+  const batch: LayerType[] = prepared.map((item, index) => {
+    const color = typeof item.record.color === 'string' ? item.record.color : drawColor;
+    return { id: firstId + index, mode: item.mode, color, coords: item.coords, visible: true,
+      leafletGroup: makeLeafletGroupForCoords(item.mode, item.coords, color),
+      jsonInfo: { subType: (getClassConfigByCode(String(item.record.Class))?.sourceFeatureKey ?? String(item.record.Class)) as FeatureKey, featureInfo: item.record },
+    };
+  });
+  nextLayerId.current += batch.length;
+  setLayers(previous => { const next = [...previous, ...batch]; syncFixedRoot(next, null); return next; });
 };
 
 const workflowBridge: WorkflowBridge = {
@@ -5590,12 +5626,12 @@ onChange={(e) => {
   onPointerDownCapture={(e) => e.stopPropagation()}
   onTouchStartCapture={(e) => e.stopPropagation()}
 >
-  <WorkflowHost
+  {nativeWorkflowSnapshot ? (measureDropdownDesktop ? <NativeWorkflowHost key={nativeWorkflowSnapshot.workflow.id} config={nativeWorkflowSnapshot.config} workflow={nativeWorkflowSnapshot.workflow} bridge={workflowBridge} registry={legacyWorkflowRegistry} onCommit={commitNativeWorkflow} onExit={stopWorkflowToSelector} /> : null) : <WorkflowHost
     workflowKey={workflowKey}
     bridge={workflowBridge}
     registry={workflowRegistry}
     onExit={stopWorkflowToSelector}
-  />
+  />}
 </div>
 
   ) : null
@@ -5906,12 +5942,12 @@ onChange={(e) => {
   onPointerDownCapture={(e) => e.stopPropagation()}
   onTouchStartCapture={(e) => e.stopPropagation()}
 >
-  <WorkflowHost
+  {nativeWorkflowSnapshot ? (!measureDropdownDesktop ? <NativeWorkflowHost key={nativeWorkflowSnapshot.workflow.id} config={nativeWorkflowSnapshot.config} workflow={nativeWorkflowSnapshot.workflow} bridge={workflowBridge} registry={legacyWorkflowRegistry} onCommit={commitNativeWorkflow} onExit={stopWorkflowToSelector} /> : null) : <WorkflowHost
     workflowKey={workflowKey}
     bridge={workflowBridge}
     registry={workflowRegistry}
     onExit={stopWorkflowToSelector}
-  />
+  />}
 </div>
 
   ) : null

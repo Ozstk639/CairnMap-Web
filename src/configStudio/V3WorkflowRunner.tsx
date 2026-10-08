@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { normalizeRuleSourceWorldId } from '@/components/Rules/data/ruleDataSources';
-import type { ClassificationPath, ConfigPackageV3, MountedFeatureRecord, SearchProfile, WorkflowControl, WorkflowDefinition, WorkflowGroupField } from './types';
+import type { ClassificationPath, ConfigPackageV3, MountedFeatureRecord, SearchProfile, WorkflowControl, WorkflowDefinition, WorkflowGroupField, WorkflowStep } from './types';
 import { listCategoryPaths, normalizeSearchProfile, optionLabel, pathMatchesScope, readRecordPath, workflowPathLabel, hasCategoryNode, resolveGeometryProfile, resolveEffectiveFields } from './runtime';
 
 import { finalizeV3WorkflowRecord } from './workflowRecord';
@@ -248,26 +248,107 @@ function ControlInput({ control, value, onChange, config, records, world }: { co
 
 /** Usable generic runner. It runs V3-composed flows and performs the same
  * target-scoped search used by saved workflows; external units remain intact. */
-export function V3WorkflowRunner({ config, workflow, records = [], worldId, onSubmit, onRequestExternal, onRequestGeometry, onPreviewSlotsChange }: { onPreviewSlotsChange?: (slots: V3WorkflowValueMap) => void; config: ConfigPackageV3; workflow: WorkflowDefinition; records?: MountedFeatureRecord[]; worldId?: string; onSubmit?: (result: V3WorkflowRunResult) => void; onRequestExternal?: (workflow: WorkflowDefinition) => void; onRequestGeometry?: (outputId: string, geometry: string) => void | MultipartCoord[] | Promise<void | MultipartCoord[]> }) {
+export function V3WorkflowRunner({ config, workflow, records = [], worldId, initialActor = '', onSubmit, onRequestExternal, onRequestGeometry, onCaptureGeometry, onStepChange, onPreviewSlotsChange }: {
+  config: ConfigPackageV3; workflow: WorkflowDefinition; records?: MountedFeatureRecord[]; worldId?: string; initialActor?: string;
+  onSubmit?: (result: V3WorkflowRunResult) => void | Promise<void>;
+  onRequestExternal?: (workflow: WorkflowDefinition) => void;
+  onRequestGeometry?: (outputId: string, geometry: string) => void | MultipartCoord[] | Promise<void | MultipartCoord[]>;
+  onCaptureGeometry?: (outputId: string, geometry: string) => MultipartCoord[];
+  onStepChange?: (step: WorkflowStep | undefined) => void;
+  onPreviewSlotsChange?: (slots: V3WorkflowValueMap) => void;
+}) {
   const [coordinates, setCoordinates] = useState<Record<string, MultipartCoord[]>>({});
   const [createdAt] = useState(() => new Date());
-  const [geometryError, setGeometryError] = useState('');
+  const [geometryErrors, setGeometryErrors] = useState<Record<string, string>>({});
   const [geometryInputs, setGeometryInputs] = useState<Record<string, string>>({});
-  const activeWorld = normalizeV3WorldId(worldId ?? records.find((record) => String(record.World ?? '').trim())?.World ?? 'zth');
+  const activeWorld = normalizeV3WorldId(worldId ?? records.find(record => String(record.World ?? '').trim())?.World ?? 'zth');
+  const defaults = () => Object.fromEntries(workflow.steps.flatMap(item => item.controls ?? []).flatMap(control => control.defaultValue === undefined ? [] : [[control.slot ?? control.id, structuredClone(control.defaultValue)]]));
   const [page, setPage] = useState(0);
-  const [slots, setSlots] = useState<V3WorkflowValueMap>(() => ({ World: activeWorld, ...Object.fromEntries(workflow.steps.flatMap((step) => step.controls ?? []).flatMap((control) => control.defaultValue === undefined ? [] : [[control.slot ?? control.id, control.defaultValue]])) }));
-  const [classifications, setClassifications] = useState<Record<string, ClassificationPath | undefined>>({}); const [submitted, setSubmitted] = useState<V3WorkflowRunResult | null>(null); const [inputIssues, setInputIssues] = useState<V3WorkflowInputIssue[]>([]);
-  const steps = workflow.mode === 'composed' ? workflow.steps : []; const step = steps[page]; const controls = step?.controls ?? [];
-  const previewState = useMemo(() => { try { return { outputs: workflow.mode === 'composed' ? evaluateV3WorkflowOutputs(workflow, slots, { world: activeWorld, classifications, config, coordinates, now: createdAt }) : [], error: '' }; } catch (error) { return { outputs: [], error: error instanceof Error ? error.message : '输出表达式无效。' }; } }, [workflow, slots, classifications, activeWorld, config, coordinates, createdAt]);
-  const preview = previewState.outputs;
+  const [slots, setSlots] = useState<V3WorkflowValueMap>(() => ({ ...defaults(), actor: initialActor, World: activeWorld }));
+  const [classifications, setClassifications] = useState<Record<string, ClassificationPath | undefined>>({});
+  const [submitted, setSubmitted] = useState<V3WorkflowRunResult | null>(null);
+  const [inputIssues, setInputIssues] = useState<V3WorkflowInputIssue[]>([]);
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
+  const stepCallback = useRef(onStepChange); stepCallback.current = onStepChange;
+  const steps = workflow.mode === 'composed' ? workflow.steps : [];
+  const step = steps[page];
+  useEffect(() => { stepCallback.current?.(step); }, [step?.id, page]);
   useEffect(() => { onPreviewSlotsChange?.(slots); }, [slots, onPreviewSlotsChange]);
-  useEffect(() => { setSlots((current) => ({ ...Object.fromEntries(workflow.steps.flatMap((item) => item.controls ?? []).flatMap((control) => control.defaultValue === undefined ? [] : [[control.slot ?? control.id, control.defaultValue]])), ...current, World: activeWorld })); }, [workflow, activeWorld]);
-  if (workflow.mode === 'external') return <section className="rounded-lg border border-violet-200 bg-violet-50 p-3 text-sm"><strong>外部整体工作流：{workflow.label.zh}</strong><p className="mt-1 text-slate-600">此工作流保留为完整受控单元，不伪装成模块化表单。</p><button type="button" disabled={!onRequestExternal} className="mt-2 rounded bg-violet-700 px-3 py-1.5 text-white disabled:opacity-40" onClick={() => onRequestExternal?.(workflow)}>{onRequestExternal ? '打开已受控工作流' : '预览保留受控组件绑定'}</button></section>;
-  if (!step) return <div className="rounded border border-amber-300 bg-amber-50 p-3 text-sm">工作流没有页面。</div>;
-  const isLast = page === steps.length - 1; const currentIssues = inputIssues.filter((issue) => !issue.stepId || issue.stepId === step.id);
-  const continueTo = (nextPage: number) => { const issues = validateV3WorkflowInputs(workflow, slots, [step]); setInputIssues(issues); if (!issues.length) setPage(nextPage); };
-  const submit = () => { const geometryIssues = workflow.outputs.flatMap((output) => { const error = validateMultipartGeometry(multipartGeometryFromSinglePath(output.geometry.selected, coordinates[output.id] ?? [])); return error ? [{ message: `输出 ${output.id}：${error}` }] : []; }); const issues = [...validateV3WorkflowInputs(workflow, slots), ...geometryIssues, ...(geometryError ? [{ message: geometryError }] : []), ...(previewState.error ? [{ message: previewState.error }] : [])]; setInputIssues(issues); if (issues.length) return; setSubmitted(preview); onSubmit?.(preview); };
-  return <section className="rounded-lg border bg-white p-3"><div className="mb-3 flex items-center justify-between gap-2"><strong>{step.label.zh}</strong><span className="text-xs text-slate-500">世界：{activeWorld} · 第 {page + 1} / {steps.length} 页</span></div>{step.kind === 'actor' ? <label className="block text-sm">填写人<input className="mt-1 w-full rounded border px-2 py-1" value={String(slots.actor ?? '')} onChange={(event) => setSlots((current) => ({ ...current, actor: event.target.value }))} /></label> : null}{step.kind === 'tagsExtensions' ? <div className="grid gap-2 sm:grid-cols-2"><textarea className="rounded border p-2 text-sm" rows={3} placeholder="tags JSON（可选）" value={String(slots.tags ?? '')} onChange={(event) => setSlots((current) => ({ ...current, tags: event.target.value }))} /><textarea className="rounded border p-2 text-sm" rows={3} placeholder="extensions JSON（可选）" value={String(slots.extensions ?? '')} onChange={(event) => setSlots((current) => ({ ...current, extensions: event.target.value }))} /></div> : null}{step.kind === 'geometry' ? <div className="rounded border border-dashed p-3 text-sm"><p>此绘制页固定类型：{step.geometry?.[0] ?? '未指定'}</p><button type="button" className="mt-2 rounded border px-2 py-1" onClick={() => { if (onRequestGeometry) { void Promise.resolve(onRequestGeometry(step.outputId ?? '', step.geometry?.[0] ?? '')).then((coords) => { if (Array.isArray(coords)) { setCoordinates((current) => ({ ...current, [step.outputId!]: coords })); setGeometryInputs((current) => ({ ...current, [step.outputId!]: JSON.stringify(coords) })); setGeometryError(''); } }).catch((error) => setGeometryError(error instanceof Error ? error.message : '无法获取绘制结果。')); } else { const type = step.geometry?.[0]; const coords = type === 'Point' ? [{ x: 0, y: -64, z: 0 }] : type === 'LineString' ? [{ x: 0, y: -64, z: 0 }, { x: 20, y: -64, z: 10 }] : [{ x: 0, y: -64, z: 0 }, { x: 20, y: -64, z: 0 }, { x: 20, y: -64, z: 20 }, { x: 0, y: -64, z: 0 }]; setCoordinates((current) => ({ ...current, [step.outputId!]: coords })); setGeometryInputs((current) => ({ ...current, [step.outputId!]: JSON.stringify(coords) })); setGeometryError(''); } }}>{onRequestGeometry ? '进入绘制' : '使用预览样例几何'}</button><label className="mt-2 grid gap-1 text-xs">预览坐标（x / y / z）<textarea className="w-full rounded border p-2 font-mono" rows={3} value={geometryInputs[step.outputId ?? ''] ?? JSON.stringify(coordinates[step.outputId ?? ''] ?? [])} onChange={(event) => { setGeometryInputs((current) => ({ ...current, [step.outputId!]: event.target.value })); try { const next = JSON.parse(event.target.value) as MultipartCoord[]; if (!Array.isArray(next)) throw new Error('坐标必须是数组。'); const error = validateMultipartGeometry(multipartGeometryFromSinglePath(step.geometry![0], next)); if (error) throw new Error(error); setCoordinates((current) => ({ ...current, [step.outputId!]: next })); setGeometryError(''); } catch (error) { setGeometryError(error instanceof Error ? error.message : '几何无效。'); } }} /></label>{geometryError ? <p role="alert" className="text-rose-700">{geometryError}</p> : null}</div> : null}{controls.length ? <div className="grid gap-2 md:grid-cols-6">{controls.map((control) => <div key={control.id} className={`grid min-w-0 gap-1 text-sm ${control.columns === 1 ? 'md:col-span-6' : control.columns === 2 ? 'md:col-span-3' : 'md:col-span-2'}`}><span>{control.label.zh}{control.required ? ' *' : ''}</span><ControlInput control={control} value={slots[control.slot ?? control.id]} config={config} records={records} world={activeWorld} onChange={(value) => { if (control.kind === 'classificationPicker') { const path = decodePath(String(value)); const targets = control.outputId ? workflow.outputs.filter((output) => output.id === control.outputId) : workflow.outputs.filter((output) => path && pathMatchesScope(path, control.classificationScope ?? output.classification)); for (const output of targets) if (path) setClassifications((current) => ({ ...current, [output.id]: path })); } setSlots((current) => ({ ...current, [control.slot ?? control.id]: value })); setInputIssues([]); }} /></div>)}</div> : null}{currentIssues.length ? <ul className="mt-3 rounded border border-rose-200 bg-rose-50 p-2 text-xs text-rose-800">{currentIssues.map((issue, index) => <li key={`${issue.stepId ?? 'global'}-${issue.controlId ?? index}`}>{issue.message}</li>)}</ul> : null}<div className="mt-3 flex justify-between"><button type="button" disabled={page === 0} className="rounded border px-3 py-1 disabled:opacity-40" onClick={() => { setInputIssues([]); setPage((value) => Math.max(0, value - 1)); }}>上一页</button>{isLast ? <button type="button" className="rounded bg-emerald-600 px-3 py-1 text-white" onClick={submit}>{onSubmit ? '确认保存输出' : '生成预览输出'}</button> : <button type="button" className="rounded bg-blue-600 px-3 py-1 text-white" onClick={() => continueTo(Math.min(steps.length - 1, page + 1))}>下一页</button>}</div><details className="mt-3 rounded border p-2"><summary>最终 record 预览</summary>{previewState.error ? <p role="alert" className="text-rose-700">{previewState.error}</p> : <pre className="max-h-64 overflow-auto text-xs">{JSON.stringify(preview, null, 2)}</pre>}</details>{submitted ? <pre className="mt-3 max-h-48 overflow-auto rounded bg-slate-950 p-2 text-xs text-emerald-100">{JSON.stringify(submitted, null, 2)}</pre> : null}</section>;
+  useEffect(() => { setSlots(current => ({ ...defaults(), ...current, World: activeWorld })); }, [workflow, activeWorld]);
+  const previewState = useMemo(() => {
+    try { return { outputs: workflow.mode === 'composed' ? evaluateV3WorkflowOutputs(workflow, slots, { world: activeWorld, classifications, config, coordinates, now: createdAt }) : [], error: '' }; }
+    catch (error) { return { outputs: [], error: error instanceof Error ? error.message : '输出表达式无效。' }; }
+  }, [workflow, slots, classifications, activeWorld, config, coordinates, createdAt]);
+  if (workflow.mode === 'external') return <section className="rounded border bg-violet-50 p-3"><strong>外部整体工作流：{workflow.label.zh}</strong><button type="button" disabled={!onRequestExternal} className="ml-2 rounded border px-2 py-1" onClick={() => onRequestExternal?.(workflow)}>打开已受控工作流</button></section>;
+  if (!step) return <p>工作流没有页面。</p>;
+  const currentIssues = inputIssues.filter(issue => !issue.stepId || issue.stepId === step.id);
+  const acceptGeometry = (outputId: string, geometry: string, coords: MultipartCoord[]) => {
+    const error = validateMultipartGeometry(multipartGeometryFromSinglePath(geometry as WorkflowDefinition['outputs'][number]['geometry']['selected'], coords));
+    if (error) throw new Error(error);
+    setCoordinates(current => ({ ...current, [outputId]: coords }));
+    setGeometryInputs(current => ({ ...current, [outputId]: JSON.stringify(coords) }));
+    setGeometryErrors(current => ({ ...current, [outputId]: '' }));
+  };
+  const captureGeometry = () => {
+    const outputId = step.outputId!; const geometry = step.geometry![0];
+    try { acceptGeometry(outputId, geometry, onCaptureGeometry!(outputId, geometry)); }
+    catch (error) { setGeometryErrors(current => ({ ...current, [outputId]: error instanceof Error ? error.message : '几何无效。' })); }
+  };
+  const next = () => {
+    const issues = validateV3WorkflowInputs(workflow, slots, [step]);
+    if (step.kind === 'geometry') {
+      const error = geometryErrors[step.outputId!] || validateMultipartGeometry(multipartGeometryFromSinglePath(step.geometry![0], coordinates[step.outputId!] ?? []));
+      if (error) issues.push({ stepId: step.id, message: error });
+    }
+    setInputIssues(issues);
+    if (!issues.length) setPage(value => Math.min(steps.length - 1, value + 1));
+  };
+  const submit = async () => {
+    if (savingRef.current || submitted) return;
+    const geometryIssues = workflow.outputs.flatMap(output => {
+      const error = geometryErrors[output.id] || validateMultipartGeometry(multipartGeometryFromSinglePath(output.geometry.selected, coordinates[output.id] ?? []));
+      return error ? [{ message: `输出 ${output.id}：${error}` }] : [];
+    });
+    const issues = [...validateV3WorkflowInputs(workflow, slots), ...geometryIssues, ...(previewState.error ? [{ message: previewState.error }] : []), ...validateV3WorkflowRecords(config, workflow, previewState.outputs)];
+    setInputIssues(issues);
+    if (issues.length) return;
+    savingRef.current = true; setSaving(true);
+    try { await onSubmit?.(previewState.outputs); setSubmitted(previewState.outputs); }
+    catch (error) { setInputIssues([{ message: error instanceof Error ? error.message : '保存失败，请重试。' }]); }
+    finally { savingRef.current = false; setSaving(false); }
+  };
+  return <section className="rounded-lg border bg-white p-3">
+    <div className="mb-3 flex justify-between"><strong>{step.label.zh}</strong><span className="text-xs">世界：{activeWorld} · 第 {page + 1} / {steps.length} 页</span></div>
+    {step.kind === 'actor' ? <label className="block text-sm">填写人<input aria-label="填写人" className="mt-1 w-full rounded border px-2 py-1" value={String(slots.actor ?? '')} onChange={event => setSlots(current => ({ ...current, actor: event.target.value }))} /></label> : null}
+    {step.kind === 'tagsExtensions' ? <div className="grid gap-2 sm:grid-cols-2">{(['tags', 'extensions'] as const).filter(key => step.tagsExtensions?.[key === 'tags' ? 'tagsEnabled' : 'extensionsEnabled'] !== false).map(key => <textarea key={key} className="rounded border p-2 text-sm" rows={3} placeholder={`${key} JSON（可选）`} value={typeof slots[key] === 'object' ? JSON.stringify(slots[key]) : String(slots[key] ?? '')} onChange={event => setSlots(current => ({ ...current, [key]: event.target.value }))} />)}</div> : null}
+    {step.kind === 'geometry' ? <div className="rounded border border-dashed p-3 text-sm">
+      <p>固定绘制类型：{step.geometry?.[0]} · 已采用 {coordinates[step.outputId!]?.length ?? 0} 个坐标</p>
+      <button type="button" className="mt-2 rounded border px-2 py-1" onClick={() => {
+        const outputId = step.outputId!; const geometry = step.geometry![0];
+        if (onRequestGeometry) void Promise.resolve(onRequestGeometry(outputId, geometry)).then(coords => { if (Array.isArray(coords)) acceptGeometry(outputId, geometry, coords); }).catch(error => setGeometryErrors(current => ({ ...current, [outputId]: error.message })));
+        else { const coords = geometry === 'Point' ? [{ x: 0, y: -64, z: 0 }] : geometry === 'LineString' ? [{ x: 0, y: -64, z: 0 }, { x: 20, y: -64, z: 10 }] : [{ x: 0, y: -64, z: 0 }, { x: 20, y: -64, z: 0 }, { x: 20, y: -64, z: 20 }, { x: 0, y: -64, z: 0 }]; acceptGeometry(outputId, geometry, coords); }
+      }}>{onRequestGeometry ? '进入绘制' : '使用预览样例几何'}</button>
+      {onCaptureGeometry ? <button type="button" className="ml-2 rounded bg-blue-600 px-2 py-1 text-white" onClick={captureGeometry}>采用当前绘制</button> : <label className="mt-2 grid gap-1 text-xs">预览坐标（x / y / z）<textarea className="w-full rounded border p-2 font-mono" rows={3} value={geometryInputs[step.outputId!] ?? '[]'} onChange={event => {
+        const outputId = step.outputId!; setGeometryInputs(current => ({ ...current, [outputId]: event.target.value }));
+        try { const coords = JSON.parse(event.target.value); if (!Array.isArray(coords)) throw new Error('坐标必须是数组。'); acceptGeometry(outputId, step.geometry![0], coords); }
+        catch (error) { setGeometryErrors(current => ({ ...current, [outputId]: error instanceof Error ? error.message : '几何无效。' })); }
+      }} /></label>}
+      {geometryErrors[step.outputId!] ? <p role="alert" className="text-rose-700">{geometryErrors[step.outputId!]}</p> : null}
+    </div> : null}
+    {step.controls?.length ? <div className="grid gap-2 md:grid-cols-6">{step.controls.map(control => <div key={control.id} className={`grid min-w-0 gap-1 text-sm ${control.columns === 1 ? 'md:col-span-6' : control.columns === 2 ? 'md:col-span-3' : 'md:col-span-2'}`}>
+      <span>{control.label.zh}{control.required ? ' *' : ''}</span><ControlInput control={control} value={slots[control.slot ?? control.id]} config={config} records={records} world={activeWorld} onChange={value => {
+        if (control.kind === 'classificationPicker') { const classification = decodePath(String(value)); if (classification && control.outputId) setClassifications(current => ({ ...current, [control.outputId!]: classification })); }
+        setSlots(current => ({ ...current, [control.slot ?? control.id]: value })); setInputIssues([]);
+      }} />
+    </div>)}</div> : null}
+    {currentIssues.length ? <ul role="alert" className="mt-3 rounded border border-rose-200 bg-rose-50 p-2 text-xs text-rose-800">{currentIssues.map((issue, index) => <li key={index}>{issue.message}</li>)}</ul> : null}
+    <div className="mt-3 flex justify-between"><button type="button" disabled={page === 0 || saving || step.kind === 'geometry' && step.drawing?.allowBack === false} className="rounded border px-3 py-1 disabled:opacity-40" onClick={() => { setInputIssues([]); if (step.kind === 'geometry' && step.drawing?.keepDrawingWhenBack === false) setCoordinates(current => ({ ...current, [step.outputId!]: [] })); setPage(value => Math.max(0, value - 1)); }}>上一页</button>
+      {page === steps.length - 1 ? <button type="button" disabled={saving || Boolean(submitted)} className="rounded bg-emerald-600 px-3 py-1 text-white disabled:opacity-40" onClick={() => void submit()}>{saving ? '保存中…' : onSubmit ? '确认保存输出' : '生成预览输出'}</button> : <button type="button" className="rounded bg-blue-600 px-3 py-1 text-white" onClick={next}>下一页</button>}
+    </div>
+    {!onSubmit ? <details className="mt-3 rounded border p-2"><summary>最终 record 预览</summary>{previewState.error ? <p role="alert">{previewState.error}</p> : <pre className="max-h-64 overflow-auto text-xs">{JSON.stringify(previewState.outputs, null, 2)}</pre>}</details> : null}
+    {submitted && !onSubmit ? <pre className="mt-3 max-h-48 overflow-auto rounded bg-slate-950 p-2 text-xs text-emerald-100">{JSON.stringify(submitted, null, 2)}</pre> : null}
+  </section>;
 }
 
 export default V3WorkflowRunner;
