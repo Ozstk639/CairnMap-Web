@@ -1,0 +1,980 @@
+{
+  "schemaVersion": "cairnmap.v32-parity-blueprint.v1",
+  "documentKind": "implementation_plan_not_importable_config",
+  "date": "2026-10-08",
+  "status": "awaiting_blueprint_confirmation",
+  "sourceHead": "b626d272d28b3b9be2abf4abe52f4d6ee2788a61",
+  "frozenReference": "0b82863d4fea3791f98917ba6d13f70e1f27eb15",
+  "branch": "codex/cm-config-runtime-v32-migration-20261007",
+  "scope": "V1 equivalent native editable V3 before first promotion",
+  "applicationRepairsApplied": false,
+  "remoteActionsAuthorized": false,
+  "sourceFileRole": "Reference and implementation locations; frozen V1 sources are read-only oracles, not files to rewrite.",
+  "inventory": {
+    "nodeCount": 95,
+    "workflowCount": 20,
+    "composedCount": 17,
+    "workflows": [
+      {
+        "id": "external-railway-integrated",
+        "mode": "external",
+        "outputs": []
+      },
+      {
+        "id": "external-station-integrated",
+        "mode": "external",
+        "outputs": []
+      },
+      {
+        "id": "external-trp-integrated",
+        "mode": "external",
+        "outputs": []
+      },
+      {
+        "id": "v3-isg_ngf_lad",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isg_ngf_lad-output-1",
+            "classification": {
+              "class": "ISG",
+              "kind": "NGF",
+              "skind": "LAD"
+            },
+            "geometry": "Polygon",
+            "assignmentCount": 5
+          }
+        ]
+      },
+      {
+        "id": "v3-isg_ngf_lis",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isg_ngf_lis-output-1",
+            "classification": {
+              "class": "ISG",
+              "kind": "NGF",
+              "skind": "LIS"
+            },
+            "geometry": "Polygon",
+            "assignmentCount": 7
+          }
+        ]
+      },
+      {
+        "id": "v3-isg_ngf_wtb",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isg_ngf_wtb-output-1",
+            "classification": {
+              "class": "ISG",
+              "kind": "NGF",
+              "skind": "WTB"
+            },
+            "geometry": "Polygon",
+            "assignmentCount": 5
+          }
+        ]
+      },
+      {
+        "id": "v3-isg_adm_dbz",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isg_adm_dbz-output-1",
+            "classification": {
+              "class": "ISG",
+              "kind": "ADM",
+              "skind": "DBZ"
+            },
+            "geometry": "Polygon",
+            "assignmentCount": 9
+          }
+        ]
+      },
+      {
+        "id": "v3-isg_adm_plz",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isg_adm_plz-output-1",
+            "classification": {
+              "class": "ISG",
+              "kind": "ADM",
+              "skind": "PLZ"
+            },
+            "geometry": "Polygon",
+            "assignmentCount": 10
+          }
+        ]
+      },
+      {
+        "id": "v3-isl_ngf_wtr",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isl_ngf_wtr-output-1",
+            "classification": {
+              "class": "ISL",
+              "kind": "NGF",
+              "skind": "WTR"
+            },
+            "geometry": "LineString",
+            "assignmentCount": 5
+          }
+        ]
+      },
+      {
+        "id": "v3-isl_ngf_bod",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isl_ngf_bod-output-1",
+            "classification": {
+              "class": "ISL",
+              "kind": "NGF",
+              "skind": "BOD"
+            },
+            "geometry": "LineString",
+            "assignmentCount": 7
+          }
+        ]
+      },
+      {
+        "id": "v3-isl_adm_dbl",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isl_adm_dbl-output-1",
+            "classification": {
+              "class": "ISL",
+              "kind": "ADM",
+              "skind": "DBL"
+            },
+            "geometry": "LineString",
+            "assignmentCount": 9
+          }
+        ]
+      },
+      {
+        "id": "v3-isl_adm_pll",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isl_adm_pll-output-1",
+            "classification": {
+              "class": "ISL",
+              "kind": "ADM",
+              "skind": "PLL"
+            },
+            "geometry": "LineString",
+            "assignmentCount": 9
+          }
+        ]
+      },
+      {
+        "id": "v3-isp_ngf_scp",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isp_ngf_scp-output-1",
+            "classification": {
+              "class": "ISP",
+              "kind": "NGF",
+              "skind": "SCP"
+            },
+            "geometry": "Point",
+            "assignmentCount": 9
+          }
+        ]
+      },
+      {
+        "id": "v3-isp_adm_dbp",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isp_adm_dbp-output-1",
+            "classification": {
+              "class": "ISP",
+              "kind": "ADM",
+              "skind": "DBP"
+            },
+            "geometry": "Point",
+            "assignmentCount": 9
+          }
+        ]
+      },
+      {
+        "id": "v3-isp_adm_plp",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isp_adm_plp-output-1",
+            "classification": {
+              "class": "ISP",
+              "kind": "ADM",
+              "skind": "PLP"
+            },
+            "geometry": "Point",
+            "assignmentCount": 9
+          }
+        ]
+      },
+      {
+        "id": "v3-bud_building",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "bud_building-output-1",
+            "classification": {
+              "class": "BUD"
+            },
+            "geometry": "Polygon",
+            "assignmentCount": 8
+          }
+        ]
+      },
+      {
+        "id": "v3-flr_unit",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "flr_unit-output-1",
+            "classification": {
+              "class": "FLR"
+            },
+            "geometry": "Polygon",
+            "assignmentCount": 10
+          }
+        ]
+      },
+      {
+        "id": "v3-rod_road",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "rod_road-output-1",
+            "classification": {
+              "class": "ROD"
+            },
+            "geometry": "LineString",
+            "assignmentCount": 17
+          }
+        ]
+      },
+      {
+        "id": "v3-tpp_teleport",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "tpp_teleport-output-1",
+            "classification": {
+              "class": "TPP"
+            },
+            "geometry": "Point",
+            "assignmentCount": 8
+          }
+        ]
+      },
+      {
+        "id": "v3-wrp_warp",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "wrp_warp-output-1",
+            "classification": {
+              "class": "WRP"
+            },
+            "geometry": "Point",
+            "assignmentCount": 8
+          }
+        ]
+      }
+    ],
+    "external": [
+      {
+        "id": "external-railway-integrated",
+        "componentKey": "railwayWorkflow",
+        "reason": "railway-integrated",
+        "coveredClassifications": [
+          {
+            "class": "RLE"
+          }
+        ]
+      },
+      {
+        "id": "external-station-integrated",
+        "componentKey": "stationWorkflow",
+        "reason": "station-integrated",
+        "coveredClassifications": [
+          {
+            "class": "STA"
+          },
+          {
+            "class": "PLF"
+          },
+          {
+            "class": "PFB"
+          },
+          {
+            "class": "STB"
+          },
+          {
+            "class": "SBP"
+          },
+          {
+            "class": "STF"
+          }
+        ]
+      },
+      {
+        "id": "external-trp-integrated",
+        "componentKey": "tradePointWorkflow",
+        "reason": "trp-integrated",
+        "coveredClassifications": [
+          {
+            "class": "TRP"
+          }
+        ]
+      }
+    ]
+  },
+  "allowedDifferences": [
+    "BUD-style decorative label dots replaced by true native geometry plus Label, same visible effect required",
+    "composed World canonical representation, same world semantics",
+    "independent en values without zh fallback",
+    "new configurable authoring UI"
+  ],
+  "checksExecutedThisTurn": {
+    "resolverConfigurationDraft": {
+      "before": {
+        "opacity": 0.25,
+        "labelStyle": "gm-outline-12"
+      },
+      "after": {
+        "opacity": 0.35,
+        "labelStyle": "gm-bw-12"
+      },
+      "candidateValidated": true,
+      "archiveRoundtrip": true,
+      "adjustments": [
+        {
+          "nodeId": "class-rod",
+          "ruleId": "v1-road-low",
+          "field": "style.strokeOpacity",
+          "before": 0.25,
+          "after": 0.35
+        },
+        {
+          "nodeId": "class-rod",
+          "ruleId": "v1-road-low",
+          "field": "label.style.family",
+          "before": "gm-outline",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod",
+          "ruleId": "v1-road-high",
+          "field": "label.style.family",
+          "before": "gm-bw",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-nom",
+          "ruleId": "v1-road-low",
+          "field": "style.strokeOpacity",
+          "before": 0.25,
+          "after": 0.35
+        },
+        {
+          "nodeId": "class-rod-nom",
+          "ruleId": "v1-road-low",
+          "field": "label.style.family",
+          "before": "gm-outline",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-nom",
+          "ruleId": "v1-road-high",
+          "field": "label.style.family",
+          "before": "gm-bw",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-tuk",
+          "ruleId": "v1-road-low",
+          "field": "style.strokeOpacity",
+          "before": 0.25,
+          "after": 0.35
+        },
+        {
+          "nodeId": "class-rod-tuk",
+          "ruleId": "v1-road-low",
+          "field": "label.style.family",
+          "before": "gm-outline",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-tuk",
+          "ruleId": "v1-road-high",
+          "field": "label.style.family",
+          "before": "gm-bw",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-pri",
+          "ruleId": "v1-road-low",
+          "field": "style.strokeOpacity",
+          "before": 0.25,
+          "after": 0.35
+        },
+        {
+          "nodeId": "class-rod-pri",
+          "ruleId": "v1-road-low",
+          "field": "label.style.family",
+          "before": "gm-outline",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-pri",
+          "ruleId": "v1-road-high",
+          "field": "label.style.family",
+          "before": "gm-bw",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-sec",
+          "ruleId": "v1-road-low",
+          "field": "style.strokeOpacity",
+          "before": 0.25,
+          "after": 0.35
+        },
+        {
+          "nodeId": "class-rod-sec",
+          "ruleId": "v1-road-low",
+          "field": "label.style.family",
+          "before": "gm-outline",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-sec",
+          "ruleId": "v1-road-high",
+          "field": "label.style.family",
+          "before": "gm-bw",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-sed",
+          "ruleId": "v1-road-low",
+          "field": "style.strokeOpacity",
+          "before": 0.25,
+          "after": 0.35
+        },
+        {
+          "nodeId": "class-rod-sed",
+          "ruleId": "v1-road-low",
+          "field": "label.style.family",
+          "before": "gm-outline",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-sed",
+          "ruleId": "v1-road-high",
+          "field": "label.style.family",
+          "before": "gm-bw",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-res",
+          "ruleId": "v1-road-low",
+          "field": "style.strokeOpacity",
+          "before": 0.25,
+          "after": 0.35
+        },
+        {
+          "nodeId": "class-rod-res",
+          "ruleId": "v1-road-low",
+          "field": "label.style.family",
+          "before": "gm-outline",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-res",
+          "ruleId": "v1-road-high",
+          "field": "label.style.family",
+          "before": "gm-bw",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-svs",
+          "ruleId": "v1-road-low",
+          "field": "style.strokeOpacity",
+          "before": 0.25,
+          "after": 0.35
+        },
+        {
+          "nodeId": "class-rod-svs",
+          "ruleId": "v1-road-low",
+          "field": "label.style.family",
+          "before": "gm-outline",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-svs",
+          "ruleId": "v1-road-high",
+          "field": "label.style.family",
+          "before": "gm-bw",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-idr",
+          "ruleId": "v1-road-low",
+          "field": "style.strokeOpacity",
+          "before": 0.25,
+          "after": 0.35
+        },
+        {
+          "nodeId": "class-rod-idr",
+          "ruleId": "v1-road-low",
+          "field": "label.style.family",
+          "before": "gm-outline",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-idr",
+          "ruleId": "v1-road-high",
+          "field": "label.style.family",
+          "before": "gm-bw",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-spe",
+          "ruleId": "v1-road-low",
+          "field": "style.strokeOpacity",
+          "before": 0.25,
+          "after": 0.35
+        },
+        {
+          "nodeId": "class-rod-spe",
+          "ruleId": "v1-road-low",
+          "field": "label.style.family",
+          "before": "gm-outline",
+          "after": "gm-bw"
+        },
+        {
+          "nodeId": "class-rod-spe",
+          "ruleId": "v1-road-high",
+          "field": "label.style.family",
+          "before": "gm-bw",
+          "after": "gm-bw"
+        }
+      ]
+    },
+    "workflowModel": {
+      "requiredDefaultPlaceholderSurviveCanonicalization": true,
+      "suppliedDrawing": {
+        "enabledFromThisPage": true,
+        "allowBack": false,
+        "keepDrawingWhenBack": false
+      },
+      "canonicalDrawing": {
+        "enabledFromThisPage": true,
+        "keepDrawingWhenBack": true
+      },
+      "drawingOptionsPreserved": false
+    },
+    "applicationModified": false,
+    "source": "G:\\RIAWebGIS\\NewPRES\\CairnMap_Codex\\migration-audits\\runtime-v32-20261008\\blueprint-readiness.json",
+    "limitations": [
+      "This is a resolver and archive feasibility check, not a browser parity acceptance.",
+      "Only two observed ROD configuration differences were prototyped.",
+      "No runtime, main-map, collision, BUD or workflow execution defects have been repaired by this script."
+    ]
+  },
+  "changes": [
+    {
+      "id": "BP01",
+      "priority": "P0",
+      "title": "冻结独立 V1 对照及完整源/参数清单",
+      "kind": "baseline",
+      "status": "planned_not_applied",
+      "dependsOn": [],
+      "existingSourceFiles": [
+        "src/configStudio/v1BehaviorBaseline.ts",
+        "scripts/config-tools/v1-workflow-reference.ts",
+        "scripts/config-tools/test-v1-render-baseline.ts"
+      ],
+      "configurationOrCapabilityTargets": [
+        "V1 full-source snapshot and assets",
+        "source inventory and parameter ledger"
+      ],
+      "acceptance": [
+        "独立冻结 V1 浏览器与候选 V3 的同输入对照",
+        "全部源分类、工作流、参数有归属；禁止静默遗漏"
+      ],
+      "evidenceOrigin": "A01-A08 全量证据口径"
+    },
+    {
+      "id": "BP02",
+      "priority": "P0",
+      "title": "补齐原生显示、交互和信息卡契约及升级",
+      "kind": "model/runtime/editor",
+      "status": "planned_not_applied",
+      "dependsOn": [
+        "BP01"
+      ],
+      "existingSourceFiles": [
+        "src/configStudio/types.ts",
+        "src/configStudio/runtime.ts",
+        "src/configStudio/package.ts",
+        "src/configStudio/ConfigStudio.tsx",
+        "src/configStudio/v32Defaults.ts"
+      ],
+      "configurationOrCapabilityTargets": [
+        "representation.labelOnly (proposed)",
+        "interaction symbol/outline profiles (proposed)",
+        "card classification/system/remaining-field capabilities (proposed)",
+        "contractRevision migration and support gates"
+      ],
+      "acceptance": [
+        "旧包保留用户配置，未知契约不能启用",
+        "每个新增能力具备类型、UI、校验、归档和实际消费"
+      ],
+      "evidenceOrigin": "A02/A04/A06"
+    },
+    {
+      "id": "BP03",
+      "priority": "P0",
+      "title": "接通 composed 的实际测绘、真实绘制和提交",
+      "kind": "runtime/integration",
+      "status": "planned_not_applied",
+      "dependsOn": [
+        "BP02"
+      ],
+      "existingSourceFiles": [
+        "src/components/Map/MapContainer.tsx",
+        "src/components/Mapping/core/MeasuringModule.tsx",
+        "src/components/Mapping/Workflow/WorkflowHost.tsx",
+        "src/configStudio/V3WorkflowRunner.tsx",
+        "src/configStudio/workflowRecord.ts"
+      ],
+      "configurationOrCapabilityTargets": [
+        "active package and workflow catalogue",
+        "geometry drafts by output ID",
+        "validated native record commit, preserving authored fields",
+        "atomic multi-output commit",
+        "external allowlist"
+      ],
+      "acceptance": [
+        "修改 assignment 后实际图层和标准包中的新 record 改变",
+        "不经过旧 formatter 重新组装而丢字段",
+        "多输出失败无部分写入，取消/返回/重试保留合法草稿"
+      ],
+      "evidenceOrigin": "A01"
+    },
+    {
+      "id": "BP04",
+      "priority": "P0",
+      "title": "工作流编辑参数、输入约束和跨输出组装",
+      "kind": "config/model/runtime/editor",
+      "status": "planned_not_applied",
+      "dependsOn": [
+        "BP02",
+        "BP03"
+      ],
+      "existingSourceFiles": [
+        "src/configStudio/V3WorkflowEditor.tsx",
+        "src/configStudio/WorkflowOutputEditor.tsx",
+        "src/configStudio/V3WorkflowRunner.tsx",
+        "src/configStudio/workflowExpression.ts",
+        "src/configStudio/workflowRecord.ts",
+        "src/configStudio/runtime.ts"
+      ],
+      "configurationOrCapabilityTargets": [
+        "required/defaultValue/placeholder/rows/label/valueNormalization/optionSource",
+        "actor validation",
+        "group.optional/minItems/addLabel",
+        "drawing.allowBack/keepDrawingWhenBack",
+        "search.debounceMs/cacheScope",
+        "protected assignment targets",
+        "final ID_N dependencies"
+      ],
+      "acceptance": [
+        "非法分类覆盖、空填写人、非法数组/搜索/token/slot 均阻断",
+        "ID_1 得到第一输出最终 ID，循环依赖阻断",
+        "绘制返回策略不被 canonicalize 覆盖",
+        "全部 V1 正常/边界输出及真实提交对照"
+      ],
+      "evidenceOrigin": "A07/A08 + drawing preservation"
+    },
+    {
+      "id": "BP05",
+      "priority": "P1",
+      "title": "按 V1 有效值修正完整显示迁移包",
+      "kind": "config/migration",
+      "status": "planned_not_applied",
+      "dependsOn": [
+        "BP02"
+      ],
+      "existingSourceFiles": [
+        "src/configStudio/legacyProjectAdapter.ts",
+        "src/components/Rules/configRuntime/configPackageAdapter.ts",
+        "src/components/Rules/rendering/featureRenderRules.ts"
+      ],
+      "configurationOrCapabilityTargets": [
+        "ROD style.strokeOpacity at logical Zoom 6: 0.25 -> 0.35",
+        "ROD label.style.family: gm-outline -> gm-bw, size 12",
+        "ISP/ISG actual V1 labelOnly branches",
+        "all conditional visibility/colour/Zoom/context defaults"
+      ],
+      "acceptance": [
+        "全节点、Zoom 0-8、条件与 store 关系直接 V1/V3 比较",
+        "所有 Label 技术路径实际字体/颜色一致",
+        "原生默认包无隐藏 V1 renderer 兜底依赖"
+      ],
+      "evidenceOrigin": "A02"
+    },
+    {
+      "id": "BP06",
+      "priority": "P1",
+      "title": "BUD 真实几何点与独立 Label 再现相同效果",
+      "kind": "config/placement/runtime",
+      "status": "planned_not_applied",
+      "dependsOn": [
+        "BP02",
+        "BP05"
+      ],
+      "existingSourceFiles": [
+        "src/configStudio/legacyProjectAdapter.ts",
+        "src/components/Rules/configRuntime/configPackageAdapter.ts",
+        "src/components/Rules/rendering/labelPlacement.ts",
+        "src/components/Rules/rendering/labelLayout.ts",
+        "src/components/Rules/core/RuleDrivenLayer.tsx",
+        "src/configStudio/ConfigRuntimePreview.tsx"
+      ],
+      "configurationOrCapabilityTargets": [
+        "source Polygon retained, point representation at Zoom 3-5",
+        "white core / dark ring geometry circle candidate",
+        "Label E / measured gap instead of N",
+        "separate symbol and text screen offsets",
+        "joint candidate/collision/visibility policy"
+      ],
+      "acceptance": [
+        "Zoom 0/2/3/5/6/8 的点中心、内外径、配色、文字起点和点击等价",
+        "密集、空名称、必显、多部件和上下文状态对照",
+        "无 withDot 或近乎不可见点模拟"
+      ],
+      "evidenceOrigin": "用户明确保留 V3 技术实现、要求同效果"
+    },
+    {
+      "id": "BP07",
+      "priority": "P1",
+      "title": "SVG 与所有 Label 路径统一偏移/点击/缓存",
+      "kind": "runtime/placement",
+      "status": "planned_not_applied",
+      "dependsOn": [
+        "BP02"
+      ],
+      "existingSourceFiles": [
+        "src/components/Rules/core/RuleDrivenLayer.tsx",
+        "src/components/Rules/rendering/labelPlacement.ts",
+        "src/components/Rules/rendering/labelStyles.ts",
+        "src/components/Rules/rendering/labelLayout.ts",
+        "src/components/Rules/rendering/labelClickInteraction.ts"
+      ],
+      "configurationOrCapabilityTargets": [
+        "label.offsetX/offsetY/placement",
+        "glyphPath/textPath actual transformation",
+        "collision bounds/hit areas/cache invalidation"
+      ],
+      "acceptance": [
+        "X=80/Y=30 实际位移为 80/30，不再为 0/0",
+        "九方向和正/负/零值覆盖 DivIcon/rotated/textPath/glyphPath/图片",
+        "相机变化与重排后偏移仍为屏幕 px"
+      ],
+      "evidenceOrigin": "A05"
+    },
+    {
+      "id": "BP08",
+      "priority": "P1",
+      "title": "碰撞权重、候选、密度、稳定性与编辑缺项",
+      "kind": "config/runtime/editor",
+      "status": "planned_not_applied",
+      "dependsOn": [
+        "BP02",
+        "BP05",
+        "BP07"
+      ],
+      "existingSourceFiles": [
+        "src/components/Rules/configRuntime/configPackageAdapter.ts",
+        "src/configStudio/RenderRuleExtensionsEditor.tsx",
+        "src/configStudio/legacyProjectAdapter.ts",
+        "src/components/Rules/rendering/labelLayout.ts",
+        "src/components/Rules/rendering/label/labelCollision.ts",
+        "src/components/Rules/rendering/label/labelPlacementCache.ts"
+      ],
+      "configurationOrCapabilityTargets": [
+        "independent geometry/label/display priorities, one explicit composition",
+        "candidateOffsetsPx",
+        "collideWith",
+        "blocks",
+        "keepPreviousAnchor",
+        "invalidateWhen",
+        "reduceOrder",
+        "preserveSelected",
+        "preserveRequired"
+      ],
+      "acceptance": [
+        "恢复 V1 有效碰撞权重/排序与障碍类别",
+        "密集混合、pan/zoom、边缘和多部件取舍一致",
+        "八项 UI 修改、保存、往返、实际执行成立"
+      ],
+      "evidenceOrigin": "A03 + 编辑覆盖缺项"
+    },
+    {
+      "id": "BP09",
+      "priority": "P1",
+      "title": "五种交互态与可配置图钉/双线效果",
+      "kind": "config/runtime/editor",
+      "status": "planned_not_applied",
+      "dependsOn": [
+        "BP02",
+        "BP07",
+        "BP08"
+      ],
+      "existingSourceFiles": [
+        "src/configStudio/v32Defaults.ts",
+        "src/configStudio/ConfigStudio.tsx",
+        "src/components/Rules/configRuntime/configPackageAdapter.ts",
+        "src/components/Rules/core/RuleDrivenLayer.tsx",
+        "src/components/Rules/rendering/labelClickInteraction.ts"
+      ],
+      "configurationOrCapabilityTargets": [
+        "engine.interactionBaselines for all five states",
+        "pin and outline profile fields",
+        "enabled/style/zIndex/forceShowLabel/labelPriority",
+        "geometry capability triggers"
+      ],
+      "acceptance": [
+        "关闭 selected 不再产生高亮",
+        "真实鼠标 hover 进入/离开按样式执行",
+        "TPP 蓝图钉、ROD 双线高亮与 V1 一致",
+        "多态优先与退出恢复确定"
+      ],
+      "evidenceOrigin": "A04"
+    },
+    {
+      "id": "BP10",
+      "priority": "P1",
+      "title": "标准信息卡分类/系统/剩余行与链接迁移",
+      "kind": "config/model/runtime/editor",
+      "status": "planned_not_applied",
+      "dependsOn": [
+        "BP02",
+        "BP05"
+      ],
+      "existingSourceFiles": [
+        "src/configStudio/legacyProjectAdapter.ts",
+        "src/configStudio/V3CardEditor.tsx",
+        "src/configStudio/V3CardRenderer.ts",
+        "src/configStudio/runtime.ts",
+        "src/components/Rules/cardrules/cardRegistryRows.ts"
+      ],
+      "configurationOrCapabilityTargets": [
+        "classification semantic formatter",
+        "main/other sections and system rows",
+        "remaining fields/tags/extensions policy",
+        "enum/date/boolean/JSON formatters",
+        "external-link text and relation click behaviour"
+      ],
+      "acceptance": [
+        "同一 record 的可见行、文案、顺序、空值与链接行为等价",
+        "34 条已知记录及全部可显示分类对照",
+        "导入导出不丢卡片设置，标准卡非 component"
+      ],
+      "evidenceOrigin": "A06"
+    },
+    {
+      "id": "BP11",
+      "priority": "P0",
+      "title": "保存/导入/升级/激活门与参数全链可用性",
+      "kind": "validation/editor/lifecycle",
+      "status": "planned_not_applied",
+      "dependsOn": [
+        "BP02",
+        "BP04",
+        "BP08",
+        "BP10"
+      ],
+      "existingSourceFiles": [
+        "src/configStudio/ConfigStudio.tsx",
+        "src/configStudio/WorkflowWorkbench.tsx",
+        "src/configStudio/ConfigLab.tsx",
+        "src/configStudio/configLabStorage.ts",
+        "src/configStudio/package.ts",
+        "src/configStudio/runtime.ts"
+      ],
+      "configurationOrCapabilityTargets": [
+        "validate before save/import activation/history activation",
+        "preserve user overrides on upgrade",
+        "requiredWhen/defaultValue/placeholder/reference field UI",
+        "effective setting value and source"
+      ],
+      "acceptance": [
+        "失败导入不覆盖/启用有效包",
+        "同一版本供主图、预览、工作流和卡片消费",
+        "参数 UI→校验→保存→ZIP/JSON→重导入→实际执行逐项通过"
+      ],
+      "evidenceOrigin": "A08 + Lab save/import validation"
+    },
+    {
+      "id": "BP12",
+      "priority": "P0",
+      "title": "完整验收与首次转正候选交付",
+      "kind": "acceptance",
+      "status": "planned_not_applied",
+      "dependsOn": [
+        "BP01",
+        "BP02",
+        "BP03",
+        "BP04",
+        "BP05",
+        "BP06",
+        "BP07",
+        "BP08",
+        "BP09",
+        "BP10",
+        "BP11"
+      ],
+      "existingSourceFiles": [
+        "scripts/config-tools",
+        "docs/90_roadmap-and-history"
+      ],
+      "configurationOrCapabilityTargets": [
+        "all-source parity manifest",
+        "automated/browser/manual evidence",
+        "native project default package",
+        "allowed exceptions and rollback commit list"
+      ],
+      "acceptance": [
+        "verify/build 和全部直接对照通过，无未归属阻断项",
+        "三类 external 完整 UI 与输出验收",
+        "人工状态如实记录，主要应用模块保持",
+        "仅本地候选，不自动发布/推送"
+      ],
+      "evidenceOrigin": "首次转正门"
+    }
+  ],
+  "perImplementationTopicChecks": [
+    "npm run verify:config-v32",
+    "npm run build",
+    "relevant direct V1/V3 regression and browser checks"
+  ],
+  "evidenceSha256": {
+    "Full_Parity_Audit_2026-10-08.md": "725ff18d759a2aa65772912db84254297c35a12e3368de8fcf3c0b1518725fd1",
+    "blueprint-readiness.json": "c5b1f0f3ffd1eddbc7d7fa2e97c8f8b941e0a3574dea8b06337896f6d1e11c51",
+    "blueprint_readiness.ts": "3e0d47e299b14dd1549ae68c4cc5b5e0a98188f4e2cfeda93877e3f72913ca65"
+  }
+}

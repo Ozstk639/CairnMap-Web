@@ -1,0 +1,6390 @@
+{
+  "schemaVersion": "cairnmap.v3-parameter-ledger.v1",
+  "note": "Direct named contract members; pending is not a claim of support. Nested settings require their own runtime evidence.",
+  "parameters": [
+    {
+      "type": "ClassificationPath",
+      "field": "class",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ClassificationPath",
+      "field": "kind",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ClassificationPath",
+      "field": "skind",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ClassificationPath",
+      "field": "skind2",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "InheritanceControls",
+      "field": "fields",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "InheritanceControls",
+      "field": "display",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "InheritanceControls",
+      "field": "card",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SelectOption",
+      "field": "value",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SelectOption",
+      "field": "label",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "fieldId",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "key",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "scope",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "type",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "cardinality",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "input",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "required",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "validateExistingData",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "requiredWhen",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "labels",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "description",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "options",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "optionSource",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "placeholder",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "defaultValue",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "sourceRuntimeField",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "scenes",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "reference",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "overrideOf",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "FieldDefinition",
+      "field": "inheritance",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPointIcon",
+      "field": "source",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPointIcon",
+      "field": "size",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPointIcon",
+      "field": "anchor",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPointIcon",
+      "field": "fallback",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "LabelStyleModifiers",
+      "field": "italic",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "LabelStyleModifiers",
+      "field": "underline",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "LabelStyleModifiers",
+      "field": "bold",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelVisualStyle",
+      "field": "family",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelVisualStyle",
+      "field": "size",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelVisualStyle",
+      "field": "modifiers",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelVisualStyle",
+      "field": "color",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStyle",
+      "field": "pointShape",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStyle",
+      "field": "icon",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStyle",
+      "field": "size",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStyle",
+      "field": "weight",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStyle",
+      "field": "stroke",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStyle",
+      "field": "fill",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStyle",
+      "field": "strokeOpacity",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStyle",
+      "field": "fillOpacity",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStyle",
+      "field": "dashPreset",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStyle",
+      "field": "lineCap",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStyle",
+      "field": "lineJoin",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "visible",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "style",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "font",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "size",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "italic",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "underline",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "source",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "fallbackSources",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "valueFormat",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "fallbackValueFormats",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "placement",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "offsetY",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "offsetX",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "withDot",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "dotAnchorMode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLabelStyle",
+      "field": "collision",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "AdvancedRenderRule",
+      "field": "predicates",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "AdvancedRenderRule",
+      "field": "visibility",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "AdvancedRenderRule",
+      "field": "geometry",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "AdvancedRenderRule",
+      "field": "symbol",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "AdvancedRenderRule",
+      "field": "label",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "AdvancedRenderRule",
+      "field": "collision",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "AdvancedRenderRule",
+      "field": "selection",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "AdvancedRenderRule",
+      "field": "specialLogic",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "AdvancedRenderRule",
+      "field": "legacyRuntime",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderScreenGate",
+      "field": "mode",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderScreenGate",
+      "field": "minScreenAreaPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderScreenGate",
+      "field": "minScreenLengthPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "profile",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "mode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "endpointPaddingRatio",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "endpointPaddingMinPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "maxTurnAngleDeg",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "minLengthPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textMode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "anchorSamples",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "candidateSpacing",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "candidateMinSpacing",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "candidateMax",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "shortThresholdMultiplier",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "longMode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "preferPreviousCandidate",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "candidateHysteresisPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathMinLengthPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathPaddingPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathMaxAngleDeltaDeg",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathMaxTotalBendDeg",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathPreferReadableDirection",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathFallback",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathCollisionPaddingPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathLetterSpacingPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathCurvedLetterSpacingPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathCurvedSpacingMinBendDeg",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "orientationPolicy",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathVerticalAngleThresholdDeg",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathVerticalLengthRatio",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "candidateOrdering",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "candidateWeightMode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "candidateSwitchThreshold",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "candidateReuseBonus",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "candidateViewportPreference",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "candidateEdgePenalty",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "centerWeightMode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "centerSwitchThreshold",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "centerReuseBonus",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkVerticalRenderMode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "svgVerticalCjkMinLengthPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "svgVerticalCjkLetterSpacingPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "advancedTextEnabled",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "advancedTextBudgetGroup",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "advancedTextMaxLabels",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "advancedTextMaxCandidatesPerPass",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkGlyphRotationPolicy",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkGlyphUprightAngleThresholdDeg",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkGlyphPathMode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkGlyphSpacingPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkGlyphCollisionPaddingPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkGlyphMinPathLengthPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkGlyphMaxCount",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkGlyphMaxAngleDeltaDeg",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkGlyphMaxTotalBendDeg",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkGlyphPreferReadableDirection",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkGlyphAllowTextPathFallback",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathHalfLengthMultiplier",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathMinHalfLengthWorld",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathMaxHalfLengthWorld",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textPathMaxHalfLengthRatio",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "textCollisionRectMode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkGlyphCompactMode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkGlyphMinAdvanceScale",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "cjkGlyphFallbackMode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "simpleFallbackEnabled",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "simpleFallbackRotate",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "repositionMode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "repositionAttemptsPerDirection",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "repositionStepMode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "repositionFailure",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "repositionStrictSvg",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "avoidLineGeometry",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "avoidPolygonGeometry",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "avoidPointSymbols",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "repositionCollisionScope",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "viewportRectMode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "viewportCandidateMode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "viewportCandidateBufferPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "viewportCandidateMaxTargets",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderLineLabelExtension",
+      "field": "viewportCandidateMinIntervalPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderAnchorExtension",
+      "field": "strategy",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderAnchorExtension",
+      "field": "candidates",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderAnchorExtension",
+      "field": "offsetPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderAnchorExtension",
+      "field": "candidateOffsetsPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderAnchorExtension",
+      "field": "allowOutsideGeometry",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderAnchorExtension",
+      "field": "requireInsideGeometry",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderAnchorExtension",
+      "field": "preferViewportCenter",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPolygonCandidateExtension",
+      "field": "mode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPolygonCandidateExtension",
+      "field": "count",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPolygonCandidateExtension",
+      "field": "gridSize",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPolygonCandidateExtension",
+      "field": "gridMinSize",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPolygonCandidateExtension",
+      "field": "maxCandidates",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPolygonCandidateExtension",
+      "field": "scanMax",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPolygonCandidateExtension",
+      "field": "overflow",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPolygonCandidateExtension",
+      "field": "preferPreviousCandidate",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPolygonCandidateExtension",
+      "field": "switchThreshold",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPolygonCandidateExtension",
+      "field": "allowViewportFallback",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPolygonCandidateExtension",
+      "field": "minScreenAreaPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPolygonCandidateExtension",
+      "field": "preferViewportCenter",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderCollisionExtension",
+      "field": "collideWith",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderCollisionExtension",
+      "field": "blocks",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderCollisionExtension",
+      "field": "allowOverlap",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderCollisionExtension",
+      "field": "paddingPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderCollisionExtension",
+      "field": "hidePolicy",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStabilityExtension",
+      "field": "enabled",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStabilityExtension",
+      "field": "cacheKey",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStabilityExtension",
+      "field": "zoomBucketSize",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStabilityExtension",
+      "field": "freezeDuringPan",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStabilityExtension",
+      "field": "recomputeOnMoveEnd",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStabilityExtension",
+      "field": "recomputeOnZoomEnd",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStabilityExtension",
+      "field": "hysteresisPx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStabilityExtension",
+      "field": "keepPreviousCandidate",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStabilityExtension",
+      "field": "keepPreviousAnchor",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderStabilityExtension",
+      "field": "invalidateWhen",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderDensityExtension",
+      "field": "mode",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderDensityExtension",
+      "field": "gridSizePx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderDensityExtension",
+      "field": "maxLabelsPerGrid",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderDensityExtension",
+      "field": "maxSymbolsPerGrid",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderDensityExtension",
+      "field": "reduceOrder",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderDensityExtension",
+      "field": "importanceField",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderDensityExtension",
+      "field": "preserveSelected",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderDensityExtension",
+      "field": "preserveRequired",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderFallbackExtension",
+      "field": "whenNoLabelText",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderFallbackExtension",
+      "field": "whenCollisionFailed",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderFallbackExtension",
+      "field": "whenRuleMissing",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderFallbackExtension",
+      "field": "whenGeometryInvalid",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderVisibilityExtension",
+      "field": "mode",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderVisibilityExtension",
+      "field": "sameId",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderVisibilityExtension",
+      "field": "coincidentPoint",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderVisibilityExtension",
+      "field": "lineContainmentChoice",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderVisibilityExtension",
+      "field": "activeContextMember",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleExtensions",
+      "field": "screenGate",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleExtensions",
+      "field": "pane",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleExtensions",
+      "field": "hitTolerancePx",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleExtensions",
+      "field": "labelText",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleExtensions",
+      "field": "lineLabel",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleExtensions",
+      "field": "anchor",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleExtensions",
+      "field": "polygonCandidates",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleExtensions",
+      "field": "collision",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleExtensions",
+      "field": "stability",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleExtensions",
+      "field": "density",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleExtensions",
+      "field": "fallback",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleExtensions",
+      "field": "visibility",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryStackPolicy",
+      "field": "zLevel",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryStackPolicy",
+      "field": "pane",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryStackPolicy",
+      "field": "zIndexOffset",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "LabelCollisionPolicy",
+      "field": "role",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "LabelCollisionPolicy",
+      "field": "basePriority",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "LabelCollisionPolicy",
+      "field": "collisionGroup",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "LabelCollisionPolicy",
+      "field": "hideWhenColliding",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "LabelCollisionPolicy",
+      "field": "densityLimit",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPriority",
+      "field": "mode",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPriority",
+      "field": "base",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderPriority",
+      "field": "metric",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleConditionalOverride",
+      "field": "id",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleConditionalOverride",
+      "field": "when",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleConditionalOverride",
+      "field": "representation",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleConditionalOverride",
+      "field": "style",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleConditionalOverride",
+      "field": "label",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleConditionalOverride",
+      "field": "geometryStack",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleConditionalOverride",
+      "field": "priority",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "RenderRuleConditionalOverride",
+      "field": "extensions",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "id",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "minZoom",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "maxZoom",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "representation",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "style",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "label",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "interaction",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "geometryStack",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "extensions",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "conditionalOverrides",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "advanced",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "minExclusive",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "maxExclusive",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "labelRole",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ZoomPriorityRule",
+      "field": "priority",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryInteractionTriggers",
+      "field": "point",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryInteractionTriggers",
+      "field": "line",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryInteractionTriggers",
+      "field": "boundary",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryInteractionTriggers",
+      "field": "interior",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryInteractionTriggers",
+      "field": "label",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryProfile",
+      "field": "enabled",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryProfile",
+      "field": "allowMultipleParts",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryProfile",
+      "field": "anchor",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryProfile",
+      "field": "color",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryProfile",
+      "field": "style",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryProfile",
+      "field": "geometryStack",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryProfile",
+      "field": "label",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryProfile",
+      "field": "zoomPriority",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryProfile",
+      "field": "interaction",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "GeometryProfile",
+      "field": "legacyDisplay",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ContainmentBinding",
+      "field": "enabled",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ContainmentBinding",
+      "field": "role",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ContainmentBinding",
+      "field": "parentReferenceField",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ContainmentBinding",
+      "field": "viewProfileKey",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ContextBindingEndpoint",
+      "field": "classification",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ContextBindingEndpoint",
+      "field": "referenceField",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ContextBinding",
+      "field": "id",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ContextBinding",
+      "field": "label",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ContextBinding",
+      "field": "host",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ContextBinding",
+      "field": "member",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ContextBinding",
+      "field": "memberSelectorField",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ContextBinding",
+      "field": "enabled",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ContextBinding",
+      "field": "profile",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "InteractionVisual",
+      "field": "enabled",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "InteractionVisual",
+      "field": "strokeColor",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "InteractionVisual",
+      "field": "strokeWidth",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "InteractionVisual",
+      "field": "strokeOpacity",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "InteractionVisual",
+      "field": "fillColor",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "InteractionVisual",
+      "field": "fillOpacity",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "InteractionVisual",
+      "field": "zIndexOffset",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "InteractionVisual",
+      "field": "forceShowLabel",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "InteractionVisual",
+      "field": "labelPriority",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigEngineSettings",
+      "field": "world",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigEngineSettings",
+      "field": "contextView",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigEngineSettings",
+      "field": "screenGateDefaults",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigEngineSettings",
+      "field": "interactionBaselines",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigEngineSettings",
+      "field": "paneDefaults",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardRelation",
+      "field": "targetClassification",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardRelation",
+      "field": "targetMatchField",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardRelation",
+      "field": "targetDisplayField",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardRelation",
+      "field": "clickable",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardRelation",
+      "field": "multiple",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardRelation",
+      "field": "sourceValuePath",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardRelation",
+      "field": "fallbackDisplay",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardItem",
+      "field": "id",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardItem",
+      "field": "source",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardItem",
+      "field": "visible",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardItem",
+      "field": "renderer",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardItem",
+      "field": "section",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardItem",
+      "field": "hideWhenEmpty",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardItem",
+      "field": "label",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardItem",
+      "field": "options",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CardItem",
+      "field": "relation",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CategoryNode",
+      "field": "nodeId",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CategoryNode",
+      "field": "path",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CategoryNode",
+      "field": "classificationLabels",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CategoryNode",
+      "field": "children",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CategoryNode",
+      "field": "inheritDown",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CategoryNode",
+      "field": "policies",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CategoryNode",
+      "field": "fields",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CategoryNode",
+      "field": "geometryType",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CategoryNode",
+      "field": "geometryProfiles",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CategoryNode",
+      "field": "containment",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CategoryNode",
+      "field": "card",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "CategoryNode",
+      "field": "legacy",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SearchProfile",
+      "field": "target",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SearchProfile",
+      "field": "queryFields",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SearchProfile",
+      "field": "displayTemplate",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SearchProfile",
+      "field": "returnField",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SearchProfile",
+      "field": "matcher",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SearchProfile",
+      "field": "minQueryLength",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SearchProfile",
+      "field": "maxResults",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SearchProfile",
+      "field": "debounceMs",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SearchProfile",
+      "field": "cacheScope",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SearchProfile",
+      "field": "mode",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SearchProfile",
+      "field": "searchFields",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SearchProfile",
+      "field": "displayFields",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SearchProfile",
+      "field": "returnFields",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "SearchProfile",
+      "field": "coarse",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowGroupField",
+      "field": "key",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowGroupField",
+      "field": "label",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowGroupField",
+      "field": "kind",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowGroupField",
+      "field": "required",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowGroupField",
+      "field": "options",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowGroupField",
+      "field": "placeholder",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowGroupField",
+      "field": "defaultValue",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowGroupField",
+      "field": "rows",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowGroupField",
+      "field": "search",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowRepeatGroup",
+      "field": "itemFields",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowRepeatGroup",
+      "field": "storage",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowRepeatGroup",
+      "field": "optional",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowRepeatGroup",
+      "field": "minItems",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowRepeatGroup",
+      "field": "addLabel",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "id",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "slot",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "valueNormalization",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "kind",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "columns",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "label",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "options",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "optionSource",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "placeholder",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "defaultValue",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "rows",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "search",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "classificationScope",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "outputId",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "required",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "systemManaged",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "group",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "componentKey",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowControl",
+      "field": "legacyBlock",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowStep",
+      "field": "id",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowStep",
+      "field": "kind",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowStep",
+      "field": "label",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowStep",
+      "field": "subtitle",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowStep",
+      "field": "controls",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowStep",
+      "field": "geometry",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowStep",
+      "field": "outputId",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowStep",
+      "field": "specialKey",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowStep",
+      "field": "tagsExtensions",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowStep",
+      "field": "drawing",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowStep",
+      "field": "legacyPage",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowAssignment",
+      "field": "id",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowAssignment",
+      "field": "target",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowAssignment",
+      "field": "expression",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowOutput",
+      "field": "id",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowOutput",
+      "field": "classification",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowOutput",
+      "field": "assignments",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowOutput",
+      "field": "geometry",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowDefinition",
+      "field": "id",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowDefinition",
+      "field": "label",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowDefinition",
+      "field": "mode",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowDefinition",
+      "field": "target",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowDefinition",
+      "field": "steps",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowDefinition",
+      "field": "outputs",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowDefinition",
+      "field": "assignments",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowDefinition",
+      "field": "external",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "WorkflowDefinition",
+      "field": "legacy",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ControlledRegistryItem",
+      "field": "id",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ControlledRegistryItem",
+      "field": "label",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ControlledRegistryItem",
+      "field": "allowedClasses",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ControlledRegistryItem",
+      "field": "optionSchema",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigRegistries",
+      "field": "cardLayouts",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigRegistries",
+      "field": "cardComponents",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigRegistries",
+      "field": "displayProfiles",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigRegistries",
+      "field": "specialDisplayLogic",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigRegistries",
+      "field": "workflowControls",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigRegistries",
+      "field": "workflowBlocks",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ParityEntry",
+      "field": "kind",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ParityEntry",
+      "field": "id",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ParityEntry",
+      "field": "source",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ParityEntry",
+      "field": "status",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ParityEntry",
+      "field": "details",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ParityEntry",
+      "field": "fingerprint",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ParityReport",
+      "field": "schemaVersion",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ParityReport",
+      "field": "sourceManifestSha256",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ParityReport",
+      "field": "entries",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ParityReport",
+      "field": "generatedAt",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV3",
+      "field": "schemaVersion",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV3",
+      "field": "contractRevision",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV3",
+      "field": "packageId",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV3",
+      "field": "projectId",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV3",
+      "field": "revision",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV3",
+      "field": "displayName",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV3",
+      "field": "sourceManifestSha256",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV3",
+      "field": "engine",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV3",
+      "field": "registries",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV3",
+      "field": "nodes",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV3",
+      "field": "contextBindings",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV3",
+      "field": "workflows",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV3",
+      "field": "parity",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV2Import",
+      "field": "schemaVersion",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV2Import",
+      "field": "packageId",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV2Import",
+      "field": "projectId",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV2Import",
+      "field": "revision",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV2Import",
+      "field": "displayName",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV2Import",
+      "field": "nodes",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV2Import",
+      "field": "workflows",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV2Import",
+      "field": "parity",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigPackageV2Import",
+      "field": "specialComponentKeys",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "AffectedFeature",
+      "field": "id",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "AffectedFeature",
+      "field": "name",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigValidationIssue",
+      "field": "severity",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigValidationIssue",
+      "field": "code",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigValidationIssue",
+      "field": "path",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigValidationIssue",
+      "field": "message",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigValidationIssue",
+      "field": "field",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigValidationIssue",
+      "field": "expected",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigValidationIssue",
+      "field": "affectedFeatures",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigValidationIssue",
+      "field": "count",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigValidationReport",
+      "field": "schemaVersion",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigValidationReport",
+      "field": "valid",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigValidationReport",
+      "field": "createdAt",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigValidationReport",
+      "field": "issues",
+      "optional": false,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    },
+    {
+      "type": "ConfigValidationReport",
+      "field": "summary",
+      "optional": true,
+      "state": "pending_consumer_and_editing_audit",
+      "evidenceRequired": [
+        "effective-default",
+        "editor-or-system-policy",
+        "save-validation",
+        "archive-roundtrip",
+        "runtime-consumer",
+        "map-preview-parity"
+      ]
+    }
+  ]
+}

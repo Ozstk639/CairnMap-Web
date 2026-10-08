@@ -1,0 +1,3112 @@
+{
+  "schemaVersion": "cairnmap.v1-independent-baseline.v1",
+  "frozenSha": "0b82863d4fea3791f98917ba6d13f70e1f27eb15",
+  "sources": [
+    {
+      "path": "package-lock.json",
+      "sha256": "5fa59cffe7fc622a6f87216fc784f3cb92f48db581375de2cacfb96f0684447b"
+    },
+    {
+      "path": "package.json",
+      "sha256": "d401316acdf73cf7ca6dd9dc1425c568c9e5c542c74e63e9ef19527e16047e66"
+    },
+    {
+      "path": "project-config/assemblies/openriamap-ria.json",
+      "sha256": "b5ed4f5d7917ac15a60821a4126147b7f5987f9e0908cce0408b293366ea0e25"
+    },
+    {
+      "path": "project-config/openriamap-ria/README.md",
+      "sha256": "af468049c6db086e78d3fd113d49d0d6486e76f3e9936a013b2545b7780af2c1"
+    },
+    {
+      "path": "project-config/packages/openriamap-ria/environment/dataSources.json",
+      "sha256": "6ec1859da96ddc9c02efd7532c16da2f58468d78aa47a988fbc1840d1a8a6f90"
+    },
+    {
+      "path": "project-config/packages/openriamap-ria/environment/ruleButtons.json",
+      "sha256": "f05cb65058f00876ee454c32b7cfcaa3e6f4f18ee244f804ab031561ab6357c9"
+    },
+    {
+      "path": "project-config/packages/openriamap-ria/environment/searchProfiles.json",
+      "sha256": "1ad709c9721386c0e5952ec08fa9a4f92410d3bf664094e766634e118adf72fd"
+    },
+    {
+      "path": "project-config/packages/openriamap-ria/environment/sourceLinkModes.json",
+      "sha256": "65628f43ed6f13949767ac79928a712a670dd7f5de43793736531d0386aa151c"
+    },
+    {
+      "path": "project-config/packages/openriamap-ria/environment/worlds.json",
+      "sha256": "b1fe8da0cebcffcac8080268ff5f885291a3b763b08dd49b42bfc725bedec0ef"
+    },
+    {
+      "path": "project-config/packages/openriamap-ria/package.json",
+      "sha256": "54df8e7785473c57f0ae61b5c973d5737017452c66e5e4de2d3cded8f136c7ec"
+    },
+    {
+      "path": "project-config/packages/openriamap-ria/project.json",
+      "sha256": "4c72eb184d281aa99a0119243d04cc29ad2e86ca0b8512e2b236e1b9641945d6"
+    },
+    {
+      "path": "project-config/presets/README.md",
+      "sha256": "d34fe3a3f4c7767116a02ca1378cc2d833a252fa4cd27a7db1a295049a6d39c8"
+    },
+    {
+      "path": "project-config/presets/building/README.md",
+      "sha256": "f7b9dd6c0cc03b1f8366b3c34dfd3f124d176dad25d375f3c1525fabeec87bdd"
+    },
+    {
+      "path": "project-config/presets/building/classes/BUD.json",
+      "sha256": "52957e8936d04e6776db1ef92dba58fdc3a2e01723a2afa75ae3dbefc9b4b10b"
+    },
+    {
+      "path": "project-config/presets/building/classes/FLR.json",
+      "sha256": "372e74d9cb82080cfcd686bc173685e296191bdcf56b9ff4172d45ce8be9bed5"
+    },
+    {
+      "path": "project-config/presets/building/preset.json",
+      "sha256": "f900740b1b458c4fd417accd8a08b4564b9874370009ce0b83892558dd67c788"
+    },
+    {
+      "path": "project-config/presets/building/workflows/building-workflow.json",
+      "sha256": "37754f46f61e364ed37230647117fdbe85334adcb7997df596e0a60f8fe07e03"
+    },
+    {
+      "path": "project-config/presets/building/workflows/floor-workflow.json",
+      "sha256": "0d389e0bd6f9fc2b6de2ded5ea609a5325107277ffaf72d149ac164aea78880b"
+    },
+    {
+      "path": "project-config/presets/core-structures/README.md",
+      "sha256": "1c716a3ace0f38a6b6fb8001b2cc1d27373ae0b58c517fb69fe5293ac6a4cf5a"
+    },
+    {
+      "path": "project-config/presets/core-structures/classes/ISG.json",
+      "sha256": "fb5c21de0ad23fe4ac699fdf0ac0d1dde7326e58444d2a0074c2aa7a02b75367"
+    },
+    {
+      "path": "project-config/presets/core-structures/classes/ISL.json",
+      "sha256": "9ec32b839bdec8fbf00fa4375cc4fe923c28fef7942726a1dd9cb49172d75300"
+    },
+    {
+      "path": "project-config/presets/core-structures/classes/ISP.json",
+      "sha256": "faaf8f2b423b31c236954d45697c356c59d25444516b6290f00a937ed21d5298"
+    },
+    {
+      "path": "project-config/presets/core-structures/preset.json",
+      "sha256": "e57ebb3fc105744177e83fc242d82b20fc1741499df9332679e8a5289cc79913"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/README.md",
+      "sha256": "6268d7573ce228522e876d5da7ef8403a9a5452690134ad800359f12bfd61925"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/card/cardEnhancements.json",
+      "sha256": "21da302f92a8670a03698f439c0abb080791878e0bb5edfd2ae757d11121ff69"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/card/cardLayouts.json",
+      "sha256": "cbae1e97155ddb554eacd1ce5831541542f47b2210eeb5492d382303e73519b6"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/card/cardRuntimeContracts.json",
+      "sha256": "6a3155efcaa69c20ae01deae1538004652f75a94dcfdde0f21ddacd3b309ae2c"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/common/README.md",
+      "sha256": "18d5b9cb938d5da4998bc3caef26583325e654677024b0bf5a123409a4fdc050"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/common/iconRegistry.json",
+      "sha256": "04a2d10ba12e5c58b68c06a144ad6e8ee5a30195ac5f9c4220848d6f3b1e21ce"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/common/renderFormatFinalContracts.json",
+      "sha256": "845655da615d244c5114d27938918bb2724610e6b7cb10ffb895fceb3418cd15"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/display/README.md",
+      "sha256": "3fe6cecbc8a6e1325d82e0b97924c90fe1373940b6c856aa3f85b77e4e2ece94"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/display/displayAlgorithms.json",
+      "sha256": "d2a93926d489da00c070e535d1400b6c8c640ba37f923182021fb645996bd66a"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/display/displayProfiles.json",
+      "sha256": "7e93375c98a71cfabbec7f0fb881fc06b42916109838164cf7e820f7f9d6b67e"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/display/displayRuntimeContracts.json",
+      "sha256": "525cfba67b9c2f5ac07a3c89d4bda762a22743af4d0409154771fad9af6ed600"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/display/labelStyles.json",
+      "sha256": "09e597c2c1f702f2a1132d8ebd69040ef2708143a01f6ee7bdef40f730c64796"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/display/specialDisplayLogic.json",
+      "sha256": "2239f2e984076751d266f7cacce122816608b94fcb579545648dd57137bb4e7a"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/format/README.md",
+      "sha256": "3aa693be667c9df88b1a6f826e56472bb9356d4d0fb90cf0438797187c829033"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/format/formatRuntimeContracts.json",
+      "sha256": "d0bca0176c7afc144ac4cde1836ba9be33290b0ca36b37f6aeaa69ba280a11ef"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/format/formatSpecialFormatters.json",
+      "sha256": "0a43bb7a603145d21cbd6eb1a9ca6c14f55c166b0fb36e99bccfc6e5ed92230c"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/format/schemaRuntimeContracts.json",
+      "sha256": "1d3e5452de12eaf1929ecc12dbe8de6c53dae72d68158f90982a7cd2f145b8f3"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/relation/README.md",
+      "sha256": "31a8baa99fa4a82db9508838fb8a6d4969cad3b70d9f6c3a1aa84c63cbb23c3d"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/relation/relationActions.json",
+      "sha256": "a761201611081f448427261820d2d4dee421141ff28d1100292d299a801b2ab8"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/relation/relationBindings.json",
+      "sha256": "223d714f8563c7e0c7f6601817ad158d78810a317ea8d0309fc441b10cd3bb98"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/relation/relationViewProfiles.json",
+      "sha256": "7be172c4e8f53055223f745f82a9f77eec6a0e4ac5275d670cf6b134b7289155"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/workflow/README.md",
+      "sha256": "44a7d6db92702dd443274bd87ddc8765208f6a4a9c2c080b73410d55b24d3f42"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/workflow/fieldControls.json",
+      "sha256": "f1e37a461ad91fb59f63cebe4c7fbb071dd9d1bef1cf201bdd00b092ac7c3df0"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/workflow/workflowBlocks.json",
+      "sha256": "db5c9f4b1b7a7d7e83845b6a31fb480cbf99ce1b99e1d25a659104311739bc9d"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/workflow/workflowComponents.json",
+      "sha256": "43e6f98caeeea86f372bfa132295934636a6614aceda000edb0c6764094e560c"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/workflow/workflowFinalContracts.json",
+      "sha256": "6a31394f8b0016d293ae9420cb4f829112c36a1b59ee7c7a7ff11ec79826a0e8"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/workflow/workflowLegacyExecutors.json",
+      "sha256": "6a6deea11bae39e6a18d831c6ed095060430b91060b78f026a588c010f91d3b8"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/workflow/workflowParityProfiles.json",
+      "sha256": "f1be4e73151bb4f0d2b4591f4b0510fe880b7637cc7b24bf45e9965d5233eaa7"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/workflow/workflowRuntimeContracts.json",
+      "sha256": "aaa1018c9c87a2c688a128ec2e5c1bf8be0db3e80bf3a14f744a27648af96af7"
+    },
+    {
+      "path": "project-config/presets/core-structures/shared/workflow/workflowTemplates.json",
+      "sha256": "b59c3fa054434f77ddcf3b0e417e85bbeba91cf3446834551067fa97734156b3"
+    },
+    {
+      "path": "project-config/presets/core-structures/workflows/generic-line-workflow.json",
+      "sha256": "ebebdb155074366a47454f49b3a176fec8e96daff486ccfbf1a5b1f1e33fb870"
+    },
+    {
+      "path": "project-config/presets/core-structures/workflows/generic-point-workflow.json",
+      "sha256": "3cd05b7492662401ab273cdebcc6d763b4a6d737532cc4ae4d4e8756cfbedff6"
+    },
+    {
+      "path": "project-config/presets/core-structures/workflows/generic-polygon-workflow.json",
+      "sha256": "c5ec0dfe8d9a1fd3eb88fc1ca58a6eeee36575ecfa04ea5a8a4c254e9c170662"
+    },
+    {
+      "path": "project-config/presets/rail/README.md",
+      "sha256": "a87abc864b3f48b8f5e4cee40340e4a70864741db13fb7d33fb23ed849715371"
+    },
+    {
+      "path": "project-config/presets/rail/classes/PFB.json",
+      "sha256": "245ee29ec08b2a1325ffd21623aaa270d860c27d082189127ef07a7556a48cb5"
+    },
+    {
+      "path": "project-config/presets/rail/classes/PLF.json",
+      "sha256": "f6a18bc1d951c7990503442d92fc677ca0da226ef17b1e97c7731737556f3ab7"
+    },
+    {
+      "path": "project-config/presets/rail/classes/RLE.json",
+      "sha256": "4444034f136cca6ca6d403e18beec28b6877fd6562f51ad82ec5ca6b94eab497"
+    },
+    {
+      "path": "project-config/presets/rail/classes/SBP.json",
+      "sha256": "a083b5ba2ccb48fa1799da64f58a41d591152b6e92aab57ac76ceb3f0ba939d0"
+    },
+    {
+      "path": "project-config/presets/rail/classes/STA.json",
+      "sha256": "6675ceb04046112ac8dc9b74dcc6b8167979d6171c977d29f8934af6a2ce5bd1"
+    },
+    {
+      "path": "project-config/presets/rail/classes/STB.json",
+      "sha256": "287179e1ae755b2a5a4c4000c744d26e9cf897f45e1f458a88be9188d3b51276"
+    },
+    {
+      "path": "project-config/presets/rail/classes/STF.json",
+      "sha256": "98f7709054e11e87a4fcc4a2a75fd7ae6abdee8de0d157298137fb073502290f"
+    },
+    {
+      "path": "project-config/presets/rail/preset.json",
+      "sha256": "febcce107d1acf0199f638a1d96ca1c986236fa9cb50b42187c07b5f0aebebe2"
+    },
+    {
+      "path": "project-config/presets/rail/workflows/rail-line-workflow.json",
+      "sha256": "bc451fad0f68cab88ca8bde48c88250407ca71afb39fa0488bf819a4297b7ef6"
+    },
+    {
+      "path": "project-config/presets/rail/workflows/rail-platform-boundary-workflow.json",
+      "sha256": "1f62fec4c997febfac99fef162b7870ccad411c2841456bf492ea9a6e32e1361"
+    },
+    {
+      "path": "project-config/presets/rail/workflows/rail-platform-workflow.json",
+      "sha256": "1add92cf3680a92beb4c927b2479ac9ee77047011f6567ba22338f124ed58ce7"
+    },
+    {
+      "path": "project-config/presets/rail/workflows/rail-station-building-floor-workflow.json",
+      "sha256": "dd9dd3b56bd2976d8b1241f469103711891d7e14da9fe447cc85d25cdf3711a4"
+    },
+    {
+      "path": "project-config/presets/rail/workflows/rail-station-building-point-workflow.json",
+      "sha256": "e1885b23a57e2d2995eac8103d8ffacb4064671a5bb174557a6523cc08c64077"
+    },
+    {
+      "path": "project-config/presets/rail/workflows/rail-station-building-workflow.json",
+      "sha256": "ec130e4b52cf2d7e9d06fb7f23a2faebb35cf607b7bd554fa43309edf24cf9cf"
+    },
+    {
+      "path": "project-config/presets/rail/workflows/rail-station-workflow.json",
+      "sha256": "f0db7a662985e51ddc5027c9a714632daece3c3b679f1f240032fc8ee494db02"
+    },
+    {
+      "path": "project-config/presets/road/README.md",
+      "sha256": "684c754f103bea6e227653bb557f9f4d02f1f2026699f8bd5942e97261041cb3"
+    },
+    {
+      "path": "project-config/presets/road/classes/ROD.json",
+      "sha256": "16d883d077371470bb52da7e067598dafab564e8d3adf6f080929d8b161742f4"
+    },
+    {
+      "path": "project-config/presets/road/preset.json",
+      "sha256": "311bd1a0fcefc4bcde192d6a1e58353200cd179b52ffabbaf188b62e2283416b"
+    },
+    {
+      "path": "project-config/presets/road/workflows/road-workflow.json",
+      "sha256": "a5366acc63c3634b53e378167746d4d6de115b56f2a9243c3f75451a6cd7b930"
+    },
+    {
+      "path": "project-config/presets/teleport/README.md",
+      "sha256": "0eec0f0d19f7bf675d84aa7e82a6b360515018ef6e0f68b5e3ba294ded308ace"
+    },
+    {
+      "path": "project-config/presets/teleport/classes/TPP.json",
+      "sha256": "29da6b7527276ad8e0c7a8d0ee21f4b3d0cf7ccd21525b84545743ac0de91f8c"
+    },
+    {
+      "path": "project-config/presets/teleport/preset.json",
+      "sha256": "5ab8755d83a0abda1e7bb705ba906dacb2db7916a8c368445d2a1df47f329996"
+    },
+    {
+      "path": "project-config/presets/teleport/workflows/teleport-workflow.json",
+      "sha256": "c6626d64f54b55d3c3cd23170a890b10b9b549a036e80dd91036fdbdadab4fb6"
+    },
+    {
+      "path": "project-config/presets/trade/README.md",
+      "sha256": "8e22da3564075867b441ee97f23d7dfe8e946607af920d4749bd463a5e62ab11"
+    },
+    {
+      "path": "project-config/presets/trade/classes/TRP.json",
+      "sha256": "2f3cce25979c10082facc1f8b77beec0efac07b37a41496e3dcb845e8e401344"
+    },
+    {
+      "path": "project-config/presets/trade/preset.json",
+      "sha256": "5e1725cb56350df0915220c6fb5b3a06cda89d2509b13e5ce602dcd02034bdf4"
+    },
+    {
+      "path": "project-config/presets/trade/workflows/trade-point-workflow.json",
+      "sha256": "c3ee821090071617ac8810629172af9f6924a984af04f12ec8ead0c3e43a0504"
+    },
+    {
+      "path": "project-config/presets/warp/README.md",
+      "sha256": "0586ab6fe0a132e08d1e10a011f7dbf57b9864ef71f3de9a4cd4c76795d2db3d"
+    },
+    {
+      "path": "project-config/presets/warp/classes/WRP.json",
+      "sha256": "4b5df4863a23ba89fb6899cfee6c132429079933bc8563da5dcb819598ede36d"
+    },
+    {
+      "path": "project-config/presets/warp/preset.json",
+      "sha256": "800b5cc4d7799da4322de619e9a5d05a7a894c3ddc8b49806aa223c2f6e14bbc"
+    },
+    {
+      "path": "project-config/presets/warp/workflows/warp-workflow.json",
+      "sha256": "94e9778307572a1372106249c03d7578891aeb7655d9451d02c1a3261bd8df26"
+    },
+    {
+      "path": "project-config/schemas/README.md",
+      "sha256": "2ffaa734376a4d2e461f47c177461835ad5e235923d3c50622a8c640517ed45f"
+    },
+    {
+      "path": "project-config/schemas/assembly/cairnmap.assembly.v1.schema.json",
+      "sha256": "c68e593975ffd26cd18725acc42e64d93b0a5427e1cd995d5d443f849369a4f6"
+    },
+    {
+      "path": "project-config/schemas/class/cairnmap.class.v1.schema.json",
+      "sha256": "72e304725998ba729bead1e74fe03c51d23c6bc3184fef76910b66430da6bdcb"
+    },
+    {
+      "path": "project-config/schemas/environment/cairnmap.data-sources.v1.schema.json",
+      "sha256": "ac261f6fc0cd38db5e3fd694e0a08027b734dd11a1601f98eb31b0e678d5fb71"
+    },
+    {
+      "path": "project-config/schemas/environment/cairnmap.media-rules.v1.schema.json",
+      "sha256": "028c4e0166acaff0df7cac60341f270238a726e657071348dcad8d83b7f99986"
+    },
+    {
+      "path": "project-config/schemas/environment/cairnmap.navigation-profiles.v1.schema.json",
+      "sha256": "18d279f36912665f5dbe71c5b1cbefb24045279e3c2a207e247c2ba76f31e2ec"
+    },
+    {
+      "path": "project-config/schemas/environment/cairnmap.rule-buttons.v1.schema.json",
+      "sha256": "df527ed9094e112e277efa7eca49bb86365807bd3578869a03abaac8d850a9d5"
+    },
+    {
+      "path": "project-config/schemas/environment/cairnmap.search-profiles.v1.schema.json",
+      "sha256": "a821e3cae201c1b30ef823f9d5fcfdcfd55fe49f224d5504bf443ddc88114ddf"
+    },
+    {
+      "path": "project-config/schemas/environment/cairnmap.source-link-modes.v1.schema.json",
+      "sha256": "9e0ec7607ab3f4e16f07854399993580c3125ab4fc8b62b245fe4a2ed8cb179b"
+    },
+    {
+      "path": "project-config/schemas/environment/cairnmap.tile-sources.v1.schema.json",
+      "sha256": "cbfbe88216a10e8949aa453542e583a59102e12fc69923b32806c75d018827ca"
+    },
+    {
+      "path": "project-config/schemas/environment/cairnmap.worlds.v1.schema.json",
+      "sha256": "aaef1ef4e49c85eb347830736bdb38b34f8840fa16d3f407b2bf1c9b2c72d8ca"
+    },
+    {
+      "path": "project-config/schemas/package/cairnmap.config-package.v1.schema.json",
+      "sha256": "73db6271b3ec2efd97a63a93b9c556ab7627b2e7ba664f1f8aa8c6e3482d7a09"
+    },
+    {
+      "path": "project-config/schemas/package/cairnmap.config-package.v2.schema.json",
+      "sha256": "d1311128ecb7aebf807758a48d8f4bcffb05be4b082da36528e3577f35158861"
+    },
+    {
+      "path": "project-config/schemas/package/cairnmap.preset.v1.schema.json",
+      "sha256": "8c41f035babb1edc6e7297ec86510b873c884061748aacc5f83c39228688538c"
+    },
+    {
+      "path": "project-config/schemas/package/cairnmap.project-package.v1.schema.json",
+      "sha256": "3e378a6d35766995f14e1fb028e85ac8414dfcc99fed93aee71ab65f34a88220"
+    },
+    {
+      "path": "project-config/schemas/review/cairnmap.review-workspace-extension.v1.schema.json",
+      "sha256": "d68213d871564bf7877fab6e81abc19ef47000041db01925ecfe41f22a4b0baf"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.card-enhancements.v1.schema.json",
+      "sha256": "0470ff57869dba8dd6377611dcf906453cd9446b7753d0adf328452544ad466c"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.card-layouts.v1.schema.json",
+      "sha256": "88b59f0c2b33276c5ab47c9fe05b31ea554a60002fd6c8e5d70b8be62075194c"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.card-runtime-contracts.v1.schema.json",
+      "sha256": "a3b5a20b1ac44ee0bb42ab6c1b6ed9f4e78401e3f56bd726f6a818c61f51a648"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.display-algorithms.v1.schema.json",
+      "sha256": "aa1a8c90536eb3c5a70204af3bed1f202f57c8d27a6e974faf4de56f6478e00b"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.display-profiles.v1.schema.json",
+      "sha256": "e71d2b1c5882fb5e4b6a5ffad42b017d6fabfcde4a238c1a4d9ab0b859ab49bf"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.field-controls.v1.schema.json",
+      "sha256": "4543fa5ae40a7a423da078fc270529e188282bcee8e59eabfb80c8e8b2bf868c"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.format-runtime-contracts.v1.schema.json",
+      "sha256": "76e1e8265d08ae0d2a5b6e0506cfc215b8d9ee22cf591a08750d3490b83b29fd"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.format-special-formatters.v1.schema.json",
+      "sha256": "d996291f9adf9505d6653ec3646eeea8932cf0f9eabc54dc3fe0116a8aaff246"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.icon-registry.v1.schema.json",
+      "sha256": "aca10554f72df9fb7e07ae463e2add28b73e7eca2e62d86da5bc101d8dcd2924"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.label-styles.v1.schema.json",
+      "sha256": "e39e98bb1dbe9715760320f37899f5c4d74c37300830a1b4135a44df05e2f8ff"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.relation-actions.v1.schema.json",
+      "sha256": "08080130a9c835512cc931f6b452a2a1d5fe245dae4d775ec90fccaf3a411aaa"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.relation-bindings.v1.schema.json",
+      "sha256": "8c7fcb1f04fb675fc31c6de3e0ca7f6d58014c6532c7bd019d2ca81074c3c1d5"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.relation-view-profiles.v1.schema.json",
+      "sha256": "13fe082cb670bf87a18bdaad0cbcb452f4d18386c2a4c427f7b126fbb42955d2"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.render-format-final-contracts.v1.schema.json",
+      "sha256": "243c471e02c1e4d45d05b26c50dc5531bf614db9694872deed0b9cb9ea442a47"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.schema-runtime-contracts.v1.schema.json",
+      "sha256": "65cb88d1ec5f1b4440760e30847fbc77a5380c223b849d3f1158fabc6dc3d67f"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.special-display-logic.v1.schema.json",
+      "sha256": "134c65218a360ae8e7479a3a0c69978a85554684d32f446a81551320b40b96da"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.workflow-blocks.v1.schema.json",
+      "sha256": "df5abbbab6a0f1fe5875a1f45e1c039bd3ee49e70febc6406f3e3089a46cffda"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.workflow-components.v1.schema.json",
+      "sha256": "5d6873c80a839145a218e333d6c167519cb88657c55126cf32c74e674da34d54"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.workflow-final-contracts.v1.schema.json",
+      "sha256": "43b4ca17bca4e20a6965951e6f74f10a2e288f1456d80bd2c0a86e4cdfdfe6e2"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.workflow-legacy-executors.v1.schema.json",
+      "sha256": "56e4ad639a644579c51766619da396d95b573b08402fd0742545d92053d9f66e"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.workflow-parity-profiles.v1.schema.json",
+      "sha256": "ef1b92a2ab8a9fdc95678df416324f1364f6d6a833a715cbb4f617712b2dd7be"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.workflow-runtime-contracts.v1.schema.json",
+      "sha256": "e2fa6041a1d82c35783005c5f1b2a3aa94a3526f83d534ba7911de6a17feef76"
+    },
+    {
+      "path": "project-config/schemas/shared/cairnmap.workflow-templates.v1.schema.json",
+      "sha256": "3cde230a00482979a5402649f64b4213e4e0a24e5c278ab1fb138295b846cd9c"
+    },
+    {
+      "path": "project-config/schemas/workflow/cairnmap.workflow.v1.schema.json",
+      "sha256": "b954e8b562570cf60acde295f1d684d113c099d580ca6ee256260ef6b53772e4"
+    },
+    {
+      "path": "project-config/templates/class/class.line.template.json",
+      "sha256": "aad0c03616b3d16efa1f72195f4d8d3d0520a6d8052c881a03942d271d99aae7"
+    },
+    {
+      "path": "project-config/templates/class/class.point.template.json",
+      "sha256": "c22f2e994b752126a3d46959d16951a52b3c21d1027d03a12662c429373f29fd"
+    },
+    {
+      "path": "project-config/templates/class/class.surface.template.json",
+      "sha256": "f12be27b2d8113ec16f1898083b604f98c8513ae47f2653b0f7a24a5b5d4476f"
+    },
+    {
+      "path": "project-config/templates/review/reviewWorkspace.extension.template.json",
+      "sha256": "38570ebf71ca717377775a7fa829242e3b41c8d4bc24754054eba8c8d27f334b"
+    },
+    {
+      "path": "public/apple-icon-180.png",
+      "sha256": "7b762b5bb503dd8ecbaec279c7d019c51269f3dc405487e4ea492cf4c46efc8e"
+    },
+    {
+      "path": "public/data/JSON.zip",
+      "sha256": "cba4dada327a5a225796f580898961ab7e1e31aee69d6408d4676c280548cafa"
+    },
+    {
+      "path": "public/data/JSON/ALL_20260128.json",
+      "sha256": "70bd64d73e77a2f7ecfd61d4842ff2f8f6152c617b877dfe9d1f459173af2cac"
+    },
+    {
+      "path": "public/data/JSON/ALL_20260226.json",
+      "sha256": "9439e97171bb456422fa4680424a383fc5ddea5d5da6036bb8ae1b6573ab7e0b"
+    },
+    {
+      "path": "public/data/JSON/ALL_20260228_HH.json",
+      "sha256": "b1bde55e260844f7aa1a3afd411fee07e376d1034332ad779db38364620739ab"
+    },
+    {
+      "path": "public/data/JSON/EXchange_build.json",
+      "sha256": "956b63a562351cdbb499eff8cf9ed6ff6c25a9aafd51db549d1305ba312a251b"
+    },
+    {
+      "path": "public/data/JSON/GLLD.json",
+      "sha256": "0f562980f02bf21f0c0b6b8a822d5921e1be1885d6a5dfe97987635cedd47408"
+    },
+    {
+      "path": "public/data/JSON/H7 A 海华北-会展中心 251231.json",
+      "sha256": "d6f204e1fbd90a112527553586e14f1b17051e6884f806d21a4fedd289231182"
+    },
+    {
+      "path": "public/data/JSON/TPPtest.json",
+      "sha256": "b0e7d399975a865fed63413ca0bfc2ebaae774fca6d409c041861bb14f73dfab"
+    },
+    {
+      "path": "public/data/JSON/Warptest.json",
+      "sha256": "bef92fd2c768868274fddd1a7f261d23653af7c5c390273663943500e850bfc0"
+    },
+    {
+      "path": "public/data/JSON/ZRT13_01B.json",
+      "sha256": "ecb4a4a32c4b393fd4f2b9944fbb67734e1d64bfc9c7833fbcd3ebfa2bda96e5"
+    },
+    {
+      "path": "public/data/JSON/ZRT13_01B_D.json",
+      "sha256": "361805175e3fa0038063e7f50435a0148d125fe0adf93590f885e546090c5c6c"
+    },
+    {
+      "path": "public/data/JSON/ZRT13_01B_U.json",
+      "sha256": "5b8f9dd0312a1a24860d9d37009dafab7b08a70a6d3094d5695b7cefd597b47a"
+    },
+    {
+      "path": "public/data/JSON/ZRT13_Buids.json",
+      "sha256": "cfe5c633a159a536d7d671674c3979156f58528bf10f29bf0ef1a03e4627e917"
+    },
+    {
+      "path": "public/data/JSON/ZRT13_Stas.json",
+      "sha256": "0a1db3205d081eb2026ec6a749bc35c457f9d268bb8e1af4ce2716c2fe23d27c"
+    },
+    {
+      "path": "public/data/JSON/ZRT1_01A.json",
+      "sha256": "9f93f7441763ddedaeadeb7a7b523c62b9ef48e687f630c1ebccbe3e1dbd7ec4"
+    },
+    {
+      "path": "public/data/JSON/ZRT1_01A_D.json",
+      "sha256": "9cb5d2e9d3f03da7e2e909317e2e95c4b473b46143fcad32d03b77143ecce430"
+    },
+    {
+      "path": "public/data/JSON/ZRT1_01A_U.json",
+      "sha256": "84ee51a0fe7defa9e71b47d96dd0dfd2fbb661eefef662d5ca4d056ce55e951a"
+    },
+    {
+      "path": "public/data/JSON/ZRT1_01B.json",
+      "sha256": "f885749bdd10fa9685fc83247eacc65c396256024ea4a1dc0f9c98fc3c470c38"
+    },
+    {
+      "path": "public/data/JSON/ZRT1_01B_D.json",
+      "sha256": "f6d0f7ad1d37272bc8e4ff98f3f36f3dad401b6587e540e6e58c39b71090f3a1"
+    },
+    {
+      "path": "public/data/JSON/ZRT1_01B_U.json",
+      "sha256": "6e382ba2255f8739890b4d9d3c9bb87a499acd889660285d5ceca2c536de5d13"
+    },
+    {
+      "path": "public/data/JSON/ZRT1_01C.json",
+      "sha256": "2c2fb67631bb25c5bcb1ed8f0ca8be2df25e37b3bfa3c85e4ee3ee33bfc438ff"
+    },
+    {
+      "path": "public/data/JSON/ZRT1_01C_D.json",
+      "sha256": "bb03c8c9ac864f5818d5c1c9e9fb5380f57c27b26fab6c73bc8bdd9473e16182"
+    },
+    {
+      "path": "public/data/JSON/ZRT1_01C_U.json",
+      "sha256": "c6713f102e6b1b391f1473642919c8794f6a2604e125a60092ec6fb16bf72f3c"
+    },
+    {
+      "path": "public/data/JSON/ZRT1_01D.json",
+      "sha256": "75206cb454a94e665fec968c2340d1b4f797e4b8e88513eed7318509d10c1d49"
+    },
+    {
+      "path": "public/data/JSON/ZRT1_01D_D.json",
+      "sha256": "8c6df3757c422ebc5f07a28adf4898c662e2d4e70b012cc264444326302fdb86"
+    },
+    {
+      "path": "public/data/JSON/ZRT1_01D_U.json",
+      "sha256": "8af1b792c343d1e753a7d149628e9a56be7822f227e9c8696c4a469733c4f53d"
+    },
+    {
+      "path": "public/data/JSON/ZRT1_Buids.json",
+      "sha256": "fba8e929a52832f1e11da8b2b1db6ef59b40fc11ff85c0b7c38edc319ba8f2ec"
+    },
+    {
+      "path": "public/data/JSON/ZRT1_Stas.json",
+      "sha256": "b50a6493a6e51da5f65321034cea4410ebb7d31b53a0ba4dfd03e766bab0778f"
+    },
+    {
+      "path": "public/data/JSON/ZRT4_01A.json",
+      "sha256": "f89fa00dbfc873599f607099649a3e5ff238357652fb507ae461e9c6140a5024"
+    },
+    {
+      "path": "public/data/JSON/ZRT4_01A_D.json",
+      "sha256": "0fbade8ef214dbce8c34c8cacf4956fc89b52d6ae476ad538794ba3dffd87eb5"
+    },
+    {
+      "path": "public/data/JSON/ZRT4_01A_U.json",
+      "sha256": "eef2c21ece6402f5aac8fdd0f617bf430cd3bb52d403347db4807b6af98d51bb"
+    },
+    {
+      "path": "public/data/JSON/ZRT4_01B.json",
+      "sha256": "4c2ce517502a1658bcd176ed98dc56b2694154b944d234e8836b433b64c93d93"
+    },
+    {
+      "path": "public/data/JSON/ZRT4_01B_D.json",
+      "sha256": "d2b1c140b2ea375d2f7a7b40a9fdc1058bc82f6ed845912aca189f3a0d3eda0c"
+    },
+    {
+      "path": "public/data/JSON/ZRT4_01B_U.json",
+      "sha256": "86a6a951c967a770c13edc57a5b5f6d08294405182db76f4380d357f5481a6c5"
+    },
+    {
+      "path": "public/data/JSON/ZRT4_01C.json",
+      "sha256": "2071d4a233671f8a6150aa512e6489064dd88180cb24ab50fa0c86b529e72073"
+    },
+    {
+      "path": "public/data/JSON/ZRT4_01C_D.json",
+      "sha256": "1903b0b170919251f7e915125356dfbac8691edadab7a5f41925bc92c7408807"
+    },
+    {
+      "path": "public/data/JSON/ZRT4_01C_U.json",
+      "sha256": "5fe1f272d8df5c1db74411c88e2b8cfbfdb0ef80a00dd62c26a8767225e88e6f"
+    },
+    {
+      "path": "public/data/JSON/ZRT4_Buids.json",
+      "sha256": "a8f851ea61a1190e690a533b9ed19213d97a546a5e060294ea21bac571ffabff"
+    },
+    {
+      "path": "public/data/JSON/ZRT4_Stas.json",
+      "sha256": "f98741a093988fdffc6b53540c35cc07e2ae7e8a120b438635eaae74417f1e19"
+    },
+    {
+      "path": "public/data/JSON/ZRT7_01A.json",
+      "sha256": "c8d4dd6dee882ec25c329aaacf1152bf513971c1351a553c24e62edba0c52517"
+    },
+    {
+      "path": "public/data/JSON/ZRT7_01A_D.json",
+      "sha256": "a88fc8b057a5b0d092df6201a80255946ac2ab661ad5f7a806f65405f37c4d82"
+    },
+    {
+      "path": "public/data/JSON/ZRT7_01A_U.json",
+      "sha256": "458e02989603a4eb10937839bc8850a04cb904f2896d5623d8e98829be351943"
+    },
+    {
+      "path": "public/data/JSON/ZRT7_01B.json",
+      "sha256": "1cbfded2ea1880f63356fc86bb6e7524440f08a7eedf612db841df0bf73f0c9a"
+    },
+    {
+      "path": "public/data/JSON/ZRT7_01B_D.json",
+      "sha256": "467885619a280cff6905919f277816ffd19118108ca0609646ce3e9f79f1cb48"
+    },
+    {
+      "path": "public/data/JSON/ZRT7_01B_U.json",
+      "sha256": "a5da78aaf41482f5db85a3ddd21a02e1c62f9c9a16b4cd3871e6c5b2c48a27cd"
+    },
+    {
+      "path": "public/data/JSON/ZRT7_01C.json",
+      "sha256": "3b8c06a3005832f15b69e21ae2b98b51009fee1f5ef2f77a35a2ca7ad53fd936"
+    },
+    {
+      "path": "public/data/JSON/ZRT7_01C_D.json",
+      "sha256": "23a5fd54cced24de604d6dd255ac2581fa982c3e71ba128ff4417958c6b9d423"
+    },
+    {
+      "path": "public/data/JSON/ZRT7_01C_U.json",
+      "sha256": "b0202e650926d779790848f1bb58985f213c202c7e56702eade4043b39935398"
+    },
+    {
+      "path": "public/data/JSON/ZRT7_Buids.json",
+      "sha256": "7ffb42d3c43237f2afc26881a1210c7f60c91c65910e71009c5e17c433f44893"
+    },
+    {
+      "path": "public/data/JSON/ZRT7_Stas.json",
+      "sha256": "660b85950647b19a5ea387cc598916b838712d45ac0e2e87036adc33fe8f3f93"
+    },
+    {
+      "path": "public/data/JSON/ZRTL1_01A.json",
+      "sha256": "525461160497c2a862026e76c96aeb409a9986cad667095448cc20e579a421de"
+    },
+    {
+      "path": "public/data/JSON/ZRTL1_01B.json",
+      "sha256": "fd9382514636eca8d13ed572c6c5cef4e12a10a8e5d20c207fcff4037ff0616a"
+    },
+    {
+      "path": "public/data/JSON/ZSGS.json",
+      "sha256": "39e86dd4a7ef139855c6f849601511c282d1bc9c58e28ed897739fc65bf394b0"
+    },
+    {
+      "path": "public/data/JSON/test.json",
+      "sha256": "cf7b28e82005fdc9922e152d9fbb3e24e673514edc264f65d7c0aa0493631f1f"
+    },
+    {
+      "path": "public/data/JSON/传送.json",
+      "sha256": "7c34ea0794653eb204f19c18f410512f94f9693d06a54ce1219fe84748d4a2a6"
+    },
+    {
+      "path": "public/data/Railcon/TSR_L.jpg",
+      "sha256": "b9832c4b549d9ca7f41016eb2d9ba117ada58699831224754774ecfbb44e98b2"
+    },
+    {
+      "path": "public/data/Railcon/TSR_S.jpg",
+      "sha256": "088a1f4378872599a59b10a562177b2b97d26f7d4c704f732bd1d95e2ed28eca"
+    },
+    {
+      "path": "public/data/Railcon/TSR_S.png",
+      "sha256": "26c34ab8d95adac35ec27e833e603df026f68c5e0a50bba039d7a5cb00128a2e"
+    },
+    {
+      "path": "public/data/bureaus.json",
+      "sha256": "4044f5eff03fed476107639f10915068ca766d4c6a52d9cf42b42526848ec892"
+    },
+    {
+      "path": "public/data/rmp_houtu.json",
+      "sha256": "f1ae54366ff089557bd2846af68fe7d16c44edad36086c96338894abf97441fc"
+    },
+    {
+      "path": "public/data/rmp_zth.json",
+      "sha256": "e939ce02aea261d802bfb0aadfd0bb0e478c599749a30224a658581187764e15"
+    },
+    {
+      "path": "public/favicon-196.png",
+      "sha256": "06bde4355b9fc5e10b9fbd6e0ad7ab4aaaeac9536570d7dd65724414dd8fe9de"
+    },
+    {
+      "path": "public/logo.png",
+      "sha256": "c84ecbabb2327c1eb12507f7b473bcf102c18980ea4ebeff4e254592a0b8b05e"
+    },
+    {
+      "path": "public/manifest-icon-192.png",
+      "sha256": "bfba83e25581e069605d33c26de8143d6be1be4819682bf63361c89307418f00"
+    },
+    {
+      "path": "public/manifest-icon-512.png",
+      "sha256": "8e22373e5dca39fbdb2640ed787289ff6ee7b69acc023fca7271f9bd765bc1fd"
+    },
+    {
+      "path": "public/pictures/normal.png",
+      "sha256": "8e22373e5dca39fbdb2640ed787289ff6ee7b69acc023fca7271f9bd765bc1fd"
+    },
+    {
+      "path": "public/web.config",
+      "sha256": "f76495fc2a0340331aeb6bce644f14a90af6d67d46a61c16ddae9387b2831bf9"
+    },
+    {
+      "path": "src/App.tsx",
+      "sha256": "43ae1d032508610b9449532a810fd3f9db7a94fce6e04df9397a083453789dce"
+    },
+    {
+      "path": "src/app/appBrand.ts",
+      "sha256": "6f4475456c59758c0ab1703c406b30db7e1a8a1788c46946cd96b8405811c43e"
+    },
+    {
+      "path": "src/components/AttributeQuery/AttributeQueryPanel.tsx",
+      "sha256": "081a8c277d71c4b3dc568e99f85dce4695c5da2debbd8706979f584f036b66f3"
+    },
+    {
+      "path": "src/components/Common/BlockingFullscreenModal.tsx",
+      "sha256": "45e0fcb2038c038ccf3dc2d49bac67264abf083b6966bdf2e7c6d1759a7876a7"
+    },
+    {
+      "path": "src/components/Common/FeatureModuleLoadDialog.tsx",
+      "sha256": "7decef5f28148cea980f33a73c2a21b1e47192e2c021e2614b6f7ace9ffd1c24"
+    },
+    {
+      "path": "src/components/Common/FeatureModuleLoadingOverlay.tsx",
+      "sha256": "56e0f7a3ecea47a8ba7d2389e10bb60f05e36cefd9618d52e94b9fa395000095"
+    },
+    {
+      "path": "src/components/Common/buildDataToolSchema.ts",
+      "sha256": "a63c787f987aa2168eaa71ffdd81a5d03c17d909196f852751b15d2902b61c80"
+    },
+    {
+      "path": "src/components/Common/exportDataToolSchema.ts",
+      "sha256": "e333912015cbfc411bd14276eb37a7ddcc48ef2c4856772dcc485f7a1161f420"
+    },
+    {
+      "path": "src/components/Common/featureFormats.ts",
+      "sha256": "bb6bebd36e72dad465bcdc1b2b7cdf644cad72b15eebf90ff24443bfe6a6f8bc"
+    },
+    {
+      "path": "src/components/Common/featureJsonSerializer.ts",
+      "sha256": "c3506fb762ef521b6c0da9a5043add55b8dbf6652d5558ebd5152ccfa4cc9d89"
+    },
+    {
+      "path": "src/components/Common/workflowEditorParser.ts",
+      "sha256": "2b3c26fff1629fa4a88c0f81cf02164d19ee5bd7a7eb12b2e2184567e312c25b"
+    },
+    {
+      "path": "src/components/Common/workflowEditorRegistry/index.ts",
+      "sha256": "f9afac38b3eb2be3cf195cd3e099ccc17dc59dc0178ac13f9d5d8773814f0d9d"
+    },
+    {
+      "path": "src/components/Common/workflowEditorRegistry/schema_BUD.ts",
+      "sha256": "564626c21b10234637c07ff3f2bc3857cc10a8c26a8975762911e0135baad94a"
+    },
+    {
+      "path": "src/components/Common/workflowEditorRegistry/schema_FLR.ts",
+      "sha256": "a0d73ceadb1340e847e5e871d7b19a56743fb6bb6ab99d1d8c4b7757bcc6e38f"
+    },
+    {
+      "path": "src/components/Common/workflowEditorRegistry/schema_ISG.ts",
+      "sha256": "568dbad3b77c13f51bc7bfa09d797be6dd0c407514bf09af230a2445e0617ff2"
+    },
+    {
+      "path": "src/components/Common/workflowEditorRegistry/schema_ISL.ts",
+      "sha256": "ccc868ae2a1513347e0d0e011d38728070bbba764e921940643de905e88cfec4"
+    },
+    {
+      "path": "src/components/Common/workflowEditorRegistry/schema_ISP.ts",
+      "sha256": "f437ea9aec4e309d52b56d8a90515c9ec935fab25d2c4969d61ccc7f3d468638"
+    },
+    {
+      "path": "src/components/Common/workflowEditorRegistry/schema_RAIL.ts",
+      "sha256": "86292b74409837302309c9aaedeef804635d7a9710096db2d25d7b5b5f619626"
+    },
+    {
+      "path": "src/components/Common/workflowEditorRegistry/schema_ROD.ts",
+      "sha256": "ba6131fb638c93050057586b6f358fbfd1120c64977815b0280be124cdbc913c"
+    },
+    {
+      "path": "src/components/Common/workflowEditorRegistry/schema_TPP.ts",
+      "sha256": "f851af84ca4f9b6a0748af9b4168943c336092aad8bc57e137b06e774f8ab928"
+    },
+    {
+      "path": "src/components/Common/workflowEditorRegistry/schema_TRP.ts",
+      "sha256": "f595522a2973dad75101b4ef9cf82d96dd9fd3e27c0dc610c4301748ca01af22"
+    },
+    {
+      "path": "src/components/Common/workflowEditorRegistry/schema_WRP.ts",
+      "sha256": "674743331c65357fe6b76117267c6ed3032312e9320ae36ef0414abd76e49d53"
+    },
+    {
+      "path": "src/components/Common/workflowEditorRegistry/types.ts",
+      "sha256": "c4a64acf535fe1acbd1cd7c8eab4ed39cc7a3cf30fa186f7951b5feab732777b"
+    },
+    {
+      "path": "src/components/Common/workflowEditorRegistry/utils.ts",
+      "sha256": "483279a1001f0caf5ed2ff86d6f1f867684cc2247527ae22ebded66a53f5082b"
+    },
+    {
+      "path": "src/components/DraggablePanel/DraggablePanel.tsx",
+      "sha256": "0955523aad1d5403c5f39a0e785597463039f4e5609adf71bd96ea55abb306dd"
+    },
+    {
+      "path": "src/components/DraggablePanel/SmallDraggablePanel.tsx",
+      "sha256": "b793c99643162b2ad3fb6c688d162c0cf7ccff5962bf6d5f5eb0bc368e56dee2"
+    },
+    {
+      "path": "src/components/DraggablePanel/desktopWindowStack.ts",
+      "sha256": "72cc24b094dc8280df31b47fd174e9744fddd36701afc3ae231810c881ba508a"
+    },
+    {
+      "path": "src/components/Icons/index.tsx",
+      "sha256": "8d1d1e53fc38ee3b499fe4b3daad1090096219095bd84d721e589481400c482d"
+    },
+    {
+      "path": "src/components/Legacy/data/landmarkParser.ts",
+      "sha256": "d77c46a22d6fbb6f9f18d3e74022ac8c29e62e48b4fa4340355a5c67cbd85b65"
+    },
+    {
+      "path": "src/components/Legacy/data/pathfinding.ts",
+      "sha256": "5458a177c4d8d26e3f3bc8a60aa67d32e120d86d630ece7de941962340698b8d"
+    },
+    {
+      "path": "src/components/Legacy/data/railwayParser.ts",
+      "sha256": "39e47778f5ee34f62530f72833c10671d84985193f18e4dcead12572fed2d6a9"
+    },
+    {
+      "path": "src/components/Legacy/data/rmpParser.ts",
+      "sha256": "c5f7f7a3236df0aaa2c308f3e3e1f070b0214bfa163d31276ac72a9bdf106f38"
+    },
+    {
+      "path": "src/components/Legacy/data/toriiTeleport.ts",
+      "sha256": "b414cceb6131ec84f6526b035c583bf91094ce47cc2df70c1db54d25eaaa3d6a"
+    },
+    {
+      "path": "src/components/Legacy/detail/LineDetailCard.tsx",
+      "sha256": "0d277dc3a77d138539bbc3ee60f56a47c0a8af1b1e57179051698cf1c6dd8894"
+    },
+    {
+      "path": "src/components/Legacy/detail/PointDetailCard.tsx",
+      "sha256": "cc43d340e6b296fc007fb02b6653654a6baf2fee6a3a5f1cce1479592ed68fe6"
+    },
+    {
+      "path": "src/components/Legacy/lines/LinesPage.tsx",
+      "sha256": "ddbe55f36f03502fdb46de9083271061e90585ee0e39cfbcac93080aff23fa07"
+    },
+    {
+      "path": "src/components/Legacy/lines/RMPMapView.tsx",
+      "sha256": "6322e04ce0687f2a023c821e62db1f16f2da492a1f383cfea1ea9646fbe5adcc"
+    },
+    {
+      "path": "src/components/Legacy/map/LandmarkLayer.tsx",
+      "sha256": "4e32bc81fd9ca317c23cc7348a9b3ae50e98a01241928c0e98d1205d02e72502"
+    },
+    {
+      "path": "src/components/Legacy/map/RailwayLayer.tsx",
+      "sha256": "5c9e20d24cc29e9b34dfe35fbea041c84e06629fa070ebd562d671d0066f9d1c"
+    },
+    {
+      "path": "src/components/Loading/LoadingOverlay.tsx",
+      "sha256": "0b96274426c7331ed09eb115a749d05249fafd3d30511c0235fbdcd5eb4c4390"
+    },
+    {
+      "path": "src/components/Map/LineHighlightLayer.tsx",
+      "sha256": "cf18eadf0669e9719b25b9e445044d560962e7cc341dcfe95e0ee3905e756138"
+    },
+    {
+      "path": "src/components/Map/MapContainer.tsx",
+      "sha256": "cef54e96c3ed6bd7c9c51e08784bd8df9961dc604752b689a14488f25ae7778f"
+    },
+    {
+      "path": "src/components/Map/PlayerLayer.tsx",
+      "sha256": "2eb16ad51467bbd3412ef3116b5c5601299442dcb3457976d4eb82b9e389e4a1"
+    },
+    {
+      "path": "src/components/Map/RouteHighlightLayer.tsx",
+      "sha256": "f176d0a38b4e97b0d729e4fa11b89feafc1f73398a53c02b6ccdb9e266260210"
+    },
+    {
+      "path": "src/components/Map/WorldSwitcher.tsx",
+      "sha256": "dda42f9f0d384c4fad9d0dd59be0de31488da61307b546a928a9948c512247d8"
+    },
+    {
+      "path": "src/components/Mapping/Editor/WorkflowStyleEditPanel.tsx",
+      "sha256": "6b30a975253029e133f85cca7af9165faceae811c1fafde31410c59ce1512ac4"
+    },
+    {
+      "path": "src/components/Mapping/Special/MergePointPlatformStation.tsx",
+      "sha256": "4db9461b0126721ce29e5894b212a432e2357a5fd535d558bb504351a694175e"
+    },
+    {
+      "path": "src/components/Mapping/Special/MergePolygonOutlineBuilding.tsx",
+      "sha256": "90d7fb49f1550f0d637b8f5bf3225cfcb3e5306fc07de89f051570a11832be06"
+    },
+    {
+      "path": "src/components/Mapping/Special/RailwayDirectionReverseButton.tsx",
+      "sha256": "ed8bcd3fbb8b1b20a98852dcafc68339dca66f0bbaf7610865fad48eb1760825"
+    },
+    {
+      "path": "src/components/Mapping/SpecialInput/TRPTradeEditor.tsx",
+      "sha256": "b1380970595eae554154ccd711102ecdefd3e996bc8bfdbb623ff45d1be9fdd0"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/BuildingWorkflow.tsx",
+      "sha256": "aac762f9221fa7970abd36a5a345dbad0e83f6de15090c3a6c616504f0ef8f61"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/FloorUnitWorkflow.tsx",
+      "sha256": "9787d9a253c25a769b3d60a67056df2dcfd1008eae1f141772e017d8a92cbb6a"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/NaturalBoundaryWorkflow.tsx",
+      "sha256": "f6404e5b4688ba6e72ed75809d6474f1b21170d08a2cc78949be1ee72cd8fd13"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/NaturalLandSurfaceWorkflow.tsx",
+      "sha256": "8500130f0eec1cecf2abb675027e155730ee8129dd8d6905d91cb6ee2668d0bd"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/NaturalLandWorkflow.tsx",
+      "sha256": "2f7e4cad7bb231aa16abd376659a6d149f4870471fe3daffb80bcd50e69eb08a"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/NaturalWaterbodyWorkflow.tsx",
+      "sha256": "f7213afdb5d1b88dccc4b2840d95e5d4dd06ac3b23c889fc74e9887ce5c9448f"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/NaturalWaterwayWorkflow.tsx",
+      "sha256": "32a760b8301905de5aaa9e19acedcbd3468d5a600798bc07ebfead71c1c6f847"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/RailwayWorkflow.tsx",
+      "sha256": "e0c1fe935750992ec913ecd6e20ce82a24903e37a351aa5234d34dc7daa08340"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/RoadWorkflow.tsx",
+      "sha256": "2a48a58c674d74c7ee964993ad8bb03ecc43d95dde56e4419d6d48ecbadec898"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/SettlementBoundaryDeterminedWorkflow.tsx",
+      "sha256": "4442663d8a062e2100c8ff14cda7232bdae82b21cdadd2d94c59527dc7354377"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/SettlementBoundaryLineWorkflow.tsx",
+      "sha256": "7bef56592691d284b10e161feb19f4d9bca3c8eeca25accf2d7be40b87037b3b"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/SettlementBoundaryPlannedWorkflow.tsx",
+      "sha256": "fe46a9c2a6a2e98a26bbd30f825943d79a1944859888644452db93787ee74ced"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/SpecialCulturalPointWorkflow.tsx",
+      "sha256": "bb95f483f5d09af8c355b699fadc92af9fefc98c23a88ad84e60aa0238d04f3f"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/StationWorkflow.tsx",
+      "sha256": "83f5488ae15533fd8b408c47c306fa4825df5913e40bd943ec08d55598a37831"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/TeleportPointWorkflow.tsx",
+      "sha256": "e18af7f496af80b2c9e2c6ccd8f7a228151c76b0a58d29c62ec07befd241140c"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/TradePointWorkflow.tsx",
+      "sha256": "ea852adf96381e1647d5bea2e283d4d05ee0bc600db47d79145eeeb61698f065"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/WarpPointWorkflow.tsx",
+      "sha256": "076f7e200109be9234f819bc5ab591322ace92fc87ea061aeb497edeb8ebb5f0"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/WorkflowFeatureSearchSelect.tsx",
+      "sha256": "11a7e9ad550a6e47b950237350857fa1b0eda795db02ac045dd986fc626aa421"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/WorkflowHost.tsx",
+      "sha256": "6c4500a833c2e57be73a55314d1edfea4e2fe22678734847897f08f52ea36b7b"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/workflowComponentExecutorRegistry.tsx",
+      "sha256": "f55e45402418c60b28c2f77649dbdad168d693ed124c9d36e8af0bf5d5cf2e1a"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/workflowConfigRuntimeBridge.ts",
+      "sha256": "7aa5d42e187b1e0ac7bd5542544791c3b8f9d82b956f5d917221781b13d5f4aa"
+    },
+    {
+      "path": "src/components/Mapping/Workflow/workflowRegistryLabels.ts",
+      "sha256": "597f3bb36bc9ce46b8404b627da4b2ce442701906f186340964870fcea02245f"
+    },
+    {
+      "path": "src/components/Mapping/core/MeasuringModule.tsx",
+      "sha256": "ae0716ab4d1f81c0e759c1c7f5482dbd7bdd4ea627c423bd925fa724e7ef5b86"
+    },
+    {
+      "path": "src/components/Mapping/core/Mtools.tsx",
+      "sha256": "32ce15d0d836968129bdee2412d4dabdf80ac0a183d4b2bb6c55c84173ed5474"
+    },
+    {
+      "path": "src/components/Mapping/core/minimalFeatureEditPackage.ts",
+      "sha256": "bd3ab68b74f0ea7fbdceabdc9d5e5277ad9c81f024cd2b99b4286b51de0dd7e8"
+    },
+    {
+      "path": "src/components/Mapping/core/relayPackageDraft.ts",
+      "sha256": "be2d660b35712ff466903788fa76586b7bb1a38e906db4eb61c86bfd3d5bddb6"
+    },
+    {
+      "path": "src/components/Mapping/core/relayPackageParser.ts",
+      "sha256": "b267555aa6065fc86575b77ebec119dc2e8e026e37dd752c97a635b24818941e"
+    },
+    {
+      "path": "src/components/Mapping/core/relayPackageSerializer.ts",
+      "sha256": "d7239eccd1996c8c93b6be88ec58cc9ae9ecf2a2dabbc3d95048149138c1a0b6"
+    },
+    {
+      "path": "src/components/Mapping/panels/DeleteFeaturePickPanel.tsx",
+      "sha256": "61a87a6b6694b6ca6a166a1f820e40f0176321ae569a58b6e4606aea54d25805"
+    },
+    {
+      "path": "src/components/Mapping/panels/DeleteFeatureSelectionPanel.tsx",
+      "sha256": "b4fdbfcad730c272beb8ef306b8d7f680d1c6d44d0528769309caae06e65f480"
+    },
+    {
+      "path": "src/components/Mapping/panels/FeaturePictureBindingPanel.tsx",
+      "sha256": "7e7a62ab9a5ebb17f6a31db8411bd6d3fe5e188e94d89f96e46677510e7a3bd9"
+    },
+    {
+      "path": "src/components/Mapping/panels/RelayPackageExportPanel.tsx",
+      "sha256": "c7b43cf8f203daf2b071729096f06fd0270ed7b022626dfdf490829e770939d0"
+    },
+    {
+      "path": "src/components/Mapping/tools/AssistLineTools.tsx",
+      "sha256": "635f04e88ae2f24242424fc3a7a490510377edceb774be8b2edc33fe6e8ed9f4"
+    },
+    {
+      "path": "src/components/Mapping/tools/ControlPointsT.tsx",
+      "sha256": "33e63a026b90a95dbec214727f5ffcd54d25d928c52ed3ad6847977f0765f41a"
+    },
+    {
+      "path": "src/components/Mapping/tools/CurveInputT.tsx",
+      "sha256": "5d4de36e5a8b40ee0d29a65cbc64e7c6b888b35b7774be006960e813f69a8367"
+    },
+    {
+      "path": "src/components/Mapping/tools/GridSnapModeSwitch.tsx",
+      "sha256": "abe8fa774e031e2be2f8fc1153cc5fa36f3d046a61bc2da2482ae8de3f0c6ba1"
+    },
+    {
+      "path": "src/components/Mapping/tools/ManualPointInput.tsx",
+      "sha256": "04d190352c20a16c76a50b6992c2c30a7dc8261e9f9f5cc1a3907b7dca287acd"
+    },
+    {
+      "path": "src/components/Mobile/MobileBottomSheet.tsx",
+      "sha256": "16293bf065feda4a31b43eb70637cba047f1263444f5e2daea2953a1ecdc54e6"
+    },
+    {
+      "path": "src/components/Mobile/MobileFeatureJsonPanel.tsx",
+      "sha256": "5b58fe740b7bfb8ddd3828e19788847786e015e93269bc77280d7bd282794f4e"
+    },
+    {
+      "path": "src/components/Mobile/MobileFeatureSharePanel.tsx",
+      "sha256": "89502b475f953073811a9b08547c143d5228b5e4766273a1eb94040c24bf24db"
+    },
+    {
+      "path": "src/components/Mobile/MobileFloorPanel.tsx",
+      "sha256": "1455c54f26c64614c5259e15920dee136952e7cc6284d09c66e54899d4377a61"
+    },
+    {
+      "path": "src/components/Mobile/MobileQuickDock.tsx",
+      "sha256": "c4d5dfe6acc1e4ba9c7ca8eba1a7b31bcda17adcd891dd660dff8d85bb34b13d"
+    },
+    {
+      "path": "src/components/Mobile/MobileQuickPanel.tsx",
+      "sha256": "75633f043c3d2278b3b2cefa56cd2fa8b21907ed2691a4b665978393e77ad6f7"
+    },
+    {
+      "path": "src/components/Navigation/NavigationPanel.tsx",
+      "sha256": "271c3cbed40d6bd946390fdb9d90ff621888582368aad308ad76c7501364ad37"
+    },
+    {
+      "path": "src/components/Navigation/Navigation_RailNewIntegrated.tsx",
+      "sha256": "1862072e9c37569044d8b17685b2f757aef80d4b355bdb6d8ff0f6cc65c72655"
+    },
+    {
+      "path": "src/components/Navigation/Navigation_Road.tsx",
+      "sha256": "9bd7ed90abfe576a2cc64b3c73aef3c66b2b4d27d46c76620c1f2f369f4cdd20"
+    },
+    {
+      "path": "src/components/Navigation/Navigation_TeleportNewIntegrated.tsx",
+      "sha256": "adec1a4dd446f70370a8ee34cd27d5e1dd06b802c70f6a47d48148390bfda8d5"
+    },
+    {
+      "path": "src/components/Navigation/railNewIndex.ts",
+      "sha256": "834b3df2b39ed3ec2b2e814f52f8fdbe81e6e8165d57d5c565afcb5783a3e9c0"
+    },
+    {
+      "path": "src/components/Navigation/teleportHubReturnPoints.ts",
+      "sha256": "f0195a6a4abd3ea4c0077708abf7763d9b4ff02e80600d868e7a5a86993ca670"
+    },
+    {
+      "path": "src/components/PWAInstallPrompt/PWAInstallPrompt.tsx",
+      "sha256": "df7f6780c00f2f1d54358d84fe699d41d0910b20ea448ebd4b58cf0fccf014eb"
+    },
+    {
+      "path": "src/components/PlayerDetail/PlayerDetailCard.tsx",
+      "sha256": "d2c7cd47b5cc3368a88fea949107fd95a7bb542fdc283b47485b3452118b1c9b"
+    },
+    {
+      "path": "src/components/Players/PlayersList.tsx",
+      "sha256": "4f527616152009c05b6f0dd6732dd77f1b616b1875b286db98c1b37d7954ec87"
+    },
+    {
+      "path": "src/components/Review/ReviewStatusBoardPanel.tsx",
+      "sha256": "19fefc073c8bf14ceddc631ea4802823570bde5cb26da0fc44624ca69c76a38e"
+    },
+    {
+      "path": "src/components/Review/adapterRegistry.ts",
+      "sha256": "775e978767f579c30166f760da5d7d1cb96f9d1eb8bef6cf7087fc1a55a04ddf"
+    },
+    {
+      "path": "src/components/Review/auth.ts",
+      "sha256": "3a1037a05e6a696baaec7adf91cb1e3995479a119c6241c6dd2a0b7fc458a70d"
+    },
+    {
+      "path": "src/components/Review/contracts.ts",
+      "sha256": "2bb4e026a7ea6cffa7afe2ec7aa88ff588dddb7de69b0abd70017551a3348932"
+    },
+    {
+      "path": "src/components/Review/index.ts",
+      "sha256": "0b9dc8d2642bdac0bcd3a7046ab97aa4e3d7db181e31b088f372963cd4d8174b"
+    },
+    {
+      "path": "src/components/Review/package/contracts.ts",
+      "sha256": "11e774fac6ecd0f6b42e04c55961e92d735024ad21e0b484d85552760c1ca278"
+    },
+    {
+      "path": "src/components/Review/package/defaultProfile.ts",
+      "sha256": "0c0d416f6988f7b2fc33b1dd35aa8f30f81cffd7bec3240835d3c374f1f137e0"
+    },
+    {
+      "path": "src/components/Review/package/digest.ts",
+      "sha256": "786363492e4aaa07236d3fb1afc63574df6bdc9cbb1dd2f54f5fd29ba906d4a7"
+    },
+    {
+      "path": "src/components/Review/package/index.ts",
+      "sha256": "51db272b8988a00242bde9321fe7efb3270aa6d446d533779d5cdf93213790f8"
+    },
+    {
+      "path": "src/components/Review/package/normalize.ts",
+      "sha256": "c2e08222b4f78d6f244138a3ade3903efcd07208539974c66222d0a5e5e469f7"
+    },
+    {
+      "path": "src/components/Review/package/parser.ts",
+      "sha256": "dc0fb1d30e25dc0abe2d5aa5a344d6013a878809b12c250501ccae8562cdc46b"
+    },
+    {
+      "path": "src/components/Review/package/profile.ts",
+      "sha256": "642c1d6b958a0933c6c0d26d7388efd141a9017e6a58231363a03695976dd764"
+    },
+    {
+      "path": "src/components/Review/package/revisionSave.ts",
+      "sha256": "4b2989e8b649392a0b99e8d30c3d05c1c696d11156d93bd69cf9d1ba155ef255"
+    },
+    {
+      "path": "src/components/Review/package/serializer.ts",
+      "sha256": "e8802a10b64b7b5b06ed8ddf2703590f5e5e922329e219cea835a0b10fdbf056"
+    },
+    {
+      "path": "src/components/Review/package/submissionTransport.ts",
+      "sha256": "2f4f0208f8c3494dd3cc78a0bf2cf3b7a4bfc58cb8cb9f2cba47f8e406246f8a"
+    },
+    {
+      "path": "src/components/Review/package/toolRefresh.ts",
+      "sha256": "76a9468487d957ecb13e0233035d0927338b1bf2622809e6a212e799c112418c"
+    },
+    {
+      "path": "src/components/Review/package/validator.ts",
+      "sha256": "71f87411e4221b90fd565676f1b0e0b491ba358e9beea4e90e2fcbb0804ef9b9"
+    },
+    {
+      "path": "src/components/Review/releasePreflight.ts",
+      "sha256": "7d17d145e3fba9c9c7b64a830488c9b4ecf0baeeff76ca1f1d52a9bc9e1c35e0"
+    },
+    {
+      "path": "src/components/Review/session.ts",
+      "sha256": "6cf8db8bf61b1f3b5143d88a79b1390d31528008f309b140972bbf63aee72746"
+    },
+    {
+      "path": "src/components/Review/statusBoard.ts",
+      "sha256": "9c1b4b28b6711e598989dd15e0d71a190e55020f651c3122d11b5f05eedc4df3"
+    },
+    {
+      "path": "src/components/Review/submission.ts",
+      "sha256": "80c6a5caded69233bc196efd2c2558930885fa0da30ab739edb8d08530ed5f59"
+    },
+    {
+      "path": "src/components/Review/workflow.ts",
+      "sha256": "6b4b2128576082aa5a4231ff1468e6a9e29285176d6f344b18b74075cc387a77"
+    },
+    {
+      "path": "src/components/Rules/ButtonRule/RuleButtonPanel.tsx",
+      "sha256": "ed2ed37bab858f241c6f5eccca3e46329e0bbcf59f98d70a2c140477690495c0"
+    },
+    {
+      "path": "src/components/Rules/ButtonRule/buttonRuleConfig.tsx",
+      "sha256": "8dc5d102b2ee80283c2474298dd9dc7937777119c7a1d20ef2f9449c5fcc08b4"
+    },
+    {
+      "path": "src/components/Rules/ButtonRule/buttonRuleFilter.ts",
+      "sha256": "ce9eb3795ac8692c0d8458c4b7b175885a614af4a167a995b61a1e83af7f9348"
+    },
+    {
+      "path": "src/components/Rules/ButtonRule/ruleButtonIconRegistry.tsx",
+      "sha256": "d8b0a24ae3e352f147629e2bc25665f626ecef1bd11b6a8e103354c99a154171"
+    },
+    {
+      "path": "src/components/Rules/ButtonRule/ruleButtonState.ts",
+      "sha256": "9b8fd84f7f6ca9013e8326fe108d5a1185cdedadd386505ebdf4942bf0022b8f"
+    },
+    {
+      "path": "src/components/Rules/RuleLayerToggle.tsx",
+      "sha256": "ea21969ac81a77864b32ee6c774a1dcf98de8863ee3f2928dbbc8693db771154"
+    },
+    {
+      "path": "src/components/Rules/cardrules/TRPFeatureInteractionCard.tsx",
+      "sha256": "aa72b036164bee4a4782841ffd6aa3cbfacdafe2ea957d3b40425e09cad0a6ef"
+    },
+    {
+      "path": "src/components/Rules/cardrules/TRPTradeSection.tsx",
+      "sha256": "58b97a9ff902fa35631ec81818b826f3c371864ac2cf93e72557f64268f29d42"
+    },
+    {
+      "path": "src/components/Rules/cardrules/cardEnhancements.ts",
+      "sha256": "cb4ff4830bffd8e5b6db806c623f0abdb49794ad7bfd0316050c6d2b66f65bdf"
+    },
+    {
+      "path": "src/components/Rules/cardrules/cardInteractions.ts",
+      "sha256": "fbee5d5ffee360c08a9d3eb2c145117f6966b80e7beb0eddbf8eb2a46c2ff2f8"
+    },
+    {
+      "path": "src/components/Rules/cardrules/cardRegistry.ts",
+      "sha256": "de7561c3bd2ce80046aa9209b08b3cddb787c3d879c0905adbb30d5cdeb8787b"
+    },
+    {
+      "path": "src/components/Rules/cardrules/cardRegistryContext.ts",
+      "sha256": "47b5e22f974d331c8f0b9c11c965e75a8ab97c06e248b096dcfb7ec12c085bf1"
+    },
+    {
+      "path": "src/components/Rules/cardrules/cardRegistryOverlays.ts",
+      "sha256": "6dedc128fc70bacded3634770dc94d0973c1e34d5e5a9a822d8da928da1e8806"
+    },
+    {
+      "path": "src/components/Rules/cardrules/cardRegistryRows.ts",
+      "sha256": "edaebb1a5e4ce2d3494af98c0d3602edf955710807e41c5b18673472a3f14365"
+    },
+    {
+      "path": "src/components/Rules/cardrules/featureCardRegistry.ts",
+      "sha256": "240f821aca8ae792c788656c29efd5db2b62d787e37a698471ded9a011bc9688"
+    },
+    {
+      "path": "src/components/Rules/cardrules/fieldRules.ts",
+      "sha256": "644bae62fca9a7fe80c7d845e0c08404e86742f5945ce0d8a40dc00b0dd62138"
+    },
+    {
+      "path": "src/components/Rules/cardrules/pictureRules.ts",
+      "sha256": "8cdc2aa1f02c3bc55e6e530addbce87cf13651243e5283541df811d92bf5335a"
+    },
+    {
+      "path": "src/components/Rules/cardrules/tradeImageRegistry.ts",
+      "sha256": "ff4660891c0d188f55607e7795ef29693f95daa2a31d392bdad2caec6aed7df4"
+    },
+    {
+      "path": "src/components/Rules/configRuntime/configPackageAdapter.ts",
+      "sha256": "3609fce501881aedbe110b14e02854913870f96512f3deb53ece4b662a3d8aab"
+    },
+    {
+      "path": "src/components/Rules/core/FeatureInteractionCard.tsx",
+      "sha256": "fbd6089f63999c5ad99269d7fe1a27b9e1c8e48afb3901d7b78806d24f8aa8e4"
+    },
+    {
+      "path": "src/components/Rules/core/RuleDrivenLayer.tsx",
+      "sha256": "e62c21e779dc9c083e9b9587900d555194ff364e3e9a53ebcbd8b8b8abdd3149"
+    },
+    {
+      "path": "src/components/Rules/data/dataRepositoryReader.ts",
+      "sha256": "9907770f1773856679cb8bf87f31c77ede93343c747b98af5a919d9eae8553e4"
+    },
+    {
+      "path": "src/components/Rules/data/effectiveRuleItems.ts",
+      "sha256": "77da269860f202099614a85d237605d43809a52931186c0a94320c293aeeb7bf"
+    },
+    {
+      "path": "src/components/Rules/data/featureStore.ts",
+      "sha256": "119bafaf18a8415f72ce5b5309158268820950e03e0d92ae3d0d2af7971778f2"
+    },
+    {
+      "path": "src/components/Rules/data/globalIdIndex.ts",
+      "sha256": "34f4a3d97e3ebdd76cdb6a449c4d51bd3281784e484829bf53f1f07089aa4f28"
+    },
+    {
+      "path": "src/components/Rules/data/ruleDataSources.ts",
+      "sha256": "2d8086b00cf1a5c57792c9a9b1b91ac861caa5c05da392e7448895f5d611997b"
+    },
+    {
+      "path": "src/components/Rules/data/sourceConfig.ts",
+      "sha256": "3178a290c7ab3960a7e4fba9c8c5f3ea6d32bf985d66ce98b476c77d82d7d0e0"
+    },
+    {
+      "path": "src/components/Rules/data/sourceLinkModes.ts",
+      "sha256": "cdae4170567433208844670145c518015ed42c2ddaedce3ebc0414e7fbf47cf6"
+    },
+    {
+      "path": "src/components/Rules/data/sourceResolver.ts",
+      "sha256": "8f3429d40dad08dd303bf7e84222f4fb6e3dfc64bcd6b49de595a42579ec167c"
+    },
+    {
+      "path": "src/components/Rules/data/sourceTypes.ts",
+      "sha256": "bd65faf30b0c23c75d8b5ce048c12710a7ad2e5bcf8ce1ff92fa39d0469e2917"
+    },
+    {
+      "path": "src/components/Rules/data/worldRuleCache.ts",
+      "sha256": "5866bee7cd04199992d2e7162a26ab937c49afd9c7e2eb94d41100ee43a1b998"
+    },
+    {
+      "path": "src/components/Rules/data/worldRuleDatasetLoader.ts",
+      "sha256": "64a0386019db015181ab4e8952d839351bfd8840fc9d22f57b60da7b7d2c094f"
+    },
+    {
+      "path": "src/components/Rules/debug/lineLabelAudit.ts",
+      "sha256": "f3f253e33bf46854ac72363225dab4f5f24bc766b729424ef49d7eb4528235d3"
+    },
+    {
+      "path": "src/components/Rules/debug/polygonLabelAudit.ts",
+      "sha256": "5a4e3fa104eb05ee0dc35e41de4c1d3a449dce772a862a793dc713c96739404b"
+    },
+    {
+      "path": "src/components/Rules/priority/structureLabelPriority.ts",
+      "sha256": "f8431b936a727563f2e2134475e6599bf9cb0f11b9dc65f3fc0d7744cbe72df5"
+    },
+    {
+      "path": "src/components/Rules/rendering/display/README.md",
+      "sha256": "c2bb85fe94ca08881809030179072108a9b538e2c6bbd96185745b45cba7495e"
+    },
+    {
+      "path": "src/components/Rules/rendering/display/displayDefaults.ts",
+      "sha256": "4913db022f11c975f57913fd7adf938d7c57c598a2a753267db33174318c95d7"
+    },
+    {
+      "path": "src/components/Rules/rendering/display/displayDiagnostics.ts",
+      "sha256": "fb3f68dd3d7d9167d03c0d9b9e1fd86ede5ce8edb5a78199dce7eebc83d357dd"
+    },
+    {
+      "path": "src/components/Rules/rendering/display/displayPriority.ts",
+      "sha256": "1ce6d64f0b61f8a79ade24c5414584c927df709966e62eb4f0945f33b91c80b7"
+    },
+    {
+      "path": "src/components/Rules/rendering/display/displayProfiles.ts",
+      "sha256": "e7a3f95e34bdccf7be1ea87e5578f94f87c466d9d38b50922c47efececea7dc1"
+    },
+    {
+      "path": "src/components/Rules/rendering/display/displayRuleNormalizer.ts",
+      "sha256": "8296bcd08ed1874a25d05492aa5629afbe800106ce7a67e7d9d17fede792220d"
+    },
+    {
+      "path": "src/components/Rules/rendering/display/displayRuleResolver.ts",
+      "sha256": "35e2f5c16bfd33aee54cad43c9fe0004d107ac6ddc842834f00c7fc32ef8da65"
+    },
+    {
+      "path": "src/components/Rules/rendering/display/displayState.ts",
+      "sha256": "919715af2744bfb72f2db92eb5bb490ca86350cbc57e6ef78a89740bf6186816"
+    },
+    {
+      "path": "src/components/Rules/rendering/display/displayTypes.ts",
+      "sha256": "29e687bb45c3c96ae8f417f3e50b64fbb21b4dd07c21516f8f7db854cbece43e"
+    },
+    {
+      "path": "src/components/Rules/rendering/featureRenderRules.ts",
+      "sha256": "2ed2de94186d3fc4ac1888ab7ba20cc13231c0c613db73383b4c38c5665374bd"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelAnchor.ts",
+      "sha256": "7e538e60a9d66c80c459576b921422d7495deb6390253a7861a7a398c995eddf"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelCollision.ts",
+      "sha256": "fa5ddd96b53dda7b8ea8a8d1632f770d194cd57bdf6bbbc486bf135c0b85e1e4"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelDensity.ts",
+      "sha256": "16ecc047cd9a2dd071c1f61bacf7d46039dd11ceb12ac9dcaa2ffeb85c23363a"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelGeoAnchorCache.ts",
+      "sha256": "e64e1275ef919c585e6fe87df6bb76e58d1c96ee7529bed79971b473fe3d90b2"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelGlyphPath.ts",
+      "sha256": "90ee248865c9bd54ffd7e16a2dea517d509663c33c68fa6300deb7fd6a8e5d06"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelGlyphPathLayer.ts",
+      "sha256": "0732d1417cbf99b99bc4f2aba68b6b823fa1753d874ed34dfbc6a14c7e963afe"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelLayoutWindow.ts",
+      "sha256": "ae45f2bfef0be1ea9ff044fa046a795f721d6cf19407e61c9eddf582443d961e"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelLineAnchorCache.ts",
+      "sha256": "bdcdba2c04f3b46fd3d41678a85116670becffbd47751fe72bd2002b904e7015"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelLineChainageReposition.ts",
+      "sha256": "68cb3135c0302c45abbda4fbbd08f52a6ef82d717e0678cb7563ebe53a3d9988"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelLineTextGeometry.ts",
+      "sha256": "5cf3f34945df2356a3893887ff16e815bf8548f834a3a4ece983e2f50521999e"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelLineTextStyle.ts",
+      "sha256": "bfe32fdcbe82dcdfa0a8cb5c09efd2d630d468c75feffe3a62141a72cf73e577"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelLineViewportGate.ts",
+      "sha256": "1f0fcb65af4f00f30668c64a88034dde4ae137a141029dade30f04d9ef8f5289"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelPlacementCache.ts",
+      "sha256": "706182406273f43f94f0f4080427202254d8a0aeed333113ed5a3c33e779dd8d"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelTextPath.ts",
+      "sha256": "d7987d4bfa7c8f792629daa592230488f68a1777f3f93cfc847dd9a1acd01a95"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelTextPathLayer.ts",
+      "sha256": "d7e47bc2aec5f8d5e9f87a8aaab7e07a71d2a047ebe0568ca0d57b889af2003b"
+    },
+    {
+      "path": "src/components/Rules/rendering/label/labelViewportStability.ts",
+      "sha256": "ad69ca67ee9243caa093df7c2747d589491d9201fccae265cd9fcb042681da43"
+    },
+    {
+      "path": "src/components/Rules/rendering/labelClickInteraction.ts",
+      "sha256": "cb4301a8fe47e09c10373d9d19a989a494f272d1e524c0cc4246f3daff33de38"
+    },
+    {
+      "path": "src/components/Rules/rendering/labelLayout.ts",
+      "sha256": "c53b244e381bad2288f6e805e98b7813dba85200aa39962cefc45f3d63cb0a11"
+    },
+    {
+      "path": "src/components/Rules/rendering/labelStyles.ts",
+      "sha256": "1cbd7c1685ff889067305846c266a161bdd8b070a3ce88baab69d506c537d668"
+    },
+    {
+      "path": "src/components/Rules/rendering/order/floorDisplayOrder.ts",
+      "sha256": "509956e785c0af26d83030b5cbf5ac86220ab7156702a0d211c8847ab0530f6b"
+    },
+    {
+      "path": "src/components/Rules/rendering/renderRules.ts",
+      "sha256": "ebece3cfd61d99424b6fd4dd7977164acf5a88ea0864ffe69361949fd9539870"
+    },
+    {
+      "path": "src/components/Rules/search/ruleSearchRegistry.ts",
+      "sha256": "79e5e1042d115b011bd1689ab5385e0a7265ae04d88cd1f0f961d36525627b62"
+    },
+    {
+      "path": "src/components/Rules/share/FeatureSharePanel.tsx",
+      "sha256": "e68a97e6bdf8df5eee4e5615ab180b1b9f26fa8017bc0306fe1e6867711eb480"
+    },
+    {
+      "path": "src/components/Rules/utils/ruleHelpers.ts",
+      "sha256": "0e9a14e29053710a0f28a7d5540e527216035377996a538e38274e456ae374cd"
+    },
+    {
+      "path": "src/components/Search/SearchBar.tsx",
+      "sha256": "c7d69ea1c78ece7ba4c3ffd9139d35d2d316c003482bc208edcad4f6960a6d5a"
+    },
+    {
+      "path": "src/components/Search/searchRuleTables.ts",
+      "sha256": "f275bfe173755e85534406388fb0212990cbf88e05a296d4e7cf1260d7bd5434"
+    },
+    {
+      "path": "src/components/Settings/DataSourceRecoveryDialog.tsx",
+      "sha256": "54c0deeee20c89a8cccb0d60b9ad8835ea1d57f012ee3f125b14773b9f6410db"
+    },
+    {
+      "path": "src/components/Settings/DataSourceSelectionSection.tsx",
+      "sha256": "b5484463774e2e2fa4a2d97e65e6f146d27abb1d5061c431c5878b6b9f4a3bac"
+    },
+    {
+      "path": "src/components/Settings/ReviewAuthSettingsSection.tsx",
+      "sha256": "f7c4ec50c7ffc139bb52c0e02d82f3e4f1d7fcb44f50e55a53f849a33f5e90ec"
+    },
+    {
+      "path": "src/components/Settings/SettingsPanel.tsx",
+      "sha256": "8b796be734aaca23f46993ce2454f81274b00c5f2b5a8e1766d965c7f6e3d20e"
+    },
+    {
+      "path": "src/components/Settings/dataSourceSelection.ts",
+      "sha256": "6781f1e14c352e8a0bda80dbba6b4d942816c4f912569ea282cf4cdc9aabae2b"
+    },
+    {
+      "path": "src/components/Toolbar/ToolIconButton.tsx",
+      "sha256": "3265fbc34f56db8bca429e0717f293b14914927a2ba41f9c6995f7d3d3e7692c"
+    },
+    {
+      "path": "src/components/Toolbar/Toolbar.tsx",
+      "sha256": "9d816454801683e046456263c198c5cd68c0f1dfe7e03017e76e77d0d05d488a"
+    },
+    {
+      "path": "src/components/ui/AppButton.tsx",
+      "sha256": "e1bfe415172b131f31a0a5943e4b1a813f7d290bf306019fb3b739aa8bbf4037"
+    },
+    {
+      "path": "src/components/ui/AppCard.tsx",
+      "sha256": "97f0998f7d5b8602ca19bebbc0c0a36235e39351bb538b61d532a801d22c3c9f"
+    },
+    {
+      "path": "src/config/zoomLevels.ts",
+      "sha256": "017c95a1b4f30c0133dd895ee45a7b63c28237af7d69790930dee5979cc8be4a"
+    },
+    {
+      "path": "src/config/zoomNodes.ts",
+      "sha256": "5f1f3c598b2a60faf406fcd0b19c222ff1858772a2d05c00830ac95553086fac"
+    },
+    {
+      "path": "src/configStudio/ConfigLab.tsx",
+      "sha256": "255d2dba7e41730aa8fa9925a08343eb0dde895a863f61eff08e0e1d82e6a5c5"
+    },
+    {
+      "path": "src/configStudio/ConfigRuntimePreview.tsx",
+      "sha256": "7bd7436719db6f62f446265398a60f8f37a795a7cab64dfbe7335251a74c1307"
+    },
+    {
+      "path": "src/configStudio/ConfigStudio.tsx",
+      "sha256": "6443eef09662ff5c7daab3b2c4e82972387a9b0e871c381350e13867596fcf0e"
+    },
+    {
+      "path": "src/configStudio/RenderRuleExtensionsEditor.tsx",
+      "sha256": "695a3b1445d5ac7cb997634761efc5d396d33a6507fbe05668d5ab0310232219"
+    },
+    {
+      "path": "src/configStudio/V3CardEditor.tsx",
+      "sha256": "7266d7665c737f1ab47eeafd75aea643273260ecc97dd3b4c7fb4acdf4b33312"
+    },
+    {
+      "path": "src/configStudio/V3CardRenderer.ts",
+      "sha256": "0e8bc3a41174e802a6349f79f5225b0f7919462d668e618e58931cbe7db2275b"
+    },
+    {
+      "path": "src/configStudio/V3WorkflowEditor.tsx",
+      "sha256": "1dbcaa760ee755f88dbc9eb21c26d8d7189087614ae4fc2048b17f1d63485b02"
+    },
+    {
+      "path": "src/configStudio/V3WorkflowRunner.tsx",
+      "sha256": "a6389e50d6717ddeed4b1bebaccca9416c410dd512b3ddcffc52b04e497af454"
+    },
+    {
+      "path": "src/configStudio/WorkflowStudioPage.tsx",
+      "sha256": "8bbe5f1b7f9ae464af65c98842162f1639687ece9744ce4a6d8b5990e3f45341"
+    },
+    {
+      "path": "src/configStudio/WorkflowWorkbench.tsx",
+      "sha256": "cb9df6f64376ff082604cb7a89f911cf47993e50af6981921f8dd9ad4565f1fe"
+    },
+    {
+      "path": "src/configStudio/configLabStorage.ts",
+      "sha256": "388fb94859d4b646aed42114eea42502f237b3062250117d84f9a058243ee1d9"
+    },
+    {
+      "path": "src/configStudio/legacyProjectAdapter.ts",
+      "sha256": "fffbd37d13a7a4c477fa077e62417b2c0688243d9f1a3a451448af7e928d7dd5"
+    },
+    {
+      "path": "src/configStudio/package.ts",
+      "sha256": "a00536b464d302cfcde3129b39a375df96a7d654fd6be74033584b6d11ca4018"
+    },
+    {
+      "path": "src/configStudio/runtime.ts",
+      "sha256": "422bb04fc9620ca933ab1b1ecb50a333f745b071e7659ecb03c5013e27f8d31b"
+    },
+    {
+      "path": "src/configStudio/types.ts",
+      "sha256": "a3ffad2b93d208179460bdbdad38d82770d1ad678aa5de86eb8dd84d6813b32c"
+    },
+    {
+      "path": "src/configStudio/v1BehaviorBaseline.ts",
+      "sha256": "566b63254efcc8c13386c6cad59a19c3311b31856dce3263cafc59d519811550"
+    },
+    {
+      "path": "src/configStudio/v32Defaults.ts",
+      "sha256": "237be36f6992f6b5dcd53b1f1d733eb16c995ae6db22f770fd8488d5d330694e"
+    },
+    {
+      "path": "src/core/dataSourceSelection/browserStorage.ts",
+      "sha256": "cd5c31fa0b1d908ebd802e15af377c8a361601f697221efe218747e6133654b4"
+    },
+    {
+      "path": "src/core/dataSourceSelection/config.ts",
+      "sha256": "b480712f4b0640049651b7f1d6a72397928a98267d3993eb97ac8bf23927d40d"
+    },
+    {
+      "path": "src/core/dataSourceSelection/contracts.ts",
+      "sha256": "c7ceae60c7a8e06e37b289af6e497d902157fba907babf4f3d30e2aabd146efb"
+    },
+    {
+      "path": "src/core/dataSourceSelection/controller.ts",
+      "sha256": "9b624bff5153af4937a5b173aa001109823e9d5f3e7fcf6edc6f77cb35f12106"
+    },
+    {
+      "path": "src/core/dataSourceSelection/index.ts",
+      "sha256": "a08c36f8ecd6d5f3e35caefa15ddda346c4b641e2a9f15e400c6c2b52a695e79"
+    },
+    {
+      "path": "src/core/geometry/multipartEditorState.ts",
+      "sha256": "695524bd931d4158c536d930457281e81340d97871e4fd95822c4857a748cbff"
+    },
+    {
+      "path": "src/core/geometry/multipartGeometry.ts",
+      "sha256": "dabdd552e35d3289014ac22288f11d3bb5b8526bda38ccc7a7e0580c95ce4745"
+    },
+    {
+      "path": "src/core/project/assemblyTypes.ts",
+      "sha256": "ecb2edc9ea5fa1bcebf7a47decc3faf62434ee659b2652415885faebc83fcd6b"
+    },
+    {
+      "path": "src/core/project/cardEnhancementRegistry.ts",
+      "sha256": "1cc7b6474006d9963d35b1dbb024a020cebd5f666f8ca51b657781c4c8c7c3e1"
+    },
+    {
+      "path": "src/core/project/cardMetadata.ts",
+      "sha256": "bec2c6480e62cb5c6a88f1e3f1a98977db3838c3a263bbe26b93d3f4dc0199ff"
+    },
+    {
+      "path": "src/core/project/cardRelationAdapter.ts",
+      "sha256": "5238b6ce3163533d2238f5c6188638b922d10201e447e2d05a177a8e78438bc7"
+    },
+    {
+      "path": "src/core/project/cardRuntimeCompatibilityAdapter.ts",
+      "sha256": "0eb06ad73157a1790d8146a680042c4011f8ad5c9900ae9142dc5ebb7594d4e3"
+    },
+    {
+      "path": "src/core/project/cardRuntimeResolver.ts",
+      "sha256": "9837820eaf7ea93d5b53a2ca8ef866536b7bc65f8aee73c591adecdba7842681"
+    },
+    {
+      "path": "src/core/project/cardTypes.ts",
+      "sha256": "fcc3bb0a6a3a6b46f71684618698db582a3759ef65d4e52cfa61ed1b2f0d87b1"
+    },
+    {
+      "path": "src/core/project/classCatalogAdapter.ts",
+      "sha256": "7336a4f6fef8cf4959d642fa7a42a34e92474c326dfe5f95a844cd07820d59a5"
+    },
+    {
+      "path": "src/core/project/classMetadata.ts",
+      "sha256": "06a6e2c00877799f420a019305204361ee9e410d5fc9e7a733ba159e700c4a15"
+    },
+    {
+      "path": "src/core/project/classTypes.ts",
+      "sha256": "8addd40639ad496d4bf2952c18f493156ee33855d285ea722d95c5295288da78"
+    },
+    {
+      "path": "src/core/project/displayAlgorithmMetadata.ts",
+      "sha256": "ad00f9f0527e20c287bbc5a441cdf39bfd76ff31065e47d6be7e0ebae1db1e0a"
+    },
+    {
+      "path": "src/core/project/displayAlgorithmRegistry.ts",
+      "sha256": "06ec28cfdfb170e690c395a940e994d6627c83f977b830890a1b8cac162071fc"
+    },
+    {
+      "path": "src/core/project/displayAlgorithmRuntimeBridge.ts",
+      "sha256": "b13097703eb87cf46bf05fd9616f929550b0a1491e331e7db036e4cb1652c8ff"
+    },
+    {
+      "path": "src/core/project/displayAlgorithmTypes.ts",
+      "sha256": "9e5ec28a993f7023a7acfd40558ef415b16812c02c8691bc25dfbb7682496014"
+    },
+    {
+      "path": "src/core/project/displayMetadata.ts",
+      "sha256": "f233f2636e17f210f6bd2f4f705f449d3a203605754482160b4dc89696f7aa0c"
+    },
+    {
+      "path": "src/core/project/displayProfileRuntimeRegistry.ts",
+      "sha256": "342ad7b9869ff401f35f8ca46a1718846f094d568d57a77f704403962301830a"
+    },
+    {
+      "path": "src/core/project/displayRuleAdapter.ts",
+      "sha256": "24daf46a7d9f8d7268c01cabdd942abdd68fe65f95b99544acc38c8439be3a1b"
+    },
+    {
+      "path": "src/core/project/displayRuleRuntimeAdapter.ts",
+      "sha256": "31565754364f87eaf386d0780396d725d3f11197b6941629690295c3617eb415"
+    },
+    {
+      "path": "src/core/project/displayRuntimeOverlay.ts",
+      "sha256": "5e7acbe16fbf8f3d405da16b6497259c3a3f8f2fd97593947e45eb31874daa01"
+    },
+    {
+      "path": "src/core/project/displayRuntimeRuleRegistry.ts",
+      "sha256": "786953cb0ec3d1417fe656d439c9a103f33cd44c914c68e04dd20840502ae443"
+    },
+    {
+      "path": "src/core/project/displayRuntimeTypes.ts",
+      "sha256": "a3505c8fcd2c6f24a325828e3e1d3edbf5b2079dbb9b9e7db54425dea4cb2ba0"
+    },
+    {
+      "path": "src/core/project/displayTypes.ts",
+      "sha256": "43d55414b3ff052f3749a25df0b10a2602f11e998f9d53b37f08e3fc68226188"
+    },
+    {
+      "path": "src/core/project/environmentTypes.ts",
+      "sha256": "fd6fdfbd8f8feb92210ee218d9750231457302cefc6c3e1a8ace19a977ce9e65"
+    },
+    {
+      "path": "src/core/project/featureFormatRuntimeRegistry.ts",
+      "sha256": "70599aec67d5e76a0ad173b03d582aab612d31d08322b1124b2914c8ca7cca5b"
+    },
+    {
+      "path": "src/core/project/formatExecutorRegistry.ts",
+      "sha256": "fbc0b672a8a498fa831850d1bf749650e938465e76be98ed750e8b7202b5caa1"
+    },
+    {
+      "path": "src/core/project/formatExecutorTypes.ts",
+      "sha256": "c86fd6823da3c407beacc3fc3505821bdbf306aaecaf9c77282683e2a7f64b41"
+    },
+    {
+      "path": "src/core/project/formatGenericAdapter.ts",
+      "sha256": "3038ad98370614cb6007502d81a4d7ac618a803e7c0ddbf73d4d74b351494336"
+    },
+    {
+      "path": "src/core/project/formatLegacyAdapter.ts",
+      "sha256": "cdc23b65b12b420161ada5966d260b6b95f74ef07641baad20d0396b2e5641c7"
+    },
+    {
+      "path": "src/core/project/formatRuntimeBridge.ts",
+      "sha256": "616af9d6bfe334422c324a143fb57a36e83e1cac2dcae65aba5a3da03fbe9a60"
+    },
+    {
+      "path": "src/core/project/formatRuntimeContracts.ts",
+      "sha256": "9cc16fb5a41c22faf11121a6b8849f59d7b8724ce8a311e7ed067f365f0f1aab"
+    },
+    {
+      "path": "src/core/project/formatSchemaComparator.ts",
+      "sha256": "b1270225219ca390716ca8e236b6755a63bf4bf2324a42ada821c4de5c79b65c"
+    },
+    {
+      "path": "src/core/project/formatSpecialFormatterMetadata.ts",
+      "sha256": "c443519cd39086782e75ffb77e42aed24f5ed18192119a48bfae762043af1dc0"
+    },
+    {
+      "path": "src/core/project/formatSpecialFormatterRegistry.ts",
+      "sha256": "72ef66dcdc92792b0859411e960c1f7d1aaceca4b63ef64e98b8082e8574525a"
+    },
+    {
+      "path": "src/core/project/formatSpecialFormatterTypes.ts",
+      "sha256": "d06697125b8281a26a1252574cb86cca4fb00c60971d9f377bc1259a3f64479b"
+    },
+    {
+      "path": "src/core/project/formatTypes.ts",
+      "sha256": "403b40de15d9ae16e846098519a4ff2c7ab1e02dd2d20889e31204f3923801cb"
+    },
+    {
+      "path": "src/core/project/openriamapRiaClasses.ts",
+      "sha256": "bd8e8de08c6147d548771761aa86bc3f0b999732b9b5d5ebea28f3b53e0572c1"
+    },
+    {
+      "path": "src/core/project/openriamapRiaEnvironment.ts",
+      "sha256": "f209237f06da2e7ff44f25da51d9a7959effe99afc3c7062739b426e3260a865"
+    },
+    {
+      "path": "src/core/project/openriamapRiaShared.ts",
+      "sha256": "697b9178c61af4db6298f8a518a5697d9fc31af72c758f64fb1a147e6b97f160"
+    },
+    {
+      "path": "src/core/project/openriamapRiaWorkflows.ts",
+      "sha256": "5660d0f28bd0ba6208103a868b490800ae80f77d2cfee57e217583d6fb9829df"
+    },
+    {
+      "path": "src/core/project/projectAssemblyMetadata.ts",
+      "sha256": "fd5d4a760b7cff9227ebb90ab4a7a3965abfe7265b887940499500e7c9214906"
+    },
+    {
+      "path": "src/core/project/relationMetadata.ts",
+      "sha256": "2fe94e28b99af43a18ce8c3272adb82d7c5d82b109b454bdf18e5040cf76f084"
+    },
+    {
+      "path": "src/core/project/relationRuntimeResolver.ts",
+      "sha256": "619fcb94aec3f94f86872d354fa8b4a9187b306997d9054a97bc1904b35e36c4"
+    },
+    {
+      "path": "src/core/project/relationTypes.ts",
+      "sha256": "16d6a9423c97591d997e8e54dd698be3317707017ee138ac2fb91d7483035a1e"
+    },
+    {
+      "path": "src/core/project/renderFormatCompatibilityAdapter.ts",
+      "sha256": "6f814ac67b60db38555db4e35dfd23a87d8f7768d29e357e9aadee0a0ea848bf"
+    },
+    {
+      "path": "src/core/project/renderFormatFinalMetadata.ts",
+      "sha256": "4974ca82367e758e9f0f273a13ee92cefd405a898ceb26752c72d3e2bba59e45"
+    },
+    {
+      "path": "src/core/project/renderFormatFinalTypes.ts",
+      "sha256": "36d3a2ae01db45bf01a41fa973a7f0976d9588433db26c8a83f55093ade08fe8"
+    },
+    {
+      "path": "src/core/project/schemaMetadata.ts",
+      "sha256": "959908360b448e6c93231023a18f59cb64bd675f749dc25c985277f5d7ff3497"
+    },
+    {
+      "path": "src/core/project/schemaRuntimeContracts.ts",
+      "sha256": "c40b2bb6b4b356be9188295dc9c0bf612714c1bb598bf099868e30c6fcb6b6e6"
+    },
+    {
+      "path": "src/core/project/schemaTypes.ts",
+      "sha256": "b2a99c819d34ce3f457e0195ac9503b8b84d950c1cf8a6285b785e73cde8abf2"
+    },
+    {
+      "path": "src/core/project/sharedTypes.ts",
+      "sha256": "4d9af21d7b8a9458e8e52566b64121b41dfab46caa3579d729a449fa81854949"
+    },
+    {
+      "path": "src/core/project/specialDisplayLogicMetadata.ts",
+      "sha256": "320b79656583433c8d3c8055408d5896623266290603cc7de42e96d58dfbf36e"
+    },
+    {
+      "path": "src/core/project/specialDisplayLogicTypes.ts",
+      "sha256": "27e074d794268b2bdfbfa90bff017b28817d33d359358f58da4dcf851d340724"
+    },
+    {
+      "path": "src/core/project/specialDisplayRuntimeBridge.ts",
+      "sha256": "7b89b3cc3ce80bcbe61693329bc327a945bfc634ed249c8732c521a86bbe4956"
+    },
+    {
+      "path": "src/core/project/workflowBlockRegistry.ts",
+      "sha256": "7f6072272a3f0d0bb9721aed57f9526c1c93c5ad8c2de78fdc8779e188692d92"
+    },
+    {
+      "path": "src/core/project/workflowCompatibilityAdapter.ts",
+      "sha256": "e1159771695c1dbb603d249a76dedc6ce5dbeb91176c6da7275aa5da253fedbe"
+    },
+    {
+      "path": "src/core/project/workflowComponentRegistry.ts",
+      "sha256": "5f3885511394527c167da404a4848e05d373eee75998e096653fb526c6c2eda0"
+    },
+    {
+      "path": "src/core/project/workflowFinalRuntimeContracts.ts",
+      "sha256": "0e242006abe096212ce0e4705d98b9912cddfa96b56df7ecbf8ac86132c4cfdf"
+    },
+    {
+      "path": "src/core/project/workflowMetadata.ts",
+      "sha256": "aaa0995923a3a663fad9c87c50e4f9281529fbb47d5fef540a90393ce43e5ea5"
+    },
+    {
+      "path": "src/core/project/workflowOutputAssembler.ts",
+      "sha256": "52764a36766c1599732f06b09b40bd5c7b8af73bf4af8915eecf14404a0ba712"
+    },
+    {
+      "path": "src/core/project/workflowPageRuntime.ts",
+      "sha256": "040a07ed92de2b7332287e8d5e6acc0bc6db1d036a405328d8c7cdd22698d609"
+    },
+    {
+      "path": "src/core/project/workflowRuntimeCompatibilityAdapter.ts",
+      "sha256": "9216288d14e3b5eeedad79fd61f91534d6c7fdd2ddcaffb3e0c7866c23143fdd"
+    },
+    {
+      "path": "src/core/project/workflowRuntimeResolver.ts",
+      "sha256": "bcbe0906acfa89827adaa110ef5843cbe6a26b6c13ed94b78c1a33b552a72c9a"
+    },
+    {
+      "path": "src/core/project/workflowTypes.ts",
+      "sha256": "90d163e9ffec824b8ddf2ab4c0c80cbe1c71a94663d4030a3edd7e8659d39bf1"
+    },
+    {
+      "path": "src/entrypoints/legacyEntry.ts",
+      "sha256": "07c0a576a7287169ce12450d1790ad630761db1c0a04efae36d79209bf2d3522"
+    },
+    {
+      "path": "src/entrypoints/measuringEntry.ts",
+      "sha256": "52e7f4827b15e7bbe38f7bb3b834c7a679ecbb752e060b5ac90830946f943b93"
+    },
+    {
+      "path": "src/lib/DynmapProjection.ts",
+      "sha256": "57fad2d079bc9b4c047c1ec04b8d505d9e4df3192606d870a305bb01069de621"
+    },
+    {
+      "path": "src/lib/DynmapTileLayer.ts",
+      "sha256": "f060223e72397d054b48087543b5a78120e60a2b1f904ac1cba15f3933ced6d9"
+    },
+    {
+      "path": "src/lib/SketchTileLayer.ts",
+      "sha256": "040b066452114ace95d84ad2101cb5f0a3709f6f69ba14bbc133470c9ade0d44"
+    },
+    {
+      "path": "src/lib/clipboard.ts",
+      "sha256": "d3cca0724095048c2b1bb47be99b1c2c052ebe3f1c57e12e7597b086fe4bb47e"
+    },
+    {
+      "path": "src/lib/cookies.ts",
+      "sha256": "34f1aa6868637620876a3995e2fb895deca78c8af18617f1ecfdbb0e499d7f39"
+    },
+    {
+      "path": "src/lib/dynmapTileMath.ts",
+      "sha256": "09b5a60260084dbda37205f42132bd749e910a282eb12a2c0d2b72d002179c3c"
+    },
+    {
+      "path": "src/lib/featureShareLink.ts",
+      "sha256": "a10ae7ff1e2a0b42bc9569a1033de401150cb73c936e95f6145bbcb0aea83901"
+    },
+    {
+      "path": "src/lib/fetchWithMirror.ts",
+      "sha256": "566dffd28031b7deffa6fdea8ac3ea2024071889eb03fa2a61b92c424d47ddda"
+    },
+    {
+      "path": "src/lib/gridSnapUtils.ts",
+      "sha256": "fd693056ba1d20cc04d5bc0f8b3b039005afa7710bd83d7c486bfd9065727542"
+    },
+    {
+      "path": "src/lib/legacyDataLoader.ts",
+      "sha256": "50a191a703b3d2c4ba02025dfed6ac067d97699011ab64a1ac1e6c53d1a32ceb"
+    },
+    {
+      "path": "src/lib/minimalFeatureEditPackage.ts",
+      "sha256": "b18a9ad399e096305b6fc798b6479279d8d823dfed9f8d924cf67582a8258ebb"
+    },
+    {
+      "path": "src/lib/playerApi.ts",
+      "sha256": "71c2f170765f724099e5901969fa62649eba20a6a573b1f34b71d487b8a2c245"
+    },
+    {
+      "path": "src/lib/rmpPathCalculator.ts",
+      "sha256": "3417bd867e2a393fdc21212e818ecd27b9ecd8d7ae473c04d654fcbefe6685c4"
+    },
+    {
+      "path": "src/lib/rmpSvgRenderer.ts",
+      "sha256": "ded1e543334547348a4c4d448980f4abd1704fe2c06bc48122e65d3ba1af4bc7"
+    },
+    {
+      "path": "src/lib/zipStore.ts",
+      "sha256": "33863c589b9b87e0e2a36444b9f361b79d549bbf9c282a1eb818225b59235973"
+    },
+    {
+      "path": "src/main.tsx",
+      "sha256": "07443c00ff92bf76ce760c0a940c7ff5bc6928bb3ee590a469f1e15384d02254"
+    },
+    {
+      "path": "src/store/dataStore.ts",
+      "sha256": "7cf1f78e1b92b60e6e7666a12ce527d6bb17b5408dcc602e82cd64b12d4738f4"
+    },
+    {
+      "path": "src/store/featureModuleStore.ts",
+      "sha256": "adeacaaa543a1ea6d7f4444b5b34f063c971a862d897b422ebcde04953241b6a"
+    },
+    {
+      "path": "src/store/loadingStore.ts",
+      "sha256": "94792bc140710cd73f059c60f5b0dde9ac3ecea5df564cd0086304d2e1115d14"
+    },
+    {
+      "path": "src/store/ruleDataStore.ts",
+      "sha256": "e1dbdd6fc26a29587b01a0e0938449ab4d18c9d5e316ed640d34432208afa114"
+    },
+    {
+      "path": "src/styles/index.css",
+      "sha256": "923d75d3370a45879f1a935cb6f780a667255d96a63a21f0a3e852b38150f5db"
+    },
+    {
+      "path": "src/types/index.ts",
+      "sha256": "3e3d0c758747d65ab4d26be8ae8d99ce0bd9118da0055d440db7f1e63c60263a"
+    },
+    {
+      "path": "src/types/riaDebug.d.ts",
+      "sha256": "706e0d6da07edb2ba14a789a145e713a34320819e0520293c9db2b66790c061b"
+    },
+    {
+      "path": "src/vite-env.d.ts",
+      "sha256": "e095733a5a97f74023a9a837e5c54bc542a462a7315ba8519d1e1a3c80f45d7f"
+    },
+    {
+      "path": "vite.config.ts",
+      "sha256": "c91e28706ca420d98bb4d5744fbf026c957d304d9d3c1016c78b2377ede6bc7e"
+    }
+  ],
+  "comparisonEnvironment": {
+    "world": "zth",
+    "logicalZoom": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "viewport": [
+      1440,
+      1000
+    ],
+    "mapSize": [
+      1200,
+      900
+    ],
+    "deviceScaleFactor": 1,
+    "renderer": "independent frozen RuleDrivenLayer, styles and helpers",
+    "loadedFontRequired": true
+  },
+  "candidateInventory": {
+    "nodes": [
+      {
+        "nodeId": "class-bud",
+        "classification": {
+          "class": "BUD"
+        }
+      },
+      {
+        "nodeId": "class-bud-nom",
+        "classification": {
+          "class": "BUD",
+          "kind": "NOM"
+        }
+      },
+      {
+        "nodeId": "class-bud-spe",
+        "classification": {
+          "class": "BUD",
+          "kind": "SPE"
+        }
+      },
+      {
+        "nodeId": "class-bud-nom-nom",
+        "classification": {
+          "class": "BUD",
+          "kind": "NOM",
+          "skind": "NOM"
+        }
+      },
+      {
+        "nodeId": "class-bud-spe-spe",
+        "classification": {
+          "class": "BUD",
+          "kind": "SPE",
+          "skind": "SPE"
+        }
+      },
+      {
+        "nodeId": "class-flr",
+        "classification": {
+          "class": "FLR"
+        }
+      },
+      {
+        "nodeId": "class-flr-nom",
+        "classification": {
+          "class": "FLR",
+          "kind": "NOM"
+        }
+      },
+      {
+        "nodeId": "class-flr-spe",
+        "classification": {
+          "class": "FLR",
+          "kind": "SPE"
+        }
+      },
+      {
+        "nodeId": "class-flr-nom-nom",
+        "classification": {
+          "class": "FLR",
+          "kind": "NOM",
+          "skind": "NOM"
+        }
+      },
+      {
+        "nodeId": "class-flr-spe-spe",
+        "classification": {
+          "class": "FLR",
+          "kind": "SPE",
+          "skind": "SPE"
+        }
+      },
+      {
+        "nodeId": "class-isg",
+        "classification": {
+          "class": "ISG"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF"
+        }
+      },
+      {
+        "nodeId": "class-isg-adm",
+        "classification": {
+          "class": "ISG",
+          "kind": "ADM"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-lad",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "LAD"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-lis",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "LIS"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-wtb",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "WTB"
+        }
+      },
+      {
+        "nodeId": "class-isg-adm-dbz",
+        "classification": {
+          "class": "ISG",
+          "kind": "ADM",
+          "skind": "DBZ"
+        }
+      },
+      {
+        "nodeId": "class-isg-adm-plz",
+        "classification": {
+          "class": "ISG",
+          "kind": "ADM",
+          "skind": "PLZ"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-lad-con",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "LAD",
+          "skind2": "CON"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-lad-isd",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "LAD",
+          "skind2": "ISD"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-lad-sbc",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "LAD",
+          "skind2": "SBC"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-lad-rgc",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "LAD",
+          "skind2": "RGC"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-lad-pen",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "LAD",
+          "skind2": "PEN"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-lad-ist",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "LAD",
+          "skind2": "IST"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-lis-mtn",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "LIS",
+          "skind2": "MTN"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-lis-bsn",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "LIS",
+          "skind2": "BSN"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-lis-pln",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "LIS",
+          "skind2": "PLN"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-wtb-sea",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "WTB",
+          "skind2": "SEA"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-wtb-lke",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "WTB",
+          "skind2": "LKE"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-wtb-str",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "WTB",
+          "skind2": "STR"
+        }
+      },
+      {
+        "nodeId": "class-isg-ngf-wtb-est",
+        "classification": {
+          "class": "ISG",
+          "kind": "NGF",
+          "skind": "WTB",
+          "skind2": "EST"
+        }
+      },
+      {
+        "nodeId": "class-isg-adm-dbz-l1",
+        "classification": {
+          "class": "ISG",
+          "kind": "ADM",
+          "skind": "DBZ",
+          "skind2": "L1"
+        }
+      },
+      {
+        "nodeId": "class-isg-adm-dbz-l2",
+        "classification": {
+          "class": "ISG",
+          "kind": "ADM",
+          "skind": "DBZ",
+          "skind2": "L2"
+        }
+      },
+      {
+        "nodeId": "class-isg-adm-dbz-l3",
+        "classification": {
+          "class": "ISG",
+          "kind": "ADM",
+          "skind": "DBZ",
+          "skind2": "L3"
+        }
+      },
+      {
+        "nodeId": "class-isg-adm-plz-l1",
+        "classification": {
+          "class": "ISG",
+          "kind": "ADM",
+          "skind": "PLZ",
+          "skind2": "L1"
+        }
+      },
+      {
+        "nodeId": "class-isg-adm-plz-l2",
+        "classification": {
+          "class": "ISG",
+          "kind": "ADM",
+          "skind": "PLZ",
+          "skind2": "L2"
+        }
+      },
+      {
+        "nodeId": "class-isg-adm-plz-l3",
+        "classification": {
+          "class": "ISG",
+          "kind": "ADM",
+          "skind": "PLZ",
+          "skind2": "L3"
+        }
+      },
+      {
+        "nodeId": "class-isg-adm-plz-up",
+        "classification": {
+          "class": "ISG",
+          "kind": "ADM",
+          "skind": "PLZ",
+          "skind2": "UP"
+        }
+      },
+      {
+        "nodeId": "class-isg-adm-plz-uc",
+        "classification": {
+          "class": "ISG",
+          "kind": "ADM",
+          "skind": "PLZ",
+          "skind2": "UC"
+        }
+      },
+      {
+        "nodeId": "class-isl",
+        "classification": {
+          "class": "ISL"
+        }
+      },
+      {
+        "nodeId": "class-isl-ngf",
+        "classification": {
+          "class": "ISL",
+          "kind": "NGF"
+        }
+      },
+      {
+        "nodeId": "class-isl-adm",
+        "classification": {
+          "class": "ISL",
+          "kind": "ADM"
+        }
+      },
+      {
+        "nodeId": "class-isl-ngf-wtr",
+        "classification": {
+          "class": "ISL",
+          "kind": "NGF",
+          "skind": "WTR"
+        }
+      },
+      {
+        "nodeId": "class-isl-ngf-bod",
+        "classification": {
+          "class": "ISL",
+          "kind": "NGF",
+          "skind": "BOD"
+        }
+      },
+      {
+        "nodeId": "class-isl-adm-dbl",
+        "classification": {
+          "class": "ISL",
+          "kind": "ADM",
+          "skind": "DBL"
+        }
+      },
+      {
+        "nodeId": "class-isl-adm-pll",
+        "classification": {
+          "class": "ISL",
+          "kind": "ADM",
+          "skind": "PLL"
+        }
+      },
+      {
+        "nodeId": "class-isl-ngf-wtr-rvr",
+        "classification": {
+          "class": "ISL",
+          "kind": "NGF",
+          "skind": "WTR",
+          "skind2": "RVR"
+        }
+      },
+      {
+        "nodeId": "class-isl-ngf-wtr-can",
+        "classification": {
+          "class": "ISL",
+          "kind": "NGF",
+          "skind": "WTR",
+          "skind2": "CAN"
+        }
+      },
+      {
+        "nodeId": "class-isl-ngf-bod-bdy",
+        "classification": {
+          "class": "ISL",
+          "kind": "NGF",
+          "skind": "BOD",
+          "skind2": "BDY"
+        }
+      },
+      {
+        "nodeId": "class-isl-ngf-bod-stc",
+        "classification": {
+          "class": "ISL",
+          "kind": "NGF",
+          "skind": "BOD",
+          "skind2": "STC"
+        }
+      },
+      {
+        "nodeId": "class-isl-adm-dbl-lbd",
+        "classification": {
+          "class": "ISL",
+          "kind": "ADM",
+          "skind": "DBL",
+          "skind2": "LBD"
+        }
+      },
+      {
+        "nodeId": "class-isl-adm-pll-cbd",
+        "classification": {
+          "class": "ISL",
+          "kind": "ADM",
+          "skind": "PLL",
+          "skind2": "CBD"
+        }
+      },
+      {
+        "nodeId": "class-isp",
+        "classification": {
+          "class": "ISP"
+        }
+      },
+      {
+        "nodeId": "class-isp-ngf",
+        "classification": {
+          "class": "ISP",
+          "kind": "NGF"
+        }
+      },
+      {
+        "nodeId": "class-isp-adm",
+        "classification": {
+          "class": "ISP",
+          "kind": "ADM"
+        }
+      },
+      {
+        "nodeId": "class-isp-ngf-scp",
+        "classification": {
+          "class": "ISP",
+          "kind": "NGF",
+          "skind": "SCP"
+        }
+      },
+      {
+        "nodeId": "class-isp-adm-dbp",
+        "classification": {
+          "class": "ISP",
+          "kind": "ADM",
+          "skind": "DBP"
+        }
+      },
+      {
+        "nodeId": "class-isp-adm-plp",
+        "classification": {
+          "class": "ISP",
+          "kind": "ADM",
+          "skind": "PLP"
+        }
+      },
+      {
+        "nodeId": "class-isp-ngf-scp-spp",
+        "classification": {
+          "class": "ISP",
+          "kind": "NGF",
+          "skind": "SCP",
+          "skind2": "SPP"
+        }
+      },
+      {
+        "nodeId": "class-isp-adm-dbp-lip",
+        "classification": {
+          "class": "ISP",
+          "kind": "ADM",
+          "skind": "DBP",
+          "skind2": "LIP"
+        }
+      },
+      {
+        "nodeId": "class-isp-adm-plp-plp",
+        "classification": {
+          "class": "ISP",
+          "kind": "ADM",
+          "skind": "PLP",
+          "skind2": "PLP"
+        }
+      },
+      {
+        "nodeId": "class-isp-adm-plp-cop",
+        "classification": {
+          "class": "ISP",
+          "kind": "ADM",
+          "skind": "PLP",
+          "skind2": "COP"
+        }
+      },
+      {
+        "nodeId": "class-isp-adm-dbp-shr",
+        "classification": {
+          "class": "ISP",
+          "kind": "ADM",
+          "skind": "DBP",
+          "skind2": "SHR"
+        }
+      },
+      {
+        "nodeId": "class-pfb",
+        "classification": {
+          "class": "PFB"
+        }
+      },
+      {
+        "nodeId": "class-plf",
+        "classification": {
+          "class": "PLF"
+        }
+      },
+      {
+        "nodeId": "class-rle",
+        "classification": {
+          "class": "RLE"
+        }
+      },
+      {
+        "nodeId": "class-rod",
+        "classification": {
+          "class": "ROD"
+        }
+      },
+      {
+        "nodeId": "class-rod-nom",
+        "classification": {
+          "class": "ROD",
+          "kind": "NOM"
+        }
+      },
+      {
+        "nodeId": "class-rod-tuk",
+        "classification": {
+          "class": "ROD",
+          "kind": "TUK"
+        }
+      },
+      {
+        "nodeId": "class-rod-pri",
+        "classification": {
+          "class": "ROD",
+          "kind": "PRI"
+        }
+      },
+      {
+        "nodeId": "class-rod-sec",
+        "classification": {
+          "class": "ROD",
+          "kind": "SEC"
+        }
+      },
+      {
+        "nodeId": "class-rod-sed",
+        "classification": {
+          "class": "ROD",
+          "kind": "SED"
+        }
+      },
+      {
+        "nodeId": "class-rod-res",
+        "classification": {
+          "class": "ROD",
+          "kind": "RES"
+        }
+      },
+      {
+        "nodeId": "class-rod-svs",
+        "classification": {
+          "class": "ROD",
+          "kind": "SVS"
+        }
+      },
+      {
+        "nodeId": "class-rod-idr",
+        "classification": {
+          "class": "ROD",
+          "kind": "IDR"
+        }
+      },
+      {
+        "nodeId": "class-rod-spe",
+        "classification": {
+          "class": "ROD",
+          "kind": "SPE"
+        }
+      },
+      {
+        "nodeId": "class-sbp",
+        "classification": {
+          "class": "SBP"
+        }
+      },
+      {
+        "nodeId": "class-sta",
+        "classification": {
+          "class": "STA"
+        }
+      },
+      {
+        "nodeId": "class-stb",
+        "classification": {
+          "class": "STB"
+        }
+      },
+      {
+        "nodeId": "class-stf",
+        "classification": {
+          "class": "STF"
+        }
+      },
+      {
+        "nodeId": "class-tpp",
+        "classification": {
+          "class": "TPP"
+        }
+      },
+      {
+        "nodeId": "class-tpp-nom",
+        "classification": {
+          "class": "TPP",
+          "kind": "NOM"
+        }
+      },
+      {
+        "nodeId": "class-tpp-spe",
+        "classification": {
+          "class": "TPP",
+          "kind": "SPE"
+        }
+      },
+      {
+        "nodeId": "class-tpp-nom-nom",
+        "classification": {
+          "class": "TPP",
+          "kind": "NOM",
+          "skind": "NOM"
+        }
+      },
+      {
+        "nodeId": "class-tpp-spe-spe",
+        "classification": {
+          "class": "TPP",
+          "kind": "SPE",
+          "skind": "SPE"
+        }
+      },
+      {
+        "nodeId": "class-trp",
+        "classification": {
+          "class": "TRP"
+        }
+      },
+      {
+        "nodeId": "class-trp-nom",
+        "classification": {
+          "class": "TRP",
+          "kind": "NOM"
+        }
+      },
+      {
+        "nodeId": "class-trp-spe",
+        "classification": {
+          "class": "TRP",
+          "kind": "SPE"
+        }
+      },
+      {
+        "nodeId": "class-trp-nom-nom",
+        "classification": {
+          "class": "TRP",
+          "kind": "NOM",
+          "skind": "NOM"
+        }
+      },
+      {
+        "nodeId": "class-trp-spe-spe",
+        "classification": {
+          "class": "TRP",
+          "kind": "SPE",
+          "skind": "SPE"
+        }
+      },
+      {
+        "nodeId": "class-wrp",
+        "classification": {
+          "class": "WRP"
+        }
+      },
+      {
+        "nodeId": "class-wrp-nom",
+        "classification": {
+          "class": "WRP",
+          "kind": "NOM"
+        }
+      },
+      {
+        "nodeId": "class-wrp-spe",
+        "classification": {
+          "class": "WRP",
+          "kind": "SPE"
+        }
+      },
+      {
+        "nodeId": "class-wrp-nom-nom",
+        "classification": {
+          "class": "WRP",
+          "kind": "NOM",
+          "skind": "NOM"
+        }
+      },
+      {
+        "nodeId": "class-wrp-spe-spe",
+        "classification": {
+          "class": "WRP",
+          "kind": "SPE",
+          "skind": "SPE"
+        }
+      }
+    ],
+    "workflows": [
+      {
+        "id": "external-railway-integrated",
+        "mode": "external",
+        "outputs": []
+      },
+      {
+        "id": "external-station-integrated",
+        "mode": "external",
+        "outputs": []
+      },
+      {
+        "id": "external-trp-integrated",
+        "mode": "external",
+        "outputs": []
+      },
+      {
+        "id": "v3-isg_ngf_lad",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isg_ngf_lad-output-1",
+            "classification": {
+              "class": "ISG",
+              "kind": "NGF",
+              "skind": "LAD"
+            },
+            "geometry": "Polygon"
+          }
+        ]
+      },
+      {
+        "id": "v3-isg_ngf_lis",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isg_ngf_lis-output-1",
+            "classification": {
+              "class": "ISG",
+              "kind": "NGF",
+              "skind": "LIS"
+            },
+            "geometry": "Polygon"
+          }
+        ]
+      },
+      {
+        "id": "v3-isg_ngf_wtb",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isg_ngf_wtb-output-1",
+            "classification": {
+              "class": "ISG",
+              "kind": "NGF",
+              "skind": "WTB"
+            },
+            "geometry": "Polygon"
+          }
+        ]
+      },
+      {
+        "id": "v3-isg_adm_dbz",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isg_adm_dbz-output-1",
+            "classification": {
+              "class": "ISG",
+              "kind": "ADM",
+              "skind": "DBZ"
+            },
+            "geometry": "Polygon"
+          }
+        ]
+      },
+      {
+        "id": "v3-isg_adm_plz",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isg_adm_plz-output-1",
+            "classification": {
+              "class": "ISG",
+              "kind": "ADM",
+              "skind": "PLZ"
+            },
+            "geometry": "Polygon"
+          }
+        ]
+      },
+      {
+        "id": "v3-isl_ngf_wtr",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isl_ngf_wtr-output-1",
+            "classification": {
+              "class": "ISL",
+              "kind": "NGF",
+              "skind": "WTR"
+            },
+            "geometry": "LineString"
+          }
+        ]
+      },
+      {
+        "id": "v3-isl_ngf_bod",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isl_ngf_bod-output-1",
+            "classification": {
+              "class": "ISL",
+              "kind": "NGF",
+              "skind": "BOD"
+            },
+            "geometry": "LineString"
+          }
+        ]
+      },
+      {
+        "id": "v3-isl_adm_dbl",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isl_adm_dbl-output-1",
+            "classification": {
+              "class": "ISL",
+              "kind": "ADM",
+              "skind": "DBL"
+            },
+            "geometry": "LineString"
+          }
+        ]
+      },
+      {
+        "id": "v3-isl_adm_pll",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isl_adm_pll-output-1",
+            "classification": {
+              "class": "ISL",
+              "kind": "ADM",
+              "skind": "PLL"
+            },
+            "geometry": "LineString"
+          }
+        ]
+      },
+      {
+        "id": "v3-isp_ngf_scp",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isp_ngf_scp-output-1",
+            "classification": {
+              "class": "ISP",
+              "kind": "NGF",
+              "skind": "SCP"
+            },
+            "geometry": "Point"
+          }
+        ]
+      },
+      {
+        "id": "v3-isp_adm_dbp",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isp_adm_dbp-output-1",
+            "classification": {
+              "class": "ISP",
+              "kind": "ADM",
+              "skind": "DBP"
+            },
+            "geometry": "Point"
+          }
+        ]
+      },
+      {
+        "id": "v3-isp_adm_plp",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "isp_adm_plp-output-1",
+            "classification": {
+              "class": "ISP",
+              "kind": "ADM",
+              "skind": "PLP"
+            },
+            "geometry": "Point"
+          }
+        ]
+      },
+      {
+        "id": "v3-bud_building",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "bud_building-output-1",
+            "classification": {
+              "class": "BUD"
+            },
+            "geometry": "Polygon"
+          }
+        ]
+      },
+      {
+        "id": "v3-flr_unit",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "flr_unit-output-1",
+            "classification": {
+              "class": "FLR"
+            },
+            "geometry": "Polygon"
+          }
+        ]
+      },
+      {
+        "id": "v3-rod_road",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "rod_road-output-1",
+            "classification": {
+              "class": "ROD"
+            },
+            "geometry": "LineString"
+          }
+        ]
+      },
+      {
+        "id": "v3-tpp_teleport",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "tpp_teleport-output-1",
+            "classification": {
+              "class": "TPP"
+            },
+            "geometry": "Point"
+          }
+        ]
+      },
+      {
+        "id": "v3-wrp_warp",
+        "mode": "composed",
+        "outputs": [
+          {
+            "id": "wrp_warp-output-1",
+            "classification": {
+              "class": "WRP"
+            },
+            "geometry": "Point"
+          }
+        ]
+      }
+    ]
+  }
+}
