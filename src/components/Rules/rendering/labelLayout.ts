@@ -228,6 +228,7 @@ export type LabelRequest = {
   anchorCandidatesLatLng?: L.LatLng[];
   /** Native polygon anchor containment policy, including holes and parts. */
   acceptsAnchor?: (screenPoint: L.Point) => boolean;
+  collisionBoundsAdjustment?: { x?: number; y?: number; width?: number; height?: number };
 
   /** label 文本 */
   text: string;
@@ -331,6 +332,8 @@ export type PlacedLabel = {
   hidden: boolean;
   hideSymbol?: boolean;
   keepGeometry?: boolean;
+  /** Actual expanded collision rectangle, used unchanged by placement reuse. */
+  collisionRect?: Rect;
   /** RB_SLU_6: 调试/审计用隐藏原因；渲染层可忽略。 */
   hiddenReason?: LabelHiddenReason;
 
@@ -426,6 +429,7 @@ export type PlacedLabel = {
 };
 
 export type AvoidRectPx = {
+  alreadyInflated?: boolean;
   x: number;
   y: number;
   w: number;
@@ -891,6 +895,10 @@ function collisionHiddenReason(blocker: IndexedRect): LabelHiddenReason {
   }
 }
 
+function adjustedCollisionRect(rect: Rect, adjustment: LabelRequest['collisionBoundsAdjustment']): Rect {
+  return adjustment ? { x: rect.x + (adjustment.x ?? 0), y: rect.y + (adjustment.y ?? 0), w: Math.max(1,rect.w + (adjustment.width ?? 0)), h: Math.max(1,rect.h + (adjustment.height ?? 0)) } : rect;
+}
+
 function rectForCandidate(
   item: LayoutItem,
   measured: Measured,
@@ -920,6 +928,8 @@ function rectForCandidate(
     const bottom = Math.max(rect.y + rect.h, anchor.y + symbol.offsetY + symbol.radius);
     rect = { x: left, y: top, w: right - left, h: bottom - top };
   }
+  const adjustment = baseReq.collisionBoundsAdjustment;
+  rect = adjustedCollisionRect(rect, adjustment);
   return { rect, dx, dy };
 }
 
@@ -1217,7 +1227,7 @@ export function layoutLabelsOnMap(
   const avoidPadExtra = opts?.avoidSpacingPx ?? 0;
   const avoidRects = opts?.avoidRectsPx ?? [];
   for (const ar of avoidRects) {
-    const pad = (ar.inflatePx ?? 0) + avoidPadExtra + params.minSpacingPx;
+    const pad = ar.alreadyInflated ? 0 : (ar.inflatePx ?? 0) + avoidPadExtra + params.minSpacingPx;
     const inflated = inflateRect({ x: ar.x, y: ar.y, w: ar.w, h: ar.h }, pad);
     index.add({
       ...inflated,
@@ -1638,7 +1648,7 @@ export function layoutLabelsOnMap(
           paddingPx: Math.max(6, item.minSpacingPx),
           mode: (anchor.lineTextViewportRectMode ?? "anchorNormalized") as any,
         });
-        const rect = rectAudit.normalizedRect;
+        const rect = adjustedCollisionRect(rectAudit.normalizedRect,baseReq.collisionBoundsAdjustment);
         const attemptAudit = buildViewportAttemptAudit({
           attemptIndex: attempts,
           candidateId: rc.candidateId,
@@ -1735,6 +1745,7 @@ export function layoutLabelsOnMap(
           dx: px.x - item.anchorPx.x,
           dy: px.y - item.anchorPx.y,
           hidden: false,
+          collisionRect: expanded,
           candidateName: "C",
           anchorCandidateIndex: baseAc.index,
           anchorCandidateId: rc.candidateId,
@@ -1995,10 +2006,10 @@ export function layoutLabelsOnMap(
         const dx = (c.dx ?? 0) + baseDeltaX;
         const dy = (c.dy ?? 0) + baseDeltaY;
 
-        if (baseReq.acceptsAnchor && !baseReq.acceptsAnchor(L.point(item.anchorPx.x + dx, item.anchorPx.y + dy))) continue;
+        if (baseReq.acceptsAnchor && !baseReq.acceptsAnchor(anchorPxCand)) continue;
         const trial = rectForCandidate(item, measured, anchorPxCand, c);
         const textPathMetrics = maybeTextPathMetrics(item, text, ac);
-        const rect = textPathMetrics?.metrics?.collisionRect ?? trial.rect;
+        const rect = textPathMetrics?.metrics?.collisionRect ? adjustedCollisionRect(textPathMetrics.metrics.collisionRect,baseReq.collisionBoundsAdjustment) : trial.rect;
         const auditCandidate: PolygonLayoutCandidateAudit | undefined =
           polygonAuditEnabled
             ? {
@@ -2123,6 +2134,7 @@ export function layoutLabelsOnMap(
           dx,
           dy,
           hidden: false,
+          collisionRect: expanded,
           candidateName: c.name,
           anchorCandidateIndex: ac.index,
           anchorCandidateId: ac.candidateId,
@@ -2251,11 +2263,11 @@ export function layoutLabelsOnMap(
 
     for (const ac of anchorCandidates) {
       for (const c of candidates) {
-        if (baseReq.acceptsAnchor && !baseReq.acceptsAnchor(L.point(ac.px.x + (c.dx ?? 0), ac.px.y + (c.dy ?? 0)))) continue;
+        if (baseReq.acceptsAnchor && !baseReq.acceptsAnchor(ac.px)) continue;
         const nextBase = rectForCandidate(item, measured, ac.px, c);
         const textPathMetrics = maybeTextPathMetrics(item, text, ac);
         const nextRect =
-          textPathMetrics?.metrics?.collisionRect ?? nextBase.rect;
+          textPathMetrics?.metrics?.collisionRect ? adjustedCollisionRect(textPathMetrics.metrics.collisionRect,baseReq.collisionBoundsAdjustment) : nextBase.rect;
         const next = { ...nextBase, rect: nextRect };
         const trial = {
           ...next,
@@ -2315,6 +2327,7 @@ export function layoutLabelsOnMap(
       dx: fallback.dx,
       dy: fallback.dy,
       hidden: false,
+          collisionRect: expanded,
       hiddenReason: item.lastFailureReason ?? "hiddenByPolicy",
       candidateName: fallback.candidate.name,
       anchorCandidateIndex: fallback.anchorIndex,

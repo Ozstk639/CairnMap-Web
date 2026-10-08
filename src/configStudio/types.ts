@@ -296,6 +296,7 @@ export type RenderPolygonCandidateExtension = {
   preferViewportCenter?: boolean;
 };
 export type RenderCollisionExtension = {
+  boundsAdjustment?: { x?: number; y?: number; width?: number; height?: number };
   collideWith?: Array<'symbol' | 'requiredLabel' | 'importantLabel' | 'optionalLabel' | 'softLabel' | 'geometry'>;
   blocks?: Array<'optionalLabel' | 'softLabel' | 'poiLabel' | 'structureLabel'>;
   allowOverlap?: boolean;

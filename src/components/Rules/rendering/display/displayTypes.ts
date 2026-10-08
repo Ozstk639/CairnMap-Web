@@ -545,6 +545,7 @@ export type DisplayHidePolicy =
   | 'geometryOnly';
 
 export type DisplayCollisionConfig = {
+  boundsAdjustment?: { x?: number; y?: number; width?: number; height?: number };
   role: DisplayCollisionRole;
   priority: number;
 

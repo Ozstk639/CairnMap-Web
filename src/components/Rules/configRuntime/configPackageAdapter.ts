@@ -502,7 +502,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
   const nativeLabelStyle = label.style ?? { family: 'gm-outline' as const, size: 14 };
   const pane = active.geometryStack.pane || paneFor(config, geometry, active.extensions?.pane);
   const triggers = profile.interaction?.triggers ?? {};
-  const pathInteractive = (active.representation === 'point' && style.symbolVisibility === 'withLabel' && Boolean(triggers.label)) || (geometry === 'Polygon'
+  const pathInteractive = (active.representation === 'point' && Boolean(triggers.point)) || (active.representation === 'point' && style.symbolVisibility === 'withLabel' && Boolean(triggers.label)) || (geometry === 'Polygon'
     ? Boolean(triggers.boundary || triggers.interior)
     : geometry === 'LineString' ? Boolean(triggers.line) : Boolean(triggers.point));
   const stroke = resolveColor(record, style.stroke, '#334155', store);
@@ -609,7 +609,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
         pointPinStyleKey: 'pin-blue',
         nativeVisual: selectedVisual,
         openCard: true,
-        geom: { point: geometry === 'Point' && pathInteractive, path: geometry !== 'Point' && pathInteractive },
+        geom: { point: (geometry === 'Point' || active.representation === 'point') && pathInteractive, path: geometry !== 'Point' && active.representation !== 'point' && pathInteractive },
       },
     },
     display: {
@@ -680,8 +680,8 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
           preferPreviousGeoCandidate: polygonCandidates.preferPreviousCandidate,
           switchThreshold: polygonCandidates.switchThreshold,
           allowViewportCandidateFallback: polygonCandidates.allowViewportFallback,
-          largeFeature: polygonCandidates.minScreenAreaPx !== undefined || polygonCandidates.preferViewportCenter !== undefined
-            ? { minScreenAreaPx: polygonCandidates.minScreenAreaPx ?? 0, preferViewportCenter: polygonCandidates.preferViewportCenter ?? false }
+          largeFeature: polygonCandidates.minScreenAreaPx !== undefined || polygonCandidates.preferViewportCenter !== undefined || anchor?.preferViewportCenter !== undefined
+            ? { minScreenAreaPx: polygonCandidates.minScreenAreaPx ?? 0, preferViewportCenter: polygonCandidates.preferViewportCenter ?? anchor?.preferViewportCenter ?? false }
             : undefined,
         } : anchor?.preferViewportCenter !== undefined ? { largeFeature: { minScreenAreaPx: 0, preferViewportCenter: anchor.preferViewportCenter } } : {}),
         ...(lineLabel ? {
@@ -773,6 +773,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
         collideWith: collisionExtensions?.collideWith,
         blocks: collisionExtensions?.blocks,
         allowOverlap: collisionExtensions?.allowOverlap,
+        boundsAdjustment: collisionExtensions?.boundsAdjustment,
         paddingPx: collisionExtensions?.paddingPx,
         hidePolicy: collisionExtensions?.hidePolicy ?? (fallback?.whenCollisionFailed === 'forceShow' ? 'forceShow' : fallback?.whenCollisionFailed === 'abbreviate' ? 'abbreviateThenHide' : fallback?.whenCollisionFailed === 'showGeometryOnly' ? 'geometryOnly' : undefined),
       },

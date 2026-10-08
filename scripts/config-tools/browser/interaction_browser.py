@@ -32,7 +32,7 @@ checks.append('positive X and negative Y label remains clickable at displayed po
 uri='data:image/svg+xml,'+__import__('urllib.parse',fromlist=['quote']).quote('<svg xmlns="http://www.w3.org/2000/svg" width="60" height="24"><rect width="60" height="24" fill="orange"/></svg>')
 b.evaluate('window.acceptance.setFeaturePatch('+json.dumps({'Name':uri})+')');time.sleep(.3)
 for size,anchor in [([32,32],[16,16]),([60,24],[30,7])]:
-    modify("for(const r of g.zoomPriority.rules){r.label.visible=false;r.style.icon={source:'Name',size:"+json.dumps(size)+",anchor:"+json.dumps(anchor)+",fallback:'circle'};}")
+    modify("g.interaction.triggers.point=true;for(const r of g.zoomPriority.rules){r.label.visible=false;r.style.symbolVisibility='independent';r.style.symbolAnchor='geometry';r.style.symbolOffsetPx={x:0,y:0};r.style.icon={source:'Name',size:"+json.dumps(size)+",anchor:"+json.dumps(anchor)+",fallback:'circle'};}")
     m=b.evaluate('''(() => {const a=window.acceptance;const l=Object.values(a.map._layers).find(l=>l.options.icon?.options.iconUrl);const e=l.getElement();const r=e.getBoundingClientRect();const cr=a.map.getContainer().getBoundingClientRect();const p=a.map.latLngToContainerPoint(l.getLatLng());return {x:r.x,y:r.y,w:r.width,h:r.height,relativeX:r.x-cr.x,relativeY:r.y-cr.y,ax:p.x,ay:p.y};})()''')
     assert [m['w'],m['h']]==size,m
     assert abs(m['relativeX']-(m['ax']-anchor[0]))<1 and abs(m['relativeY']-(m['ay']-anchor[1]))<1,m

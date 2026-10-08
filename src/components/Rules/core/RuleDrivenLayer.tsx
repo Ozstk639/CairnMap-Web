@@ -1707,6 +1707,15 @@ export default function RuleDrivenLayer(props: Props) {
   const stateVisualGroupRef = useRef<L.LayerGroup>(L.layerGroup());
   const stateHoverBoundRef = useRef<WeakSet<L.Layer>>(new WeakSet());
   const [hoveredUid, setHoveredUid] = useState<string | null>(null);
+  useEffect(() => {
+    if (!mapReady || !map || !configRuntime) return;
+    const container = map.getContainer();
+    const clearHover = () => setHoveredUid(null);
+    // Style/config updates may replace a hovered Leaflet layer before its
+    // mouseout fires. Leaving the map must always clear that transient state.
+    container.addEventListener('mouseleave', clearHover);
+    return () => container.removeEventListener('mouseleave', clearHover);
+  }, [mapReady, map, Boolean(configRuntime)]);
   const [searchFocusedUid, setSearchFocusedUid] = useState<string | null>(null);
   const transientInteractionRef = useRef({ editing: new Set<string>(), deletion: new Set<string>() });
 
@@ -2281,6 +2290,7 @@ export default function RuleDrivenLayer(props: Props) {
       highlightGroupRef.current?.clearLayers();
       setFeatureCardOpen(false);
       setSelectedFeature(null);
+      setSearchFocusedUid(null);
     };
 
     window.addEventListener("ria:ruleFeatureCardClose", handler as any);
@@ -3622,6 +3632,7 @@ export default function RuleDrivenLayer(props: Props) {
             );
           }
         }
+        if (configRuntime && nativeBundle?.nativeSymbol?.visibility === 'withLabel' && !labelPlan?.enabled) setNativeSymbolVisible(root,nativeBundle,false);
         if (labelPlan?.enabled && labelPlan.declutter) {
           const rawRequests = buildLabelRequests(
             sourceRecord,
@@ -3646,6 +3657,7 @@ export default function RuleDrivenLayer(props: Props) {
             req.selected = selectedFeature?.uid === req.featureUid;
             req.symbolDensityBlocked = symbolDensityBlocked || req.partIndex !== undefined && nativeSymbolPartBudget.has(r.uid) && !nativeSymbolPartBudget.get(r.uid)!.has(req.partIndex);
             req.runtimeStability = configRuntime ? displayPlan.stability : undefined;
+            req.collisionBoundsAdjustment = configRuntime ? displayPlan.collision.boundsAdjustment : undefined;
             if (configRuntime && sourceRecord.type === 'Polygon' && (displayPlan.anchor.requireInsideGeometry || displayPlan.anchor.allowOutsideGeometry === false)) {
               const allParts = sourceRecord.multipartGeometry?.type === 'Polygon' ? sourceRecord.multipartGeometry.parts : [[sourceRecord.coords3 ?? []]];
               const parts = req.partIndex === undefined ? allParts : allParts.slice(req.partIndex, req.partIndex + 1);
@@ -3739,6 +3751,7 @@ export default function RuleDrivenLayer(props: Props) {
             });
           }
           if (!requests.length) {
+            if (configRuntime && nativeBundle?.nativeSymbol?.visibility === 'withLabel') setNativeSymbolVisible(root,nativeBundle,false);
             updateLineAuditBlocked(
               auditRow,
               "anchor-resolve",
@@ -3775,17 +3788,18 @@ export default function RuleDrivenLayer(props: Props) {
         const retained = new Set(declutterLabelRequests.map(req => req.id));
         for (const id of nativePlacementRef.current.keys()) if (!retained.has(id)) nativePlacementRef.current.delete(id);
         for (const req of declutterLabelRequests) {
-          const signature = JSON.stringify([stabilitySignature, req.worldId, req.displayMode, req.geometrySignature, req.text, req.font, req.placement, req.offsetX, req.offsetY, req.withDot, req.candidateOffsetsPx, req.symbolBounds, req.declutter, req.displayAnchor, req.runtimeStability]);
+          const signature = JSON.stringify([stabilitySignature, req.worldId, req.displayMode, req.geometrySignature, req.text, req.font, req.placement, req.offsetX, req.offsetY, req.withDot, req.candidateOffsetsPx, req.symbolBounds, req.collisionBoundsAdjustment, req.declutter, req.displayAnchor, req.runtimeStability]);
           signatures.set(req.id, signature);
           const previous = nativePlacementRef.current.get(req.id);
           const panDistancePx = previous ? map.latLngToContainerPoint(previous.center).distanceTo(map.latLngToContainerPoint(map.getCenter())) : Infinity;
           if (previous && shouldReuseNativePlacement({ settings: req.runtimeStability, reason, sameContent: previous.signature === signature, panDistancePx, sameZoom: previous.zoom === map.getZoom() })) {
             req.anchorLatLng = previous.anchor;
+            if (previous.size) { const point = map.latLngToContainerPoint(previous.anchor); previous.placed = { ...previous.placed, collisionRect: { ...previous.size, x: point.x + previous.size.x, y: point.y + previous.size.y } }; }
             frozen.push(previous.placed);
             if (!previous.placed.hidden && previous.size) {
               const point = map.latLngToContainerPoint(previous.anchor);
               reservedLabels.push({ request: req, rect: { ...previous.size, x: point.x + previous.size.x, y: point.y + previous.size.y } });
-              avoidRectsPx.push({ ...previous.size, x: point.x + previous.size.x, y: point.y + previous.size.y, ownerUid: req.collisionOwnerUid ?? req.featureUid, collisionSource: 'label', collisionRole: previous.placed.collisionRole, collisionGroup: previous.placed.collisionGroup, priority: previous.placed.priority });
+              avoidRectsPx.push({ ...previous.size, x: point.x + previous.size.x, y: point.y + previous.size.y, ownerUid: req.collisionOwnerUid ?? req.featureUid, collisionSource: 'label', alreadyInflated: true, collisionRole: previous.placed.collisionRole, collisionGroup: previous.placed.collisionGroup, priority: previous.placed.priority });
             }
           } else fresh.push(req);
         }
@@ -4260,18 +4274,9 @@ export default function RuleDrivenLayer(props: Props) {
             b.label.on('mouseout', () => setHoveredUid(value => value === uid ? null : value));
           }
           const savedPlacement = nativePlacementRef.current.get(req.id);
-          if (savedPlacement && b.label) {
-            const element = (b.label as L.Marker).getElement?.();
-            const rect = element?.querySelector('span')?.getBoundingClientRect() ?? element?.getBoundingClientRect();
-            if (rect?.width && rect.height) {
-              const mapRect = map.getContainer().getBoundingClientRect(); const anchor = map.latLngToContainerPoint(savedPlacement.anchor);
-              let bounds = { x: rect.x - mapRect.x - anchor.x, y: rect.y - mapRect.y - anchor.y, w: rect.width, h: rect.height };
-              if (req.symbolBounds && !req.symbolDensityBlocked) {
-                const r = req.symbolBounds.radius; const x = savedPlacement.placed.dx + req.symbolBounds.offsetX - r; const y = savedPlacement.placed.dy + req.symbolBounds.offsetY - r;
-                const left = Math.min(bounds.x,x), top = Math.min(bounds.y,y); bounds = { x:left, y:top, w:Math.max(bounds.x+bounds.w,x+2*r)-left, h:Math.max(bounds.y+bounds.h,y+2*r)-top };
-              }
-              savedPlacement.size = bounds;
-            }
+          if (savedPlacement?.placed.collisionRect) {
+            const rect = savedPlacement.placed.collisionRect; const anchor = map.latLngToContainerPoint(savedPlacement.anchor);
+            savedPlacement.size = { x: rect.x - anchor.x, y: rect.y - anchor.y, w: rect.w, h: rect.h };
           }
           const row = lineAuditRows.get(req.featureUid ?? "");
           if (row && b.label && root.hasLayer(b.label)) {
@@ -4745,8 +4750,8 @@ function createLayerBundle(
     const plan = typeof symbol.point === 'function' ? symbol.point(r, ctx, store) : symbol.point;
     const mainPane = (plan as any)?.pane ?? symbol?.pane ?? 'ria-point';
     const pointTolerance = nativeHitTolerance(displayPlan);
-    const nativePointHitEnabled = pointTolerance > 0 && (deletePickTarget || geomPathEnabled);
-    const interactive = nativePointHitEnabled ? false : (deletePickTarget ? true : geomPathEnabled);
+    const nativePointHitEnabled = pointTolerance > 0 && (deletePickTarget || (geomPointEnabled || geomPathEnabled));
+    const interactive = nativePointHitEnabled ? false : (deletePickTarget ? true : (geomPointEnabled || geomPathEnabled));
     const pointProxyRadius = Math.max(5, Number(plan?.radius ?? 5) + pointTolerance);
     const makeCenterMarker = (latlng: L.LatLng): L.Layer => plan?.kind === 'icon'
       ? (() => {
@@ -4767,13 +4772,13 @@ function createLayerBundle(
       bindNativeHitProxy(hitProxy, r, {
         deletePickTarget,
         assistPickTarget,
-        geometryEnabled: geomPathEnabled,
+        geometryEnabled: (geomPointEnabled || geomPathEnabled),
         clickEnabled,
         onLabelClick,
         effectiveClickPlan,
       });
     } else if (deletePickTarget) bindDeletePick(main, r);
-    else if (geomPathEnabled && clickEnabled && onLabelClick) {
+    else if ((geomPointEnabled || geomPathEnabled) && clickEnabled && onLabelClick) {
       (main as any).on?.('click', (event: L.LeafletMouseEvent) => {
         (event as any)?.originalEvent?.stopPropagation?.();
         onLabelClick(r, effectiveClickPlan as any);
@@ -4977,10 +4982,11 @@ function updateLayerBundle(
       const expectedSignature = plan?.kind === 'shape' ? configShapeSignature(plan) : configIconSignature(plan, iconUrl);
       const centerSignature = JSON.stringify(centers.map((item) => [item.lat, item.lng]));
       const pointTolerance = nativeHitTolerance(displayPlan);
-      const nativePointHitEnabled = pointTolerance > 0 && (deletePickTarget || geomPathEnabled);
+      const nativePointHitEnabled = pointTolerance > 0 && (deletePickTarget || (geomPointEnabled || geomPathEnabled));
+      const nextInteractive = nativePointHitEnabled ? false : (deletePickTarget || geomPointEnabled || geomPathEnabled);
       const pointProxyRadius = Math.max(5, Number(plan?.radius ?? 5) + pointTolerance);
       const expectedHitProxySignature = nativeHitProxySignature('point-representation', pointTolerance, pointProxyRadius, nativePointHitEnabled);
-      if (!center || bundle.kind !== expectedKind || bundle.iconUrl !== expectedSignature || bundle.pointSignature !== centerSignature || bundle.hitProxySignature !== expectedHitProxySignature || (centers.length > 1 && !(bundle.main instanceof L.FeatureGroup))) {
+      if (!center || nativeSymbolParts(bundle).some(layer => Boolean((layer as any).options?.interactive) !== Boolean(nextInteractive)) || bundle.kind !== expectedKind || bundle.iconUrl !== expectedSignature || bundle.pointSignature !== centerSignature || bundle.hitProxySignature !== expectedHitProxySignature || (centers.length > 1 && !(bundle.main instanceof L.FeatureGroup))) {
         rebuildBundle();
         return;
       }
@@ -5003,13 +5009,13 @@ function updateLayerBundle(
         bindNativeHitProxy(bundle.hitProxy, r, {
           deletePickTarget,
           assistPickTarget,
-          geometryEnabled: geomPathEnabled,
+          geometryEnabled: (geomPointEnabled || geomPathEnabled),
           clickEnabled,
           onLabelClick,
           effectiveClickPlan,
         });
       } else if (deletePickTarget) bindDeletePick(bundle.main, r);
-      else if (geomPathEnabled && clickEnabled && onLabelClick) {
+      else if ((geomPointEnabled || geomPathEnabled) && clickEnabled && onLabelClick) {
         (bundle.main as any).on?.('click', (event: L.LeafletMouseEvent) => {
           (event as any)?.originalEvent?.stopPropagation?.();
           onLabelClick(r, effectiveClickPlan as any);

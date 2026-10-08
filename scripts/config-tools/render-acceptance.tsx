@@ -25,19 +25,20 @@ function Harness() {
   const params = new URLSearchParams(location.search);
   const [config, setConfig] = useState(createConfigPackageFromCurrentProject);
   const [map, setMap] = useState<L.Map | null>(null);
+  const [datasetOverride, setDataset] = useState<{ features: unknown[] } | null>(null);
   const [featurePatch, setFeaturePatch] = useState<Record<string, unknown>>({});
   const node = config.nodes.find((item) => item.path.class === (params.get('class') ?? 'BUD') && !item.path.kind)!;
   const scenario = (params.get('scenario') ?? 'smallPolygon') as PreviewScenario;
-  const dataset = useMemo(() => ({ features: makeConfigPreviewFixture(config, node, scenario).features.map((feature) => ({ ...(feature as object), ...featurePatch })) }), [config, node, scenario, featurePatch]);
+  const dataset = useMemo(() => ({ features: (datasetOverride?.features ?? makeConfigPreviewFixture(config, node, scenario).features).map((feature) => ({ ...(feature as object), ...featurePatch })) }), [config, node, scenario, featurePatch, datasetOverride]);
   const projection = useMemo(() => new DynmapProjection(ZTH_FLAT_CONFIG), []);
   useEffect(() => {
-    api.acceptance = { map, config, dataset, setConfig, setFeaturePatch, geometry: resolveGeometryProfile(config, node.path, scenario.includes('Point') ? 'Point' : scenario.includes('Line') ? 'LineString' : 'Polygon'),
+    api.acceptance = { map, config, dataset, setConfig, setDataset, setFeaturePatch, geometry: resolveGeometryProfile(config, node.path, scenario.includes('Point') ? 'Point' : scenario.includes('Line') ? 'LineString' : 'Polygon'),
       roundTrip: async () => { const report = validateConfigPackage(config); const archive = await buildConfigPackageArchive(config, report); return readConfigPackage(new File([archive], 'acceptance.zip')); } };
   }, [map, config, dataset, node, scenario]);
   return <main style={{ height: 900, width: 1200, margin: 20 }}>
     {params.get('mode') === 'preview' ? <ConfigRuntimePreview config={config} node={node} scenario={scenario} onMapReady={setMap} /> :
       <MapContainer style={{ height: '100%', width: '100%' }} center={[0, 0]} zoom={toLeafletZoom(6)} zoomAnimation={false} fadeAnimation={false} {...MAP_ZOOM_BOUNDS} crs={createDynmapCRS(ZTH_FLAT_CONFIG)}><Ready ready={setMap} />
-        {map ? <RuleDrivenLayer mapReady map={map} projection={projection} worldId="zth" visible activeButtonIds={[]} bypassButtonFilter runtimeDataset={dataset} disableTransientSources configRuntime={params.get('mode') === 'v1' ? undefined : config} floorPanelMode="hidden" /> : null}
+        {map ? <RuleDrivenLayer mapReady map={map} projection={projection} worldId="zth" visible activeButtonIds={[]} bypassButtonFilter runtimeDataset={dataset} disableTransientSources={!params.has('transient')} configRuntime={params.get('mode') === 'v1' ? undefined : config} floorPanelMode="hidden" /> : null}
       </MapContainer>}
   </main>;
 }

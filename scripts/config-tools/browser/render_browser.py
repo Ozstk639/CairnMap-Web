@@ -47,7 +47,7 @@ for mode in ['v1','main','preview']:
         b.evaluate('void window.acceptance.map.setZoom('+str(zoom-3)+', {animate:false})');time.sleep(.6)
         b.wait('Object.values(window.acceptance.map._layers).filter(l=>l._tiles).every(l=>!l.isLoading())');rows.append({'logicalZoom':zoom,**metrics()});b.screenshot('bud-'+mode+'-zoom'+str(zoom)+'.png')
     results['BUD-'+mode]=rows
-    if mode=='main': assert len(rows[2]['layers'])>=2 and any(l.get('radius')==6 for l in rows[2]['layers']),rows[2]
+    if mode=='main': assert len(rows[2]['layers'])>=2 and any(l.get('radius')==4.5 and l.get('opacity')==.85 for l in rows[2]['layers']),rows[2]
 parity=[]
 for main,preview in zip(results['BUD-main'],results['BUD-preview']):
     assert main['logicalZoom']==preview['logicalZoom'] and len(main['layers'])==len(preview['layers'])
@@ -67,7 +67,7 @@ for zoom in [0,1,2]:
     b.screenshot('preview-low-zoom'+str(zoom)+'.png')
 results['lowZoomTiles']=low
 results['roundTrip']=b.evaluate('window.acceptance.roundTrip().then(c=>({same:JSON.stringify(c.workflows,(k,v)=>v&&typeof v==="object"&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort()):v)===JSON.stringify(window.acceptance.config.workflows,(k,v)=>v&&typeof v==="object"&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort()):v),revision:c.contractRevision}))')
-assert results['roundTrip']=={'same':True,'revision':5},results['roundTrip']
+assert results['roundTrip']=={'same':True,'revision':6},results['roundTrip']
 assert not b.errors,b.errors
 results['runtimeErrors']=b.errors
 (OUT/'render-browser-result.json').write_text(json.dumps(results,ensure_ascii=False,indent=2),encoding='utf-8')

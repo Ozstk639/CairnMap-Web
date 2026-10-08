@@ -513,8 +513,8 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
     const structureStyle = styled({ weight: 1, stroke: { mode: 'fixed', color: '#111827' }, strokeOpacity: 0.28, fill: { mode: 'fixed', color: '#9ca3af' }, fillOpacity: 0.08 });
     const lowLabel = labeled({ visible: true, style: { family: 'structure-label', size: 12 }, source: 'Name', placement: 'E', offsetX: 11, offsetY: 3.7, collision: { role: 'optional', basePriority: 2400, collisionGroup: 'structureLabel', hideWhenColliding: true } });
     const highLabel = labeled({ visible: true, style: { family: 'structure-label', size: 12 }, source: 'Name', placement: 'center', offsetY: 3, collision: { role: 'important', basePriority: 3600, collisionGroup: 'structureLabel', hideWhenColliding: true } });
-    const lowExtensions: RenderRuleExtensions = { ...clone(extensions), anchor: { ...(extensions.anchor ?? {}), strategy: 'interior', candidates: ['C'] }, labelText: { ...(extensions.labelText ?? {}), maxChars: 10, abbreviationEnabled: true, suffix: '…' }, collision: { ...(extensions.collision ?? {}), paddingPx: 3, hidePolicy: 'abbreviateThenHide' }, density: { mode: 'override', gridSizePx: 104, maxLabelsPerGrid: 2, reduceOrder: ['abbreviateOptionalLabels', 'hideOptionalLabels'], preserveSelected: true, preserveRequired: true } };
-    const highExtensions: RenderRuleExtensions = { ...clone(lowExtensions), anchor: { ...(lowExtensions.anchor ?? {}), candidates: ['C', 'N', 'S', 'E', 'W'] }, collision: { ...(lowExtensions.collision ?? {}), paddingPx: 4 }, density: { mode: 'override', gridSizePx: 104, maxLabelsPerGrid: 3, reduceOrder: ['abbreviateOptionalLabels', 'hideOptionalLabels'], preserveSelected: true, preserveRequired: true } };
+    const lowExtensions: RenderRuleExtensions = { ...clone(extensions), anchor: { ...(extensions.anchor ?? {}), strategy: 'interior', candidates: ['C'] }, labelText: { ...(extensions.labelText ?? {}), maxChars: 10, abbreviationEnabled: true, suffix: '…' }, collision: { ...(extensions.collision ?? {}), paddingPx: 3, boundsAdjustment: { y: -3.7, width: 3 }, hidePolicy: 'abbreviateThenHide' }, density: { mode: 'override', gridSizePx: 104, maxLabelsPerGrid: 2, reduceOrder: ['abbreviateOptionalLabels', 'hideOptionalLabels'], preserveSelected: true, preserveRequired: true } };
+    const highExtensions: RenderRuleExtensions = { ...clone(lowExtensions), anchor: { ...(lowExtensions.anchor ?? {}), candidates: ['C', 'N', 'S', 'E', 'W'] }, collision: { ...(lowExtensions.collision ?? {}), paddingPx: 4, boundsAdjustment: { y: -3 } }, density: { mode: 'override', gridSizePx: 104, maxLabelsPerGrid: 3, reduceOrder: ['abbreviateOptionalLabels', 'hideOptionalLabels'], preserveSelected: true, preserveRequired: true } };
     const areaMetric = { kind: 'area' as const, multiplier: 1, divisor: 10, rounding: 'floor' as const, min: 0, max: 999 };
     return profile([
       hidden('v1-structure-hidden', 0, 2),
@@ -611,7 +611,8 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
     if (key === 'ADM/DBZ/L2' || key === 'ADM/PLZ/L2') return shown('v1-isg-admin-l2', 6, 6);
     if (key === 'ADM/DBZ/L3' || key === 'ADM/PLZ/L3') return shown('v1-isg-admin-l3', 8, 8);
     if (key === 'ADM/PLZ/UP' || key === 'ADM/PLZ/UC') return profile([hidden('v1-isg-admin-hidden', 0, 8)]);
-    return profile([makeRule('v1-generic-surface', 0, 8, { representation: 'labelOnly', style: surfaceStyle, label: surfaceLabel, extensions: surfaceExtensions, geometryStack: { zLevel: 300 }, priority: { mode: 'replace', base: 5000 } })]);
+    if (key.startsWith('ADM/DBZ/') || key.startsWith('ADM/PLZ/')) return profile([hidden('v1-isg-admin-unclassified', 0, 8)]);
+    return shown('v1-generic-surface', 2, 8);
   }
 
   if ((config.classCode === 'TRP' || config.classCode === 'TPP' || config.classCode === 'WRP') && geometry === 'Point') {

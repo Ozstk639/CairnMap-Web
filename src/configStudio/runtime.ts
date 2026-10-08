@@ -393,6 +393,7 @@ function validateRuleExtensions(rule: ZoomPriorityRule, geometry: GeometryKind, 
   if (extensions.fallback?.whenRuleMissing && !['geometryOnly','hidden'].includes(extensions.fallback.whenRuleMissing)) issue(issues, 'error', 'fallback-rule-unsupported', rulePath, '原生规则缺失仅支持隐藏或通用几何；不支持旧规则或调试渲染器回退。');
   if (extensions.fallback?.whenGeometryInvalid && extensions.fallback.whenGeometryInvalid !== 'skip') issue(issues, 'error', 'fallback-geometry-unsupported', rulePath, '无有效几何时只能跳过；错误标记和仅调试尚未实现，不能保存为有效配置。');
   for (const key of ['weightedSwitchThreshold','reuseBonus','edgePenalty'] as const) { const value = extensions.polygonCandidates?.[key]; if (value !== undefined && value < 0) issue(issues, 'error', 'polygon-weight-invalid', rulePath, '面候选权重参数必须非负。'); }
+  for (const value of Object.values(extensions.collision?.boundsAdjustment ?? {})) if (value !== undefined && (!Number.isFinite(value) || Math.abs(value) > 80)) issue(issues, 'error', 'collision-bounds-invalid', rulePath, '碰撞框调整须为 -80 到 80 像素。');
   const screen = extensions.screenGate;
   if (screen && screen.mode !== 'inherit' && screen.mode !== 'override') issue(issues, 'error', 'screen-gate-mode-invalid', rulePath, '屏幕阈值必须选择继承全局或本规则覆盖。');
   if (screen?.mode === 'override') {
