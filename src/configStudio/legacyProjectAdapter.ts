@@ -14,7 +14,8 @@ import { resolveFeatureDisplayPlan } from '@/components/Rules/rendering/display/
 import { FeatureStore } from '@/components/Rules/data/featureStore';
 import type { FeatureRecord } from '@/components/Rules/rendering/renderRules';
 import type { FeatureDisplayRuleDraft } from '@/components/Rules/rendering/display/displayTypes';
-import { WORKFLOW_EDITOR_SCHEMAS, projectRegistryScene } from '@/components/Common/workflowEditorRegistry';
+import { WORKFLOW_EDITOR_SCHEMAS, projectRegistryScene, resolveClassificationDisplayName } from '@/components/Common/workflowEditorRegistry';
+import { resolveCardRegistryLayout } from '@/components/Rules/cardrules/cardRegistry';
 import cardLayoutsJson from '../../project-config/presets/core-structures/shared/card/cardLayouts.json';
 import workflowBlocksJson from '../../project-config/presets/core-structures/shared/workflow/workflowBlocks.json';
 import type {
@@ -702,58 +703,11 @@ type LegacyCardField = {
   hideWhenEmpty?: boolean;
 };
 
-/**
- * Translate the old registry's relation controls/overlays into the six-part
- * V3 relation configuration.  This keeps ordinary cards data-driven: no
- * class-specific React card is needed merely to make a known link clickable.
- */
-function relationForLegacyCardField(config: CairnMapClassConfig, field: LegacyCardField): CardItem['relation'] | undefined {
-  const path = field.path;
-  const bySearch = field.searchConfigKey ? schemaSearch({ class: config.classCode }, false, field.searchConfigKey) : undefined;
-  const mapped = bySearch ? {
-    targetClassification: bySearch.target,
-    targetMatchField: field.searchConfigKey === 'warpPoint' ? 'WRPointI2D' : 'ID',
-    targetDisplayField: 'Name',
-    clickable: true,
-    fallbackDisplay: 'raw' as const,
-  } : undefined;
-  if (mapped) return mapped;
-
-  const declared = config.fields.find((candidate) => candidate.key === field.key || candidate.key === path);
-  if (declared?.ref) return {
-    targetClassification: { class: declared.ref.classCode },
-    targetMatchField: declared.ref.matchField,
-    targetDisplayField: declared.ref.displayField ?? 'Name',
-    clickable: true,
-    fallbackDisplay: 'raw',
-  };
-
-  const fixed = path === 'BuildingID' || path === 'tags.BuildingID'
-    ? { class: 'BUD', match: 'ID' }
-    : path === 'tags.Land'
-      ? { class: 'ISG', kind: 'NGF', match: 'ID' }
-      : path === 'tags.Adm'
-        ? { class: 'ISG', kind: 'ADM', match: 'ID' }
-        : path === 'TGTWarp'
-          ? { class: 'WRP', match: 'WRPointI2D' }
-          : path === 'STBuilding' || path === 'staBuildingID'
-            ? { class: 'STB', match: 'ID' }
-            : path === 'LineID'
-              ? { class: 'RLE', match: 'ID' }
-              : undefined;
-  return fixed ? {
-    targetClassification: { class: fixed.class, ...(fixed.kind ? { kind: fixed.kind } : {}) },
-    targetMatchField: fixed.match,
-    targetDisplayField: 'Name',
-    clickable: true,
-    fallbackDisplay: 'raw',
-  } : undefined;
-}
-
 function cardItemFromLegacyField(config: CairnMapClassConfig, schemaKey: string, field: LegacyCardField, index: number): CardItem {
-  const relation = relationForLegacyCardField(config, field);
+  // A reference/search input does not make a V1 plain card value clickable.
+  const relation = undefined;
   const isRailColor = config.classCode === 'RLE' && /^(?:color|Color)$/.test(field.path);
-  const options = field.formatter === 'externalLink' ? { format: 'externalLink' as const }
+  const options = field.formatter === 'externalLink' ? { format: 'externalLink' as const, linkText: 'href' as const }
     : field.formatter === 'boolText' ? { format: 'boolean' as const }
       : field.formatter === 'json' ? { format: 'json' as const }
         : undefined;
@@ -800,15 +754,40 @@ function cardFor(config: CairnMapClassConfig, path: ClassificationPath = { class
     : [];
   const groupItems: CardItem[] = projected?.groups.map((group, index) => cardItemFromLegacyField(config, schema?.schemaKey ?? config.classCode, group, index)) ?? [];
   const supplemental = supplementalLegacyCardItems(config);
-  if (schemaItems.length || groupItems.length || supplemental.length) return { mode: 'fields', items: [...schemaItems, ...groupItems, ...supplemental] };
-  const items: CardItem[] = fieldsFor(config)
-    .filter((item) => config.fields.find((legacy) => legacy.key === item.key)?.scenes?.infocard !== false)
-    .map((item) => ({
-      id: `${config.classCode}-${item.key}-card`, source: item.key, visible: true, section: 'main', hideWhenEmpty: true,
-      renderer: item.reference ? 'relationLink' : 'text', label: item.labels,
-      ...(item.reference ? { relation: { targetClassification: { class: item.reference.classCode }, targetMatchField: item.reference.matchField, targetDisplayField: item.reference.displayField, clickable: true } } : {}),
-    }));
-  return { mode: 'fields', items };
+  const defaults = [...schemaItems, ...groupItems];
+  const items: CardItem[] = [];
+  const used = new Set<string>();
+  const append = (item: CardItem) => { if (!used.has(item.source)) { items.push(item); used.add(item.source); } };
+  const layout = resolveCardRegistryLayout({ schemaKey: schema?.schemaKey, classCode: path.class, kind: path.kind, skind: path.skind, skind2: path.skind2 });
+  for (const item of layout?.items ?? [{ kind: 'classification' }, { kind: 'registryDefaultGroup' }]) {
+    if (item.kind === 'classification' && schema && !item.hidden) append({ id: `${config.classCode}-classification-card`, source: 'Class', visible: true, renderer: 'text', section: 'main', label: { zh: item.label ?? projected?.classification?.label ?? '类型', en: '' }, options: { format: 'classification' } });
+    if (item.kind === 'registryDefaultGroup') defaults.forEach(append);
+    if ((item.kind === 'rawField' || item.kind === 'registryField') && !item.hidden) {
+      const source = item.path ?? (item.kind === 'registryField' ? defaults.find(field => field.id.includes(`-${item.key}-`))?.source : undefined);
+      if (!source) continue;
+      const field = defaults.find(field => field.source === source) ?? { id: `${config.classCode}-${source}-raw`, source, visible: true, renderer: 'text' as const, section: 'main' as const, label: { zh: item.kind === 'rawField' ? item.label : item.label ?? source, en: '' } };
+      const target = item.linkTarget;
+      if (item.transform === 'featureLink' || item.transform === 'featureLinkList') append({ ...field, section: 'main', renderer: 'relationLink', relation: { targetClassification: { class: target?.classCode ?? '', ...(target?.kind ? { kind: target.kind } : {}), ...(target?.skind ? { skind: target.skind } : {}), ...(target?.skind2 ? { skind2: target.skind2 } : {}) }, targetMatchField: target?.matchField ?? 'ID', targetDisplayField: target?.displayField ?? 'Name', multiple: item.transform === 'featureLinkList', sourceValuePath: target?.sourceValuePath, fallbackDisplay: target?.fallbackDisplay, clickable: true } });
+      else append({ ...field, section: 'main', options: item.transform === 'externalLink' ? { format: 'externalLink', linkText: 'href' } : field.options });
+    }
+    if (item.kind === 'enhancement') {
+      if (item.key === 'railColorChip') {
+        const color = defaults.find(field => field.source === 'color'); if (color) append({ ...color, label: { zh: '色号', en: '' } });
+      } else {
+        if (item.key === 'stationBuildingLineChips') append({ id: `${config.classCode}-height-enhancement`, source: 'height', fallbackSources: ['Height'], visible: true, renderer: 'text', section: 'main', label: { zh: '高度', en: '' }, options: { format: 'plain' } });
+        supplemental.forEach(append);
+      }
+    }
+  }
+  // Registry other rows precede unlisted values, followed by editable audit rows.
+  defaults.filter(item => item.section === 'other').forEach(append);
+  const audit = [
+    { source: 'CreateTime', fallbackSources: ['createTime'], label: '创建时间' },
+    { source: 'CreateBy', fallbackSources: ['createBy'], label: '创建者' },
+    { source: 'ModifityTime', fallbackSources: ['ModifyTime','ModifiedTime','modifityTime','modifyTime','modifiedTime'], label: '最后编辑时间' },
+    { source: 'ModifityBy', fallbackSources: ['ModifyBy','ModifiedBy','modifityBy','modifyBy','modifiedBy'], label: '编辑者' },
+  ].map(field => ({ ...field, id: `${config.classCode}-${field.source}-meta`, label: { zh: field.label, en: '' }, visible: true, hideWhenEmpty: true, afterRemaining: true, renderer: 'text' as const, section: 'other' as const }));
+  return { mode: 'fields', items: [...items, ...audit], remaining: { enabled: true, section: 'other', includeSystem: true, order: 'record', hideWhenEmpty: false, maxDepth: 3, maxArrayLength: 50, exclude: ['CoordP','CoordL','CoordG','Conpoints','Flrpoints','PLpoints','Linepoints','coordinate','UpdateTime','updateTime','UpdateBy','updateBy', ...(schema ? ['Class','Kind','Skind','Skind2','SKind','SKind2'] : []), ...defaults.map(item => item.source)] } };
 }
 
 function categoryId(path: ClassificationPath): string {
@@ -852,6 +831,13 @@ function nodesFor(config: CairnMapClassConfig): CategoryNode[] {
         return candidateValue === code && candidate.kind === path.kind;
       });
       labels[level] = option ? localized(option.label, String(code)) : { zh: String(code), en: '' };
+    }
+    const schema = schemaForPath(path);
+    const view = schema ? projectRegistryScene(schema, 'infocard') : undefined;
+    if (schema) {
+      const level = path.skind2 ? 'skind2' : path.skind ? 'skind' : path.kind ? 'kind' : 'class';
+      const display = view?.classification ? resolveClassificationDisplayName(view.classification.ref, { Kind: path.kind, SKind: path.skind, SKind2: path.skind2 }) : schema.displayName;
+      if (display) labels[level] = { zh: display, en: labels[level]?.en ?? '' };
     }
     return labels;
   };

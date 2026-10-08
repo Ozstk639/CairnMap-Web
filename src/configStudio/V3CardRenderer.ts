@@ -87,16 +87,16 @@ function lineChipsRow(item: CardItem, record: FeatureRecord, railIndex?: RailNew
   return undefined;
 }
 
-function rowFor(item: CardItem, record: FeatureRecord, railIndex?: RailNewIndex | null): CardRow | undefined {
+function rowFor(item: CardItem, record: FeatureRecord, config: ConfigPackageV3, railIndex?: RailNewIndex | null): CardRow | undefined {
   if (!item.visible) return undefined;
   if (item.renderer === 'lineChips') return lineChipsRow(item, record, railIndex);
 
-  const raw = valueAt(record, item.source);
+  const raw = [item.source, ...(item.fallbackSources ?? [])].map(source => valueAt(record, source)).find(value => !isEmpty(value));
   const rawText = text(raw).trim();
   const label = labelFor(item);
   const colorText = text(valueAt(record, item.options?.colorSource || item.source)).trim();
   const needsValue = item.renderer !== 'media' && item.renderer !== 'colorCapsule';
-  if (!rawText && needsValue && item.hideWhenEmpty !== false) return undefined;
+  if (!rawText && needsValue && item.hideWhenEmpty !== false && item.options?.format !== 'classification') return undefined;
 
   if (item.renderer === 'relationLink') {
     const values = relationValues(raw, item);
@@ -126,10 +126,45 @@ function rowFor(item: CardItem, record: FeatureRecord, railIndex?: RailNewIndex 
   if (item.renderer === 'media') {
     return rawText ? { label, value: item.options?.mediaSource === 'external-url' ? makeExternalLink(rawText, rawText) : rawText } : undefined;
   }
-  if (item.options?.format === 'externalLink') return rawText ? { label, value: makeExternalLink(rawText, rawText) } : undefined;
-  if (item.options?.format === 'boolean') return { label, value: raw === true || rawText === 'true' ? '是' : '否' };
-  if (item.options?.format === 'json') return { label, value: rawText };
-  return { label, value: rawText };
+  if (item.options?.format === 'externalLink') return rawText ? { label, value: makeExternalLink(rawText, item.options.linkText === 'raw' ? rawText : undefined) } : undefined;
+  if (item.options?.format === 'boolean') return { label, value: raw === true || rawText.toLowerCase() === 'true' ? '是' : raw === false || rawText.toLowerCase() === 'false' ? '否' : rawText || '未知' };
+  if (item.options?.format === 'classification') {
+    const path = classificationFor(record);
+    const nodes = config.nodes.filter(node => node.path.class === path.class && (!node.path.kind || node.path.kind === path.kind) && (!node.path.skind || node.path.skind === path.skind) && (!node.path.skind2 || node.path.skind2 === path.skind2)).sort((a,b) => Object.keys(b.path).length - Object.keys(a.path).length);
+    const node = nodes[0];
+    const level = path.skind2 ? 'skind2' : path.skind ? 'skind' : path.kind ? 'kind' : 'class';
+    return { label, value: node?.classificationLabels?.[level]?.zh || [path.kind,path.skind,path.skind2].filter(Boolean).join('/') || path.class };
+  }
+  if (item.options?.format === 'enum') {
+    const field = resolveEffectiveFields(config, classificationFor(record)).find(field => field.key === item.source);
+    return { label, value: field?.options?.find(option => String(option.value) === rawText)?.label.zh || rawText };
+  }
+  if (item.options?.format === 'world') return { label, value: rawText };
+  if (item.options?.format === 'date') {
+    const compact = /^(\d{4})(\d{2})(\d{2})$/.exec(rawText);
+    const date = new Date(compact ? `${compact[1]}-${compact[2]}-${compact[3]}T00:00:00Z` : rawText);
+    return { label, value: Number.isNaN(date.getTime()) ? rawText : date.toISOString().slice(0, 10) };
+  }
+  if (item.options?.format === 'plain') return { label, value: rawText || '未知' };
+  return { label, value: isEmpty(raw) ? '未知' : raw };
+}
+
+function isEmpty(value: unknown): boolean { return value == null || typeof value === 'string' && !value.trim() || Array.isArray(value) && !value.length || typeof value === 'object' && !Object.keys(value).length; }
+const AUDIT_FIELDS = ['CreateTime','createTime','CreateBy','createBy','ModifityTime','ModifyTime','ModifiedTime','modifityTime','modifyTime','modifiedTime','ModifityBy','ModifyBy','ModifiedBy','modifityBy','modifyBy','modifiedBy','UpdateTime','updateTime','UpdateBy','updateBy'];
+function remainingRows(record: FeatureRecord, items: CardItem[], settings: NonNullable<Extract<import('./types').CardConfiguration, { mode: 'fields' }>['remaining']>): CardRow[] {
+  const used = new Set([...items.filter(item => item.renderer !== 'lineChips').flatMap(item => item.options?.format === 'classification' ? ['Class','Kind','Skind','Skind2','SKind','SKind2'] : [item.source, ...(item.fallbackSources ?? [])]), ...(settings.exclude ?? []), ...(!settings.includeSystem ? AUDIT_FIELDS : [])]);
+  const rows: CardRow[] = [];
+  const excluded = (key: string) => [...used].some(path => key === path || key.startsWith(path + '.'));
+  const walk = (value: unknown, prefix: string, depth: number) => {
+    if (excluded(prefix) || settings.hideWhenEmpty && isEmpty(value)) return;
+    if (value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length && depth <= (settings.maxDepth ?? 3)) {
+      let entries = Object.entries(value); if (settings.order === 'alphabetical') entries = entries.sort(([a],[b]) => a.localeCompare(b));
+      for (const [key, child] of entries) walk(child, prefix ? `${prefix}.${key}` : key, depth + 1);
+    } else rows.push({ label: prefix, value: Array.isArray(value) && value.length > (settings.maxArrayLength ?? 50) ? `[Array(${value.length})]` : value });
+  };
+  let entries = Object.entries(record.featureInfo); if (settings.order === 'alphabetical') entries = entries.sort(([a],[b]) => a.localeCompare(b));
+  for (const [key, value] of entries) walk(value, key, 1);
+  return rows;
 }
 
 /** Returns undefined for the deliberately specialised TRP card. */
@@ -142,7 +177,7 @@ export function buildV3CardSections(
   const path = classificationFor(record);
   const card = resolveCardConfiguration(config, path);
   if (!card || card.mode === 'component') return undefined;
-  const items = card.mode === 'fields'
+  const items: CardItem[] = card.mode === 'fields'
     ? card.items
     : resolveEffectiveFields(config, path).map((field) => ({
       id: `layout-fallback-${field.key}`,
@@ -163,11 +198,15 @@ export function buildV3CardSections(
     }));
   const mainRows: CardRow[] = [];
   const otherRows: CardRow[] = [];
-  for (const item of items) {
-    const row = rowFor(item, record, railIndex);
-    if (!row) continue;
+  const add = (item: CardItem) => {
+    if (card.mode === 'fields' && card.remaining?.includeSystem === false && AUDIT_FIELDS.includes(item.source)) return;
+    const row = rowFor(item, record, config, railIndex);
+    if (!row) return;
     if (item.section === 'other') otherRows.push(row);
     else mainRows.push(row);
-  }
+  };
+  items.filter(item => !item.afterRemaining).forEach(add);
+  if (card.mode === 'fields' && card.remaining?.enabled) (card.remaining.section === 'main' ? mainRows : otherRows).push(...remainingRows(record, items, card.remaining));
+  items.filter(item => item.afterRemaining).forEach(add);
   return { mainRows, otherRows };
 }

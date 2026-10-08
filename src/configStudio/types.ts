@@ -579,6 +579,8 @@ export type CardRelation = {
 export type CardItem = {
   id: string;
   source: string;
+  fallbackSources?: string[];
+  afterRemaining?: boolean;
   visible: boolean;
   renderer: CardRenderer;
   /** Preserve the V1 main/other card split rather than slicing by row count. */
@@ -604,7 +606,7 @@ export type CardItem = {
 
 /** A layout and a code component remain mutually exclusive. */
 export type CardConfiguration =
-  | { mode: 'fields'; items: CardItem[]; remaining?: { enabled: boolean; section: CardSection; includeSystem: boolean; exclude?: string[] } }
+  | { mode: 'fields'; items: CardItem[]; remaining?: { enabled: boolean; section: CardSection; includeSystem: boolean; exclude?: string[]; hideWhenEmpty?: boolean; order?: 'record' | 'alphabetical'; maxDepth?: number; maxArrayLength?: number } }
   | { mode: 'layout'; layoutId: string; options?: Record<string, unknown> }
   | { mode: 'component'; componentKey: string; options?: Record<string, unknown> };
 

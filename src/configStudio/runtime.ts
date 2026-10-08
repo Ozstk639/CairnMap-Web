@@ -29,7 +29,7 @@ import { createBlankV32Package } from './v32Defaults';
 const GEOMETRIES: GeometryKind[] = ['Point', 'LineString', 'Polygon'];
 const SYSTEM_FIELD_KEYS = new Set([
   'ID', 'Name', 'World', 'Class', 'Kind', 'Skind', 'Skind2', 'SKind', 'SKind2',
-  'Creator', 'CreatedAt', 'Editor', 'EditedAt', 'CoordP', 'CoordL', 'CoordG',
+  'Creator', 'CreatedAt', 'Editor', 'EditedAt', 'Type', 'CreateBy', 'CreateTime', 'createBy', 'createTime', 'ModifityTime', 'ModifyTime', 'ModifiedTime', 'modifityTime', 'modifyTime', 'modifiedTime', 'ModifityBy', 'ModifyBy', 'ModifiedBy', 'modifityBy', 'modifyBy', 'modifiedBy', 'CoordP', 'CoordL', 'CoordG',
 ]);
 /** Name is a V1-configured field in several classes, even though it is also universally selectable. */
 const PROTECTED_FIELD_KEYS = new Set([...SYSTEM_FIELD_KEYS].filter((key) => key !== 'Name'));
@@ -553,11 +553,18 @@ function validateCard(node: CategoryNode, config: ConfigPackageV3, issues: Confi
     if (!registryHas(config.registries.cardComponents, card.componentKey, node.path.class)) issue(issues, 'error', 'card-component-invalid', path, `专用信息卡组件 ${card.componentKey || '空'} 不在受控注册表中或不适用于该 Class。`);
     return;
   }
+  if (card.remaining) {
+    if (!['main','other'].includes(card.remaining.section)) issue(issues, 'error', 'card-remaining-section-invalid', path, '剩余字段区域无效。');
+    if (card.remaining.order && !['record','alphabetical'].includes(card.remaining.order)) issue(issues, 'error', 'card-remaining-order-invalid', path, '剩余字段排序方式无效。');
+    for (const key of ['maxDepth','maxArrayLength'] as const) if (card.remaining[key] !== undefined && (!Number.isInteger(card.remaining[key]) || card.remaining[key]! <= 0)) issue(issues, 'error', 'card-remaining-limit-invalid', path, '剩余字段上限必须为正整数。');
+  }
   for (const item of card.items) {
     const itemPath = `${path}/items/${item.id}`;
     if (!CARD_RENDERERS.has(item.renderer)) issue(issues, 'error', 'card-renderer-invalid', itemPath, `未知的信息卡显示器 ${String(item.renderer)}。`);
     if (item.section !== undefined && item.section !== 'main' && item.section !== 'other') issue(issues, 'error', 'card-section-invalid', itemPath, '信息卡区域只能为主要信息或其他信息。');
     if (!sourceExists(item.source, fields)) issue(issues, 'error', 'card-field-missing', itemPath, `信息卡字段 ${item.source} 未定义。`, { field: item.source });
+    if (item.options?.format && !['plain','externalLink','boolean','json','classification','enum','date','world'].includes(item.options.format)) issue(issues, 'error', 'card-format-invalid', itemPath, '未知的信息卡格式。');
+    if (config.contractRevision === 5 && item.options?.format && ['classification','enum','date','world'].includes(item.options.format)) issue(issues, 'error', 'card-format-revision-invalid', itemPath, '该信息卡格式要求原生 r6。');
     if (item.renderer === 'lineChips' && !item.options?.lineChipSource) issue(issues, 'error', 'card-line-chips-source-required', itemPath, '关联线路胶囊必须选择平台、车站或车站建筑来源。');
     if (item.renderer !== 'relationLink') continue;
     const relation = item.relation;
