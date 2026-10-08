@@ -277,6 +277,11 @@ export type RenderAnchorExtension = {
  * may have a 10,000px² candidate threshold even when the geometry itself is
  * visible at a lower screen area. */
 export type RenderPolygonCandidateExtension = {
+  weightMode?: 'none' | 'distanceToCenter';
+  weightedSwitchThreshold?: number;
+  reuseBonus?: number;
+  viewportPreference?: boolean;
+  edgePenalty?: number;
   mode?: 'inherit' | 'none' | 'fixedInterior' | 'autoInteriorGrid' | 'largeFeatureGrid' | 'viewportAwareCandidateSet' | 'gridByWorldUnits';
   count?: number;
   gridSize?: number;
@@ -310,6 +315,7 @@ export type RenderStabilityExtension = {
   invalidateWhen?: Array<'zoomBucketChanged' | 'featureGeometryChanged' | 'featureTextChanged' | 'modeChanged' | 'worldChanged' | 'labelOutOfViewport' | 'collisionFailedRepeatedly'>;
 };
 export type RenderDensityExtension = {
+  enabled?: boolean;
   mode: 'inherit' | 'override';
   gridSizePx?: number;
   maxLabelsPerGrid?: number;

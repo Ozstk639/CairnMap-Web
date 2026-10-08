@@ -1430,6 +1430,47 @@
     "t25": {
       "type": "object",
       "properties": {
+        "weightMode": {
+          "anyOf": [
+            {
+              "const": "none"
+            },
+            {
+              "const": "distanceToCenter"
+            }
+          ]
+        },
+        "weightedSwitchThreshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "reuseBonus": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "viewportPreference": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "edgePenalty": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
         "mode": {
           "anyOf": [
             {
@@ -1772,6 +1813,16 @@
     "t28": {
       "type": "object",
       "properties": {
+        "enabled": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
         "mode": {
           "anyOf": [
             {

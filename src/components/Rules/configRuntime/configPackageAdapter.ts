@@ -523,7 +523,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
   const labelKey = labelStyleKey(nativeLabelStyle, record, store);
   const screenGate = active.extensions?.screenGate;
   const minScreenAreaPx = geometry === 'Polygon'
-    ? (screenGate?.mode === 'override' ? screenGate.minScreenAreaPx : config.engine.screenGateDefaults.polygonMinScreenAreaPx)
+    ? (screenGate?.mode === 'override' ? screenGate.minScreenAreaPx : active.representation === 'labelOnly' ? 0 : config.engine.screenGateDefaults.polygonMinScreenAreaPx)
     : undefined;
   const minScreenLengthPx = geometry === 'LineString'
     ? (screenGate?.mode === 'override' ? screenGate.minScreenLengthPx : config.engine.screenGateDefaults.lineMinScreenLengthPx)
@@ -665,6 +665,11 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
         ...(anchor?.allowOutsideGeometry !== undefined ? { allowOutsideGeometry: anchor.allowOutsideGeometry } : {}),
         ...(anchor?.requireInsideGeometry !== undefined ? { requireInsideGeometry: anchor.requireInsideGeometry } : {}),
         ...(polygonCandidates ? {
+          candidateWeightMode: polygonCandidates.weightMode,
+          candidateSwitchThreshold: polygonCandidates.weightedSwitchThreshold,
+          candidateReuseBonus: polygonCandidates.reuseBonus,
+          candidateViewportPreference: polygonCandidates.viewportPreference,
+          candidateEdgePenalty: polygonCandidates.edgePenalty,
           geoCandidateMode: polygonCandidates.mode === 'inherit' ? undefined : polygonCandidates.mode,
           geoCandidateCount: polygonCandidates.count,
           geoGridSize: polygonCandidates.gridSize,
@@ -772,7 +777,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
         hidePolicy: collisionExtensions?.hidePolicy ?? (fallback?.whenCollisionFailed === 'forceShow' ? 'forceShow' : fallback?.whenCollisionFailed === 'abbreviate' ? 'abbreviateThenHide' : fallback?.whenCollisionFailed === 'showGeometryOnly' ? 'geometryOnly' : undefined),
       },
       density: {
-        enabled: density?.mode === 'override',
+        enabled: density?.mode === 'override' && density.enabled !== false,
         gridSizePx: density?.gridSizePx,
         maxLabelsPerGrid: density?.maxLabelsPerGrid,
         maxSymbolsPerGrid: density?.maxSymbolsPerGrid,
@@ -840,7 +845,7 @@ export function resolveConfigRuntimeScreenGate(config: ConfigPackageV3 | undefin
   if (!profile?.enabled || !active) return undefined;
   const screen = resolveRenderExtensions(config, geometry, active.extensions).screenGate;
   return {
-    ...(geometry === 'Polygon' ? { minScreenAreaPx: screen?.mode === 'override' ? screen.minScreenAreaPx : config.engine.screenGateDefaults.polygonMinScreenAreaPx } : {}),
+    ...(geometry === 'Polygon' ? { minScreenAreaPx: screen?.mode === 'override' ? screen.minScreenAreaPx : active.representation === 'labelOnly' ? 0 : config.engine.screenGateDefaults.polygonMinScreenAreaPx } : {}),
     ...(geometry === 'LineString' ? { minScreenLengthPx: screen?.mode === 'override' ? screen.minScreenLengthPx : config.engine.screenGateDefaults.lineMinScreenLengthPx } : {}),
   };
 }

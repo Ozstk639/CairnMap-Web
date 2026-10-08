@@ -26,3 +26,17 @@ for (const cls of ['ROD', 'ISP', 'ISL', 'ISG', 'TPP', 'WRP', 'FLR', 'STF']) {
   }
 }
 console.log(`display-parity: ${cases} direct V1/V3 opacity, labelOnly, priority and obstacle-policy cases: OK`);
+
+for (const cls of ['ISG','SBP']) {
+  const v1 = FEATURE_RENDER_RULES.find(rule => rule.match.Class === cls)!;
+  const record: any = { uid: cls, type: cls === 'SBP' ? 'Points' : 'Polygon', meta: { Class: cls, Type: cls === 'SBP' ? 'Points' : 'Polygon', World: 'zth', idValue: cls, sig: {} }, featureInfo: { ID: cls, Class: cls, Name: 'Parity', World: 'zth' }, p3: { x:0,y:-64,z:0 }, coords3: [{ x:-50,y:-64,z:-50 },{ x:50,y:-64,z:-50 },{ x:50,y:-64,z:50 }] };
+  const ctx: any = { worldId:'zth', zoomLevel:6,leafletZoom:3,inFloorView:false };
+  const store = new FeatureStore([record]);
+  const source = resolveFeatureDisplayPlan(record,v1,ctx,store);
+  const native: any = resolveConfigRuntimeRule(config,record,ctx,null,store);
+  if (cls === 'ISG') {
+    for (const key of ['candidateWeightMode','candidateSwitchThreshold','candidateReuseBonus','candidateViewportPreference','candidateEdgePenalty']) assert.equal(native.display.anchor[key],(source.anchor as any)[key],key);
+    assert.equal(native.display.density.enabled,source.density.enabled);
+  } else { assert.equal(native.symbol.point.radius,5); assert.equal(native.symbol.point.style.color,'#3388ff'); }
+}
+console.log('display-parity: polygon candidate weights, source disabled density and missing-icon circle preserved: OK');

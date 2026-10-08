@@ -3649,7 +3649,15 @@ export default function RuleDrivenLayer(props: Props) {
             if (configRuntime && sourceRecord.type === 'Polygon' && (displayPlan.anchor.requireInsideGeometry || displayPlan.anchor.allowOutsideGeometry === false)) {
               const allParts = sourceRecord.multipartGeometry?.type === 'Polygon' ? sourceRecord.multipartGeometry.parts : [[sourceRecord.coords3 ?? []]];
               const parts = req.partIndex === undefined ? allParts : allParts.slice(req.partIndex, req.partIndex + 1);
-              req.acceptsAnchor = screen => { const point = projection.latLngToLocation(map.containerPointToLatLng(screen), Y_FOR_DISPLAY); return parts.some(rings => rings[0]?.length && pointInPolygonXZ(point,rings[0]) && !rings.slice(1).some(hole => pointInPolygonXZ(point,hole))); };
+              req.acceptsAnchor = screen => {
+                const point = projection.latLngToLocation(map.containerPointToLatLng(screen), Y_FOR_DISPLAY);
+                const contains = (ring: Array<{ x: number; z: number }>) => pointInPolygonXZ(point, ring) || ring.some((a,i) => {
+                  const b = ring[(i + 1) % ring.length]; const dx = b.x - a.x, dz = b.z - a.z;
+                  const t = Math.max(0, Math.min(1, ((point.x - a.x)*dx + (point.z - a.z)*dz)/(dx*dx + dz*dz || 1)));
+                  return Math.hypot(point.x - a.x - t*dx, point.z - a.z - t*dz) < 1e-6;
+                });
+                return parts.some(rings => rings[0]?.length && contains(rings[0]) && !rings.slice(1).some(hole => contains(hole)));
+              };
             }
             req.densityImportance = displayPlan.density?.importanceField ? Number(getFeatureValueByPath(r, displayPlan.density.importanceField)) || 0 : undefined;
             req.worldId = worldId;

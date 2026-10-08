@@ -29,3 +29,14 @@ assert.equal(sourceRule.label!.collision.basePriority, 25, 'Migration mutated it
 await assert.rejects(() => readConfigPackage(new File([JSON.stringify({ ...config, contractRevision: 99 })], 'future.json')));
 assert.equal(validateConfigPackage({ ...config, contractRevision: 99 } as any).valid, false);
 console.log('native-contract: r6 labelOnly and non-mutating r5 upgrade, unknown revision rejection: OK');
+
+const dynamic = structuredClone(older);
+const dynamicRule = dynamic.nodes[0].geometryProfiles.Point!.zoomPriority.rules[0];
+dynamicRule.priority = { mode: 'replace', base: 100, metric: { kind: 'field', field: 'score', multiplier: 2, rounding: 'floor' } };
+dynamicRule.conditionalOverrides = [{ id: 'authored-branch', when: [{ kind: 'fieldEquals', field: 'Name', value: 'branch' }], label: { ...dynamicRule.label!, collision: { ...dynamicRule.label!.collision, basePriority: 40 } } }];
+const upgraded = await readConfigPackage(new File([JSON.stringify(dynamic)], 'dynamic-r5.json'));
+assert.equal(upgraded.nodes[0].geometryProfiles.Point!.zoomPriority.rules[0].label!.collision.basePriority, 25, 'replace metric cannot add C base during upgrade');
+const branchFeature = { ...feature, featureInfo: { ...feature.featureInfo, Name: 'branch', score: 5 } };
+const branchRule: any = resolveConfigRuntimeRule(upgraded, branchFeature, ctx, null);
+assert.equal(branchRule.display.collision.priority, 50, 'authored r5 conditional B + dynamic C retained');
+console.log('native-contract: r5 replace metrics and conditional B/C semantics retained: OK');

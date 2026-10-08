@@ -31,7 +31,7 @@ export function NativeWorkflowHost({ config, workflow, bridge, registry, onCommi
   const all = [...Object.values(datasets).flatMap(dataset => dataset.features), ...(bridge.getCommittedLayerJsonInfos?.().map(item => item.featureInfo) ?? [])];
   const records = [...new Map(all.map(raw => {
     const record = (raw.featureInfo && typeof raw.featureInfo === 'object' ? raw.featureInfo : raw) as MountedFeatureRecord;
-    return [`${record.World}:${record.Class}:${record.ID}`, record] as const;
+    return [`${record.World}:${record.Class}:${record.Kind ?? ""}:${record.SKind ?? record.Skind ?? ""}:${record.SKind2 ?? record.Skind2 ?? ""}:${record.ID}`, record] as const;
   })).values()].filter(record => !deleted.has(String(record.ID ?? '')));
   const points = () => bridgeRef.current.getTempPoints().map(point => ({ x: point.x, y: point.y ?? -64, z: point.z }));
   const switchStep = useCallback((step: WorkflowStep | undefined) => {

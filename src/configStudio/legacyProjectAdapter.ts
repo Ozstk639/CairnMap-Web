@@ -199,6 +199,11 @@ function extensionsFromV1(display: FeatureDisplayRuleDraft | undefined): RenderR
       ...(anchor.requireInsideGeometry !== undefined ? { requireInsideGeometry: anchor.requireInsideGeometry } : {}),
     },
     polygonCandidates: {
+      weightMode: anchor.candidateWeightMode,
+      weightedSwitchThreshold: anchor.candidateSwitchThreshold,
+      reuseBonus: anchor.candidateReuseBonus,
+      viewportPreference: anchor.candidateViewportPreference,
+      edgePenalty: anchor.candidateEdgePenalty,
       ...(anchor.geoCandidateMode ? { mode: anchor.geoCandidateMode } : {}),
       ...(anchor.geoCandidateCount !== undefined ? { count: anchor.geoCandidateCount } : {}),
       ...(anchor.geoGridSize !== undefined ? { gridSize: anchor.geoGridSize } : {}),
@@ -314,6 +319,7 @@ function extensionsFromV1(display: FeatureDisplayRuleDraft | undefined): RenderR
     },
     ...(density ? { density: {
       mode: 'override' as const,
+      enabled: density.enabled,
       gridSizePx: density.gridSizePx,
       maxLabelsPerGrid: density.maxLabelsPerGrid,
       maxSymbolsPerGrid: density.maxSymbolsPerGrid,
@@ -549,7 +555,7 @@ function geometryProfile(config: CairnMapClassConfig, path: ClassificationPath =
   }
 
   if (config.classCode === 'SBP' && geometry === 'Point') {
-    const iconStyle = styled({ icon: { source: 'iconUrl', size: [24, 24], anchor: [12, 24], fallback: 'hide' }, pointShape: 'circle', size: 4, weight: 2, stroke: { mode: 'fixed', color: '#111827' }, strokeOpacity: 0.9, fill: { mode: 'fixed', color: '#f97316' }, fillOpacity: 0.75 });
+    const iconStyle = styled({ icon: { source: 'iconUrl', size: [24, 24], anchor: [12, 24], fallback: 'circle' }, pointShape: 'circle', size: 5, weight: 2, stroke: { mode: 'fixed', color: '#3388ff' }, strokeOpacity: 0.9, fill: { mode: 'fixed', color: '#3388ff' }, fillOpacity: 0.6 });
     const iconExtensions: RenderRuleExtensions = { ...clone(extensions), pane: 'point-top', visibility: { mode: 'sameId', sameId: { target: { class: 'STB' }, sourceField: 'ID', targetField: 'ID', behavior: 'hideIfExists' } } };
     const iconLabel = labeled({ visible: true, style: { family: 'bubble-dark', size: 14 }, source: 'Name', placement: 'near', collision: { role: 'optional', basePriority: 2500, collisionGroup: 'poiLabel', hideWhenColliding: true } });
     return profile([
@@ -1239,8 +1245,8 @@ export function createConfigPackageFromCurrentProject(): ConfigPackageV3 {
     contractRevision: 6,
     packageId: 'cairnmap-config-v32-semantic',
     projectId: 'openriamap-ria',
-    revision: 1,
-    displayName: { zh: 'V3.2：V1 真实语义迁移', en: 'V3.2 V1 semantic migration' },
+    revision: 2,
+    displayName: { zh: 'V3.2：V1 显示与工作流再现', en: 'V3.2 V1 semantic migration' },
     engine,
     registries: buildRegistries(workflows),
     nodes,
