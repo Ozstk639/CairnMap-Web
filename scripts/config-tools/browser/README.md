@@ -30,6 +30,43 @@ Coverage:
 - `render_browser.py`: nine directions and signed offsets, seven label families, real multipart counts, whole-center count, V1/V3 BUD Zoom 0/2/3/5/6/8, main/preview pixel parity, loaded low-Zoom tiles and actual ZIP roundtrip.
 - `interaction_browser.py`: real mouse clicks on all component labels and displaced labels; unchanged-URL image size/anchor changes; clicks at the image rectangle edge; host/member preview fixtures.
 
-`render-acceptance.html` and its TSX entry mount the production `RuleDrivenLayer` or `ConfigRuntimePreview` with controlled fixtures. They are test entries served by Vite, and are not imported into the production application entry point. The V1 mode mounts the frozen V1 rule path for comparison.
+`render-acceptance.html` mounts the production `RuleDrivenLayer` or `ConfigRuntimePreview` with controlled fixtures. Its `mode=v1` uses the candidate tree's legacy path, so that mode alone is **not** an independent historical oracle. The independent tests below use the detached frozen reference on port 5189.
 
 Tile checks use the live RIA Satellite source. A network/source failure makes that acceptance fail; the production preview reports tile errors instead of silently appearing blank. Core `npm run verify:config-v32` remains deterministic and does not require this browser or the live tile service.
+
+## Independent parity and production-host checks
+
+Create a detached reference at frozen commit `0b82863d4fea3791f98917ba6d13f70e1f27eb15` in a separate worktree. Keep all 520 recorded source/assets/config/dependency files unchanged. Serve it at 5189 with the same installed dependency versions. The reference needs test-only HTML/TSX entries `v1-oracle` and `v1-workflow-oracle`; copying those test entries is allowed, replacing any frozen production file is not. The candidate entries live beside this README's parent directory.
+
+Run sequentially, after the four basic scripts:
+
+```powershell
+$env:CAIRNMAP_ACCEPTANCE_OUT = 'G:/RIAWebGIS/NewPRES/CairnMap_Codex/migration-audits/runtime-v32-implementation-20261008'
+python scripts/config-tools/browser/independent_matrix.py
+python scripts/config-tools/browser/independent_matrix.py --hierarchy
+python scripts/config-tools/browser/independent_dense.py
+python scripts/config-tools/browser/bud_independent.py
+python scripts/config-tools/browser/svg_offsets.py
+python scripts/config-tools/browser/interaction_parity.py
+python scripts/config-tools/browser/interaction_states.py
+python scripts/config-tools/browser/native_workflow_matrix.py
+python scripts/config-tools/browser/workflow_capture_parity.py
+python scripts/config-tools/browser/external_lifecycle.py
+python scripts/config-tools/browser/lifecycle_browser.py
+python scripts/config-tools/browser/field_binding_browser.py
+npx tsx --tsconfig tsconfig.app.json scripts/config-tools/refresh-parameter-ledger.ts
+npx tsx --tsconfig tsconfig.app.json scripts/config-tools/build-parity-delivery.ts
+python scripts/config-tools/browser/delivery_import.py
+python scripts/config-tools/browser/summarize_acceptance.py
+```
+
+`--reuse-reference` reuses the already captured V1 measurements in the corresponding result JSON; use it only after rechecking the frozen 520-file inventory. It does not recapture V1 and must not be used to create initial expectations.
+
+- Matrix: 101 schema/catalog records × nine logical Zooms; hierarchy: 28 additional paths × nine Zooms; both measure visible DOM labels and geometry styles rather than whole-image similarity. BUD/STB's deliberate CSS-dot-to-geometry change has its own symbol/center check.
+- Dense: 29 mixed records across six Zoom/pan scenarios, recording label identities and bounds as well as paired images.
+- Native workflow matrix: 17 composed flows, two input variants each, production MeasuringModule with real drawing clicks and complete record comparison to V1 schema/assembler fixtures.
+- Capture/external: actual frozen components/formatters in a test capture bridge on 5189; actual production MeasuringModule on 5188. This is not a replay of the entire frozen V1 MeasuringModule. Source components remain untouched.
+- Five states: real pointer for hover/selection, production search-select/close events, and production temp-source storage/change events for editing/deletion; enable/disable/re-enable/recover. Full edit/delete tool UX still belongs to manual acceptance.
+- Field binding: actual Studio authoring, numeric-array defaults in Runner, modified values in a real committed record. Delivery import: actual file input imports the generated ZIP and saves identical JSON content.
+
+These are automatic CDP checks. User manual acceptance, unlisted data combinations and every possible advanced parameter value are not implied by passing them. The parameter ledger identifies compatibility metadata and system fields separately, with evidence scoped to each capability family.

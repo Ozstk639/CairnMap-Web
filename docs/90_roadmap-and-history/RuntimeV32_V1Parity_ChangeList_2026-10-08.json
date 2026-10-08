@@ -2,12 +2,12 @@
   "schemaVersion": "cairnmap.v32-parity-blueprint.v1",
   "documentKind": "implementation_plan_not_importable_config",
   "date": "2026-10-08",
-  "status": "awaiting_blueprint_confirmation",
+  "status": "implemented_local_auto_acceptance_manual_pending",
   "sourceHead": "b626d272d28b3b9be2abf4abe52f4d6ee2788a61",
   "frozenReference": "0b82863d4fea3791f98917ba6d13f70e1f27eb15",
   "branch": "codex/cm-config-runtime-v32-migration-20261007",
   "scope": "V1 equivalent native editable V3 before first promotion",
-  "applicationRepairsApplied": false,
+  "applicationRepairsApplied": true,
   "remoteActionsAuthorized": false,
   "sourceFileRole": "Reference and implementation locations; frozen V1 sources are read-only oracles, not files to rewrite.",
   "inventory": {
@@ -976,5 +976,18 @@
     "Full_Parity_Audit_2026-10-08.md": "725ff18d759a2aa65772912db84254297c35a12e3368de8fcf3c0b1518725fd1",
     "blueprint-readiness.json": "c5b1f0f3ffd1eddbc7d7fa2e97c8f8b941e0a3574dea8b06337896f6d1e11c51",
     "blueprint_readiness.ts": "3e0d47e299b14dd1549ae68c4cc5b5e0a98188f4e2cfeda93877e3f72913ca65"
+  },
+  "originalBlueprintStatus": "awaiting_blueprint_confirmation",
+  "execution": {
+    "updatedAt": "2026-10-09",
+    "candidateSourceHead": "834a048fe492c2bd57777ca519cdcf47443e6317",
+    "contractRevision": 6,
+    "packageRevision": 2,
+    "implementationReport": "RuntimeV32_V1Parity_Implementation_Report_2026-10-09.md",
+    "acceptanceSummary": "runtime-v32-implementation-20261008/acceptance-summary.json",
+    "manualAcceptance": "pending_user_execution",
+    "promotionApproved": false,
+    "pushOrPRAuthorized": false,
+    "parameterEvidence": "source ownership and capability-family tests; not exhaustive per-value UI acceptance"
   }
 }

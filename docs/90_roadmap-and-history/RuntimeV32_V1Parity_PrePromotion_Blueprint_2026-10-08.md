@@ -1,5 +1,7 @@
 # Runtime V3.2 首次转正前：V1 完整再现修改蓝图
 
+> 2026-10-09 更新：用户已批准并执行本蓝图。下文保留提出蓝图时的原始状态；当前实施、自动核验、交付与尚未执行的用户人工验收见 [实施报告](RuntimeV32_V1Parity_Implementation_Report_2026-10-09.md)。
+
 日期：2026-10-08。状态：**待用户确认的实施蓝图，尚未应用功能修复，尚未通过转正验收**。
 
 基线工作树：`G:/RIAWebGIS/NewPRES/CairnMap_Codex/wt/cairnmap-config-runtime-v32-migration-20261007`。

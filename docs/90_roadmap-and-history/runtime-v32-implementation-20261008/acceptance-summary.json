@@ -1,0 +1,243 @@
+{
+  "schemaVersion": "cairnmap.v32-acceptance-summary.v1",
+  "generatedAt": "2026-10-09T00:11:41.767577+08:00",
+  "candidateSourceHead": "834a048fe492c2bd57777ca519cdcf47443e6317",
+  "branch": "codex/cm-config-runtime-v32-migration-20261007",
+  "frozenV1": "0b82863d4fea3791f98917ba6d13f70e1f27eb15",
+  "status": "local_implementation_auto_acceptance_passed_manual_pending",
+  "sourceHashFilesChecked": 520,
+  "deterministicTestCommands": [
+    "test:native-contract-schema",
+    "test:v1-render-baseline",
+    "test:config-studio-v3",
+    "test:v3-semantic-parity",
+    "test:workflow-output-editor",
+    "test:v1-workflow-output-parity",
+    "test:label-placement",
+    "test:map-zoom",
+    "test:multipart-labels",
+    "test:localization",
+    "test:package-roundtrip",
+    "test:external-workflow-output-parity",
+    "test:native-contract",
+    "test:workflow-practical",
+    "test:native-workflow-commit",
+    "test:display-parity",
+    "test:density-stability",
+    "test:card-parity",
+    "test:workflow-capture",
+    "test:config-activation",
+    "test:workflow-field-controls"
+  ],
+  "buildPassed": true,
+  "independentRender": {
+    "matrix": 909,
+    "hierarchy": 252,
+    "failed": 0,
+    "coveredNodes": 95,
+    "denseScenarios": 6,
+    "denseFeatureCount": 29,
+    "referenceMeasurements": "immutable saved V1 measurements reused for final matrix; frozen source fingerprints rechecked"
+  },
+  "nativeProductionWorkflows": {
+    "composed": 17,
+    "submissions": 34,
+    "expected": "V1 schema/assembler fixtures",
+    "fullRecordEquality": true
+  },
+  "external": {
+    "workflows": 3,
+    "records": 7,
+    "reference": "frozen components + formatters + test capture bridge",
+    "candidate": "production MeasuringModule",
+    "fullFrozenHostReplay": false
+  },
+  "cards": {
+    "sourceCases": 101,
+    "standardCases": 98,
+    "TRPSpecialCardExcluded": 3,
+    "evidenceScope": "visible row assembly/order/value objects; not 98 full DOM/card-click sessions"
+  },
+  "interaction": {
+    "states": 5,
+    "methods": "real pointer; production search events; temp-source state storage/events",
+    "fullEditDeleteToolUX": "manual_pending"
+  },
+  "positions": {
+    "nineDirectionsAndOffsets": 45,
+    "svgFamilies": 2,
+    "svgOffsetCases": 6,
+    "budIndependentZooms": [
+      0,
+      2,
+      3,
+      5,
+      6,
+      8
+    ],
+    "maxLayoutErrorCssPx": 1,
+    "wholeImagePixelEqualityClaimed": false
+  },
+  "delivery": {
+    "diskZipActualStudioImport": true,
+    "JSONZIPRoundTrip": true,
+    "contractRevision": 6,
+    "packageRevision": 2
+  },
+  "parameters": {
+    "membersIncludingNestedUnionVariants": 673,
+    "counts": {
+      "editable_with_family_evidence": 528,
+      "system_managed": 22,
+      "compatibility_metadata": 61,
+      "editable_guarded_values": 2,
+      "explicit_external_exception": 4,
+      "controlled_registry_metadata": 9,
+      "generated_provenance": 10,
+      "diagnostic_or_import_shape": 37
+    },
+    "perParameterAllValuesEndToEndClaimed": false
+  },
+  "manualAcceptance": {
+    "automaticCDP": "passed",
+    "agentVisualReview": "BUD logical3 V1/V3 paired; dense logical5 representative",
+    "user": "not_executed",
+    "promotionApproved": false
+  },
+  "remoteActions": {
+    "push": false,
+    "PR": false,
+    "mainChanged": false,
+    "RIASync": false
+  },
+  "evidenceDirectory": "G:\\RIAWebGIS\\NewPRES\\CairnMap_Codex\\migration-audits\\runtime-v32-implementation-20261008",
+  "evidenceFiles": [
+    {
+      "file": "independent-matrix.json",
+      "sha256": "6cc187d261ec573cd23edb10c639babb7a6c57f44121d7a00da9779074f9bc23",
+      "bytes": 670344,
+      "modifiedAt": "2026-10-09T00:04:58.743490+08:00"
+    },
+    {
+      "file": "independent-hierarchy.json",
+      "sha256": "8bb1bbfd4fd250b899a036b763b33b31b861dbb333dd38ea5eed9ca63ab9fac1",
+      "bytes": 204051,
+      "modifiedAt": "2026-10-09T00:08:11.878359+08:00"
+    },
+    {
+      "file": "independent-dense.json",
+      "sha256": "eae6360344a741ce4c738d5b76fcf927aab26cb3489bf8bc54ea07cb003abe2d",
+      "bytes": 71466,
+      "modifiedAt": "2026-10-09T00:08:21.232083+08:00"
+    },
+    {
+      "file": "native-workflow-matrix.json",
+      "sha256": "b639bfff1fbf6d1b66b90f7bfdfe98e9f105d7c7164b7f609ff61298367bc102",
+      "bytes": 37547,
+      "modifiedAt": "2026-10-08T20:30:43.363302+08:00"
+    },
+    {
+      "file": "external-lifecycle.json",
+      "sha256": "8daaf7131a63edde5f7c18e4555bee67c62cb074ac21e27fd7cd8068048031eb",
+      "bytes": 14106,
+      "modifiedAt": "2026-10-08T20:57:11.627055+08:00"
+    },
+    {
+      "file": "workflow-capture-parity.json",
+      "sha256": "4fbbfc5aefd106e9914e5816942d4abbe0e9c7e7ff0e91588a3d135ff59b2ab6",
+      "bytes": 1137,
+      "modifiedAt": "2026-10-08T19:52:35.484161+08:00"
+    },
+    {
+      "file": "interaction-states.json",
+      "sha256": "2552a1e338ec32fbc08499f91481c643625da9c1f21c2bd59ac420b91866bcf8",
+      "bytes": 2889,
+      "modifiedAt": "2026-10-08T23:49:41.533614+08:00"
+    },
+    {
+      "file": "interaction-parity.json",
+      "sha256": "bc11551f89855d451b0562676e073fcf1e0e5c1be0f593371dc661cc2a1fc6dc",
+      "bytes": 6506,
+      "modifiedAt": "2026-10-08T21:14:28.578622+08:00"
+    },
+    {
+      "file": "interaction-browser-result.json",
+      "sha256": "3153b5386531dea98693d7217713dd84fde7e64d4d0b75cd5ebe370e7760fc88",
+      "bytes": 455,
+      "modifiedAt": "2026-10-08T23:19:19.307443+08:00"
+    },
+    {
+      "file": "render-browser-result.json",
+      "sha256": "cbd21bed53b3682302d6a0e663ee7cd0d169d5e149e915e687870bb266788602",
+      "bytes": 22202,
+      "modifiedAt": "2026-10-08T23:08:04.443123+08:00"
+    },
+    {
+      "file": "svg-offsets.json",
+      "sha256": "d6d8302b6a33c22f3c6c9bb9cd74869ffa460091e81d7947ca9388fdeaea6d97",
+      "bytes": 2238,
+      "modifiedAt": "2026-10-08T23:53:23.754136+08:00"
+    },
+    {
+      "file": "bud-parity-browser.json",
+      "sha256": "b2212d4307ac7003214f0c7439fcfc81aa6ad709dc8cf10c9bf0f1938398dbd5",
+      "bytes": 2563,
+      "modifiedAt": "2026-10-08T23:46:26.397095+08:00"
+    },
+    {
+      "file": "lifecycle-browser-result.json",
+      "sha256": "a7429f5777464af096a7698b47eb2de236dba867ed563109f7893a1a9dbb0f66",
+      "bytes": 576,
+      "modifiedAt": "2026-10-08T21:14:33.003325+08:00"
+    },
+    {
+      "file": "studio-browser-result.json",
+      "sha256": "3942a34f3746415bc2d67cdfb961972072ee81d0c6fe4441dd4dda90c3e3b8c3",
+      "bytes": 292,
+      "modifiedAt": "2026-10-08T21:05:57.305870+08:00"
+    },
+    {
+      "file": "studio-extended-result.json",
+      "sha256": "b8c81fa67607b7b33566812f83cc60b48f3a29589a5863c5a0c8d6a4e90f900d",
+      "bytes": 475,
+      "modifiedAt": "2026-10-08T21:06:05.975362+08:00"
+    },
+    {
+      "file": "field-binding-browser-result.json",
+      "sha256": "0ee8e2ef266b4c8edd2255d098d1454be441fe5811c6a21d929860a6aadb6810",
+      "bytes": 1584,
+      "modifiedAt": "2026-10-08T23:44:24.859912+08:00"
+    },
+    {
+      "file": "delivery-import.json",
+      "sha256": "f8ea0d3c84d60dcfb82c6876fbeccc22414aadbd993497d1afd8bd113de71a4a",
+      "bytes": 131,
+      "modifiedAt": "2026-10-09T00:00:15.512440+08:00"
+    },
+    {
+      "file": "delivery-manifest.json",
+      "sha256": "6294b7ba1221d870d48c237021c3d832cf89175f3e3cfa05995a360d072a08b5",
+      "bytes": 1047,
+      "modifiedAt": "2026-10-08T23:58:39.610858+08:00"
+    },
+    {
+      "file": "delivery-validation.json",
+      "sha256": "dcbf94c64598d00fb190ff8dd94b99b523e00c4a26429f767d69d81ed85558c4",
+      "bytes": 247,
+      "modifiedAt": "2026-10-08T23:58:39.555705+08:00"
+    },
+    {
+      "file": "verify-final.log",
+      "sha256": "e622763fa27643648c33876fa2b9a85aecf7561edd55c03cf356aeab519f9d2e",
+      "bytes": 5872,
+      "modifiedAt": "2026-10-08T23:55:09.071389+08:00"
+    },
+    {
+      "file": "build-final.log",
+      "sha256": "f06aa51f80e2e32c14d65eb792dfdde4b190701d9d9f83d56b3012b71afa409b",
+      "bytes": 7581,
+      "modifiedAt": "2026-10-08T23:55:53.947050+08:00"
+    }
+  ],
+  "screenshots": "paired/interaction/workflow/UI PNGs are in evidenceDirectory; not all images are committed"
+}

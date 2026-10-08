@@ -40,7 +40,8 @@ for fixture in fixtures['cases']:
  for zoom in range(9):cases.append({'key':fixture['key'],'class':r['Class'],'zoom':zoom,'record':r})
 snapshots={}
 if args.reuse_reference:
- recorded=json.loads((OUT/'independent-matrix.json').read_text(encoding='utf-8'))
+ reference_name='independent-hierarchy.json' if args.hierarchy else 'independent-matrix.json'
+ recorded=json.loads((OUT/reference_name).read_text(encoding='utf-8'))
  assert recorded['sourceSha']==fixtures['sourceSha']
  references=[r for r in recorded['results'] if not args.classes or r['class'] in args.classes.split(',')]
  assert len(references)==len(cases)
