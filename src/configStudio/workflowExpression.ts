@@ -8,9 +8,25 @@ export type WorkflowExpression =
 export const WORKFLOW_SYSTEM_TOKENS = ['ID', 'World', 'WorldPrefix', 'Class', 'Kind', 'Skind', 'Skind2', 'Creator'] as const;
 export const PROTECTED_WORKFLOW_TARGETS = new Set(['World', 'Class', 'Kind', 'Skind', 'Skind2', 'SKind', 'SKind2', 'Type', 'Creator', 'CreateBy', 'CreateTime', 'EditBy', 'EditTime', 'CoordP', 'CoordL', 'CoordG', 'Geometry']);
 
+export function workflowConditionMatches(condition: import('./types').WorkflowValueCondition | undefined, slots: Record<string, unknown>, system: Record<string, unknown> = {}): boolean {
+  if (!condition) return true;
+  const value = Object.prototype.hasOwnProperty.call(system, condition.token) ? system[condition.token] : slots[condition.token];
+  const empty = value == null || typeof value === 'string' && !value.trim();
+  if (condition.operator === 'empty') return empty;
+  if (condition.operator === 'present') return !empty;
+  return value === condition.value;
+}
+
+export function workflowCaptureSlots(workflow: import('./types').WorkflowDefinition): string[] {
+  return workflow.steps.flatMap(step => [step.drawing?.pointSlot, ...(step.drawing?.auxiliaryPoints ?? []).map(point => point.slot)]).filter((slot): slot is string => Boolean(slot));
+}
+export function workflowDerivedPointTokens(workflow: import('./types').WorkflowDefinition): string[] {
+  return workflowCaptureSlots(workflow).flatMap(slot => [slot, `${slot}_X`, `${slot}_Y`, `${slot}_Z`]);
+}
+
 /** Resolve final-ID dependencies by stable output identity, retaining display order. */
-export function workflowOutputAssemblyOrder(workflow: { outputs: Array<{ id: string; assignments: Array<{ target: string; expression: string }> }> }): number[] {
-  const dependencies = workflow.outputs.map((output, index) => new Set(output.assignments.flatMap(assignment => workflowExpressionTokens(parseWorkflowExpression(assignment.expression)).flatMap(token => {
+export function workflowOutputAssemblyOrder(workflow: { outputs: Array<{ id: string; assignments: Array<{ target: string; expression: string; when?: import('./types').WorkflowValueCondition }> }> }): number[] {
+  const dependencies = workflow.outputs.map((output, index) => new Set(output.assignments.flatMap(assignment => [...workflowExpressionTokens(parseWorkflowExpression(assignment.expression)), ...(assignment.when ? [assignment.when.token] : [])].flatMap(token => {
     const match = /^ID_(\d+)$/.exec(token);
     if (!match) return [];
     const target = Number(match[1]) - 1;

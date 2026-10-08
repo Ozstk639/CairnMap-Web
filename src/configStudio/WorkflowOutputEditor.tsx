@@ -1,9 +1,10 @@
 import { GripVertical, Plus } from 'lucide-react';
+import { WorkflowValueConditionEditor } from './WorkflowValueConditionEditor';
 import { useMemo, useState } from 'react';
 import type { ConfigPackageV3, WorkflowAssignment, WorkflowDefinition, WorkflowOutput } from './types';
 import { resolveSelectableFields, validateWorkflowDefinition } from './runtime';
 import { evaluateV3Expression, normalizeV3WorkflowSlots, workflowOutputSystem, type V3WorkflowValueMap } from './V3WorkflowRunner';
-import { formatWorkflowExpression, parseWorkflowExpression, WORKFLOW_SYSTEM_TOKENS } from './workflowExpression';
+import { formatWorkflowExpression, parseWorkflowExpression, WORKFLOW_SYSTEM_TOKENS, workflowDerivedPointTokens } from './workflowExpression';
 
 const uid = () => `assignment-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -44,6 +45,7 @@ function AssignmentRow({ value, index, targets, tokens, system, slots, errors, o
       <label>分隔符<input className="ml-1 w-16 rounded border px-2 py-1" value={separator} onChange={(event) => setSeparator(event.target.value)} /></label><button type="button" className="rounded border px-2 py-1" onClick={join}>使用可选段 join</button>
     </div><p className="mt-2 text-slate-500">直接选择槽位或系统字段；文本使用引号，+ 拼接；join 自动跳过空片段。World 由活动世界提供。</p></details>
     <div className="mt-2 flex min-w-0 flex-wrap items-start gap-2 text-xs"><code className="min-w-0 flex-1 break-all">{value.target || '（未选择目标）'} ← {preview}</code><button type="button" className="shrink-0 rounded border px-2 py-1" onClick={onCopy}>复制行</button><button type="button" className="shrink-0 rounded border px-2 py-1 text-rose-700" onClick={onDelete}>删除行</button></div>
+    <WorkflowValueConditionEditor value={value.when} tokens={tokens} onChange={when => onChange({ ...value, when })} />
     {errors.length ? <ul role="alert" className="mt-2 space-y-1 text-xs text-rose-700">{errors.map((error, i) => <li key={i}>{error}</li>)}</ul> : null}
   </article>;
 }
@@ -52,7 +54,7 @@ export function WorkflowOutputEditor({ config, workflow, output, slots, world, o
   const [dragId, setDragId] = useState<string>();
   const targets = resolveSelectableFields(config, output.classification).map((field) => field.key);
   const controlSlots = workflow.steps.flatMap((step) => step.controls ?? []).flatMap((control) => control.slot ? [control.slot] : []);
-  const tokens = [...new Set([...controlSlots, ...WORKFLOW_SYSTEM_TOKENS, ...workflow.outputs.flatMap((_, index) => WORKFLOW_SYSTEM_TOKENS.map((token) => `${token}_${index + 1}`))])];
+  const tokens = [...new Set([...controlSlots, ...workflowDerivedPointTokens(workflow), ...WORKFLOW_SYSTEM_TOKENS, ...workflow.outputs.flatMap((_, index) => WORKFLOW_SYSTEM_TOKENS.map((token) => `${token}_${index + 1}`))])];
   slots = normalizeV3WorkflowSlots(workflow, slots);
   const system = workflowOutputSystem(workflow, slots, { world }, output.id);
   const issues = useMemo(() => validateWorkflowDefinition(workflow, config).issues, [workflow, config]);

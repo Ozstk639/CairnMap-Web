@@ -43,6 +43,7 @@ export type FieldDefinition = {
   optionSource?: { registryKey: string; runtimeField?: string };
   placeholder?: string;
   defaultValue?: unknown;
+  emptyValue?: 'omit' | 'preserve';
   sourceRuntimeField?: string;
   scenes?: { workflow?: boolean; editor?: boolean; infocard?: boolean; search?: boolean };
   reference?: { classCode: string; matchField: string; displayField?: string };
@@ -703,6 +704,7 @@ export type WorkflowControl = {
   /** System Classification N control maps to exactly one workflow output. */
   outputId?: string;
   required?: boolean;
+  when?: WorkflowValueCondition;
   systemManaged?: boolean;
   group?: WorkflowRepeatGroup;
   componentKey?: string;
@@ -720,12 +722,14 @@ export type WorkflowStep = {
   outputId?: string;
   specialKey?: string;
   tagsExtensions?: { tagsEnabled: boolean; extensionsEnabled: boolean };
-  drawing?: { enabledFromThisPage?: boolean; drawMode?: string; allowBack?: boolean; keepDrawingWhenBack?: boolean };
+  drawing?: { enabledFromThisPage?: boolean; drawMode?: string; allowBack?: boolean; keepDrawingWhenBack?: boolean; pointSlot?: string; auxiliaryPoints?: WorkflowAuxiliaryPoint[] };
   legacyPage?: Record<string, unknown>;
 };
 
 /** Target paths include fields, tags.xxx and extensions.xxx. */
-export type WorkflowAssignment = { id: string; target: string; expression: string };
+export type WorkflowValueCondition = { token: string; operator: 'empty' | 'present' | 'equals'; value?: string | number | boolean };
+export type WorkflowAuxiliaryPoint = { id: string; slot: string; label: LocalizedText; required?: boolean; when?: WorkflowValueCondition };
+export type WorkflowAssignment = { id: string; target: string; expression: string; when?: WorkflowValueCondition };
 export type WorkflowOutput = {
   id: string;
   /** Default category scope. The system creates Classification N controls if it has descendants. */

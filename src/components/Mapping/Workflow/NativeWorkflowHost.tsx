@@ -2,8 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useRuleDataStore } from '@/store/ruleDataStore';
 import { V3WorkflowRunner, type V3WorkflowRunResult } from '@/configStudio/V3WorkflowRunner';
 import type { ConfigPackageV3, MountedFeatureRecord, WorkflowDefinition, WorkflowStep } from '@/configStudio/types';
-import type { MultipartCoord } from '@/core/geometry/multipartGeometry';
-import WorkflowHost, { type WorkflowBridge, type WorkflowKey, type WorkflowRegistry } from './WorkflowHost';
+import WorkflowHost, { type WorldPoint, type WorkflowBridge, type WorkflowKey, type WorkflowRegistry } from './WorkflowHost';
 
 export function NativeWorkflowHost({ config, workflow, bridge, registry, onCommit, onExit }: {
   config: ConfigPackageV3; workflow: WorkflowDefinition; bridge: WorkflowBridge; registry: WorkflowRegistry;
@@ -14,7 +13,8 @@ export function NativeWorkflowHost({ config, workflow, bridge, registry, onCommi
   const [snapshot] = useState(() => ({ config: structuredClone(config), workflow: structuredClone(workflow) }));
   const bridgeRef = useRef(bridge); bridgeRef.current = bridge;
   const previousStep = useRef<WorkflowStep>();
-  const drafts = useRef(new Map<string, MultipartCoord[]>());
+  const drafts = useRef(new Map<string, WorldPoint[]>());
+  const activeCapture = useRef<string>();
   const datasets = useRuleDataStore(state => state.datasets);
   const deleted = new Set(bridge.getDeleteMarkedFeatureIds?.() ?? []);
   const all = [...Object.values(datasets).flatMap(dataset => dataset.features), ...(bridge.getCommittedLayerJsonInfos?.().map(item => item.featureInfo) ?? [])];
@@ -28,14 +28,15 @@ export function NativeWorkflowHost({ config, workflow, bridge, registry, onCommi
     const previous = previousStep.current;
     if (previous?.id === step?.id) return;
     if (previous?.kind === 'geometry' && previous.outputId) {
-      if (previous.drawing?.keepDrawingWhenBack === false) { drafts.current.delete(previous.outputId); current.clearWorkflowPreview(`native:${previous.outputId}`); }
-      else drafts.current.set(previous.outputId, points());
+      if (previous.drawing?.keepDrawingWhenBack === false) for (const id of [previous.outputId, ...(previous.drawing.auxiliaryPoints ?? []).map(point => `auxiliary:${point.id}`)]) { drafts.current.delete(id); current.clearWorkflowPreview(`native:${id}`); }
+      else drafts.current.set(activeCapture.current ?? previous.outputId, current.getTempPoints().map(point => ({ ...point })));
     }
     current.suspendDrawMode();
     if (step?.kind === 'geometry') {
+      activeCapture.current = step.outputId;
       current.clearTempPoints();
       current.setTempPoints(drafts.current.get(step.outputId!) ?? []);
-      current.setDrawMode(step.geometry?.[0] === 'Point' ? 'point' : step.geometry?.[0] === 'LineString' ? 'polyline' : 'polygon');
+      if (step.drawing?.enabledFromThisPage !== false) current.setDrawMode(step.geometry?.[0] === 'Point' ? 'point' : step.geometry?.[0] === 'LineString' ? 'polyline' : 'polygon');
     }
     previousStep.current = step;
   }, []);
@@ -49,13 +50,23 @@ export function NativeWorkflowHost({ config, workflow, bridge, registry, onCommi
   }
   return <div><button type="button" className="mb-2 rounded border px-2 py-1 text-xs" onClick={onExit}>退出工作流</button><V3WorkflowRunner config={snapshot.config} workflow={snapshot.workflow} records={records} worldId={bridge.getCurrentWorldId()} initialActor={bridge.getEditorId()}
     onStepChange={switchStep} onPreviewSlotsChange={previewSlots}
-    onRequestGeometry={(_outputId, geometry) => bridgeRef.current.setDrawMode(geometry === 'Point' ? 'point' : geometry === 'LineString' ? 'polyline' : 'polygon')}
+    onRequestGeometry={(outputId, geometry) => {
+      const current = bridgeRef.current;
+      if (activeCapture.current !== outputId) {
+        if (activeCapture.current) drafts.current.set(activeCapture.current, current.getTempPoints().map(point => ({ ...point })));
+        current.clearTempPoints(); current.setTempPoints(drafts.current.get(outputId) ?? []); activeCapture.current = outputId;
+      }
+      current.setDrawMode(geometry === 'Point' ? 'point' : geometry === 'LineString' ? 'polyline' : 'polygon');
+    }}
     onCaptureGeometry={(outputId, geometry) => {
-      const coords = geometry === 'Point' ? points().slice(0, 1) : points();
-      drafts.current.set(outputId, coords);
+      if (activeCapture.current !== outputId) throw new Error('请先进入对应绘制。');
+      const rawPoints = bridgeRef.current.getTempPoints();
+      const rawPoint = rawPoints[rawPoints.length - 1];
+      const coords = geometry === 'Point' ? points().slice(-1) : points();
+      drafts.current.set(outputId, geometry === 'Point' ? rawPoint ? [{ ...rawPoint }] : [] : bridgeRef.current.getTempPoints().map(point => ({ ...point })));
       bridgeRef.current.upsertWorkflowPreview(`native:${outputId}`, geometry === 'Point' ? 'point' : geometry === 'LineString' ? 'polyline' : 'polygon', coords);
       bridgeRef.current.suspendDrawMode();
-      return coords;
+      return { coordinates: coords, point: rawPoint ? { x: rawPoint.x, y: rawPoint.y, z: rawPoint.z } : undefined };
     }}
     onSubmit={outputs => { onCommit(snapshot.config, snapshot.workflow, outputs); onExit(); }}
   /></div>;

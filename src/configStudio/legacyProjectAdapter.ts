@@ -610,6 +610,7 @@ function fieldsFor(config: CairnMapClassConfig): FieldDefinition[] {
     cardinality: 'single',
     input: inputType(field),
     required: field.required,
+    ...(field.key === 'hub' && ['TPP','WRP'].includes(config.classCode) ? { emptyValue: 'preserve' as const } : {}),
     // V1 required flags constrain new workflow output but do not retroactively
     // declare the already mounted formal data invalid.
     validateExistingData: false,
@@ -638,6 +639,7 @@ function fieldsFor(config: CairnMapClassConfig): FieldDefinition[] {
     STA: ['platforms'],
     PLF: ['lines'],
     FLR: ['FloorID'],
+    TPP: ['TGTcoordinate.x', 'TGTcoordinate.y', 'TGTcoordinate.z'],
   };
   for (const key of runtimeAliases[config.classCode] ?? []) {
     if (known.has(key)) continue;
@@ -645,7 +647,8 @@ function fieldsFor(config: CairnMapClassConfig): FieldDefinition[] {
     supplemental.push({
       fieldId: `${config.classCode}-runtime-${key}`,
       key,
-      type: key === 'platforms' || key === 'lines' ? 'json' : 'string',
+      ...(key === 'TGTcoordinate.x' || key === 'TGTcoordinate.z' ? { requiredWhen: [{ kind: 'fieldPresent' as const, field: 'TGTWarp', present: false }] } : {}),
+      type: key.startsWith('TGTcoordinate.') ? 'number' : key === 'platforms' || key === 'lines' ? 'json' : 'string',
       cardinality: 'single',
       input: key === 'platforms' || key === 'lines' ? 'json' : 'text',
       validateExistingData: false,
@@ -1075,7 +1078,7 @@ function workflowsFromSchemas(classes: CairnMapClassConfig[]): WorkflowDefinitio
       });
       return options.persist === false ? undefined : { id: `${schema.schemaKey}-assignment-${field.key}-${slot}`, target: field.path, expression: slot };
     };
-    const assignments = [
+    const assignments: import('./types').WorkflowAssignment[] = [
       ...(schema.idField.workflow?.visible ? [projectField(projected.idField)] : []),
       ...projected.fields.map((field) => projectField(field)),
       // ID-only inputs must remain available to expressions but must never
@@ -1113,6 +1116,23 @@ function workflowsFromSchemas(classes: CairnMapClassConfig[]): WorkflowDefinitio
     const geometry = schema.classification?.ref?.geom === '线' ? 'LineString' as const
       : schema.classification?.ref?.geom === '面' ? 'Polygon' as const : 'Point' as const;
     const outputId = `${schema.schemaKey}-output-1`;
+    const drawing: NonNullable<WorkflowStep['drawing']> = { enabledFromThisPage: true, keepDrawingWhenBack: true };
+    const drawingControls: WorkflowControl[] = [];
+    if (classCode === 'TPP' || classCode === 'WRP') {
+      drawing.pointSlot = 'SOURCE_POINT';
+      const hubSlot = assignments.find(assignment => assignment.target === 'hub')?.expression;
+      const hubControl = controls.find(control => control.slot === hubSlot);
+      if (hubControl) hubControl.defaultValue = '';
+      drawingControls.push({ id: `${schema.schemaKey}-elevation`, kind: 'number', slot: 'SOURCE_ELEVATION', columns: 1, label: { zh: '起点高度(y)', en: '' } });
+      assignments.push({ id: `${schema.schemaKey}-source-elevation-input`, target: 'elevation', expression: 'SOURCE_ELEVATION' }, { id: `${schema.schemaKey}-source-elevation-capture`, target: 'elevation', expression: 'SOURCE_POINT_Y', when: { token: 'SOURCE_POINT_Y', operator: 'present' } });
+      if (classCode === 'TPP') {
+        const warpSlot = assignments.find(assignment => assignment.target === 'TGTWarp')?.expression ?? '';
+        const when = { token: warpSlot, operator: 'empty' as const };
+        drawing.auxiliaryPoints = [{ id: `${schema.schemaKey}-target-point`, slot: 'TARGET_POINT', label: { zh: '目标点坐标', en: '' }, required: true, when }];
+        drawingControls.push({ id: `${schema.schemaKey}-target-elevation`, kind: 'number', slot: 'TARGET_ELEVATION', columns: 1, label: { zh: '目标点高度(y)', en: '' }, when });
+        assignments.push({ id: `${schema.schemaKey}-target-y-default`, target: 'TGTcoordinate.y', expression: '-64', when }, { id: `${schema.schemaKey}-target-x`, target: 'TGTcoordinate.x', expression: 'TARGET_POINT_X', when }, { id: `${schema.schemaKey}-target-z`, target: 'TGTcoordinate.z', expression: 'TARGET_POINT_Z', when }, { id: `${schema.schemaKey}-target-y-input`, target: 'TGTcoordinate.y', expression: 'TARGET_ELEVATION', when }, { id: `${schema.schemaKey}-target-elevation-input`, target: 'TGTelevation', expression: 'TARGET_ELEVATION', when }, { id: `${schema.schemaKey}-target-y-capture`, target: 'TGTcoordinate.y', expression: 'TARGET_POINT_Y', when: { token: 'TARGET_POINT_Y', operator: 'present' } }, { id: `${schema.schemaKey}-target-elevation-capture`, target: 'TGTelevation', expression: 'TARGET_POINT_Y', when: { token: 'TARGET_POINT_Y', operator: 'present' } });
+      }
+    }
     return [{
       id: `v3-${schema.schemaKey}`,
       label: { zh: schema.displayName, en: '' },
@@ -1122,7 +1142,7 @@ function workflowsFromSchemas(classes: CairnMapClassConfig[]): WorkflowDefinitio
         { id: `${schema.schemaKey}-actor`, kind: 'actor' as const, label: { zh: '填写人', en: 'Author' } },
         { id: `${schema.schemaKey}-form`, kind: 'form' as const, label: { zh: '基本信息', en: 'Basic information' }, controls },
         { id: `${schema.schemaKey}-tail`, kind: 'tagsExtensions' as const, label: { zh: '标签与扩展', en: 'Tags and extensions' }, tagsExtensions: { tagsEnabled: true, extensionsEnabled: true } },
-        { id: `${schema.schemaKey}-geometry`, kind: 'geometry' as const, outputId, geometry: [geometry], label: { zh: '绘制', en: 'Geometry' }, drawing: { enabledFromThisPage: true, keepDrawingWhenBack: true } },
+        { id: `${schema.schemaKey}-geometry`, kind: 'geometry' as const, outputId, geometry: [geometry], label: { zh: '绘制', en: 'Geometry' }, drawing, controls: drawingControls },
       ],
       outputs: [{ id: outputId, classification: target, assignments, geometry: { selected: geometry } }],
       legacy: { runtimeMode: 'registry-schema', source: { schemaKey: schema.schemaKey } },

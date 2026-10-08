@@ -23,7 +23,7 @@ import type {
   SelectOption,
   ZoomPriorityRule,
 } from './types';
-import { isSafeWorkflowTarget, parseWorkflowExpression, workflowExpressionTokens, WORKFLOW_SYSTEM_TOKENS, PROTECTED_WORKFLOW_TARGETS, workflowOutputAssemblyOrder } from './workflowExpression';
+import { isSafeWorkflowTarget, parseWorkflowExpression, workflowExpressionTokens, WORKFLOW_SYSTEM_TOKENS, PROTECTED_WORKFLOW_TARGETS, workflowOutputAssemblyOrder, workflowCaptureSlots, workflowDerivedPointTokens } from './workflowExpression';
 import { createBlankV32Package } from './v32Defaults';
 
 const GEOMETRIES: GeometryKind[] = ['Point', 'LineString', 'Polygon'];
@@ -611,10 +611,11 @@ export function validateWorkflowOutput(output: WorkflowOutput, _outputIndex: num
   if (!output.geometry.selected) issue(issues, 'error', 'workflow-output-geometry-required', base, '每个工作流输出必须选择固定绘制类型。');
   else if (!resolveGeometryProfile(config, output.classification, output.geometry.selected)?.enabled) issue(issues, 'error', 'workflow-output-geometry-disabled', base, `输出分类没有启用 ${output.geometry.selected} 绘制类型。`);
   const fields = new Set(resolveEffectiveFields(config, output.classification).map((field) => field.key));
-  const tokens = new Set([...WORKFLOW_SYSTEM_TOKENS, ...workflow.outputs.flatMap((_, index) => WORKFLOW_SYSTEM_TOKENS.map((item) => `${item}_${index + 1}`)), ...slots]);
+  const tokens = new Set([...WORKFLOW_SYSTEM_TOKENS, ...workflow.outputs.flatMap((_, index) => WORKFLOW_SYSTEM_TOKENS.map((item) => `${item}_${index + 1}`)), ...slots, ...workflowDerivedPointTokens(workflow)]);
   const assignmentIds = new Set<string>();
   for (const assignment of output.assignments) {
     const assignmentPath = `${base}/assignments/${assignment.id}`;
+    validateWorkflowValueCondition(assignment.when, tokens, assignmentPath, issues);
     if (PROTECTED_WORKFLOW_TARGETS.has(assignment.target.split('.')[0])) {
       const token = assignment.target === 'SKind' ? 'Skind' : assignment.target === 'SKind2' ? 'Skind2' : assignment.target;
       if (assignment.expression.trim() !== token || !WORKFLOW_SYSTEM_TOKENS.includes(token as typeof WORKFLOW_SYSTEM_TOKENS[number])) issue(issues, 'error', 'workflow-system-target-protected', assignmentPath, `系统字段 ${assignment.target} 不能由字段组装覆盖。`);
@@ -627,6 +628,12 @@ export function validateWorkflowOutput(output: WorkflowOutput, _outputIndex: num
       for (const token of workflowExpressionTokens(parseWorkflowExpression(assignment.expression))) if (!tokens.has(token)) issue(issues, 'error', 'workflow-assignment-slot-missing', assignmentPath, `字段组装引用了不存在的输入槽位或系统字段 ${token}。`);
     } catch (error) { issue(issues, 'error', 'workflow-assignment-expression-invalid', assignmentPath, error instanceof Error ? error.message : '组装表达式无效。'); }
   }
+}
+
+function validateWorkflowValueCondition(condition: import('./types').WorkflowValueCondition | undefined, tokens: Set<string>, path: string, issues: ConfigValidationIssue[]): void {
+  if (!condition) return;
+  if (!tokens.has(condition.token) || !['empty','present','equals'].includes(condition.operator)) issue(issues, 'error', 'workflow-value-condition-invalid', path, '执行条件必须使用已声明 token 与受控操作。');
+  if (condition.operator === 'equals' && !['string','number','boolean'].includes(typeof condition.value)) issue(issues, 'error', 'workflow-value-condition-invalid', path, '相等条件必须有有效比较值。');
 }
 
 function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3, issues: ConfigValidationIssue[]): void {
@@ -658,6 +665,17 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
 
   const slots = new Set<string>();
   const controlList = controlsFor(workflow);
+  const allTokens = new Set([...controlList.flatMap(control => control.slot ? [control.slot] : []), ...workflowDerivedPointTokens(workflow), ...WORKFLOW_SYSTEM_TOKENS, ...workflow.outputs.flatMap((_, index) => WORKFLOW_SYSTEM_TOKENS.map(token => `${token}_${index + 1}`))]);
+  const captured = workflowCaptureSlots(workflow);
+  const derivedTokens = workflowDerivedPointTokens(workflow);
+  for (const token of derivedTokens) if (!/^[A-Z][A-Z0-9_]*$/.test(token) || controlList.some(control => control.slot === token) || derivedTokens.filter(item => item === token).length > 1 || WORKFLOW_SYSTEM_TOKENS.some(system => token === system || new RegExp(`^${system}_\\d+$`).test(token))) issue(issues, 'error', 'workflow-capture-slot-invalid', base, `坐标槽位 ${token} 无效、重复或占用系统 token。`);
+  if (config.contractRevision === 5 && captured.length) issue(issues, 'error', 'workflow-capture-revision-invalid', base, '坐标槽位要求原生 r6。');
+  for (const step of workflow.steps) {
+    if (step.drawing?.drawMode && step.drawing.drawMode !== ({ Point: 'point', LineString: 'polyline', Polygon: 'polygon' } as const)[step.geometry?.[0] ?? 'Point']) issue(issues, 'error', 'workflow-draw-mode-invalid', `${base}/steps/${step.id}`, '绘制模式必须与固定几何类型一致。');
+    const ids = (step.drawing?.auxiliaryPoints ?? []).map(point => point.id);
+    if (ids.some(id => !id) || new Set(ids).size !== ids.length) issue(issues, 'error', 'workflow-auxiliary-id-invalid', `${base}/steps/${step.id}`, '辅助点标识必须存在且唯一。');
+  }
+  for (const step of workflow.steps) for (const point of step.drawing?.auxiliaryPoints ?? []) validateWorkflowValueCondition(point.when, allTokens, `${base}/steps/${step.id}/drawing/${point.id}`, issues);
   const validateOptions = (control: Pick<WorkflowControl, 'kind' | 'options'>, path: string) => {
     if (control.kind !== 'select') return;
     const values = (control.options ?? []).map((option) => option.value);
@@ -665,6 +683,7 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
   };
   for (const step of workflow.steps) for (const control of step.controls ?? []) {
     const controlPath = `${base}/steps/${step.id}/controls/${control.id}`;
+    validateWorkflowValueCondition(control.when, allTokens, controlPath, issues);
     if (['notice', 'runtimeValue', 'component'].includes(control.kind)) issue(issues, 'error', 'workflow-control-kind-not-composed', controlPath, '组合式工作流只允许标准表单控件；专有流程应切换为外部整体工作流。');
     if (control.slot) {
       if (!/^[A-Z][A-Z0-9_]*$/.test(control.slot) || slots.has(control.slot) || WORKFLOW_SYSTEM_TOKENS.some(token => control.slot === token || new RegExp(`^${token}_\\d+$`).test(control.slot!))) issue(issues, 'error', 'workflow-slot-invalid', controlPath, `输出槽位 ${control.slot} 无效、重复或与系统 token 冲突。`);

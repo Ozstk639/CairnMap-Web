@@ -1,4 +1,5 @@
 import type { WorkflowControl, WorkflowGroupField } from './types';
+import { WorkflowValueConditionEditor } from './WorkflowValueConditionEditor';
 
 type Settings = WorkflowControl | WorkflowGroupField;
 export function WorkflowControlSettings({ value, onChange }: { value: Settings; onChange: (next: Settings) => void }) {
@@ -19,5 +20,6 @@ export function WorkflowControlSettings({ value, onChange }: { value: Settings; 
     <label>输入提示<input className="mt-1 w-full rounded border px-2 py-1" value={value.placeholder ?? ''} onChange={event => patch({ placeholder: event.target.value })} /></label>
     {value.kind === 'textarea' || value.kind === 'json' ? <label>输入行数<input type="number" min={1} className="mt-1 w-full rounded border px-2 py-1" value={value.rows ?? 3} onChange={event => patch({ rows: Number(event.target.value) })} /></label> : null}
     {'slot' in value ? <label>值规范化<select className="mt-1 w-full rounded border px-2 py-1" value={value.valueNormalization ?? 'none'} onChange={event => onChange({ ...value, valueNormalization: event.target.value as WorkflowControl['valueNormalization'] })}><option value="none">保留输入</option><option value="trim">去首尾空白</option><option value="abbr">标识缩写</option><option value="number">数值</option></select></label> : null}
+    {'id' in value ? <WorkflowValueConditionEditor value={value.when} onChange={when => onChange({ ...value, when })} /> : null}
   </div>;
 }

@@ -6491,6 +6491,83 @@
           "id": "tpp_teleport-assignment-id",
           "target": "ID",
           "expression": "join(\"_\",WorldPrefix+Class+Kind+Skind,H)"
+        },
+        {
+          "id": "tpp_teleport-source-elevation-input",
+          "target": "elevation",
+          "expression": "SOURCE_ELEVATION"
+        },
+        {
+          "id": "tpp_teleport-source-elevation-capture",
+          "target": "elevation",
+          "expression": "SOURCE_POINT_Y",
+          "when": {
+            "token": "SOURCE_POINT_Y",
+            "operator": "present"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-y-default",
+          "target": "TGTcoordinate.y",
+          "expression": "-64",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-x",
+          "target": "TGTcoordinate.x",
+          "expression": "TARGET_POINT_X",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-z",
+          "target": "TGTcoordinate.z",
+          "expression": "TARGET_POINT_Z",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-y-input",
+          "target": "TGTcoordinate.y",
+          "expression": "TARGET_ELEVATION",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-elevation-input",
+          "target": "TGTelevation",
+          "expression": "TARGET_ELEVATION",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-y-capture",
+          "target": "TGTcoordinate.y",
+          "expression": "TARGET_POINT_Y",
+          "when": {
+            "token": "TARGET_POINT_Y",
+            "operator": "present"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-elevation-capture",
+          "target": "TGTelevation",
+          "expression": "TARGET_POINT_Y",
+          "when": {
+            "token": "TARGET_POINT_Y",
+            "operator": "present"
+          }
         }
       ],
       "controls": [
@@ -6510,6 +6587,7 @@
           "id": "tpp_teleport-hub-B",
           "slot": "B",
           "kind": "text",
+          "defaultValue": "",
           "valueNormalization": "trim"
         },
         {
@@ -6615,6 +6693,16 @@
           "kind": "text",
           "required": true,
           "valueNormalization": "abbr"
+        },
+        {
+          "id": "tpp_teleport-elevation",
+          "slot": "SOURCE_ELEVATION",
+          "kind": "number"
+        },
+        {
+          "id": "tpp_teleport-target-elevation",
+          "slot": "TARGET_ELEVATION",
+          "kind": "number"
         }
       ]
     },
@@ -6707,6 +6795,83 @@
           "id": "tpp_teleport-assignment-id",
           "target": "ID",
           "expression": "join(\"_\",WorldPrefix+Class+Kind+Skind,H)"
+        },
+        {
+          "id": "tpp_teleport-source-elevation-input",
+          "target": "elevation",
+          "expression": "SOURCE_ELEVATION"
+        },
+        {
+          "id": "tpp_teleport-source-elevation-capture",
+          "target": "elevation",
+          "expression": "SOURCE_POINT_Y",
+          "when": {
+            "token": "SOURCE_POINT_Y",
+            "operator": "present"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-y-default",
+          "target": "TGTcoordinate.y",
+          "expression": "-64",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-x",
+          "target": "TGTcoordinate.x",
+          "expression": "TARGET_POINT_X",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-z",
+          "target": "TGTcoordinate.z",
+          "expression": "TARGET_POINT_Z",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-y-input",
+          "target": "TGTcoordinate.y",
+          "expression": "TARGET_ELEVATION",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-elevation-input",
+          "target": "TGTelevation",
+          "expression": "TARGET_ELEVATION",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-y-capture",
+          "target": "TGTcoordinate.y",
+          "expression": "TARGET_POINT_Y",
+          "when": {
+            "token": "TARGET_POINT_Y",
+            "operator": "present"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-elevation-capture",
+          "target": "TGTelevation",
+          "expression": "TARGET_POINT_Y",
+          "when": {
+            "token": "TARGET_POINT_Y",
+            "operator": "present"
+          }
         }
       ],
       "controls": [
@@ -6726,6 +6891,7 @@
           "id": "tpp_teleport-hub-B",
           "slot": "B",
           "kind": "text",
+          "defaultValue": "",
           "valueNormalization": "trim"
         },
         {
@@ -6831,6 +6997,16 @@
           "kind": "text",
           "required": true,
           "valueNormalization": "abbr"
+        },
+        {
+          "id": "tpp_teleport-elevation",
+          "slot": "SOURCE_ELEVATION",
+          "kind": "number"
+        },
+        {
+          "id": "tpp_teleport-target-elevation",
+          "slot": "TARGET_ELEVATION",
+          "kind": "number"
         }
       ]
     },
@@ -6923,6 +7099,20 @@
           "id": "wrp_warp-assignment-id",
           "target": "ID",
           "expression": "join(\"_\",WorldPrefix+Class+Kind+Skind,H)"
+        },
+        {
+          "id": "wrp_warp-source-elevation-input",
+          "target": "elevation",
+          "expression": "SOURCE_ELEVATION"
+        },
+        {
+          "id": "wrp_warp-source-elevation-capture",
+          "target": "elevation",
+          "expression": "SOURCE_POINT_Y",
+          "when": {
+            "token": "SOURCE_POINT_Y",
+            "operator": "present"
+          }
         }
       ],
       "controls": [
@@ -6949,6 +7139,7 @@
           "id": "wrp_warp-hub-C",
           "slot": "C",
           "kind": "text",
+          "defaultValue": "",
           "valueNormalization": "trim"
         },
         {
@@ -7032,6 +7223,11 @@
           "kind": "text",
           "required": true,
           "valueNormalization": "abbr"
+        },
+        {
+          "id": "wrp_warp-elevation",
+          "slot": "SOURCE_ELEVATION",
+          "kind": "number"
         }
       ]
     },
@@ -7124,6 +7320,20 @@
           "id": "wrp_warp-assignment-id",
           "target": "ID",
           "expression": "join(\"_\",WorldPrefix+Class+Kind+Skind,H)"
+        },
+        {
+          "id": "wrp_warp-source-elevation-input",
+          "target": "elevation",
+          "expression": "SOURCE_ELEVATION"
+        },
+        {
+          "id": "wrp_warp-source-elevation-capture",
+          "target": "elevation",
+          "expression": "SOURCE_POINT_Y",
+          "when": {
+            "token": "SOURCE_POINT_Y",
+            "operator": "present"
+          }
         }
       ],
       "controls": [
@@ -7150,6 +7360,7 @@
           "id": "wrp_warp-hub-C",
           "slot": "C",
           "kind": "text",
+          "defaultValue": "",
           "valueNormalization": "trim"
         },
         {
@@ -7233,6 +7444,11 @@
           "kind": "text",
           "required": true,
           "valueNormalization": "abbr"
+        },
+        {
+          "id": "wrp_warp-elevation",
+          "slot": "SOURCE_ELEVATION",
+          "kind": "number"
         }
       ]
     }

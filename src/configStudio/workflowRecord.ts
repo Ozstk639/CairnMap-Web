@@ -16,7 +16,7 @@ export function finalizeV3WorkflowRecord(config: ConfigPackageV3, output: Workfl
       return entries.length ? Object.fromEntries(entries) : undefined;
     }
     const field = fields.get(path);
-    if (value === '' && !field?.required) return undefined;
+    if (value === '' && !field?.required && field?.emptyValue !== 'preserve') return undefined;
     if (field?.type === 'number' && value !== null && value !== '') { const number = Number(value); return Number.isFinite(number) ? number : value; }
     if (field?.type === 'boolean' && typeof value === 'string') return value === 'true' ? true : value === 'false' ? false : value;
     return value;
