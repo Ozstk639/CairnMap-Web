@@ -25,6 +25,9 @@ export type Condition =
   | { kind: 'fieldEquals'; field: string; value: string }
   | { kind: 'fieldIn'; field: string; values: string[] }
   | { kind: 'fieldPresent'; field: string; present: boolean };
+export type RenderFieldCondition = Extract<Condition, { field: string }>;
+export type RenderFieldGroup = { op: 'all' | 'any' | 'not'; items: Array<RenderFieldCondition | RenderFieldGroup> };
+export type RenderRuleMatch = { zoom: { min: number; max: number }; fields?: RenderFieldGroup };
 
 export type FieldDefinition = {
   fieldId: string;
@@ -450,6 +453,8 @@ export type RenderRuleConditionalOverride = {
 /** 区块 C：zoom windows and metric based display priority only. */
 export type ZoomPriorityRule = {
   id: string;
+  /** r7: the only authored match range; fields exclude classification identity. */
+  when?: RenderRuleMatch;
   /** V3.2 uses inclusive Leaflet zoom boundaries. */
   minZoom?: number;
   maxZoom?: number;
@@ -794,7 +799,7 @@ export type ParityReport = { schemaVersion: 'cairnmap.v1-parity-report.v2'; sour
 export type ConfigPackageV3 = {
   schemaVersion: 'cairnmap.config-package.v3';
   /** Contract revision is API compatibility, not the user-facing package revision. */
-  contractRevision: 3 | 4 | 5 | 6;
+  contractRevision: 3 | 4 | 5 | 6 | 7;
   packageId: string;
   projectId: string;
   /** Persistence version only; the save dialog requires a monotonic integer. */

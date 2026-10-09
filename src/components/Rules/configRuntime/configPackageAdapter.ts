@@ -302,7 +302,8 @@ function mergeExtensions(base: RenderRuleExtensions | undefined, override: Rende
  * This keeps Zoom intervals single and non-overlapping while retaining V1's
  * small number of real field-dependent visual branches. */
 function activeRuleFor(profile: NonNullable<ReturnType<typeof resolveGeometryProfile>>, record: FeatureRecord, ctx: RenderContext): ZoomPriorityRule | undefined {
-  const base = resolveZoomRule(profile, ctx.zoomLevel);
+  const selected = resolveZoomRule(profile, ctx.zoomLevel, field => featureValue(record, field));
+  const base = selected?.when ? { ...selected, minZoom: selected.when.zoom.min, maxZoom: selected.when.zoom.max } : selected;
   if (!base) return undefined;
   let active: ZoomPriorityRule = base;
   for (const override of base.conditionalOverrides ?? []) {
@@ -581,7 +582,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
   const fallback = active.extensions?.fallback;
   const labelText = active.extensions?.labelText;
   const ruleDisplayPriority = dynamicPriority(record, active);
-  const collisionPriority = config.contractRevision === 6 && label.collision.compatibility !== 'r5DisplayPriority'
+  const collisionPriority = config.contractRevision >= 6 && label.collision.compatibility !== 'r5DisplayPriority'
     ? dynamicPriority(record, { ...active, priority: { mode: 'add', base: label.collision.basePriority, metric: label.collision.metric } })
     : label.collision.basePriority + ruleDisplayPriority;
   const iconSource = style.icon ? String(featureValue(record, style.icon.source) ?? '').trim() : '';
@@ -630,7 +631,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
         offsetX: label.offsetX ?? 0,
         screenOffsets: true,
         candidatePlacement: anchor?.candidatePlacement,
-        ...(config.contractRevision === 6 && label.withDot ? { withDot: true, dotAnchorMode: label.dotAnchorMode ?? 'inline' } : {}),
+        ...(config.contractRevision >= 6 && label.withDot ? { withDot: true, dotAnchorMode: label.dotAnchorMode ?? 'inline' } : {}),
         // A decoration may accompany a genuine Point symbol in r6. Structures
         // represented by points use the native symbol/Label coupling instead.
         styleKey: labelKey as any,

@@ -1,4 +1,5 @@
 import { isNativeConfigRevision } from './contract';
+import { canonicalRenderFields, matchesRenderFields, renderRuleRange, validateRenderFields } from './renderRuleConditions';
 import type {
   AffectedFeature,
   CardConfiguration,
@@ -80,7 +81,7 @@ export function compileConfigRuntime(value: ConfigPackageV3): ConfigPackageV3 {
     resolveCardConfiguration(config, node.path);
     for (const geometry of GEOMETRIES) {
       const profile = resolveGeometryProfile(config, node.path, geometry);
-      if (profile && !compiledZoomBuckets.has(profile)) compiledZoomBuckets.set(profile, Array.from({ length: 9 }, (_, zoom) => profile.zoomPriority.rules.filter(rule => (rule.minZoom === undefined || zoom >= rule.minZoom) && (rule.maxZoom === undefined || zoom <= rule.maxZoom))));
+      if (profile && !compiledZoomBuckets.has(profile)) compiledZoomBuckets.set(profile, Array.from({ length: 9 }, (_, zoom) => profile.zoomPriority.rules.filter(rule => { const range = renderRuleRange(rule); return zoom >= range.min && zoom <= range.max; })));
     }
   }
   for (const geometry of GEOMETRIES) {
@@ -351,8 +352,13 @@ export function resolveCardItems(config: ConfigPackageV3, path: ClassificationPa
   return card?.mode === 'fields' ? card.items : [];
 }
 
-export function resolveZoomRule(profile: GeometryProfile, zoom: number): ZoomPriorityRule | undefined {
+export function resolveZoomRule(profile: GeometryProfile, zoom: number, read?: (field: string) => unknown): ZoomPriorityRule | undefined {
   const bucket = compiledZoomBuckets.get(profile)?.[zoom];
+  if (profile.zoomPriority.rules.some(rule => rule.when)) {
+    const candidates = bucket ?? profile.zoomPriority.rules.filter(rule => { const range = renderRuleRange(rule); return zoom >= range.min && zoom <= range.max; });
+    for (let i = candidates.length - 1; i >= 0; i--) if (!candidates[i].when?.fields || read && matchesRenderFields(candidates[i].when?.fields, read)) return candidates[i];
+    return undefined;
+  }
   if (bucket) return bucket[0];
   return profile.zoomPriority.rules.find((rule) => {
     const min = rule.minZoom ?? (rule.minExclusive === undefined ? undefined : rule.minExclusive + 1);
@@ -587,11 +593,16 @@ function validateProfile(profile: GeometryProfile, geometry: GeometryKind, path:
   const intervals: Array<{ id: string; min: number; max: number }> = [];
   for (const [index, rule] of profile.zoomPriority.rules.entries()) {
     const rulePath = `${path}/renderRules/${rule.id || index + 1}`;
-    const min = rule.minZoom;
-    const max = rule.maxZoom;
+    const min = rule.when?.zoom.min ?? rule.minZoom;
+    const max = rule.when?.zoom.max ?? rule.maxZoom;
+    if (config.contractRevision === 7) {
+      if (!rule.when || !Number.isInteger(min) || !Number.isInteger(max) || min! < 0 || max! > 8 || min! > max!) issue(issues, 'error', 'render-match-zoom-required', rulePath, 'r7 必须填写 0–8 的闭区间整数 Zoom，允许单级区间。');
+      if (rule.minZoom !== undefined || rule.maxZoom !== undefined || rule.minExclusive !== undefined || rule.maxExclusive !== undefined || rule.conditionalOverrides !== undefined) issue(issues, 'error', 'render-legacy-match-forbidden', rulePath, 'r7 只使用 when.zoom 和非分类字段组合，不能保留旧匹配或分支。');
+      for (const message of validateRenderFields(rule.when?.fields, resolveEffectiveFields(config, sourcePath), resolveSelectableFields(config, sourcePath).map(field => field.key))) issue(issues, 'error', 'render-field-condition-invalid', `${rulePath}/when/fields`, message);
+    } else if (rule.when) issue(issues, 'error', 'render-match-revision-invalid', rulePath, '组合规则需要原生 r7；旧包请先无损迁移。');
     if (!rule.representation) issue(issues, 'error', 'render-representation-required', rulePath, '渲染规则必须选择显示种类。');
     else if (!['hidden', 'geometry', 'point', 'labelOnly'].includes(rule.representation)) issue(issues, 'error', 'render-representation-invalid', rulePath, '未知显示种类。');
-    if (rule.representation === 'labelOnly' && config.contractRevision !== 6) issue(issues, 'error', 'render-contract-capability-invalid', rulePath, '仅标签显示需要原生契约 revision 6。');
+    if (rule.representation === 'labelOnly' && config.contractRevision < 6) issue(issues, 'error', 'render-contract-capability-invalid', rulePath, '仅标签显示需要原生契约 revision 6 或更新版本。');
     if (min !== undefined && max !== undefined && min > max) issue(issues, 'error', 'zoom-interval-invalid', rulePath, '显示区间必须符合下界 ≤ Zoom ≤ 上界。');
     intervals.push({ id: rule.id, min: min ?? -Infinity, max: max ?? Infinity });
     const stack = rule.geometryStack;
@@ -644,11 +655,14 @@ function validateProfile(profile: GeometryProfile, geometry: GeometryKind, path:
       const value = rule.advanced?.[key as keyof NonNullable<typeof rule.advanced>];
       return value !== undefined && (typeof value !== 'object' || value === null || Object.keys(value as object).length > 0);
     })) issue(issues, 'error', 'legacy-advanced-forbidden', rulePath, 'V3.2 原生规则只能使用类型化“扩展规则”，不得保留 V1 advanced/JSON 回退。');
-    if (index === 0 && !rule.id) issue(issues, 'error', 'render-rule-id-required', rulePath, '渲染规则必须具有 ID。');
+    if (!rule.id || profile.zoomPriority.rules.slice(0, index).some(prior => prior.id === rule.id)) issue(issues, 'error', 'render-rule-id-required', rulePath, '渲染规则必须具有唯一 ID。');
   }
   for (let left = 0; left < intervals.length; left += 1) for (let right = left + 1; right < intervals.length; right += 1) {
     const a = intervals[left]; const b = intervals[right];
-    if (a.min <= b.max && b.min <= a.max) issue(issues, 'error', 'render-zoom-interval-overlap', path, `渲染规则 ${a.id} 与 ${b.id} 的闭区间重叠。`);
+    if (config.contractRevision === 7) {
+      if (a.min === b.min && a.max === b.max && canonicalRenderFields(profile.zoomPriority.rules[left].when?.fields) === canonicalRenderFields(profile.zoomPriority.rules[right].when?.fields)) issue(issues, 'error', 'render-match-duplicate', path, `渲染规则 ${a.id} 与 ${b.id} 的完整条件重复。`);
+      else if (a.min >= b.min && a.max <= b.max && !profile.zoomPriority.rules[right].when?.fields) issue(issues, 'warning', 'render-match-shadowed', path, `规则 ${a.id} 被后项 ${b.id} 完全覆盖。`);
+    } else if (a.min <= b.max && b.min <= a.max) issue(issues, 'error', 'render-zoom-interval-overlap', path, `渲染规则 ${a.id} 与 ${b.id} 的闭区间重叠。`);
   }
 }
 

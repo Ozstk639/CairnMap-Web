@@ -43,7 +43,7 @@
     "test:external-workflow-output-parity": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-external-workflow-output-parity.ts",
     "test:package-roundtrip": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-package-roundtrip.ts",
     "test:localization": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-localization.ts",
-    "verify:config-v32": "npm run test:native-contract-schema && npm run test:v1-render-baseline && npm run test:config-studio-v3 && npm run test:v3-semantic-parity && npm run test:workflow-output-editor && npm run test:v1-workflow-output-parity && npm run test:label-placement && npm run test:map-zoom && npm run test:multipart-labels && npm run test:localization && npm run test:package-roundtrip && npm run test:external-workflow-output-parity && npm run test:native-contract && npm run test:workflow-practical && npm run test:native-workflow-commit && npm run test:display-parity && npm run test:density-stability && npm run test:card-parity && npm run test:workflow-capture && npm run test:config-activation && npm run test:workflow-field-controls && npm run test:compiled-runtime",
+    "verify:config-v32": "npm run test:native-contract-schema && npm run test:v1-render-baseline && npm run test:config-studio-v3 && npm run test:v3-semantic-parity && npm run test:workflow-output-editor && npm run test:v1-workflow-output-parity && npm run test:label-placement && npm run test:map-zoom && npm run test:multipart-labels && npm run test:localization && npm run test:package-roundtrip && npm run test:external-workflow-output-parity && npm run test:native-contract && npm run test:workflow-practical && npm run test:native-workflow-commit && npm run test:display-parity && npm run test:density-stability && npm run test:card-parity && npm run test:workflow-capture && npm run test:config-activation && npm run test:workflow-field-controls && npm run test:compiled-runtime && npm run test:render-r7",
     "test:config-v32-acceptance": "npm run build",
     "audit:eol": "node ./scripts/quality/check-eol.mjs",
     "test:native-contract": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-native-contract.ts",
@@ -56,7 +56,8 @@
     "test:config-activation": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-config-activation.ts",
     "test:native-contract-schema": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/generate-native-contract-schema.ts --check",
     "test:workflow-field-controls": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-workflow-field-controls.ts",
-    "test:compiled-runtime": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-compiled-runtime.ts"
+    "test:compiled-runtime": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-compiled-runtime.ts",
+    "test:render-r7": "tsx --tsconfig ./tsconfig.app.json ./scripts/config-tools/test-render-r7.ts"
   },
   "dependencies": {
     "jszip": "^3.10.1",
