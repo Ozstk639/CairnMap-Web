@@ -5,7 +5,7 @@ import FeatureModuleLoadingOverlay from './components/Common/FeatureModuleLoadin
 import ConfigStudio from './configStudio/ConfigStudio'
 import ConfigLab from './configStudio/ConfigLab'
 import WorkflowStudioPage from './configStudio/WorkflowStudioPage'
-import { useEffect } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { useFeatureModuleStore } from './store/featureModuleStore'
 
 function App() {
@@ -20,8 +20,9 @@ function App() {
   const isConfigLab = workspace === 'config-lab'
   const isWorkflowStudio = workspace === 'config-workflow'
 
+  let workspaceContent: ReactNode
   if (isConfigStudio) {
-    return <ConfigStudio onClose={() => {
+    workspaceContent = <ConfigStudio onClose={() => {
       const returnTarget = sessionStorage.getItem('cairnmap-config-studio-return')
       if (returnTarget) {
         sessionStorage.removeItem('cairnmap-config-studio-return')
@@ -32,30 +33,25 @@ function App() {
       target.searchParams.delete('workspace')
       window.location.assign(target.toString())
     }} />
-  }
-
-  if (isConfigLab) {
-    return <ConfigLab onClose={() => {
+  } else if (isConfigLab) {
+    workspaceContent = <ConfigLab onClose={() => {
       const target = new URL(window.location.href)
       target.searchParams.delete('workspace')
       target.searchParams.delete('configMode')
       window.location.assign(target.toString())
     }} />
-  }
-
-  if (isWorkflowStudio) {
-    return <WorkflowStudioPage onClose={() => {
+  } else if (isWorkflowStudio) {
+    workspaceContent = <WorkflowStudioPage onClose={() => {
       const target = new URL(window.location.href)
       target.searchParams.delete('workspace')
       target.searchParams.delete('tab')
       window.location.assign(target.toString())
     }} />
-  }
+  } else workspaceContent = <><MapContainer /><PWAInstallPrompt /></>
 
   return (
     <div className="app-root h-screen w-screen">
-      <MapContainer />
-      <PWAInstallPrompt />
+      {workspaceContent}
       <FeatureModuleLoadDialog />
       <FeatureModuleLoadingOverlay />
     </div>

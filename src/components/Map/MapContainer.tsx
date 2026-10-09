@@ -1880,7 +1880,10 @@ case 'players':
                 onTogglePlayers={setShowPlayers}
                 onToggleDimBackground={setDimBackground}
                 onToggleMapStyle={setMapStyle}
-              />
+              >
+                <ToolIconButton label="测量工具" icon={<Ruler className="w-5 h-5" />} active={measurementToolsActive} onClick={() => { requestMeasuringModuleEntry('mtools'); setMobileQuickPanel(null); }} />
+                <ToolIconButton label="测绘" icon={<Pencil className="w-5 h-5" />} active={measuringModuleActive} onClick={() => { requestMeasuringModuleEntry('measuring'); setMobileQuickPanel(null); }} />
+              </LayerControl>
             );
           }}
           onDockHeightChange={setMobileQuickDockHeight}

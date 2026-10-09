@@ -1,6 +1,6 @@
 {
   "documentKind": "consolidated_implementation_blueprint_not_importable_config",
-  "status": "awaiting_user_review_and_generation_command_not_implemented",
+  "status": "implementation_authorized_in_progress",
   "date": "2026-10-09",
   "blueprint": "RuntimeV32_Frontend_Runtime_Editor_Implementation_Blueprint_2026-10-09.md",
   "worktree": "G:/RIAWebGIS/NewPRES/CairnMap_Codex/wt/cairnmap-config-runtime-v32-migration-20261007",
@@ -8,7 +8,7 @@
   "planningBaselineHead": "bf6748d9487fffe6d53709e865185df22be1b34d",
   "functionalBaselineHead": "b7b6e414538f3baee48ab3b3975988e90aa5363e",
   "frozenV1": "0b82863d4fea3791f98917ba6d13f70e1f27eb15",
-  "functionalGenerationAuthorizedThisTurn": false,
+  "functionalGenerationAuthorizedThisTurn": true,
   "remoteActionsAuthorized": false,
   "recommendedContractRevision": 7,
   "nextPackageRevisionExample": 3,
