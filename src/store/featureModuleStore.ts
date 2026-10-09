@@ -169,7 +169,9 @@ export const useFeatureModuleStore = create<FeatureModuleState>((set, get) => ({
   requestModuleActivation: (moduleKey, options) => {
     const existing = get().modules[moduleKey];
     if (existing.enabledByUser) {
-      void get().ensureModuleLoaded(moduleKey);
+      void get().ensureModuleLoaded(moduleKey).catch((error: unknown) => {
+        set({ dialog: { isOpen: true, moduleKey, title: DEFAULT_TITLES[moduleKey], description: DEFAULT_DESCRIPTIONS[moduleKey], loading: false, error: String((error as Error)?.message ?? error ?? '扩展模块加载失败') } });
+      });
       return;
     }
     if (existing.lastLoadedVersion === CURRENT_APP_VERSION && existing.status === 'loaded') {
@@ -197,6 +199,15 @@ export const useFeatureModuleStore = create<FeatureModuleState>((set, get) => ({
     const dialog = get().dialog;
     const moduleKey = dialog.moduleKey;
     if (!dialog.isOpen || !moduleKey) return;
+
+    // Browsers retain failed dynamic imports in the current module map. A
+    // user-triggered page reload retries the real bundled URLs, including
+    // dependencies, without importing arbitrary URLs or changing the bundle.
+    if (get().modules[moduleKey].status === 'error' && typeof window !== 'undefined') {
+      try { window.sessionStorage.setItem('ria_feature_module_retry_v1', moduleKey); } catch { /* retry still reloads */ }
+      window.location.reload();
+      return;
+    }
 
     set((state) => ({
       modules: {
@@ -287,6 +298,9 @@ export const useFeatureModuleStore = create<FeatureModuleState>((set, get) => ({
               error: message,
             },
           },
+        // Publish error and its dialog together: the host must not interpret
+        // the gap between these states as the user cancelling the tool intent.
+        dialog: { isOpen: true, moduleKey, title: DEFAULT_TITLES[moduleKey], description: DEFAULT_DESCRIPTIONS[moduleKey], loading: false, error: message },
         }));
         persistState(get().modules);
         throw err;

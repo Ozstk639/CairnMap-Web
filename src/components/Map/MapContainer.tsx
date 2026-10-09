@@ -361,9 +361,19 @@ function MapContainer({ configRuntime, configLab = false }: { configRuntime?: Co
   const legacyModuleState = useFeatureModuleStore((s) => s.modules.legacy);
   const featureDialogState = useFeatureModuleStore((s) => s.dialog);
   const requestFeatureModuleActivation = useFeatureModuleStore((s) => s.requestModuleActivation);
+  const featureModulesHydrated = useFeatureModuleStore((s) => s.hydrated);
   const measuringModuleLoaded = measuringModuleState.status === 'loaded';
   const legacyModuleLoaded = legacyModuleState.status === 'loaded';
-  const [pendingMeasureModuleOpen, setPendingMeasureModuleOpen] = useState<null | 'measuring' | 'mtools'>(null);
+  const resumeMeasureModuleRef = useRef(false);
+  const [pendingMeasureModuleOpen, setPendingMeasureModuleOpen] = useState<null | 'measuring' | 'mtools'>(() => {
+    try {
+      if (sessionStorage.getItem('ria_feature_module_retry_v1') === 'measuring') {
+        const tool = sessionStorage.getItem('ria_feature_module_pending_tool_v1');
+        if (tool === 'measuring' || tool === 'mtools') { resumeMeasureModuleRef.current = true; return tool; }
+      }
+    } catch { /* session persistence is optional */ }
+    return null;
+  });
   const [pendingLegacyAction, setPendingLegacyAction] = useState<null | 'railway-on' | 'landmark-on' | 'lines-page'>(null);
   const [measuringOpenSignal, setMeasuringOpenSignal] = useState(0);
   const [measurementToolsOpenSignal, setMeasurementToolsOpenSignal] = useState(0);
@@ -481,6 +491,20 @@ useEffect(() => {
 }, []);
 
   useEffect(() => {
+    try {
+      if (pendingMeasureModuleOpen) sessionStorage.setItem('ria_feature_module_pending_tool_v1', pendingMeasureModuleOpen);
+      else sessionStorage.removeItem('ria_feature_module_pending_tool_v1');
+    } catch { /* session persistence is optional */ }
+  }, [pendingMeasureModuleOpen]);
+
+  useEffect(() => {
+    if (!resumeMeasureModuleRef.current || !featureModulesHydrated || !mapReady) return;
+    resumeMeasureModuleRef.current = false;
+    try { sessionStorage.removeItem('ria_feature_module_retry_v1'); } catch { /* optional */ }
+    requestFeatureModuleActivation('measuring');
+  }, [featureModulesHydrated, mapReady, requestFeatureModuleActivation]);
+
+  useEffect(() => {
     if (!pendingMeasureModuleOpen || !measuringModuleLoaded) return;
     if (pendingMeasureModuleOpen === 'measuring') setMeasuringOpenSignal((v) => v + 1);
     else setMeasurementToolsOpenSignal((v) => v + 1);
@@ -489,9 +513,10 @@ useEffect(() => {
 
   useEffect(() => {
     if (!pendingMeasureModuleOpen) return;
-    if (featureDialogState.isOpen) return;
+    if (resumeMeasureModuleRef.current) return;
+    if (featureDialogState.isOpen || useFeatureModuleStore.getState().dialog.isOpen) return;
     if (measuringModuleLoaded) return;
-    if (measuringModuleState.status === 'loading') return;
+    if (measuringModuleState.status === 'loading' || useFeatureModuleStore.getState().modules.measuring.status === 'loading') return;
     setPendingMeasureModuleOpen(null);
   }, [pendingMeasureModuleOpen, featureDialogState.isOpen, measuringModuleLoaded, measuringModuleState.status]);
 

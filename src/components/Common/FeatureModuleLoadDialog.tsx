@@ -57,7 +57,7 @@ export default function FeatureModuleLoadDialog() {
             disabled={dialog.loading}
           >
             {dialog.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            <span>{dialog.loading ? '加载中' : '下载并启用'}</span>
+            <span>{dialog.loading ? '加载中' : dialog.error ? '重新加载并重试' : '下载并启用'}</span>
           </AppButton>
         </div>
       </AppCard>
