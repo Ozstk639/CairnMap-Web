@@ -47,4 +47,9 @@
 - 尊重关闭继承；首次本地显示编辑生成独立组，取消不留下节点，失配模板/引用和祖先几何约束阻断保存。
 - 专项、完整核验和构建通过。真实界面取消、父级继承、新分类核验、兼容组模板和草稿切标签阻断通过；实际候选组含 9 个优先平级、1 个父级、14 个其他兼容分类，运行异常零。证据：[category-editor-result.json](G:/RIAWebGIS/NewPRES/CairnMap_Codex/migration-audits/runtime-v32-frontend-runtime-editor-20261009/category-editor-result.json)。
 
-后续：BP07–BP10 按蓝图继续实施，逐主题记录验证和本地提交。
+## BP07：统一扩展规则
+
+- 主区保留基础 A/B/C；三个高级模块进入同一默认折叠入口。显示权重指标、合成/边界归 C 子模块；Pane/zIndex 属于通用层级，Label 每屏配额属于碰撞/密度，Label 独立碰撞指标保持独立。
+- 仅重组编辑入口与控件归属，未改变保存路径、默认值或规则效果。完整核验和构建通过，实际页面各规则只有一个默认折叠总入口，三个高级模块均嵌套其内。证据：[extensions-grouping-result.json](G:/RIAWebGIS/NewPRES/CairnMap_Codex/migration-audits/runtime-v32-frontend-runtime-editor-20261009/extensions-grouping-result.json)。
+
+后续：BP08–BP10 按蓝图继续实施，逐主题记录验证和本地提交。
