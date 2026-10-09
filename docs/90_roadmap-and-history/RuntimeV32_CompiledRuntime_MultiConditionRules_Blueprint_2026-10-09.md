@@ -2,6 +2,8 @@
 
 日期：2026-10-09。状态：**供用户审阅的方案，未实施功能修改**。
 
+本文件保留讨论历史。全部前端、运行时和编辑要求已合并到[整合实施蓝图](G:/RIAWebGIS/NewPRES/CairnMap_Codex/wt/cairnmap-config-runtime-v32-migration-20261007/docs/90_roadmap-and-history/RuntimeV32_Frontend_Runtime_Editor_Implementation_Blueprint_2026-10-09.md)，后续实施以整合版为统一参照，仍等待用户核验和开始生成命令。
+
 功能基线：`b7b6e414538f3baee48ab3b3975988e90aa5363e`，分支 `codex/cm-config-runtime-v32-migration-20261007`。继续仅本地更新；不授权 push、PR、main 或 RIA 同步。独立 V1 参照仍为 `0b82863d4fea3791f98917ba6d13f70e1f27eb15`。
 
 依据：[前端排查报告](G:/RIAWebGIS/NewPRES/CairnMap_Codex/migration-audits/runtime-v32-feedback-20261009/Frontend_Feedback_Findings_2026-10-09.md)、当前 V1/V3 代码以及用户本次要求。配套 JSON 是计划清单，不是可以导入的配置包。

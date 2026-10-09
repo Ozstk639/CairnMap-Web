@@ -1,6 +1,7 @@
 {
   "documentKind": "implementation_blueprint_not_importable_config",
   "status": "proposal_for_user_review_not_implemented",
+  "supersededForImplementationBy": "RuntimeV32_Frontend_Runtime_Editor_Implementation_Plan_2026-10-09.json",
   "date": "2026-10-09",
   "requirementsSupplementDate": "2026-10-09",
   "sourceHead": "b7b6e414538f3baee48ab3b3975988e90aa5363e",
