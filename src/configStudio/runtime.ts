@@ -64,8 +64,12 @@ function freezeData<T>(value: T): T {
 }
 /** Only validated activation/preview snapshots enter this cache. Mutable editor
  * objects deliberately retain the uncached reference implementation. */
-export function compileConfigRuntime(value: ConfigPackageV3): ConfigPackageV3 {
+export function compileConfigRuntime(value: ConfigPackageV3, validated = false): ConfigPackageV3 {
   if (compiledConfigs.has(value)) return value;
+  if (!validated) {
+    const report = validateConfigPackage(value);
+    if (!report.valid) throw new Error(`无法编译无效配置：${report.issues.filter(issue => issue.severity === 'error').slice(0, 5).map(issue => issue.message).join('；')}`);
+  }
   const config = freezeData(structuredClone(value));
   const compiled: CompiledConfig = { epoch: ++compiledEpoch, byClass: new Map(), ancestors: new Map(), descendants: new Set(), fields: new Map(), selectable: new Map(), profiles: new Map(), cards: new Map(), defaults: new Map(), extensions: new WeakMap(), hits: 0 };
   for (const node of config.nodes) {

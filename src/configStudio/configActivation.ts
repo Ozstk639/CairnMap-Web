@@ -12,5 +12,5 @@ export function prepareConfigForActivation(value: ConfigPackageV3): ConfigPackag
   if (config.contractRevision !== 6 && config.contractRevision !== 7) throw new Error(`无法启用：未知的原生契约 revision ${config.contractRevision}。`);
   const report = validateConfigPackage(config);
   if (!report.valid) throw new Error(`无法保存或启用无效配置：${report.issues.filter(issue => issue.severity === 'error').slice(0,5).map(issue => `${issue.path}：${issue.message}`).join('；')}`);
-  return compileConfigRuntime(config);
+  return compileConfigRuntime(config, true);
 }

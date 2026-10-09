@@ -6,7 +6,7 @@ import { buildConfigPackageArchive, downloadConfigPackage, readConfigPackage } f
 import { validateConfigPackage } from './runtime';
 import { listConfigLabPackages, loadLatestConfigLabPackage, saveConfigLabPackage } from './configLabStorage';
 import type { ConfigPackageV3 } from './types';
-import { createConfigPackageFromCurrentProject } from './legacyProjectAdapter';
+import { createEditableConfigPackageFromCurrentProject as createConfigPackageFromCurrentProject } from './renderRuleTemplates';
 
 class LabErrorBoundary extends Component<{ children: ReactNode; onError: (error: Error) => void }, { error?: Error }> {
   state: { error?: Error } = {};

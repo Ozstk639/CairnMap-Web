@@ -6,7 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import { createDynmapCRS, DynmapProjection, ZTH_FLAT_CONFIG } from '@/lib/DynmapProjection';
 import { createDynmapTileLayer } from '@/lib/DynmapTileLayer';
 import RuleDrivenLayer from '@/components/Rules/core/RuleDrivenLayer';
-import { resolveGeometryProfile } from './runtime';
+import { compileConfigRuntime, resolveGeometryProfile, validateConfigPackage } from './runtime';
 import { toLeafletZoom, toZoomLevel } from '@/components/Rules/rendering/renderRules';
 import type { CategoryNode, ConfigPackageV3, GeometryKind, PreviewScenario } from './types';
 
@@ -178,6 +178,7 @@ export function previewScenarioCompatible(config: ConfigPackageV3, node: Categor
 }
 
 export function ConfigRuntimePreview({ config, node, scenario, onRuntimeError, onMapReady }: { config: ConfigPackageV3; node: CategoryNode; scenario: PreviewScenario; onRuntimeError?: (error: Error) => void; onMapReady?: (map: L.Map) => void }) {
+  const activeConfig = useMemo(() => validateConfigPackage(config).valid ? compileConfigRuntime(config, true) : undefined, [config]);
   const [map, setMap] = useState<L.Map | null>(null);
   const [tileError, setTileError] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
@@ -212,9 +213,10 @@ export function ConfigRuntimePreview({ config, node, scenario, onRuntimeError, o
     <MapContainer center={[0, 0]} zoom={leafletZoom} minZoom={MAP_ZOOM_BOUNDS.minZoom} maxZoom={MAP_ZOOM_BOUNDS.maxZoom} zoomControl={false} attributionControl crs={createDynmapCRS(ZTH_FLAT_CONFIG)} className="absolute inset-0 h-full min-h-[300px] w-full" dragging={false} touchZoom={false} doubleClickZoom={false} boxZoom={false} keyboard={false} scrollWheelZoom={false} zoomSnap={1} zoomDelta={1}>
       <TileLayer onError={setTileError} />
       <LockedViewport zoom={leafletZoom} onReady={setMap} onZoom={(value) => setZoom(toZoomLevel(value))} />
-      {map ? <RuleDrivenLayer mapReady map={map} projection={projection} worldId="zth" visible activeButtonIds={[]} bypassButtonFilter runtimeDataset={dataset} disableTransientSources configRuntime={config} floorPanelMode={selectedBinding ? 'embedded' : 'hidden'} /> : null}
+      {map && activeConfig ? <RuleDrivenLayer mapReady map={map} projection={projection} worldId="zth" visible activeButtonIds={[]} bypassButtonFilter runtimeDataset={dataset} disableTransientSources configRuntime={activeConfig} floorPanelMode={selectedBinding ? 'embedded' : 'hidden'} /> : null}
     </MapContainer>
     {tileError ? <p role="alert" className="absolute bottom-3 left-3 right-3 z-[1100] rounded bg-rose-50/95 p-2 text-xs text-rose-800">{tileError}</p> : null}
+    {!activeConfig ? <p role="status" className="absolute bottom-3 left-3 right-3 z-[1100] rounded bg-amber-50 p-2 text-xs text-amber-900">当前草稿尚未通过核验，完善条件或引用后恢复原生预览。</p> : null}
     <div className="absolute left-3 top-3 z-[1100] flex overflow-hidden rounded border border-slate-300 bg-white/95 shadow">
       <button type="button" className="px-3 py-1 text-lg hover:bg-slate-100" aria-label="缩小验证器" onClick={() => setZoom((value) => Math.max(0, value - 1))}>−</button>
       <span aria-live="polite" className="min-w-20 border-x px-2 py-1 text-center text-xs leading-6">规则 Zoom {zoom}</span>
