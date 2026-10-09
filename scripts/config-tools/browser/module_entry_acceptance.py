@@ -33,7 +33,7 @@ def open_tool(tool):
         b.wait("[...document.querySelectorAll('button')].some(e=>e.textContent.trim()===" + json.dumps(tool) + "&&e.getBoundingClientRect().height)")
     b.evaluate("(()=>{const e=[...document.querySelectorAll('button')].find(e=>e.textContent.trim()===" + json.dumps(tool) + "&&e.getBoundingClientRect().height);e.click();return true;})()")
 
-for mode, narrow, tool in [('v3', False, '测绘'), ('v3', True, '测量工具'), ('v1', False, '测量工具')]:
+for mode, narrow, tool in [('v3', False, '测绘'), ('v3', True, '测量工具'), ('v3', True, '测绘'), ('v1', False, '测量工具')]:
     print(json.dumps({'checking': mode, 'narrow': narrow, 'tool': tool}, ensure_ascii=False), flush=True)
     load(mode, narrow)
     assert state('s.modules.measuring.enabledByUser') is False
@@ -48,9 +48,10 @@ for mode, narrow, tool in [('v3', False, '测绘'), ('v3', True, '测量工具')
     open_tool(tool)
     b.click('下载并启用')
     b.wait("(async()=>{const s=" + store + ".getState();return s.modules.measuring.status==='loaded'&&!s.dialog.isOpen;})()", 60)
-    b.wait("[...document.querySelectorAll('button')].some(e=>e.textContent.trim()==='开始测绘(完整)')" if tool == '测绘' else "[...document.querySelectorAll('h3')].some(e=>e.textContent.trim()==='测量工具')")
+    b.wait("[...document.querySelectorAll('button')].some(e=>e.textContent.trim()==='开始测绘(完整)'&&e.getBoundingClientRect().height)" if tool == '测绘' else "[...document.querySelectorAll('h3')].some(e=>e.textContent.trim()==='测量工具'&&e.getBoundingClientRect().height)")
+    b.evaluate("new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))")
     checks.append({'mode': mode, 'narrow': narrow, 'tool': tool, 'coldDialogSingle': True, 'cancelKeepsDisabled': True, 'activationLoaded': True, 'dialogBounds': rect})
-    b.screenshot('module-entry-' + mode + ('-narrow' if narrow else '-desktop') + '.png')
+    b.screenshot('module-entry-' + mode + ('-narrow' if narrow else '-desktop') + ('-measuring' if tool == '测绘' else '-measurement') + '.png')
 load('v3', cold=False)
 assert state('s.modules.measuring.enabledByUser') is True
 b.click('测绘')

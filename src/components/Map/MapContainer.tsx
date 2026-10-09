@@ -1,6 +1,7 @@
 import { isNativeConfigRevision } from '../../configStudio/contract';
 import { MAP_ZOOM_BOUNDS, TILE_ZOOM_BOUNDS } from '@/lib/mapZoom';
 import { Suspense, lazy, useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import MobileBottomSheet from '@/components/Mobile/MobileBottomSheet';
 import MobileQuickDock from '@/components/Mobile/MobileQuickDock';
 import MobileFeatureJsonPanel from '@/components/Mobile/MobileFeatureJsonPanel';
@@ -366,6 +367,8 @@ function MapContainer({ configRuntime, configLab = false }: { configRuntime?: Co
   const [pendingLegacyAction, setPendingLegacyAction] = useState<null | 'railway-on' | 'landmark-on' | 'lines-page'>(null);
   const [measuringOpenSignal, setMeasuringOpenSignal] = useState(0);
   const [measurementToolsOpenSignal, setMeasurementToolsOpenSignal] = useState(0);
+  const [measurementLauncherHost, setMeasurementLauncherHost] = useState<HTMLDivElement | null>(null);
+  const [measuringLauncherHost, setMeasuringLauncherHost] = useState<HTMLDivElement | null>(null);
 
   const [stations, setStations] = useState<ParsedStation[]>([]);
   const [lines, setLines] = useState<ParsedLine[]>([]);
@@ -2121,30 +2124,7 @@ case 'players':
             onToggleMapStyle={setMapStyle}
           >
           {measuringModuleLoaded ? (
-            <Suspense fallback={null}>
-              <LazyMeasurementToolsModule
-                mapReady={mapReady}
-                leafletMapRef={leafletMapRef}
-                projectionRef={projectionRef}
-                closeSignal={measureToolsCloseSignal}
-                openSignal={measurementToolsOpenSignal}
-                onBecameActive={() => setMeasuringCloseSignal(v => v + 1)}
-                launcherSlot={(launcher) => <div className="hidden sm:block">{launcher}</div>}
-              />
-              <LazyMeasuringModule
-                configRuntime={configRuntime}
-                ref={measuringModuleRef}
-                mapReady={mapReady}
-                leafletMapRef={leafletMapRef}
-                projectionRef={projectionRef}
-                currentWorldId={currentWorld}
-                closeSignal={measuringCloseSignal}
-                openSignal={measuringOpenSignal}
-                onBecameActive={() => setMeasureToolsCloseSignal(v => v + 1)}
-                disablePackageUpload={configLab}
-                launcherSlot={(launcher) => <div className="hidden sm:block">{launcher}</div>}
-              />
-            </Suspense>
+            <><div ref={setMeasurementLauncherHost} /><div ref={setMeasuringLauncherHost} /></>
           ) : (
             <>
               <div className="hidden sm:block">
@@ -2171,6 +2151,23 @@ case 'players':
           </LayerControl>
         </div>
       </div>
+
+      {/* Module bodies must stay outside the hidden desktop toolbar. Only launchers are portaled into it. */}
+      {measuringModuleLoaded && <Suspense fallback={null}>
+        <LazyMeasurementToolsModule
+          mapReady={mapReady} leafletMapRef={leafletMapRef} projectionRef={projectionRef}
+          closeSignal={measureToolsCloseSignal} openSignal={measurementToolsOpenSignal}
+          onBecameActive={() => setMeasuringCloseSignal(v => v + 1)}
+          launcherSlot={launcher => measurementLauncherHost ? createPortal(launcher, measurementLauncherHost) : launcher}
+        />
+        <LazyMeasuringModule
+          configRuntime={configRuntime} ref={measuringModuleRef} mapReady={mapReady}
+          leafletMapRef={leafletMapRef} projectionRef={projectionRef} currentWorldId={currentWorld}
+          closeSignal={measuringCloseSignal} openSignal={measuringOpenSignal}
+          onBecameActive={() => setMeasureToolsCloseSignal(v => v + 1)} disablePackageUpload={configLab}
+          launcherSlot={launcher => measuringLauncherHost ? createPortal(launcher, measuringLauncherHost) : launcher}
+        />
+      </Suspense>}
 
       <MobileBottomSheet
         open={shouldShowMobileSheet}

@@ -4816,12 +4816,6 @@ const workflowBridge: WorkflowBridge = {
         className="h-11 w-11"
       />
 
-      {/* 移动端仍使用局部定位；桌面端通过桌面窗口 root portal 接入统一层级栈。 */}
-      {!measureDropdownDesktop ? (
-        <div className="absolute right-0 z-50 max-md:bottom-full max-md:mb-2 max-md:origin-bottom-right">
-          {measureDropdownMenu}
-        </div>
-      ) : null}
       {measureDropdownPortal}
     </div>
   );
@@ -5260,6 +5254,7 @@ const layerManagerDesktopNode = measuringActive ? (
 const rightDockNode = (
   <>
     {launcherNode}
+    {!measureDropdownDesktop && measureDropdownOpen ? <div className="sm:hidden fixed right-4 top-[40%] z-[2600] max-h-[55vh] overflow-y-auto">{measureDropdownMenu}</div> : null}
     {layerManagerDesktopNode}
   </>
 );
