@@ -38,6 +38,8 @@ export type FloorViewConfig = {
 
 export type RenderContext = {
   worldId: string;
+  /** Data epoch includes transient mounts, overrides and deletion/restoration. */
+  dataVersion?: number;
   leafletZoom: number;
   zoomLevel: ZoomLevel;
   inFloorView: boolean;

@@ -106,10 +106,30 @@ import { filterRecordsByRuleButtons } from "@/components/Rules/ButtonRule/button
 import { setRuleSearchPool } from "@/components/Rules/search/ruleSearchRegistry";
 import { useRuleDataStore } from "@/store/ruleDataStore";
 import { useLoadingStore } from "@/store/loadingStore";
-import { resolveConfigInteractionVisual, resolveConfigRuntimeCardOverride, resolveConfigRuntimeContextForHost, resolveConfigRuntimeContextForRecord, resolveConfigRuntimeRule, resolveConfigRuntimeScreenGate, resolveConfigRuntimeStackOrder } from "@/components/Rules/configRuntime/configPackageAdapter";
+import { configRuntimeViewportReach, resolveConfigInteractionVisual, resolveConfigRuntimeCardOverride, resolveConfigRuntimeContextForHost, resolveConfigRuntimeContextForRecord, resolveConfigRuntimeRule, resolveConfigRuntimeScreenGate, resolveConfigRuntimeStackOrder } from "@/components/Rules/configRuntime/configPackageAdapter";
 import type { ConfigPackageV3 } from "@/configStudio/types";
 
 const FLOOR_VIEW_MIN_LEVEL = Math.max(0, DEFAULT_FLOOR_VIEW.minLevel);
+
+const nativeGeometryBounds = new WeakMap<FeatureRecord, { projection: DynmapProjection; version: number; bounds: L.LatLngBounds }>();
+function nativeInLayoutViewport(record: FeatureRecord, projection: DynmapProjection, map: L.Map, layout: L.LatLngBounds, reach: number, version: number): boolean {
+  let cached = nativeGeometryBounds.get(record);
+  if (!cached || cached.projection !== projection || cached.version !== version) {
+    const bounds = L.latLngBounds([]);
+    const visit = (value: unknown): void => {
+      if (Array.isArray(value)) { value.forEach(visit); return; }
+      const point = value as { x?: number; y?: number; z?: number } | undefined;
+      if (point && Number.isFinite(point.x) && Number.isFinite(point.z)) bounds.extend(projection.locationToLatLng(point.x!, point.y ?? Y_FOR_DISPLAY, point.z!));
+    };
+    visit(record.multipartGeometry?.parts ?? (record.type === 'Points' ? [record.p3] : record.coords3));
+    cached = { projection, version, bounds }; nativeGeometryBounds.set(record, cached);
+  }
+  if (!cached.bounds.isValid()) return true;
+  const a = map.latLngToContainerPoint(cached.bounds.getNorthWest()), b = map.latLngToContainerPoint(cached.bounds.getSouthEast());
+  const c = map.latLngToContainerPoint(layout.getNorthWest()), d = map.latLngToContainerPoint(layout.getSouthEast());
+  return Math.max(a.x, b.x) + reach >= Math.min(c.x, d.x) && Math.min(a.x, b.x) - reach <= Math.max(c.x, d.x)
+    && Math.max(a.y, b.y) + reach >= Math.min(c.y, d.y) && Math.min(a.y, b.y) - reach <= Math.max(c.y, d.y);
+}
 
 type Props = {
   mapReady: boolean;
@@ -1706,6 +1726,7 @@ export default function RuleDrivenLayer(props: Props) {
   const highlightGroupRef = useRef<L.LayerGroup | null>(null);
   const stateVisualGroupRef = useRef<L.LayerGroup>(L.layerGroup());
   const stateHoverBoundRef = useRef<WeakSet<L.Layer>>(new WeakSet());
+  const stateHoverEnabledRef = useRef<Map<string, boolean>>(new Map());
   const [hoveredUid, setHoveredUid] = useState<string | null>(null);
   useEffect(() => {
     if (!mapReady || !map || !configRuntime) return;
@@ -2988,6 +3009,9 @@ export default function RuleDrivenLayer(props: Props) {
     const refresh = (
       reason: "initial" | "move" | "moveend" | "zoomend" | "state" = "state",
     ) => {
+      // A queued React/Leaflet refresh may outlive the map during workspace
+      // navigation or HMR. Never project against a removed map pane.
+      if (!(map as L.Map & { _mapPane?: HTMLElement })._mapPane || !map.getContainer().isConnected) return;
       const waitingFirstPaint =
         pendingRuleFirstPaintWorldRef.current === worldId &&
         isActiveRuleLoading(worldId) &&
@@ -3040,6 +3064,7 @@ export default function RuleDrivenLayer(props: Props) {
 
       const context: RenderContext = {
         worldId,
+        dataVersion,
         leafletZoom,
         zoomLevel,
         inFloorView,
@@ -3070,12 +3095,13 @@ export default function RuleDrivenLayer(props: Props) {
       );
       const viewportWorldRectXZ = layoutViewportWorldRectXZ;
       const records = isNativeConfigRevision(configRuntime?.contractRevision)
-        ? [...recordsRef.current].sort((left, right) => {
-            const a = resolveConfigRuntimeStackOrder(configRuntime, left, context);
-            const b = resolveConfigRuntimeStackOrder(configRuntime, right, context);
-            return a.geometryZ - b.geometryZ || a.displayPriority - b.displayPriority || left.uid.localeCompare(right.uid);
-          })
+        ? recordsRef.current.filter(record => selectedFeature?.uid === record.uid || searchFocusedUid === record.uid || pendingOpenUidRef.current === record.uid
+            || nativeInLayoutViewport(record, projection, map, layoutBounds, configRuntimeViewportReach(configRuntime!, record, context, store), dataVersion))
+          .map(record => ({ record, stack: resolveConfigRuntimeStackOrder(configRuntime, record, context, store) }))
+          .sort((a, b) => a.stack.geometryZ - b.stack.geometryZ || a.stack.displayPriority - b.stack.displayPriority || a.record.uid.localeCompare(b.record.uid))
+          .map(item => item.record)
         : recordsRef.current;
+      stateHoverEnabledRef.current.clear();
       // Symbol density is a native V3.2 rule extension.  Reserve each grid
       // slot for the highest collision/display priority first, independently
       // from the later painter's z-order (which remains low-to-high).
@@ -3225,6 +3251,7 @@ export default function RuleDrivenLayer(props: Props) {
 
         const interactionReasons: DisplayInteractionReason[] = [];
         const activeState = (state: import('@/configStudio/types').InteractionState) => !configRuntime || resolveConfigInteractionVisual(configRuntime, r, context, state, store).enabled;
+        if (configRuntime) stateHoverEnabledRef.current.set(r.uid, activeState('hover'));
         const isSelectedFeature = selectedFeature?.uid === r.uid && activeState('selected');
         const isSearchFocus = (searchFocusedUid === r.uid || pendingOpenUidRef.current === r.uid) && activeState('searchResult');
         const isHovered = hoveredUid === r.uid && activeState('hover');
@@ -3348,7 +3375,7 @@ export default function RuleDrivenLayer(props: Props) {
             : [r.p3];
           const visiblePoint = pointCoords
             .map((point) => projection.locationToLatLng(point.x, point.y, point.z))
-            .find((candidate) => layoutBounds.contains(candidate));
+            .find((candidate) => layoutBounds.contains(candidate)) ?? (configRuntime && pointCoords[0] ? projection.locationToLatLng(pointCoords[0].x, pointCoords[0].y, pointCoords[0].z) : undefined);
           if (!visiblePoint) continue;
           pointLatLng = visiblePoint;
         } else if (r.coords3 && r.coords3.length) {
@@ -3368,7 +3395,7 @@ export default function RuleDrivenLayer(props: Props) {
             L.latLng(minLat, minLng),
             L.latLng(maxLat, maxLng),
           );
-          if (!layoutBounds.intersects(b)) {
+          if (!configRuntime && !layoutBounds.intersects(b)) {
             updateLineAuditBlocked(
               auditRow,
               "viewport",
@@ -3526,8 +3553,8 @@ export default function RuleDrivenLayer(props: Props) {
           const bindHover = (layer: L.Layer) => {
             if (stateHoverBoundRef.current.has(layer)) return;
             stateHoverBoundRef.current.add(layer);
-            layer.on('mouseover', () => setHoveredUid(r.uid));
-            layer.on('mouseout', () => setHoveredUid(value => value === r.uid ? null : value));
+            layer.on('mouseover', () => { if (stateHoverEnabledRef.current.get(r.uid)) setHoveredUid(r.uid); });
+            layer.on('mouseout', () => { if (stateHoverEnabledRef.current.get(r.uid)) setHoveredUid(value => value === r.uid ? null : value); });
             if (layer instanceof L.LayerGroup) layer.eachLayer(bindHover);
           };
           [nativeBundle.main, nativeBundle.hitProxy, nativeBundle.label].filter(Boolean).forEach(layer => bindHover(layer!));
@@ -4270,8 +4297,8 @@ export default function RuleDrivenLayer(props: Props) {
           if (configRuntime && b.label && !stateHoverBoundRef.current.has(b.label)) {
             const uid = req.featureUid ?? '';
             stateHoverBoundRef.current.add(b.label);
-            b.label.on('mouseover', () => setHoveredUid(uid));
-            b.label.on('mouseout', () => setHoveredUid(value => value === uid ? null : value));
+            b.label.on('mouseover', () => { if (stateHoverEnabledRef.current.get(uid)) setHoveredUid(uid); });
+            b.label.on('mouseout', () => { if (stateHoverEnabledRef.current.get(uid)) setHoveredUid(value => value === uid ? null : value); });
           }
           const savedPlacement = nativePlacementRef.current.get(req.id);
           if (savedPlacement?.placed.collisionRect) {

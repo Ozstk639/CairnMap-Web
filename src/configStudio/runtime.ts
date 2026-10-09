@@ -51,6 +51,7 @@ type CompiledConfig = {
   hits: number;
 };
 const compiledConfigs = new WeakMap<ConfigPackageV3, CompiledConfig>();
+const compiledZoomBuckets = new WeakMap<GeometryProfile, ZoomPriorityRule[][]>();
 let compiledEpoch = 0;
 const compiledPathKey = (path: ClassificationPath) => JSON.stringify([path.class, path.kind ?? '', path.skind ?? '', path.skind2 ?? '']);
 function freezeData<T>(value: T): T {
@@ -77,7 +78,10 @@ export function compileConfigRuntime(value: ConfigPackageV3): ConfigPackageV3 {
   for (const node of config.nodes) {
     resolveEffectiveFields(config, node.path);
     resolveCardConfiguration(config, node.path);
-    for (const geometry of GEOMETRIES) resolveGeometryProfile(config, node.path, geometry);
+    for (const geometry of GEOMETRIES) {
+      const profile = resolveGeometryProfile(config, node.path, geometry);
+      if (profile && !compiledZoomBuckets.has(profile)) compiledZoomBuckets.set(profile, Array.from({ length: 9 }, (_, zoom) => profile.zoomPriority.rules.filter(rule => (rule.minZoom === undefined || zoom >= rule.minZoom) && (rule.maxZoom === undefined || zoom <= rule.maxZoom))));
+    }
   }
   for (const geometry of GEOMETRIES) {
     resolveRenderExtensions(config, geometry);
@@ -348,6 +352,8 @@ export function resolveCardItems(config: ConfigPackageV3, path: ClassificationPa
 }
 
 export function resolveZoomRule(profile: GeometryProfile, zoom: number): ZoomPriorityRule | undefined {
+  const bucket = compiledZoomBuckets.get(profile)?.[zoom];
+  if (bucket) return bucket[0];
   return profile.zoomPriority.rules.find((rule) => {
     const min = rule.minZoom ?? (rule.minExclusive === undefined ? undefined : rule.minExclusive + 1);
     const max = rule.maxZoom ?? (rule.maxExclusive === undefined ? undefined : rule.maxExclusive - 1);

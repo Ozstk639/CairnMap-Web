@@ -20,4 +20,11 @@
 - 新专项逐分类对照旧解释路径、快照隔离、同修订号编辑、热命中和缓存上限通过，已加入统一核验。`npm run verify:config-v32`、`npm run build` 通过。
 - 后续 BP03/BP04 衔接 Zoom 候选桶和动态要素绑定；本阶段不声称整套性能目标已达成。
 
-后续：BP03–BP10 按蓝图继续实施，逐主题记录验证和本地提交。
+## BP03：动态绑定与刷新
+
+- 同一活动配置、记录、数据版本、FeatureStore 和上下文复用一次要素绑定；交互值、排序键和原生规则复用，比较器不再解析配置。配置编译补齐九级 Zoom 桶。
+- 几何包围盒按记录/投影/数据版本缓存，在完整规则构造之前保守裁剪，纳入文字、图标、偏移及各部件，保留选中/搜索目标。禁用 hover 的事件不再写视觉状态。保留既有增量图层更新，并阻止旧地图卸载后的排队刷新访问已删除 pane。
+- 缓存专项覆盖同 ID 替换、字段/数据 epoch、FeatureStore 与楼层变化；完整核验和构建通过。
+- 真实 App/ConfigLab、463 记录、同相机、三轮六次缩放：V1 脚本中位数 0.090936s，V3 0.066397s，比例约 0.73；均无长任务，末次均六个 Label，运行异常零。证据：[runtime-performance.json](G:/RIAWebGIS/NewPRES/CairnMap_Codex/migration-audits/runtime-v32-frontend-runtime-editor-20261009/runtime-performance.json)。这是开发构建阶段结果，生产构建/开卡 P95/放大数据及最终独立回归仍须 BP10 完成。
+
+后续：BP04–BP10 按蓝图继续实施，逐主题记录验证和本地提交。

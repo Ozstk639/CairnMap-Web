@@ -15,7 +15,7 @@ import type {
   ZoomPriorityRule,
 } from '@/configStudio/types';
 import { createDefaultGeometryProfile } from '@/configStudio/v32Defaults';
-import { resolveGeometryProfile, resolveZoomRule, resolveRenderExtensions } from '@/configStudio/runtime';
+import { isCompiledConfigRuntime, resolveGeometryProfile, resolveZoomRule, resolveRenderExtensions } from '@/configStudio/runtime';
 import { buildV3CardSections } from '@/configStudio/V3CardRenderer';
 import type { FeatureStore } from '@/components/Rules/data/featureStore';
 import type { FeatureRecord, RenderContext, RenderRule } from '@/components/Rules/rendering/renderRules';
@@ -34,16 +34,58 @@ export type ConfigRuntimeScreenGate = {
   minScreenLengthPx?: number;
 };
 
+type RuntimeBinding = {
+  geometry: GeometryKind;
+  profile: ReturnType<typeof resolveGeometryProfile>;
+  active: ZoomPriorityRule | undefined;
+  visuals: Partial<Record<InteractionState, InteractionVisual>>;
+  stack?: { geometryZ: number; displayPriority: number };
+  native?: RenderRule | null;
+  nativeResolved?: boolean;
+};
+const bindingCache = new WeakMap<ConfigPackageV3, WeakMap<FeatureRecord, { key: string; store?: FeatureStore; floors: RenderContext['activeBuildingFloorRefSet']; binding: RuntimeBinding }>>();
+function runtimeBinding(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderContext, store?: FeatureStore, storeIndependent = false): RuntimeBinding {
+  const key = [ctx.worldId, ctx.dataVersion, ctx.zoomLevel, ctx.leafletZoom, ctx.inFloorView, ctx.activeBuildingUid, ctx.activeContextBindingId, ctx.activeFloorSelector].join('\u001f');
+  const compiled = isCompiledConfigRuntime(config);
+  let cache = bindingCache.get(config);
+  const prior = compiled ? cache?.get(record) : undefined;
+  if (prior?.key === key && (storeIndependent || prior.store === store) && prior.floors === ctx.activeBuildingFloorRefSet) return prior.binding;
+  const geometry = geometryFor(record);
+  const profile = resolveGeometryProfile(config, pathFor(record), geometry);
+  const resolved = profile ? activeRuleFor(profile, record, ctx) : undefined;
+  const active = resolved ? { ...resolved, extensions: resolveRenderExtensions(config, geometry, resolved.extensions) } : undefined;
+  const binding: RuntimeBinding = { geometry, profile, active, visuals: {} };
+  if (compiled) {
+    if (!cache) { cache = new WeakMap(); bindingCache.set(config, cache); }
+    // Only the latest binding per record is retained, rather than 9 x 5 states.
+    cache.set(record, { key, store, floors: ctx.activeBuildingFloorRefSet, binding });
+  }
+  return binding;
+}
+
+/** Conservative screen reach used before building a full drawing rule. */
+export function configRuntimeViewportReach(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderContext, store?: FeatureStore): number {
+  const active = runtimeBinding(config, record, ctx, store).active;
+  const label = active?.label; const style = active?.style;
+  const fontSize = label?.style?.size ?? label?.size ?? 16;
+  const textLength = Math.max(0, ...[label?.source ?? 'Name', ...(label?.fallbackSources ?? [])].map(source => String(featureValue(record, source) ?? '').length));
+  const offsets = active?.extensions?.anchor?.candidateOffsetsPx ?? [];
+  return Math.max(1024, textLength * fontSize * 2 + Math.abs(label?.offsetX ?? 0) + Math.abs(label?.offsetY ?? 0)
+    + Math.abs(style?.symbolOffsetPx?.x ?? 0) + Math.abs(style?.symbolOffsetPx?.y ?? 0)
+    + (style?.size ?? 0) + (style?.weight ?? 0) + Math.max(0, ...(style?.icon?.size ?? []), ...(style?.icon?.anchor ?? []).map(Math.abs))
+    + Math.max(0, ...offsets.map(offset => Math.abs(offset.x) + Math.abs(offset.y))) + (active?.extensions?.hitTolerancePx ?? 0));
+}
+
 function geometryFor(record: FeatureRecord): GeometryKind {
   return record.type === 'Points' ? 'Point' : record.type === 'Polyline' ? 'LineString' : 'Polygon';
 }
 
 export function resolveConfigInteractionVisual(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderContext, state: InteractionState, store?: FeatureStore): InteractionVisual {
-  const geometry = geometryFor(record);
-  const profile = resolveGeometryProfile(config, pathFor(record), geometry);
-  const active = profile ? activeRuleFor(profile, record, ctx) : undefined;
-  const visual: InteractionVisual = { enabled: false, strokeColor: '#000000', strokeWidth: 0, strokeOpacity: 0, ...config.engine?.interactionBaselines[geometry][state], ...resolveRenderExtensions(config, geometry, active?.extensions).interaction?.[state] };
+  const binding = runtimeBinding(config, record, ctx, store);
+  if (binding.visuals[state]) return binding.visuals[state]!;
+  const visual: InteractionVisual = { enabled: false, strokeColor: '#000000', strokeWidth: 0, strokeOpacity: 0, ...config.engine?.interactionBaselines[binding.geometry][state], ...(binding.active?.extensions ?? resolveRenderExtensions(config, binding.geometry)).interaction?.[state] };
   if (visual.strokeColorBinding) visual.strokeColor = resolveColor(record, visual.strokeColorBinding, visual.strokeColor, store);
+  binding.visuals[state] = visual;
   return visual;
 }
 
@@ -455,11 +497,13 @@ export function resolveConfigRuntimeStackOrder(
   config: ConfigPackageV3 | undefined,
   record: FeatureRecord,
   ctx: RenderContext,
+  store?: FeatureStore,
 ): { geometryZ: number; displayPriority: number } {
   if (!config || !isNativeConfigRevision(config.contractRevision)) return { geometryZ: 0, displayPriority: 0 };
-  const profile = resolveGeometryProfile(config, pathFor(record), geometryFor(record));
-  const active = profile ? activeRuleFor(profile, record, ctx) : undefined;
-  return {
+  const binding = runtimeBinding(config, record, ctx, store);
+  if (binding.stack) return binding.stack;
+  const active = binding.active;
+  return binding.stack = {
     geometryZ: Number(active?.geometryStack?.zLevel ?? 0),
     displayPriority: active ? dynamicPriority(record, active) : 0,
   };
@@ -467,9 +511,9 @@ export function resolveConfigRuntimeStackOrder(
 
 function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderContext, store?: FeatureStore): RenderRule | null {
   if (!isNativeConfigRevision(config.contractRevision) || !config.engine) return null;
-  const geometry = geometryFor(record);
+  const binding = runtimeBinding(config, record, ctx, store);
+  const { geometry, profile } = binding;
   const path = pathFor(record);
-  const profile = resolveGeometryProfile(config, path, geometry);
   if (!profile?.enabled) return null;
 
   // World is an engine-assigned system field; it scopes loaded data rather than
@@ -482,12 +526,12 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
   const featureWorld = rawFeatureWorld ? normalizeRuleSourceWorldId(rawFeatureWorld) : activeWorld;
   if (featureWorld !== activeWorld) return null;
 
-  let resolved = activeRuleFor(profile, record, ctx);
+  let resolved = binding.active;
   if (!resolved && resolveRenderExtensions(config, geometry).fallback?.whenRuleMissing === 'geometryOnly') {
     const base = createDefaultGeometryProfile(geometry).zoomPriority.rules[0];
-    resolved = { ...base, label: base.label ? { ...base.label, visible: false } : undefined };
+    resolved = { ...base, extensions: resolveRenderExtensions(config, geometry, base.extensions), label: base.label ? { ...base.label, visible: false } : undefined };
   }
-  const active = resolved ? { ...resolved, extensions: resolveRenderExtensions(config, geometry, resolved.extensions) } : undefined;
+  const active = resolved;
   // A label is an optional part of a render rule.  Earlier r5 code returned
   // null for the *whole feature* when a rule intentionally hid/omitted its
   // label style, which is why a valid V3 polygon or line could disappear.
@@ -840,11 +884,9 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
 /** Called by the render loop once a map and projection exist for pixel metrics. */
 export function resolveConfigRuntimeScreenGate(config: ConfigPackageV3 | undefined, record: FeatureRecord, ctx: RenderContext): ConfigRuntimeScreenGate | undefined {
   if (!config || !isNativeConfigRevision(config.contractRevision) || !config.engine) return undefined;
-  const geometry = geometryFor(record);
-  const profile = resolveGeometryProfile(config, pathFor(record), geometry);
-  const active = profile ? activeRuleFor(profile, record, ctx) : undefined;
+  const { geometry, profile, active } = runtimeBinding(config, record, ctx, undefined, true);
   if (!profile?.enabled || !active) return undefined;
-  const screen = resolveRenderExtensions(config, geometry, active.extensions).screenGate;
+  const screen = active.extensions?.screenGate;
   return {
     ...(geometry === 'Polygon' ? { minScreenAreaPx: screen?.mode === 'override' ? screen.minScreenAreaPx : active.representation === 'labelOnly' ? 0 : config.engine.screenGateDefaults.polygonMinScreenAreaPx } : {}),
     ...(geometry === 'LineString' ? { minScreenLengthPx: screen?.mode === 'override' ? screen.minScreenLengthPx : config.engine.screenGateDefaults.lineMinScreenLengthPx } : {}),
@@ -864,5 +906,9 @@ export function resolveConfigRuntimeRule(
   fallback: RenderRule | null,
   store?: FeatureStore,
 ): RenderRule | null {
-  return config ? nativeRule(config, record, ctx, store) : fallback;
+  if (!config) return fallback;
+  if (!isCompiledConfigRuntime(config)) return nativeRule(config, record, ctx, store);
+  const binding = runtimeBinding(config, record, ctx, store);
+  if (!binding.nativeResolved) { binding.native = nativeRule(config, record, ctx, store); binding.nativeResolved = true; }
+  return binding.native ?? null;
 }
