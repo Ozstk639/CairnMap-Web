@@ -1,0 +1,561 @@
+{
+  "sourceSha": "0b82863d4fea3791f98917ba6d13f70e1f27eb15",
+  "reference": "actual frozen component + formatter, test capture bridge",
+  "candidate": "actual production MeasuringModule + external host",
+  "results": [
+    {
+      "workflow": "railway",
+      "v1": [
+        {
+          "ID": "ZREXTERNALEXTERNAL_EXTERNAL",
+          "Name": "EXTERNAL",
+          "bureau": "EXTERNAL",
+          "line": "EXTERNAL",
+          "color": "2277aa",
+          "direction": 2,
+          "startplf": "EXTERNAL",
+          "endplf": "EXTERNAL",
+          "CoordL": [
+            [
+              [
+                20,
+                -64,
+                13
+              ],
+              [
+                70,
+                -64,
+                13
+              ]
+            ]
+          ],
+          "Type": "Polyline",
+          "Class": "RLE",
+          "World": 0,
+          "CreateTime": "20261007",
+          "CreateBy": "EXTERNAL"
+        }
+      ],
+      "v3": [
+        {
+          "ID": "ZREXTERNALEXTERNAL_EXTERNAL",
+          "Name": "EXTERNAL",
+          "bureau": "EXTERNAL",
+          "line": "EXTERNAL",
+          "color": "2277aa",
+          "direction": 2,
+          "startplf": "EXTERNAL",
+          "endplf": "EXTERNAL",
+          "CoordL": [
+            [
+              [
+                20,
+                -64,
+                13
+              ],
+              [
+                70,
+                -64,
+                13
+              ]
+            ]
+          ],
+          "Type": "Polyline",
+          "Class": "RLE",
+          "World": 0,
+          "CreateTime": "20261007",
+          "CreateBy": "EXTERNAL"
+        }
+      ]
+    },
+    {
+      "workflow": "station",
+      "v1": [
+        {
+          "ID": "ZREXTERNALSTB_EXTERNAL",
+          "Name": "EXTERNAL",
+          "CoordG": [
+            [
+              [
+                [
+                  20,
+                  -64,
+                  13
+                ],
+                [
+                  70,
+                  -64,
+                  13
+                ],
+                [
+                  57.5,
+                  -64,
+                  38
+                ]
+              ]
+            ]
+          ],
+          "Type": "Polygon",
+          "Class": "STB",
+          "World": 0,
+          "CreateTime": "20261007",
+          "CreateBy": "EXTERNAL"
+        },
+        {
+          "ID": "ZREXTERNALEXTERNALPFB_EXTERNAL",
+          "Name": "EXTERNAL",
+          "LineID": "ZREXTERNALEXTERNAL_EXTERNAL",
+          "CoordG": [
+            [
+              [
+                [
+                  20,
+                  -64,
+                  13
+                ],
+                [
+                  70,
+                  -64,
+                  13
+                ],
+                [
+                  57.5,
+                  -64,
+                  38
+                ]
+              ]
+            ]
+          ],
+          "Type": "Polygon",
+          "Class": "PFB",
+          "World": 0,
+          "CreateTime": "20261007",
+          "CreateBy": "EXTERNAL"
+        },
+        {
+          "ID": "ZREXTERNALEXTERNALPLF_EXTERNAL_D",
+          "Name": "EXTERNAL-EXTERNAL站台",
+          "Situation": true,
+          "Connect": true,
+          "lines": [
+            {
+              "ID": "EXTERNAL",
+              "Avaliable": true,
+              "Overtaking": false,
+              "getin": true,
+              "getout": true,
+              "NextOT": false
+            }
+          ],
+          "CoordP": [
+            [
+              20,
+              -64,
+              13
+            ]
+          ],
+          "Type": "Points",
+          "Class": "PLF",
+          "World": 0,
+          "CreateTime": "20261007",
+          "CreateBy": "EXTERNAL"
+        },
+        {
+          "ID": "ZREXTERNALEXTERNALPLF_EXTERNAL_U",
+          "Name": "EXTERNAL-EXTERNAL站台",
+          "Situation": true,
+          "Connect": true,
+          "lines": [
+            {
+              "ID": "EXTERNAL",
+              "Avaliable": true,
+              "Overtaking": false,
+              "getin": true,
+              "getout": true,
+              "NextOT": false
+            }
+          ],
+          "CoordP": [
+            [
+              20,
+              -64,
+              13
+            ]
+          ],
+          "Type": "Points",
+          "Class": "PLF",
+          "World": 0,
+          "CreateTime": "20261007",
+          "CreateBy": "EXTERNAL"
+        },
+        {
+          "ID": "ZREXTERNALEXTERNALSTA_EXTERNAL",
+          "Name": "EXTERNAL",
+          "STBuilding": "ZREXTERNALSTB_EXTERNAL",
+          "platforms": [
+            {
+              "ID": "ZREXTERNALEXTERNALPLF_EXTERNAL_D"
+            },
+            {
+              "ID": "ZREXTERNALEXTERNALPLF_EXTERNAL_U"
+            }
+          ],
+          "CoordP": [
+            [
+              20,
+              -64,
+              13
+            ]
+          ],
+          "Type": "Points",
+          "Class": "STA",
+          "World": 0,
+          "CreateTime": "20261007",
+          "CreateBy": "EXTERNAL"
+        }
+      ],
+      "v3": [
+        {
+          "ID": "ZREXTERNALSTB_EXTERNAL",
+          "Name": "EXTERNAL",
+          "CoordG": [
+            [
+              [
+                [
+                  20,
+                  -64,
+                  13
+                ],
+                [
+                  70,
+                  -64,
+                  13
+                ],
+                [
+                  57.5,
+                  -64,
+                  38
+                ]
+              ]
+            ]
+          ],
+          "Type": "Polygon",
+          "Class": "STB",
+          "World": 0,
+          "CreateTime": "20261007",
+          "CreateBy": "EXTERNAL"
+        },
+        {
+          "ID": "ZREXTERNALEXTERNALPFB_EXTERNAL",
+          "Name": "EXTERNAL",
+          "LineID": "ZREXTERNALEXTERNAL_EXTERNAL",
+          "CoordG": [
+            [
+              [
+                [
+                  20,
+                  -64,
+                  13
+                ],
+                [
+                  70,
+                  -64,
+                  13
+                ],
+                [
+                  57.5,
+                  -64,
+                  38
+                ]
+              ]
+            ]
+          ],
+          "Type": "Polygon",
+          "Class": "PFB",
+          "World": 0,
+          "CreateTime": "20261007",
+          "CreateBy": "EXTERNAL"
+        },
+        {
+          "ID": "ZREXTERNALEXTERNALPLF_EXTERNAL_D",
+          "Name": "EXTERNAL-EXTERNAL站台",
+          "Situation": true,
+          "Connect": true,
+          "lines": [
+            {
+              "ID": "EXTERNAL",
+              "Avaliable": true,
+              "Overtaking": false,
+              "getin": true,
+              "getout": true,
+              "NextOT": false
+            }
+          ],
+          "CoordP": [
+            [
+              20,
+              -64,
+              13
+            ]
+          ],
+          "Type": "Points",
+          "Class": "PLF",
+          "World": 0,
+          "CreateTime": "20261007",
+          "CreateBy": "EXTERNAL"
+        },
+        {
+          "ID": "ZREXTERNALEXTERNALPLF_EXTERNAL_U",
+          "Name": "EXTERNAL-EXTERNAL站台",
+          "Situation": true,
+          "Connect": true,
+          "lines": [
+            {
+              "ID": "EXTERNAL",
+              "Avaliable": true,
+              "Overtaking": false,
+              "getin": true,
+              "getout": true,
+              "NextOT": false
+            }
+          ],
+          "CoordP": [
+            [
+              20,
+              -64,
+              13
+            ]
+          ],
+          "Type": "Points",
+          "Class": "PLF",
+          "World": 0,
+          "CreateTime": "20261007",
+          "CreateBy": "EXTERNAL"
+        },
+        {
+          "ID": "ZREXTERNALEXTERNALSTA_EXTERNAL",
+          "Name": "EXTERNAL",
+          "STBuilding": "ZREXTERNALSTB_EXTERNAL",
+          "platforms": [
+            {
+              "ID": "ZREXTERNALEXTERNALPLF_EXTERNAL_D"
+            },
+            {
+              "ID": "ZREXTERNALEXTERNALPLF_EXTERNAL_U"
+            }
+          ],
+          "CoordP": [
+            [
+              20,
+              -64,
+              13
+            ]
+          ],
+          "Type": "Points",
+          "Class": "STA",
+          "World": 0,
+          "CreateTime": "20261007",
+          "CreateBy": "EXTERNAL"
+        }
+      ]
+    },
+    {
+      "workflow": "trp",
+      "v1": [
+        {
+          "ID": "ZTRPNOMNOM_EXTERNAL",
+          "Name": "EXTERNAL",
+          "Kind": "NOM",
+          "SKind": "NOM",
+          "SKind2": "",
+          "Interaction": "EXTERNAL",
+          "Situation": "EXTERNAL",
+          "elevation": 1,
+          "tags": {
+            "Land": "EXTERNAL",
+            "UAdm": "EXTERNAL",
+            "UAdmG": "EXTERNAL"
+          },
+          "extensions": {
+            "link": {
+              "wiki": "EXTERNAL"
+            },
+            "character": {
+              "brief": "EXTERNAL"
+            }
+          },
+          "CoordP": [
+            [
+              20,
+              -64,
+              13
+            ]
+          ],
+          "Type": "Points",
+          "Class": "TRP",
+          "World": 0,
+          "CreateTime": "20261007",
+          "CreateBy": "EXTERNAL",
+          "Trade": [
+            {
+              "TradeNum": 1,
+              "OfferItems": [
+                {
+                  "Name": "EXTERNAL",
+                  "Img": "",
+                  "Count": 1,
+                  "ItemID": "EXTERNAL",
+                  "Brief": "EXTERNAL"
+                },
+                {
+                  "Name": "EXTERNAL",
+                  "Img": "",
+                  "Count": 1,
+                  "ItemID": "EXTERNAL",
+                  "Brief": "EXTERNAL"
+                }
+              ],
+              "ReceiveItems": [
+                {
+                  "Name": "EXTERNAL",
+                  "Img": "",
+                  "Count": 1,
+                  "ItemID": "EXTERNAL",
+                  "Brief": "EXTERNAL"
+                },
+                {
+                  "Name": "EXTERNAL",
+                  "Img": "",
+                  "Count": 1,
+                  "ItemID": "EXTERNAL",
+                  "Brief": "EXTERNAL"
+                }
+              ],
+              "Note": "EXTERNAL"
+            },
+            {
+              "TradeNum": 1,
+              "OfferItems": [
+                {
+                  "Name": "EXTERNAL",
+                  "Img": "",
+                  "Count": 1,
+                  "ItemID": "EXTERNAL",
+                  "Brief": "EXTERNAL"
+                }
+              ],
+              "ReceiveItems": [
+                {
+                  "Name": "EXTERNAL",
+                  "Img": "",
+                  "Count": 1,
+                  "ItemID": "EXTERNAL",
+                  "Brief": "EXTERNAL"
+                }
+              ],
+              "Note": "EXTERNAL"
+            }
+          ]
+        }
+      ],
+      "v3": [
+        {
+          "ID": "ZTRPNOMNOM_EXTERNAL",
+          "Name": "EXTERNAL",
+          "Kind": "NOM",
+          "SKind": "NOM",
+          "SKind2": "",
+          "Interaction": "EXTERNAL",
+          "Situation": "EXTERNAL",
+          "elevation": 1,
+          "tags": {
+            "Land": "EXTERNAL",
+            "UAdm": "EXTERNAL",
+            "UAdmG": "EXTERNAL"
+          },
+          "extensions": {
+            "link": {
+              "wiki": "EXTERNAL"
+            },
+            "character": {
+              "brief": "EXTERNAL"
+            }
+          },
+          "CoordP": [
+            [
+              20,
+              -64,
+              13
+            ]
+          ],
+          "Type": "Points",
+          "Class": "TRP",
+          "World": 0,
+          "CreateTime": "20261007",
+          "CreateBy": "EXTERNAL",
+          "Trade": [
+            {
+              "TradeNum": 1,
+              "OfferItems": [
+                {
+                  "Name": "EXTERNAL",
+                  "Img": "",
+                  "Count": 1,
+                  "ItemID": "EXTERNAL",
+                  "Brief": "EXTERNAL"
+                },
+                {
+                  "Name": "EXTERNAL",
+                  "Img": "",
+                  "Count": 1,
+                  "ItemID": "EXTERNAL",
+                  "Brief": "EXTERNAL"
+                }
+              ],
+              "ReceiveItems": [
+                {
+                  "Name": "EXTERNAL",
+                  "Img": "",
+                  "Count": 1,
+                  "ItemID": "EXTERNAL",
+                  "Brief": "EXTERNAL"
+                },
+                {
+                  "Name": "EXTERNAL",
+                  "Img": "",
+                  "Count": 1,
+                  "ItemID": "EXTERNAL",
+                  "Brief": "EXTERNAL"
+                }
+              ],
+              "Note": "EXTERNAL"
+            },
+            {
+              "TradeNum": 1,
+              "OfferItems": [
+                {
+                  "Name": "EXTERNAL",
+                  "Img": "",
+                  "Count": 1,
+                  "ItemID": "EXTERNAL",
+                  "Brief": "EXTERNAL"
+                }
+              ],
+              "ReceiveItems": [
+                {
+                  "Name": "EXTERNAL",
+                  "Img": "",
+                  "Count": 1,
+                  "ItemID": "EXTERNAL",
+                  "Brief": "EXTERNAL"
+                }
+              ],
+              "Note": "EXTERNAL"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,8 @@
+{
+  "checks": [
+    "single-level rule content copy preserves target Zoom and excludes source conditions",
+    "r7 non-classification field rule validates in actual editor",
+    "new-rule draft blocks top-level tab switching"
+  ],
+  "runtimeErrors": []
+}

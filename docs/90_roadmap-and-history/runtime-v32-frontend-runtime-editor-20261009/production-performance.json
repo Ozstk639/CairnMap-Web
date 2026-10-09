@@ -1,0 +1,206 @@
+{
+  "environment": "matched minified production builds, actual App/ConfigLab; fixed world/camera; five six-zoom warm batches; isolated Edge",
+  "rows": [
+    {
+      "mode": "v1",
+      "source": "frozen V1 production",
+      "host": {
+        "world": "zth",
+        "records": 463,
+        "measurement": false
+      },
+      "batches": [
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.30901999999999996,
+            "ScriptDuration": 0.080036,
+            "LayoutDuration": 0.002317
+          },
+          "longTasksMs": []
+        },
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.208345,
+            "ScriptDuration": 0.06476499999999999,
+            "LayoutDuration": 0.0026469999999999996
+          },
+          "longTasksMs": []
+        },
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.203959,
+            "ScriptDuration": 0.068739,
+            "LayoutDuration": 0.00255
+          },
+          "longTasksMs": []
+        },
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.21113799999999994,
+            "ScriptDuration": 0.06821000000000002,
+            "LayoutDuration": 0.0029060000000000006
+          },
+          "longTasksMs": []
+        },
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.21136600000000005,
+            "ScriptDuration": 0.07401999999999997,
+            "LayoutDuration": 0.0026699999999999988
+          },
+          "longTasksMs": []
+        }
+      ],
+      "medianScriptDuration": 0.068739,
+      "scriptRange": [
+        0.06476499999999999,
+        0.080036
+      ],
+      "cardVisibleNextFrameMs": [
+        28.600000023841858,
+        35.90000009536743,
+        24.700000047683716,
+        21.200000047683716,
+        38.200000047683716,
+        34.09999990463257,
+        37.10000002384186,
+        19.40000009536743,
+        23.40000009536743,
+        36.700000047683716,
+        23.100000023841858,
+        22.100000023841858,
+        33.199999928474426,
+        22.699999928474426,
+        23.5,
+        22.699999928474426,
+        21.300000071525574,
+        22.199999928474426,
+        24.59999990463257,
+        34.10000002384186,
+        24.299999952316284,
+        19.899999976158142,
+        23.5,
+        24.200000047683716,
+        20,
+        19.799999952316284,
+        21.799999952316284,
+        22.299999952316284,
+        37.199999928474426,
+        36.90000009536743
+      ],
+      "cardP95Ms": 37.199999928474426,
+      "cardScope": "30 repeated real pointer opens of the same first visible record; title and body rendered, next frame",
+      "disabledHover": null,
+      "layers": 20,
+      "labels": 8
+    },
+    {
+      "mode": "v3",
+      "source": "r7/r3 candidate production",
+      "host": {
+        "world": "zth",
+        "records": 463,
+        "contract": 7,
+        "packageRevision": 3,
+        "measurement": false
+      },
+      "batches": [
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.2541659999999999,
+            "ScriptDuration": 0.06704100000000002,
+            "LayoutDuration": 0.0026260000000000003
+          },
+          "longTasksMs": []
+        },
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.20056000000000007,
+            "ScriptDuration": 0.05592200000000003,
+            "LayoutDuration": 0.0023699999999999997
+          },
+          "longTasksMs": []
+        },
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.1925570000000001,
+            "ScriptDuration": 0.052482999999999946,
+            "LayoutDuration": 0.0028870000000000007
+          },
+          "longTasksMs": []
+        },
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.19352100000000005,
+            "ScriptDuration": 0.04528500000000002,
+            "LayoutDuration": 0.002456999999999999
+          },
+          "longTasksMs": []
+        },
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.19455199999999984,
+            "ScriptDuration": 0.05790200000000001,
+            "LayoutDuration": 0.002345999999999999
+          },
+          "longTasksMs": []
+        }
+      ],
+      "medianScriptDuration": 0.05592200000000003,
+      "scriptRange": [
+        0.04528500000000002,
+        0.06704100000000002
+      ],
+      "cardVisibleNextFrameMs": [
+        28.699999928474426,
+        26.90000009536743,
+        25.399999976158142,
+        26,
+        24.600000023841858,
+        25.300000071525574,
+        25.899999976158142,
+        25.5,
+        26.800000071525574,
+        23.699999928474426,
+        23.899999976158142,
+        26.59999990463257,
+        25.90000009536743,
+        27.799999952316284,
+        24.5,
+        26.5,
+        24.199999928474426,
+        28.700000047683716,
+        23.700000047683716,
+        25.199999928474426,
+        27.600000023841858,
+        25.299999952316284,
+        25.799999952316284,
+        26.399999976158142,
+        24.5,
+        26.299999952316284,
+        25.600000023841858,
+        24.90000009536743,
+        23,
+        24.700000047683716
+      ],
+      "cardP95Ms": 28.699999928474426,
+      "cardScope": "30 repeated real pointer opens of the same first visible record; title and body rendered, next frame",
+      "disabledHover": {
+        "layerChanges": 0,
+        "sameData": true,
+        "sameLayers": true,
+        "iterations": 30,
+        "targets": 4,
+        "scope": "native text labels; independent player-marker hover excluded"
+      },
+      "layers": 21,
+      "labels": 8
+    }
+  ],
+  "scriptRatio": 0.8135410756630156,
+  "runtimeErrors": [],
+  "target": {
+    "maxV3V1ScriptRatio": 2,
+    "maxV3CardP95Ms": 100
+  }
+}

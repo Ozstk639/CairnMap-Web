@@ -1,0 +1,80 @@
+{
+  "checks": [
+    "Studio field-to-control binding and save",
+    "numeric-array defaults in actual Runner",
+    "edited numeric array in production committed record"
+  ],
+  "control": {
+    "id": "field-input-mv11d0aa",
+    "slot": "I",
+    "columns": 1,
+    "label": {
+      "zh": "验收数值",
+      "en": ""
+    },
+    "required": false,
+    "defaultValue": [
+      1,
+      2
+    ],
+    "kind": "group",
+    "group": {
+      "storage": "scalar",
+      "optional": true,
+      "addLabel": {
+        "zh": "添加验收数值",
+        "en": ""
+      },
+      "itemFields": [
+        {
+          "key": "",
+          "kind": "number",
+          "label": {
+            "zh": "验收数值",
+            "en": ""
+          },
+          "options": [],
+          "required": true
+        }
+      ]
+    }
+  },
+  "assignment": {
+    "id": "field-assignment-field-input-mv11d0aa",
+    "target": "tags.acceptanceValues",
+    "expression": "I"
+  },
+  "record": {
+    "World": "zth",
+    "Class": "WRP",
+    "Kind": "NOM",
+    "SKind": "NOM",
+    "ID": "ZWRPNOMNOM_binding-value",
+    "WRPointI2D": "binding-value",
+    "Name": "binding-value",
+    "hub": "binding-value",
+    "extensions": {
+      "link": {
+        "wiki": "binding-value"
+      }
+    },
+    "elevation": 12,
+    "tags": {
+      "acceptanceValues": [
+        3,
+        4
+      ]
+    },
+    "CreateBy": "binding-user",
+    "CreateTime": "20261009",
+    "Type": "Points",
+    "CoordP": [
+      [
+        20,
+        -64,
+        13
+      ]
+    ]
+  },
+  "errors": []
+}

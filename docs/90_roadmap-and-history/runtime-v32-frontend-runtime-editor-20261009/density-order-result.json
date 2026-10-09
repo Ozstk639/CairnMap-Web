@@ -1,0 +1,40 @@
+{
+  "hideFirst": {
+    "hidden": true,
+    "text": "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "calls": 0,
+    "trace": [
+      "hideOptionalLabels"
+    ],
+    "reason": "densityLimit"
+  },
+  "abbreviateFirst": {
+    "hidden": false,
+    "text": "W",
+    "calls": 1,
+    "trace": [
+      "abbreviateOptionalLabels"
+    ]
+  },
+  "hardQuota": {
+    "hidden": true,
+    "text": "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "calls": 1,
+    "trace": [
+      "abbreviateOptionalLabels",
+      "hideOptionalLabels"
+    ],
+    "reason": "densityLimit"
+  },
+  "emptyOrder": {
+    "hidden": true,
+    "text": "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "calls": 0,
+    "reason": "densityLimit"
+  },
+  "numberedUI": [
+    "1",
+    "2"
+  ],
+  "runtimeErrors": []
+}

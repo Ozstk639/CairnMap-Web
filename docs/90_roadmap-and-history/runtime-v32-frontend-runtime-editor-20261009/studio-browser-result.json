@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "feature draft blocks tab switch",
+    "workflow draft blocks tab switch",
+    "workflow wheel scrolls a bounded container",
+    "save writes package and ends workflow draft",
+    "compatibility URL enters shared Studio workflow tab"
+  ],
+  "runtime_errors": []
+}
