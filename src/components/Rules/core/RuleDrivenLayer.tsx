@@ -3839,14 +3839,13 @@ export default function RuleDrivenLayer(props: Props) {
           // RB_SLU_15：在 padded layout window 中提前布局视口外 label。
           viewportPaddingPx: labelLayoutViewportPaddingPx,
         })];
+        const placedById = new Map<string, (typeof placed)[number]>();
+        for (const p of placed) placedById.set(p.id, p);
         if (configRuntime) for (const req of fresh) {
-          const p = placed.find(item => item.id === req.id);
+          const p = placedById.get(req.id);
           if (p) nativePlacementRef.current.set(req.id, { signature: signatures.get(req.id)!, placed: p, anchor: req.anchorLatLng, center: map.getCenter(), zoom: map.getZoom() });
         }
         livePlacementRef.current = declutterLabelRequests.some(req => req.runtimeStability?.enabled && req.runtimeStability.freezeDuringPan === false);
-
-        const placedById = new Map<string, (typeof placed)[number]>();
-        for (const p of placed) placedById.set(p.id, p);
 
         for (const req of declutterLabelRequests) {
           const row = lineAuditRows.get(req.featureUid ?? "");

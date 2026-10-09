@@ -116,7 +116,9 @@ function featureValue(record: FeatureRecord, source: string): unknown {
 }
 
 function matchesTargetPath(record: FeatureRecord, target: RuntimePath): boolean {
-  const path = pathFor(record);
+  return matchesPath(pathFor(record), target);
+}
+function matchesPath(path: RuntimePath, target: RuntimePath): boolean {
   return path.class === target.class
     && (!target.kind || path.kind === target.kind)
     && (!target.skind || path.skind === target.skind)
@@ -143,6 +145,54 @@ export type ConfigRuntimeContext = {
   options: Array<{ value: string; label: string }>;
 };
 
+type ContextLookup = {
+  order: Map<FeatureRecord, number>;
+  paths: Map<FeatureRecord, RuntimePath>;
+  firstHostBinding: WeakMap<FeatureRecord, ContextBinding>;
+  hosts: Map<ContextBinding, Map<string, FeatureRecord[]>>;
+  members: Map<ContextBinding, Map<string, FeatureRecord[]>>;
+  contexts: WeakMap<FeatureRecord, ConfigRuntimeContext | undefined>;
+};
+// FeatureStore is replaced when authoritative world/temp data changes. These
+// indexes belong to that data snapshot and immutable config identity; retaining
+// neither key keeps old worlds and configurations collectible.
+const contextLookups = new WeakMap<FeatureStore, WeakMap<ConfigPackageV3, ContextLookup>>();
+function contextLookup(config: ConfigPackageV3, store: FeatureStore): ContextLookup | undefined {
+  if (!isCompiledConfigRuntime(config)) return undefined;
+  let configs = contextLookups.get(store);
+  const cached = configs?.get(config); if (cached) return cached;
+  const result: ContextLookup = { order: new Map(), paths: new Map(), firstHostBinding: new WeakMap(), hosts: new Map(), members: new Map(), contexts: new WeakMap() };
+  const classes = new Map<string, FeatureRecord[]>();
+  for (const [index, record] of store.all.entries()) {
+    const path = pathFor(record); result.paths.set(record, path); result.order.set(record, index);
+    const records = classes.get(path.class) ?? []; records.push(record); classes.set(path.class, records);
+  }
+  const references = (records: FeatureRecord[], path: RuntimePath, field: string) => {
+    const index = new Map<string, FeatureRecord[]>();
+    for (const record of records) if (matchesPath(result.paths.get(record)!, path)) {
+      for (const value of new Set(relationValues(record, field))) {
+        const matches = index.get(value) ?? []; matches.push(record); index.set(value, matches);
+      }
+    }
+    return index;
+  };
+  for (const binding of config.contextBindings ?? []) if (binding.enabled) {
+    const hosts = classes.get(binding.host.classification.class) ?? [];
+    for (const host of hosts) if (!result.firstHostBinding.has(host) && matchesPath(result.paths.get(host)!, binding.host.classification)) result.firstHostBinding.set(host, binding);
+    result.hosts.set(binding, references(hosts, binding.host.classification, binding.host.referenceField));
+    result.members.set(binding, references(classes.get(binding.member.classification.class) ?? [], binding.member.classification, binding.member.referenceField));
+  }
+  if (!configs) { configs = new WeakMap(); contextLookups.set(store, configs); }
+  configs.set(config, result); return result;
+}
+function referencedRecords(index: Map<string, FeatureRecord[]> | undefined, values: string[], order: Map<FeatureRecord, number>): FeatureRecord[] {
+  const records = new Set<FeatureRecord>();
+  for (const value of values) for (const record of index?.get(value) ?? []) records.add(record);
+  // Host references may be arrays in a different order from the source. Preserve
+  // the original store.filter/find ordering and de-duplicate shared references.
+  return [...records].sort((a, b) => order.get(a)! - order.get(b)!);
+}
+
 /**
  * Resolve one generic host/member relation.  It deliberately uses category
  * paths plus author-selected reference fields, so BUD/FLR/STF are never baked
@@ -154,10 +204,12 @@ export function resolveConfigRuntimeContextForHost(
   store?: FeatureStore,
 ): ConfigRuntimeContext | undefined {
   if (!config || !isNativeConfigRevision(config.contractRevision) || !store) return undefined;
-  const binding = (config.contextBindings ?? []).find((candidate) => candidate.enabled && matchesTargetPath(host, candidate.host.classification));
-  if (!binding) return undefined;
-  const members = store.all.filter((candidate) => relatedByBinding(host, candidate, binding));
-  if (!members.length) return undefined;
+  const lookup = contextLookup(config, store);
+  if (lookup?.contexts.has(host)) return lookup.contexts.get(host);
+  const binding = lookup?.firstHostBinding.get(host) ?? (lookup?.paths.has(host) ? undefined : (config.contextBindings ?? []).find((candidate) => candidate.enabled && matchesTargetPath(host, candidate.host.classification)));
+  if (!binding) { lookup?.contexts.set(host, undefined); return undefined; }
+  const members = lookup ? referencedRecords(lookup.members.get(binding), relationValues(host, binding.host.referenceField), lookup.order) : store.all.filter((candidate) => relatedByBinding(host, candidate, binding));
+  if (!members.length) { lookup?.contexts.set(host, undefined); return undefined; }
   const selector = binding.memberSelectorField || 'ID';
   const byValue = new Map<string, { value: string; label: string }>();
   for (const member of members) {
@@ -167,7 +219,8 @@ export function resolveConfigRuntimeContextForHost(
     byValue.set(value, { value, label });
   }
   const options = [...byValue.values()].sort((a, b) => a.value.localeCompare(b.value, undefined, { numeric: true }));
-  return { binding, host, members, memberUids: new Set(members.map((member) => member.uid)), options };
+  const context = { binding, host, members, memberUids: new Set(members.map((member) => member.uid)), options };
+  lookup?.contexts.set(host, context); return context;
 }
 
 /** Resolve a context starting from either side, which lets a member click open its host context. */
@@ -179,9 +232,10 @@ export function resolveConfigRuntimeContextForRecord(
   if (!config || !isNativeConfigRevision(config.contractRevision) || !store) return undefined;
   const direct = resolveConfigRuntimeContextForHost(config, record, store);
   if (direct) return direct;
+  const lookup = contextLookup(config, store);
   for (const binding of config.contextBindings ?? []) {
     if (!binding.enabled || !matchesTargetPath(record, binding.member.classification)) continue;
-    const host = store.all.find((candidate) => relatedByBinding(candidate, record, binding));
+    const host = lookup ? referencedRecords(lookup.hosts.get(binding), relationValues(record, binding.member.referenceField), lookup.order)[0] : store.all.find((candidate) => relatedByBinding(candidate, record, binding));
     if (!host) continue;
     const context = resolveConfigRuntimeContextForHost(config, host, store);
     if (context?.binding.id === binding.id) return context;
