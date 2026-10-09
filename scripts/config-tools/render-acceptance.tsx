@@ -6,8 +6,8 @@ import type * as L from 'leaflet';
 import '../../src/styles/index.css';
 import 'leaflet/dist/leaflet.css';
 import { ConfigRuntimePreview, makeConfigPreviewFixture } from '../../src/configStudio/ConfigRuntimePreview';
-import { createConfigPackageFromCurrentProject } from '../../src/configStudio/legacyProjectAdapter';
-import { resolveGeometryProfile, validateConfigPackage } from '../../src/configStudio/runtime';
+import { createEditableConfigPackageFromCurrentProject as createConfigPackageFromCurrentProject } from '../../src/configStudio/renderRuleTemplates';
+import { compileConfigRuntime, configCompilationStats, resolveGeometryProfile, validateConfigPackage } from '../../src/configStudio/runtime';
 import type { PreviewScenario } from '../../src/configStudio/types';
 import { createDynmapCRS, DynmapProjection, ZTH_FLAT_CONFIG } from '../../src/lib/DynmapProjection';
 import { createDynmapTileLayer } from '../../src/lib/DynmapTileLayer';
@@ -24,6 +24,9 @@ function Ready({ ready }: { ready: (map: L.Map) => void }) {
 function Harness() {
   const params = new URLSearchParams(location.search);
   const [config, setConfig] = useState(createConfigPackageFromCurrentProject);
+  // Controlled geometry probes may intentionally combine authoring-incompatible
+  // profiles. This test-only entry compiles them; production activation validates.
+  const runtimeConfig = useMemo(() => compileConfigRuntime(config, true), [config]);
   const [map, setMap] = useState<L.Map | null>(null);
   const [datasetOverride, setDataset] = useState<{ features: unknown[] } | null>(null);
   const [featurePatch, setFeaturePatch] = useState<Record<string, unknown>>({});
@@ -32,13 +35,13 @@ function Harness() {
   const dataset = useMemo(() => ({ features: (datasetOverride?.features ?? makeConfigPreviewFixture(config, node, scenario).features).map((feature) => ({ ...(feature as object), ...featurePatch })) }), [config, node, scenario, featurePatch, datasetOverride]);
   const projection = useMemo(() => new DynmapProjection(ZTH_FLAT_CONFIG), []);
   useEffect(() => {
-    api.acceptance = { map, config, dataset, setConfig, setDataset, setFeaturePatch, geometry: resolveGeometryProfile(config, node.path, scenario.includes('Point') ? 'Point' : scenario.includes('Line') ? 'LineString' : 'Polygon'),
+    api.acceptance = { map, config, dataset, setConfig, setDataset, setFeaturePatch, compilationStats: () => configCompilationStats(runtimeConfig), geometry: resolveGeometryProfile(config, node.path, scenario.includes('Point') ? 'Point' : scenario.includes('Line') ? 'LineString' : 'Polygon'),
       roundTrip: async () => { const report = validateConfigPackage(config); const archive = await buildConfigPackageArchive(config, report); return readConfigPackage(new File([archive], 'acceptance.zip')); } };
-  }, [map, config, dataset, node, scenario]);
+  }, [map, config, runtimeConfig, dataset, node, scenario]);
   return <main style={{ height: 900, width: 1200, margin: 20 }}>
     {params.get('mode') === 'preview' ? <ConfigRuntimePreview config={config} node={node} scenario={scenario} onMapReady={setMap} /> :
       <MapContainer style={{ height: '100%', width: '100%' }} center={[0, 0]} zoom={toLeafletZoom(6)} zoomAnimation={false} fadeAnimation={false} {...MAP_ZOOM_BOUNDS} crs={createDynmapCRS(ZTH_FLAT_CONFIG)}><Ready ready={setMap} />
-        {map ? <RuleDrivenLayer mapReady map={map} projection={projection} worldId="zth" visible activeButtonIds={[]} bypassButtonFilter runtimeDataset={dataset} disableTransientSources={!params.has('transient')} configRuntime={params.get('mode') === 'v1' ? undefined : config} floorPanelMode="hidden" /> : null}
+        {map ? <RuleDrivenLayer mapReady map={map} projection={projection} worldId="zth" visible activeButtonIds={[]} bypassButtonFilter runtimeDataset={dataset} disableTransientSources={!params.has('transient')} configRuntime={params.get('mode') === 'v1' ? undefined : runtimeConfig} floorPanelMode="hidden" /> : null}
       </MapContainer>}
   </main>;
 }

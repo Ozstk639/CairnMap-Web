@@ -16,12 +16,13 @@ class Browser:
     def __init__(self):
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         pages = json.loads(opener.open('http://127.0.0.1:9238/json').read())
-        page = next(item for item in pages if item['type'] == 'page' and (item['url'] == 'about:blank' or item['url'].startswith(('http://127.0.0.1:5188', 'http://127.0.0.1:5189'))))
+        page = next(item for item in pages if item['type'] == 'page' and (item['url'] == 'about:blank' or item['url'].startswith(('http://127.0.0.1:5188', 'http://127.0.0.1:5189', 'http://127.0.0.1:5208', 'http://127.0.0.1:5209'))))
         self.ws = websocket.create_connection(page['webSocketDebuggerUrl'], origin='http://127.0.0.1:9238', timeout=30)
         self.seq = 0
         self.errors = []
         self.call('Page.enable')
         self.call('Runtime.enable')
+        self.call('Emulation.setTouchEmulationEnabled', {'enabled': False})
         self.call('Emulation.setDeviceMetricsOverride', {'width': 1440, 'height': 1000, 'deviceScaleFactor': 1, 'mobile': False})
     def call(self, method, params=None):
         self.seq += 1
@@ -40,7 +41,12 @@ class Browser:
     def wait(self, predicate, seconds=20):
         deadline = time.time() + seconds
         while time.time() < deadline:
-            if self.evaluate(predicate): return
+            try:
+                if self.evaluate(predicate): return
+            except RuntimeError as error:
+                # A real navigation can destroy the old execution context while
+                # polling. Retry only this CDP transport condition, never JS errors.
+                if not any(message in str(error) for message in ['Inspected target navigated or closed', 'Execution context was destroyed', 'Cannot find context']): raise
             time.sleep(.15)
         raise RuntimeError('Browser predicate timed out: ' + predicate)
     def navigate(self, query):

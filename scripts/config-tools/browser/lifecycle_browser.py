@@ -35,6 +35,7 @@ assert b.evaluate("window.savedRunnerInput.value==='draft-snapshot'")
 checks.append('world changes suspend submission and restore the original-world form')
 b.screenshot('workflow-lifecycle.png')
 b.navigate('?workspace=config-studio');b.click('读取/新建')
+b.evaluate("document.querySelector('[data-rule-extensions] > summary').click();true")
 texts=b.evaluate("document.body.innerText")
 for label in ['候选、碰撞对象与稳定/密度策略','默认值、提示、条件与引用','Label 独立碰撞指标','显示权重合成与边界']:
  assert label in texts,(label,texts[-2000:])

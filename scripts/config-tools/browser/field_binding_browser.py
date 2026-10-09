@@ -7,7 +7,7 @@ def value(selector,data):
 b.navigate('?workspace=config-studio')
 backup=b.evaluate("sessionStorage.getItem('cairnmap-config-studio-saved')")
 try:
- b.evaluate("""(async()=>{const {createConfigPackageFromCurrentProject}=await import('/src/configStudio/legacyProjectAdapter.ts');const c=createConfigPackageFromCurrentProject();c.nodes.find(n=>n.path.class==='WRP'&&!n.path.kind).fields.push({fieldId:'acceptance-values',key:'tags.acceptanceValues',scope:'tags',type:'number',cardinality:'multiple',input:'text',required:false,labels:{zh:'验收数值',en:''},description:{zh:'',en:''},defaultValue:[1,2],scenes:{workflow:true}});sessionStorage.setItem('cairnmap-config-studio-saved',JSON.stringify(c));})()""")
+ b.evaluate("""(async()=>{const {createEditableConfigPackageFromCurrentProject:createConfigPackageFromCurrentProject}=await import('/src/configStudio/renderRuleTemplates.ts');const c=createConfigPackageFromCurrentProject();c.nodes.find(n=>n.path.class==='WRP'&&!n.path.kind).fields.push({fieldId:'acceptance-values',key:'tags.acceptanceValues',scope:'tags',type:'number',cardinality:'multiple',input:'text',required:false,labels:{zh:'验收数值',en:''},description:{zh:'',en:''},defaultValue:[1,2],scenes:{workflow:true}});sessionStorage.setItem('cairnmap-config-studio-saved',JSON.stringify(c));})()""")
  b.navigate('?workspace=config-studio&tab=workflows')
  value('section[aria-label="工作流编辑区域"] select','v3-wrp_warp')
  b.click('读取');b.wait('!!document.querySelector("select[aria-label=\\"添加输入的字段\\"]")')

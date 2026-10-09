@@ -27,9 +27,7 @@ def load(mode, narrow=False, cold=True):
 def open_tool(tool):
     visible = b.evaluate("[...document.querySelectorAll('button')].some(e=>e.textContent.trim()===" + json.dumps(tool) + "&&e.getBoundingClientRect().height)")
     if not visible:
-        rect = b.evaluate("(()=>{const e=document.querySelector('button[title=\"模式工具\"]');const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()")
-        b.call('Input.dispatchMouseEvent', {'type': 'mousePressed', 'button': 'left', 'clickCount': 1, **rect})
-        b.call('Input.dispatchMouseEvent', {'type': 'mouseReleased', 'button': 'left', 'clickCount': 1, **rect})
+        b.evaluate("document.querySelector('button[title=\"模式工具\"]').click();true")
         b.wait("[...document.querySelectorAll('button')].some(e=>e.textContent.trim()===" + json.dumps(tool) + "&&e.getBoundingClientRect().height)")
     b.evaluate("(()=>{const e=[...document.querySelectorAll('button')].find(e=>e.textContent.trim()===" + json.dumps(tool) + "&&e.getBoundingClientRect().height);e.click();return true;})()")
 
@@ -58,6 +56,14 @@ b.click('测绘')
 b.wait("(async()=>{return " + store + ".getState().modules.measuring.status==='loaded';})()", 60)
 assert not state('s.dialog.isOpen')
 checks.append({'mode': 'v3', 'warmActivationWithoutDialog': True})
+b.evaluate("(()=>{const s=JSON.parse(localStorage.getItem('ria_feature_modules_v1'));s.appVersion='acceptance-old-version';s.modules.measuring.lastLoadedVersion='acceptance-old-version';localStorage.setItem('ria_feature_modules_v1',JSON.stringify(s));return true;})()")
+load('v3',cold=False)
+assert state('s.modules.measuring.enabledByUser') is True
+assert state('s.modules.measuring.lastLoadedVersion') is None
+open_tool('测绘')
+b.wait("(async()=>{const s="+store+".getState();return s.modules.measuring.status==='loaded'&&s.modules.measuring.lastLoadedVersion===s.appVersion;})()",40)
+assert not state('s.dialog.isOpen')
+checks.append({'mode':'v3','versionMismatchInvalidatesLoadedMarker':True,'userActivationRetained':True,'reloadUsesCurrentVersion':True})
 result = {'checks': checks, 'runtimeErrors': b.errors}
 (OUT / 'module-entry-result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
 assert not b.errors, b.errors
