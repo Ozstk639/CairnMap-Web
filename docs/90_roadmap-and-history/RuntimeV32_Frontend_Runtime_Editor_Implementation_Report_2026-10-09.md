@@ -41,4 +41,10 @@
 - 校验有效预览才生成独立编译快照，非法草稿不落回 V1。编译公共入口也校验非法条件。
 - 模板专项、完整核验和构建通过。真实 Studio 复制单级规则、目标条件保持、非分类字段保存核验、未保存切标签阻断通过，零运行异常。跨分类未知 NofFloor 引用在实际页面被正确阻断，兼容模板正例通过。证据：[r7-editor-result.json](G:/RIAWebGIS/NewPRES/CairnMap_Codex/migration-audits/runtime-v32-frontend-runtime-editor-20261009/r7-editor-result.json)。
 
-后续：BP06–BP10 按蓝图继续实施，逐主题记录验证和本地提交。
+## BP06：分类继承和完整组模板
+
+- 新分类创建面板支持父级继承/系统默认与任何兼容分类的有效显示组；同父级平级优先，几何、多部件和规范化锚点过滤。整组保留 Zoom、非分类条件与顺序，独立节点/规则 ID；字段、卡片、工作流与上下文仍属于目标父级体系。
+- 尊重关闭继承；首次本地显示编辑生成独立组，取消不留下节点，失配模板/引用和祖先几何约束阻断保存。
+- 专项、完整核验和构建通过。真实界面取消、父级继承、新分类核验、兼容组模板和草稿切标签阻断通过；实际候选组含 9 个优先平级、1 个父级、14 个其他兼容分类，运行异常零。证据：[category-editor-result.json](G:/RIAWebGIS/NewPRES/CairnMap_Codex/migration-audits/runtime-v32-frontend-runtime-editor-20261009/category-editor-result.json)。
+
+后续：BP07–BP10 按蓝图继续实施，逐主题记录验证和本地提交。

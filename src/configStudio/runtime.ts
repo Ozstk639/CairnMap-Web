@@ -1071,6 +1071,7 @@ export function validateConfigPackage(config: ConfigPackageV3, mountedRecords: M
     node.fields.forEach((field, index) => validateField(field, `${base}/fields/${index}`, keys, issues));
     for (const geometry of GEOMETRIES) {
       const profile = node.geometryProfiles[geometry];
+      if (config.contractRevision === 7 && profile?.enabled && resolveCategoryNodes(config, node.path).some(ancestor => ancestor.nodeId !== node.nodeId && ancestor.geometryType && ancestor.geometryType !== geometry)) issue(issues, 'error', 'geometry-type-inheritance-invalid', `${base}/geometry/${geometry}`, '本级几何与祖先已指定的类型不一致。');
       if (profile) validateProfile(profile, geometry, `${base}/geometry/${geometry}`, config, node.path, issues);
       if (node.geometryType && geometry !== node.geometryType && profile?.enabled) issue(issues, 'error', 'geometry-type-multiple-enabled', `${base}/geometry/${geometry}`, '同一分类节点只能启用一种几何类型。');
     }
