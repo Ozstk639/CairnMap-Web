@@ -37,6 +37,65 @@ const PROTECTED_FIELD_KEYS = new Set([...SYSTEM_FIELD_KEYS].filter((key) => key 
 const EXTERNAL_WORKFLOW_REASONS = new Set(['railway-integrated', 'station-integrated', 'trp-integrated']);
 const CARD_RENDERERS = new Set(['text', 'tag', 'colorCapsule', 'nameColorCapsule', 'relationLink', 'lineChips', 'media']);
 
+type CompiledConfig = {
+  epoch: number;
+  byClass: Map<string, CategoryNode[]>;
+  ancestors: Map<string, CategoryNode[]>;
+  descendants: Set<string>;
+  fields: Map<string, FieldDefinition[]>;
+  selectable: Map<string, FieldDefinition[]>;
+  profiles: Map<string, GeometryProfile | undefined>;
+  cards: Map<string, CardConfiguration | undefined>;
+  defaults: Map<GeometryKind, import('./types').RenderRuleExtensions>;
+  extensions: WeakMap<object, Map<GeometryKind, import('./types').RenderRuleExtensions>>;
+  hits: number;
+};
+const compiledConfigs = new WeakMap<ConfigPackageV3, CompiledConfig>();
+let compiledEpoch = 0;
+const compiledPathKey = (path: ClassificationPath) => JSON.stringify([path.class, path.kind ?? '', path.skind ?? '', path.skind2 ?? '']);
+function freezeData<T>(value: T): T {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.values(value).forEach(freezeData);
+    Object.freeze(value);
+  }
+  return value;
+}
+/** Only validated activation/preview snapshots enter this cache. Mutable editor
+ * objects deliberately retain the uncached reference implementation. */
+export function compileConfigRuntime(value: ConfigPackageV3): ConfigPackageV3 {
+  if (compiledConfigs.has(value)) return value;
+  const config = freezeData(structuredClone(value));
+  const compiled: CompiledConfig = { epoch: ++compiledEpoch, byClass: new Map(), ancestors: new Map(), descendants: new Set(), fields: new Map(), selectable: new Map(), profiles: new Map(), cards: new Map(), defaults: new Map(), extensions: new WeakMap(), hits: 0 };
+  for (const node of config.nodes) {
+    const group = compiled.byClass.get(node.path.class) ?? [];
+    group.push(node); compiled.byClass.set(node.path.class, group);
+    let parent = parentClassificationPath(node.path);
+    while (parent) { compiled.descendants.add(compiledPathKey(parent)); parent = parentClassificationPath(parent); }
+  }
+  for (const group of compiled.byClass.values()) group.sort((a, b) => pathDepth(a.path) - pathDepth(b.path));
+  compiledConfigs.set(config, compiled);
+  for (const node of config.nodes) {
+    resolveEffectiveFields(config, node.path);
+    resolveCardConfiguration(config, node.path);
+    for (const geometry of GEOMETRIES) resolveGeometryProfile(config, node.path, geometry);
+  }
+  for (const geometry of GEOMETRIES) {
+    resolveRenderExtensions(config, geometry);
+    for (const node of config.nodes) for (const rule of node.geometryProfiles[geometry]?.zoomPriority.rules ?? []) resolveRenderExtensions(config, geometry, rule.extensions);
+  }
+  return config;
+}
+export function isCompiledConfigRuntime(config: ConfigPackageV3): boolean { return compiledConfigs.has(config); }
+export function configCompilationStats(config: ConfigPackageV3) {
+  const compiled = compiledConfigs.get(config);
+  return compiled ? { epoch: compiled.epoch, nodes: config.nodes.length, classes: compiled.byClass.size, cachedPaths: compiled.ancestors.size, hits: compiled.hits } : undefined;
+}
+function cachedPathValue<T>(map: Map<string, T>, key: string, value: T): T {
+  // Unregistered data paths cannot cause unbounded cache growth.
+  if (map.size < 1024) map.set(key, value);
+  return value;
+}
+
 export function classificationPathKey(path: ClassificationPath): string {
   return [path.class, path.kind, path.skind, path.skind2].filter((value): value is string => Boolean(value)).join('/');
 }
@@ -152,6 +211,12 @@ export function inheritanceControls(node: CategoryNode): InheritanceControls {
 }
 
 export function resolveCategoryNodes(config: ConfigPackageV3, path: ClassificationPath): CategoryNode[] {
+  const compiled = compiledConfigs.get(config);
+  if (compiled) {
+    const key = compiledPathKey(path); const cached = compiled.ancestors.get(key);
+    if (cached) { compiled.hits++; return cached; }
+    return cachedPathValue(compiled.ancestors, key, freezeData((compiled.byClass.get(path.class) ?? []).filter(node => nodeMatchesPath(node, path))));
+  }
   return config.nodes.filter((node) => nodeMatchesPath(node, path)).sort((a, b) => pathDepth(a.path) - pathDepth(b.path));
 }
 
@@ -164,6 +229,8 @@ export function hasCategoryNode(config: ConfigPackageV3, path: ClassificationPat
 }
 
 export function hasDescendants(config: ConfigPackageV3, path: ClassificationPath): boolean {
+  const compiled = compiledConfigs.get(config);
+  if (compiled) return compiled.descendants.has(compiledPathKey(path));
   return config.nodes.some((node) => pathDepth(node.path) > pathDepth(path) && pathMatchesScope(node.path, path));
 }
 
@@ -173,6 +240,9 @@ export function hasDescendants(config: ConfigPackageV3, path: ClassificationPath
  * inherited declaration and never mutates the parent node.
  */
 export function resolveEffectiveFields(config: ConfigPackageV3, path: ClassificationPath): FieldDefinition[] {
+  const compiled = compiledConfigs.get(config); const cacheKey = compiledPathKey(path);
+  const cached = compiled?.fields.get(cacheKey);
+  if (cached) { compiled!.hits++; return cached; }
   const values = new Map<string, FieldDefinition>();
   let inherited = true;
   for (const [index, node] of resolveCategoryNodes(config, path).entries()) {
@@ -185,7 +255,8 @@ export function resolveEffectiveFields(config: ConfigPackageV3, path: Classifica
     }
     inherited = inheritanceControls(node).fields;
   }
-  return [...values.values()];
+  const result = [...values.values()];
+  return compiled ? cachedPathValue(compiled.fields, cacheKey, freezeData(result)) : result;
 }
 
 export function resolveWorkflowSelectOptions(config: ConfigPackageV3, control: Pick<WorkflowControl, 'options' | 'optionSource'>): SelectOption[] {
@@ -206,14 +277,18 @@ function systemFieldDefinition(key: string): FieldDefinition {
 }
 
 export function resolveSelectableFields(config: ConfigPackageV3, scope: ClassificationPath, options: { includeSystem?: boolean } = {}): FieldDefinition[] {
+  const compiled = compiledConfigs.get(config); const cacheKey = `${compiledPathKey(scope)}:${options.includeSystem !== false}`;
+  const cached = compiled?.selectable.get(cacheKey);
+  if (cached) { compiled!.hits++; return cached; }
   const concrete = config.nodes.filter((node) => pathMatchesScope(node.path, scope) && !hasDescendants(config, node.path));
   const candidates = concrete.length ? concrete : config.nodes.filter((node) => pathMatchesScope(node.path, scope));
   if (!candidates.length) return options.includeSystem === false ? [] : [...SYSTEM_FIELD_KEYS].map(systemFieldDefinition);
   const fieldSets = candidates.map((node) => new Map(resolveEffectiveFields(config, node.path).map((field) => [field.key, field])));
   const common = [...fieldSets[0].values()].filter((field) => fieldSets.every((set) => set.has(field.key)));
-  if (options.includeSystem === false) return common;
+  if (options.includeSystem === false) return compiled ? cachedPathValue(compiled.selectable, cacheKey, freezeData(common)) : common;
   const custom = new Set(common.map((field) => field.key));
-  return [...[...SYSTEM_FIELD_KEYS].filter((key) => !custom.has(key)).map(systemFieldDefinition), ...common];
+  const result = [...[...SYSTEM_FIELD_KEYS].filter((key) => !custom.has(key)).map(systemFieldDefinition), ...common];
+  return compiled ? cachedPathValue(compiled.selectable, cacheKey, freezeData(result)) : result;
 }
 
 /** Display/Card resolve independently and only propagate through their own switch. */
@@ -230,12 +305,17 @@ function resolveInheritedValue<T>(config: ConfigPackageV3, path: ClassificationP
 }
 
 export function resolveGeometryProfile(config: ConfigPackageV3, path: ClassificationPath, geometry: GeometryKind): GeometryProfile | undefined {
+  const compiled = compiledConfigs.get(config); const key = `${compiledPathKey(path)}:${geometry}`;
+  if (compiled?.profiles.has(key)) { compiled.hits++; return compiled.profiles.get(key); }
   const selectedType = resolveInheritedValue(config, path, 'display', (node) => node.geometryType);
-  if (selectedType && selectedType !== geometry) return undefined;
-  return resolveInheritedValue(config, path, 'display', (node) => node.geometryProfiles[geometry]);
+  const result = selectedType && selectedType !== geometry ? undefined : resolveInheritedValue(config, path, 'display', (node) => node.geometryProfiles[geometry]);
+  return compiled ? cachedPathValue(compiled.profiles, key, result) : result;
 }
 
 export function resolveRenderExtensions(config: ConfigPackageV3, geometry: GeometryKind, local?: import('./types').RenderRuleExtensions): import('./types').RenderRuleExtensions {
+  const compiled = compiledConfigs.get(config);
+  const cached = local ? compiled?.extensions.get(local)?.get(geometry) : compiled?.defaults.get(geometry);
+  if (cached) { compiled!.hits++; return cached; }
   const result = structuredClone(config.engine?.renderDefaults?.[geometry] ?? {});
   for (const [key,value] of Object.entries(local ?? {})) {
     if (value === undefined) continue;
@@ -247,11 +327,19 @@ export function resolveRenderExtensions(config: ConfigPackageV3, geometry: Geome
       (result as Record<string, unknown>)[key] = { ...(previous && typeof previous === 'object' ? previous : {}), ...patch };
     } else (result as Record<string, unknown>)[key] = value;
   }
+  if (compiled) {
+    freezeData(result);
+    if (!local) compiled.defaults.set(geometry, result);
+    else { const map = compiled.extensions.get(local) ?? new Map(); map.set(geometry, result); compiled.extensions.set(local, map); }
+  }
   return result;
 }
 
 export function resolveCardConfiguration(config: ConfigPackageV3, path: ClassificationPath): CardConfiguration | undefined {
-  return resolveInheritedValue(config, path, 'card', (node) => node.card);
+  const compiled = compiledConfigs.get(config); const key = compiledPathKey(path);
+  if (compiled?.cards.has(key)) { compiled.hits++; return compiled.cards.get(key); }
+  const result = resolveInheritedValue(config, path, 'card', (node) => node.card);
+  return compiled ? cachedPathValue(compiled.cards, key, result) : result;
 }
 
 export function resolveCardItems(config: ConfigPackageV3, path: ClassificationPath): CardItem[] {

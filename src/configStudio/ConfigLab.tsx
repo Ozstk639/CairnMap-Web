@@ -25,7 +25,7 @@ function switchMode(mode: 'v1' | 'v3') {
 
 export function ConfigLab({ onClose }: { onClose: () => void }) {
   const mode = new URLSearchParams(window.location.search).get('configMode') === 'v1' ? 'v1' : 'v3';
-  const [config, setConfig] = useState<ConfigPackageV3>(() => createConfigPackageFromCurrentProject());
+  const [config, setConfig] = useState<ConfigPackageV3>(() => prepareConfigForActivation(createConfigPackageFromCurrentProject()));
   const [versions, setVersions] = useState<ConfigPackageV3[]>([]);
   const [message, setMessage] = useState('正在加载本地 V3 配置…');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -48,7 +48,7 @@ export function ConfigLab({ onClose }: { onClose: () => void }) {
     void loadLatestConfigLabPackage().then((saved) => {
       if (saved) { setConfig(saved); setMessage(`${recoveryIssue ? recoveryIssue + ' ' : ''}已加载本地 V3 配置 ${saved.packageId} r${saved.revision}。`); }
       else {
-        const migrated = createConfigPackageFromCurrentProject();
+        const migrated = prepareConfigForActivation(createConfigPackageFromCurrentProject());
         setConfig(migrated);
         setMessage(`${recoveryIssue ? recoveryIssue + ' ' : ''}没有本地 V3.2 版本；已加载可编辑的 V1 语义迁移包。`);
       }

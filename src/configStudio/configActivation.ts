@@ -1,6 +1,6 @@
 import type { ConfigPackageV3 } from './types';
 import { migrateV31Package, migrateV4Package, migrateV5Package } from './package';
-import { validateConfigPackage } from './runtime';
+import { compileConfigRuntime, validateConfigPackage } from './runtime';
 /** One validation boundary for persisted packages and runtime activation.
  * Import/edit may retain a diagnostic draft, but never bypass this boundary. */
 export function prepareConfigForActivation(value: ConfigPackageV3): ConfigPackageV3 {
@@ -12,5 +12,5 @@ export function prepareConfigForActivation(value: ConfigPackageV3): ConfigPackag
   if (config.contractRevision !== 6) throw new Error(`无法启用：未知的原生契约 revision ${config.contractRevision}。`);
   const report = validateConfigPackage(config);
   if (!report.valid) throw new Error(`无法保存或启用无效配置：${report.issues.filter(issue => issue.severity === 'error').slice(0,5).map(issue => `${issue.path}：${issue.message}`).join('；')}`);
-  return config;
+  return compileConfigRuntime(config);
 }
