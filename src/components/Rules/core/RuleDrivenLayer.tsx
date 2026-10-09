@@ -4032,7 +4032,8 @@ export default function RuleDrivenLayer(props: Props) {
           const anchorPx = map.latLngToContainerPoint(req.anchorLatLng);
           const shifted = L.point(anchorPx.x + p.dx, anchorPx.y + p.dy);
           const ll = map.containerPointToLatLng(shifted);
-          if (parentBundle?.nativeSymbol?.followLabelAnchor && !req.symbolDensityBlocked) {
+          if (parentBundle?.nativeSymbol && p.hideSymbol) setNativeSymbolVisible(root, parentBundle, false, req.partIndex);
+          if (parentBundle?.nativeSymbol?.followLabelAnchor && !req.symbolDensityBlocked && !p.hideSymbol) {
             setNativeSymbolVisible(root, parentBundle, true, req.partIndex);
             placeNativeSymbol(map, parentBundle, ll, req.partIndex, req.anchorLatLng);
           }

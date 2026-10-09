@@ -14,6 +14,7 @@ export type LabelDensityReduceStep =
   | 'hideOptionalLabels'
   | 'hideSymbols'
   | 'geometryOnly';
+export const DEFAULT_LABEL_DENSITY_REDUCE_ORDER: LabelDensityReduceStep[] = ['abbreviateOptionalLabels', 'hideOptionalLabels'];
 
 export type LabelDensityInput = {
   densityEnabled?: boolean;

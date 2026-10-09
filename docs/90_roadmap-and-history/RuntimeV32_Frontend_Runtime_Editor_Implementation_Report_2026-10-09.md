@@ -52,4 +52,10 @@
 - 主区保留基础 A/B/C；三个高级模块进入同一默认折叠入口。显示权重指标、合成/边界归 C 子模块；Pane/zIndex 属于通用层级，Label 每屏配额属于碰撞/密度，Label 独立碰撞指标保持独立。
 - 仅重组编辑入口与控件归属，未改变保存路径、默认值或规则效果。完整核验和构建通过，实际页面各规则只有一个默认折叠总入口，三个高级模块均嵌套其内。证据：[extensions-grouping-result.json](G:/RIAWebGIS/NewPRES/CairnMap_Codex/migration-audits/runtime-v32-frontend-runtime-editor-20261009/extensions-grouping-result.json)。
 
-后续：BP08–BP10 按蓝图继续实施，逐主题记录验证和本地提交。
+## BP08：密度编号与严格执行
+
+- 选择框显示连续编号，按有效顺序排列；仅 grip 发起拖动，附键盘上/下移，恢复继承不固化默认数组，显式空顺序采用最终失败回退。
+- 布局引擎按序执行，终止隐藏不再提前缩略或被 forceShow 反转；缩略重新检查真实预算。先隐藏符号后成功缩略的结果也正确保持符号隐藏。
+- 实际布局验收：hideOptional 在前时缩略调用零、目标隐藏；缩略在前时调用一次、目标缩略显示；同格硬配额仍隐藏；空数组不缩略；UI 显示 1、2，零运行异常。证据：[density-order-result.json](G:/RIAWebGIS/NewPRES/CairnMap_Codex/migration-audits/runtime-v32-frontend-runtime-editor-20261009/density-order-result.json)。完整核验/构建通过。
+
+后续：BP09–BP10 按蓝图继续实施，逐主题记录验证和本地提交。

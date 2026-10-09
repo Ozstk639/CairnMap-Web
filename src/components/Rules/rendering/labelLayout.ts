@@ -2,6 +2,7 @@ import { placeLabel, labelCandidateShift } from './labelPlacement';
 import * as L from "leaflet";
 import {
   LabelDensityLimiter,
+  DEFAULT_LABEL_DENSITY_REDUCE_ORDER,
   resolveLabelDensityConfig,
   type ResolvedLabelDensityConfig,
   type LabelDensityReduceStep,
@@ -323,6 +324,8 @@ export type LabelHiddenReason =
   | "hiddenByPolicy";
 
 export type PlacedLabel = {
+  /** Ordered density actions actually applied; useful for acceptance diagnostics. */
+  densityActionTrace?: LabelDensityReduceStep[];
   id: string;
   featureUid?: string;
   text: string;
@@ -2374,40 +2377,56 @@ export function layoutLabelsOnMap(
     // 先尝试原文
     let p = tryPlace(item, item.req.text);
 
-    // 再尝试缩略
-    const densityOrder = item.lastFailureReason === 'densityLimit' ? item.density?.reduceOrder : undefined;
-    if (!p && item.allowAbbrev && item.abbrev && (!densityOrder || densityOrder.includes('abbreviateOptionalLabels') && item.collisionRole === 'optional')) {
+    // Ordinary collision fallback remains separate from ordered density reduction.
+    if (!p && item.lastFailureReason !== 'densityLimit' && item.allowAbbrev && item.abbrev) {
       const short = item.abbrev(item.req.text);
       if (short && short !== item.req.text) {
         p = tryPlace(item, short);
       }
     }
 
-    if (!p && shouldForceShow(item) && item.lastFailureReason !== 'densityLimit') {
+    let hideSymbol = false;
+    let keepGeometry = item.hidePolicy === 'geometryOnly';
+    let terminalDensityAction = false;
+    const densityFailed = !p && item.lastFailureReason === 'densityLimit';
+    const densityActionTrace: LabelDensityReduceStep[] = [];
+    if (!p && item.lastFailureReason === 'densityLimit') for (const action of item.density?.reduceOrder ?? DEFAULT_LABEL_DENSITY_REDUCE_ORDER) {
+      if (action === 'abbreviateOptionalLabels') {
+        if (item.collisionRole !== 'optional' || !item.allowAbbrev || !item.abbrev) continue;
+        densityActionTrace.push(action);
+        const short = item.abbrev(item.req.text);
+        if (short && short !== item.req.text) p = tryPlace(item, short);
+        if (p) break;
+      } else if (action === 'hideSoftLabels' && item.collisionRole === 'soft' || action === 'hideOptionalLabels' && item.collisionRole === 'optional') {
+        densityActionTrace.push(action); terminalDensityAction = true; break;
+      } else if (action === 'hideSymbols') {
+        densityActionTrace.push(action); hideSymbol = true;
+      } else if (action === 'geometryOnly') {
+        densityActionTrace.push(action); keepGeometry = true; hideSymbol = false; terminalDensityAction = true; break;
+      }
+    }
+
+    if (!p && !terminalDensityAction && shouldForceShow(item) && item.lastFailureReason !== 'densityLimit') {
       p = forcePlace(item, item.req.text);
     }
 
     if (p) {
+      p.densityActionTrace = densityActionTrace.length ? densityActionTrace : undefined;
+      if (hideSymbol) p.hideSymbol = true;
       placed.push(p);
       continue;
     }
 
     // 放不下
     getDefaultLabelPlacementCache().noteFailure(item.placementCache, item.lastFailureReason);
-    let hideSymbol = false;
-    let keepGeometry = item.hidePolicy === 'geometryOnly';
-    if (item.lastFailureReason === 'densityLimit') for (const action of densityOrder ?? []) {
-      if (action === 'hideSymbols') hideSymbol = true;
-      if (action === 'geometryOnly') { keepGeometry = true; hideSymbol = false; break; }
-      if (action === 'hideSoftLabels' && item.collisionRole === 'soft' || action === 'hideOptionalLabels' && item.collisionRole === 'optional') break;
-    }
     placed.push({
       id: item.req.id,
       featureUid: item.req.featureUid,
       text: item.req.text,
       dx: 0,
       dy: 0,
-      hidden: item.allowHide || item.lastFailureReason === 'densityLimit',
+      hidden: item.allowHide || densityFailed || item.lastFailureReason === 'densityLimit',
+      densityActionTrace: densityActionTrace.length ? densityActionTrace : undefined,
       hideSymbol,
       keepGeometry,
       hiddenReason: item.lastFailureReason ?? "notPlaced",
