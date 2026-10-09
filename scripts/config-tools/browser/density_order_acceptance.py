@@ -15,7 +15,7 @@ assert result['hideFirst']['hidden'] and result['hideFirst']['calls']==0,result
 assert not result['abbreviateFirst']['hidden'] and result['abbreviateFirst']['calls']==1,result
 assert result['hardQuota']['hidden'],result
 assert result['emptyOrder']['hidden'] and result['emptyOrder']['calls']==0,result
-b.navigate('?workspace=config-studio');b.click('读取/新建');b.evaluate("(()=>{const e=[...document.querySelectorAll('button')].find(e=>e.textContent.includes('仅显示启用状态'));if(e)e.click();const g=document.querySelector('[data-rule-extensions]');g.open=true;[...g.querySelectorAll('details')].find(e=>e.querySelector('summary')?.textContent==='候选、碰撞对象与稳定/密度策略').open=true;return true;})()")
+b.navigate('?workspace=config-studio');b.click('读取/新建');b.evaluate("(()=>{const e=[...document.querySelectorAll('button')].find(e=>e.textContent.includes('仅显示启用状态'));if(e)e.click();const g=document.querySelector('[data-rule-extensions]');g.open=true;[...g.querySelectorAll('details')].find(e=>e.querySelector('summary')?.dataset.moduleTitle==='候选、碰撞对象与稳定/密度策略').open=true;return true;})()")
 order=b.evaluate("(()=>{const g=document.querySelector('[data-density-order]');return [...g.querySelectorAll('[role=checkbox][aria-checked=true]')].map(e=>e.textContent);})()")
 assert order==[str(i+1) for i in range(len(order))],order
 result['numberedUI']=order;b.screenshot('density-numbered-editor.png');b.click('放弃草稿')

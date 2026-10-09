@@ -48,7 +48,7 @@ class Browser:
         self.wait("document.querySelector('nav[aria-label=\"设计工作区\"]') !== null")
         self.evaluate('window.confirm = () => true')
     def click(self, label):
-        rect = self.evaluate("(() => { const el = [...document.querySelectorAll('button,summary')].find(el => el.textContent.trim() === " + json.dumps(label) + " && el.getBoundingClientRect().height); if(!el) throw Error('Element missing'); el.scrollIntoView({block:'center'}); const r=el.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}; })()")
+        rect = self.evaluate("(() => { const el = [...document.querySelectorAll('button,summary')].find(el => (el.dataset.moduleTitle === " + json.dumps(label) + " || el.textContent.trim() === " + json.dumps(label) + " || el.getAttribute('aria-label') === " + json.dumps(label) + " || el.getAttribute('title') === " + json.dumps(label) + ") && el.getBoundingClientRect().height); if(!el) throw Error('Element missing'); el.scrollIntoView({block:'center'}); const r=el.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}; })()")
         self.call('Input.dispatchMouseEvent', {'type': 'mousePressed', 'button': 'left', 'clickCount': 1, **rect})
         self.call('Input.dispatchMouseEvent', {'type': 'mouseReleased', 'button': 'left', 'clickCount': 1, **rect})
         time.sleep(.2)

@@ -58,4 +58,10 @@
 - 布局引擎按序执行，终止隐藏不再提前缩略或被 forceShow 反转；缩略重新检查真实预算。先隐藏符号后成功缩略的结果也正确保持符号隐藏。
 - 实际布局验收：hideOptional 在前时缩略调用零、目标隐藏；缩略在前时调用一次、目标缩略显示；同格硬配额仍隐藏；空数组不缩略；UI 显示 1、2，零运行异常。证据：[density-order-result.json](G:/RIAWebGIS/NewPRES/CairnMap_Codex/migration-audits/runtime-v32-frontend-runtime-editor-20261009/density-order-result.json)。完整核验/构建通过。
 
-后续：BP09–BP10 按蓝图继续实施，逐主题记录验证和本地提交。
+## BP09：菱形模块帮助
+
+- 所有指定模块、扩展子模块、独立碰撞指标及全局对应模块使用统一菱形问号；各自维护意义、效果、编辑/继承方式、单位和例子。有效扩展来源仍明确是静态检查。
+- 支持 hover、键盘 focus/Escape、触屏点击停留和关闭，浮层 portal 避免滚动裁切；不改变父级折叠或草稿。锚点 X/Y 的输入也允许正负值。
+- 实际页面模块标题无缺失帮助，键盘与手机编辑器全屏的真实 touch 通过，浮层在 390×844 视窗内，草稿和折叠状态未改变，零异常。已视觉检查截图。证据：[module-help-result.json](G:/RIAWebGIS/NewPRES/CairnMap_Codex/migration-audits/runtime-v32-frontend-runtime-editor-20261009/module-help-result.json)。完整核验与构建通过。
+
+后续：BP10 综合独立回归、实际入口生命周期、生产性能与版本化交付。
