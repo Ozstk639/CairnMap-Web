@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import { evaluateWorkflowExpression as run,parseWorkflowExpression,formatWorkflowExpression,workflowExpressionTokens } from '../../src/configStudio/workflowExpression';
+assert.equal(run('join("_",WorldPrefix+A,coalesce(B,0))',{A:'TPP',B:''},{WorldPrefix:'Z'}),'ZTPP_0');
+assert.equal(run('coalesce(A,B)',{A:false,B:'other'},{}),false);
+assert.equal(run('add(number(A),multiply(B,2))',{A:'3',B:4},{}),11);
+assert.equal(run('A+B',{A:3,B:4},{}),'34');
+assert.deepEqual(run('point(P)',{P:[[0,-64,-12]]},{}),{x:0,y:-64,z:-12});
+assert.equal(run('z(P)',{P:[[[[0,-64,-12]]]]},{}),-12);
+assert.throws(()=>run('point(P)',{P:[[0,0,0],[1,0,1]]},{}));
+assert.throws(()=>run('divide(1,0)',{},{}));
+assert.throws(()=>parseWorkflowExpression('eval("1")'));
+assert.throws(()=>parseWorkflowExpression('constructor("x")'));
+const expression='join("_",upper(A),coalesce(B,C))';
+assert.equal(formatWorkflowExpression(parseWorkflowExpression(expression)),expression);
+assert.deepEqual(workflowExpressionTokens(parseWorkflowExpression(expression)),['A','B','C']);
+console.log('workflow-calculator: safe functions, nested composition, unchanged + semantics, false/zero, coordinate formats, unknown calls and dependencies: OK');

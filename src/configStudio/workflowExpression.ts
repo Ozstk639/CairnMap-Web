@@ -3,8 +3,28 @@ export type WorkflowExpression =
   | { kind: 'literal'; value: string | number | boolean | null }
   | { kind: 'token'; name: string }
   | { kind: 'concat'; parts: WorkflowExpression[] }
-  | { kind: 'join'; args: WorkflowExpression[] };
+  | { kind: 'join'; args: WorkflowExpression[] }
+  | { kind:'call'; name:string; args:WorkflowExpression[] };
 
+export const WORKFLOW_FUNCTIONS = [
+  {name:'join',label:'可选段拼接',signature:'join("_",A,B)',description:'以分隔符连接非空片段，保留 0 和 false。',min:2,max:4096},
+  {name:'coalesce',label:'首个非空值',signature:'coalesce(A,B)',description:'取首个非空值，0 和 false 不跳过。',min:1,max:4096},
+  {name:'text',label:'转为文本',signature:'text(A)',description:'以受控方式将值转换为文本。',min:1,max:1},
+  {name:'number',label:'转为数字',signature:'number(A)',description:'返回有效有限数字，无效值报错。',min:1,max:1},
+  {name:'trim',label:'去除两端空白',signature:'trim(A)',description:'返回去除两端空白后的文本。',min:1,max:1},
+  {name:'upper',label:'转大写',signature:'upper(A)',description:'将文本转换为大写。',min:1,max:1},
+  {name:'lower',label:'转小写',signature:'lower(A)',description:'将文本转换为小写。',min:1,max:1},
+  {name:'abs',label:'绝对值',signature:'abs(A)',description:'返回有限数字的绝对值。',min:1,max:1},
+  {name:'round',label:'四舍五入',signature:'round(A)',description:'将有限数字四舍五入为整数。',min:1,max:1},
+  {name:'add',label:'数值加法',signature:'add(A,B)',description:'按数值相加；+ 仍保持原有文本拼接。',min:2,max:2},
+  {name:'subtract',label:'数值减法',signature:'subtract(A,B)',description:'按数值相减。',min:2,max:2},
+  {name:'multiply',label:'数值乘法',signature:'multiply(A,B)',description:'按数值相乘。',min:2,max:2},
+  {name:'divide',label:'数值除法',signature:'divide(A,B)',description:'按数值相除；除以零报错。',min:2,max:2},
+  {name:'point',label:'单点坐标对象',signature:'point(A)',description:'将一个点的 CoordP 数组变为 {x,y,z}；多点报错。绘制返回格式已提供直接选择。',min:1,max:1},
+  {name:'x',label:'首点 X',signature:'x(A)',description:'读取坐标对象或规范几何数组的首点 x。',min:1,max:1},
+  {name:'y',label:'首点 Y',signature:'y(A)',description:'读取坐标对象或规范几何数组的首点 y。',min:1,max:1},
+  {name:'z',label:'首点 Z',signature:'z(A)',description:'读取坐标对象或规范几何数组的首点 z。',min:1,max:1},
+] as const;
 export const WORKFLOW_SYSTEM_TOKENS = ['ID', 'World', 'WorldPrefix', 'Class', 'Kind', 'Skind', 'Skind2', 'Creator'] as const;
 export const PROTECTED_WORKFLOW_TARGETS = new Set(['World', 'Class', 'Kind', 'Skind', 'Skind2', 'SKind', 'SKind2', 'Type', 'Creator', 'CreateBy', 'CreateTime', 'EditBy', 'EditTime', 'CoordP', 'CoordL', 'CoordG', 'Geometry']);
 
@@ -93,7 +113,8 @@ export function parseWorkflowExpression(source: string): WorkflowExpression {
       if (name[0] === 'null') return { kind: 'literal', value: null };
       return { kind: 'token', name: name[0] };
     }
-    if (name[0] !== 'join') throw new Error('只允许调用 join。');
+    const definition=WORKFLOW_FUNCTIONS.find(item=>item.name===name[0]);
+    if (!definition) throw new Error(`第 ${cursor-name[0].length+1} 个字符：不支持函数 ${name[0]}。`);
     cursor += 1; const args: WorkflowExpression[] = [];
     while (true) {
       args.push(expression(depth + 1)); space();
@@ -101,8 +122,8 @@ export function parseWorkflowExpression(source: string): WorkflowExpression {
       if (source[cursor] !== ',') throw new Error('join 参数必须用逗号分隔并以 ) 结束。');
       cursor += 1;
     }
-    if (args.length < 2) throw new Error('join 至少需要分隔符和一个片段。');
-    return { kind: 'join', args };
+    if (args.length<definition.min || args.length>definition.max) throw new Error(`${name[0]} 参数数量应为 ${definition.min}–${definition.max}。`);
+    return name[0]==='join'?{ kind:'join',args }:{kind:'call',name:name[0],args};
   };
   const expression = (depth: number): WorkflowExpression => {
     const parts = [atom(depth)]; space();
@@ -117,7 +138,7 @@ export function parseWorkflowExpression(source: string): WorkflowExpression {
 export function workflowExpressionTokens(expression: WorkflowExpression): string[] {
   if (expression.kind === 'token') return [expression.name];
   if (expression.kind === 'literal') return [];
-  return [...new Set((expression.kind === 'join' ? expression.args : expression.parts).flatMap(workflowExpressionTokens))];
+  return [...new Set((expression.kind === 'join' || expression.kind==='call' ? expression.args : expression.parts).flatMap(workflowExpressionTokens))];
 }
 
 export function evaluateWorkflowExpression(source: string, slots: Record<string, unknown>, system: Record<string, unknown>): unknown {
@@ -126,6 +147,34 @@ export function evaluateWorkflowExpression(source: string, slots: Record<string,
     if (expression.kind === 'literal') return expression.value;
     if (expression.kind === 'token') return Object.prototype.hasOwnProperty.call(system, expression.name) ? system[expression.name] : Object.prototype.hasOwnProperty.call(slots, expression.name) ? slots[expression.name] : undefined;
     if (expression.kind === 'concat') return expression.parts.map((part) => text(run(part))).join('');
+    if(expression.kind==='call') {
+      const values=expression.args.map(run); const value=values[0];
+      const numeric=(raw:unknown)=>{if(raw==null||typeof raw==='string'&&!raw.trim())throw new Error('数值参数尚未填写。');const number=Number(raw);if(!Number.isFinite(number))throw new Error('数值参数无效。');return number;};
+      const coordinate=(raw:unknown):{x:number;y:number;z:number}=>{
+        if(raw&&typeof raw==='object'&&!Array.isArray(raw)){const point=raw as Record<string,unknown>;return {x:numeric(point.x),y:numeric(point.y),z:numeric(point.z)};}
+        let point=raw;while(Array.isArray(point)&&Array.isArray(point[0]))point=point[0];
+        if(!Array.isArray(point)||point.length!==3)throw new Error('参数不是有效坐标。');return {x:numeric(point[0]),y:numeric(point[1]),z:numeric(point[2])};
+      };
+      switch(expression.name) {
+        case 'coalesce':return values.find(item=>item!=null&&!(typeof item==='string'&&!item.trim()));
+        case 'text':return text(value);
+        case 'number':return numeric(value);
+        case 'trim':return text(value).trim();
+        case 'upper':return text(value).toUpperCase();
+        case 'lower':return text(value).toLowerCase();
+        case 'abs':return Math.abs(numeric(value));
+        case 'round':return Math.round(numeric(value));
+        case 'add':return numeric(value)+numeric(values[1]);
+        case 'subtract':return numeric(value)-numeric(values[1]);
+        case 'multiply':return numeric(value)*numeric(values[1]);
+        case 'divide':{const divisor=numeric(values[1]);if(divisor===0)throw new Error('不能除以零。');return numeric(value)/divisor;}
+        case 'point':if(Array.isArray(value)&&(value.length!==1||!Array.isArray(value[0])||value[0].length!==3||value[0].some(Array.isArray)))throw new Error('单点对象转换只允许一个点。');return coordinate(value);
+        case 'x':return coordinate(value).x;
+        case 'y':return coordinate(value).y;
+        case 'z':return coordinate(value).z;
+        default:throw new Error('未知受控函数。');
+      }
+    }
     const [separator, ...parts] = expression.args;
     return parts.map(run).filter((value) => value != null && String(value).trim()).map(text).join(text(run(separator)));
   };
@@ -136,5 +185,5 @@ export function formatWorkflowExpression(expression: WorkflowExpression): string
   if (expression.kind === 'literal') return JSON.stringify(expression.value);
   if (expression.kind === 'token') return expression.name;
   if (expression.kind === 'concat') return expression.parts.map(formatWorkflowExpression).join('+');
-  return `join(${expression.args.map(formatWorkflowExpression).join(',')})`;
+  return `${expression.kind==='call'?expression.name:'join'}(${expression.args.map(formatWorkflowExpression).join(',')})`;
 }

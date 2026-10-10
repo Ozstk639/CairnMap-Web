@@ -1,33 +1,20 @@
+import { resolveWorkflowFields } from './fieldReuse';
+import { WorkflowExpressionEditor } from './WorkflowExpressionEditor';
 import { GripVertical, Plus } from 'lucide-react';
 import { WorkflowValueConditionEditor } from './WorkflowValueConditionEditor';
 import { useMemo, useState } from 'react';
 import type { ConfigPackageV3, WorkflowAssignment, WorkflowDefinition, WorkflowOutput } from './types';
 import { resolveSelectableFields, validateWorkflowDefinition } from './runtime';
 import { evaluateV3Expression, normalizeV3WorkflowSlots, workflowOutputSystem, type V3WorkflowValueMap } from './V3WorkflowRunner';
-import { formatWorkflowExpression, parseWorkflowExpression, WORKFLOW_SYSTEM_TOKENS, workflowDerivedPointTokens } from './workflowExpression';
+import { WORKFLOW_SYSTEM_TOKENS, workflowDerivedPointTokens } from './workflowExpression';
 
 const uid = () => `assignment-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
-function AssignmentRow({ value, index, targets, tokens, system, slots, errors, onChange, onDelete, onCopy, onDragStart, onDragEnd, onDrop }: {
-  value: WorkflowAssignment; index: number; targets: string[]; tokens: string[]; system: V3WorkflowValueMap; slots: V3WorkflowValueMap; errors: string[];
+function AssignmentRow({ value, index, targets, tokens, tokenInfo, system, slots, errors, onChange, onDelete, onCopy, onDragStart, onDragEnd, onDrop }: {
+  value: WorkflowAssignment; index: number; targets: string[]; tokens: string[]; tokenInfo:Array<{token:string;label:string;type?:string}>; system: V3WorkflowValueMap; slots: V3WorkflowValueMap; errors: string[];
   onChange: (next: WorkflowAssignment) => void; onDelete: () => void; onCopy: () => void; onDragStart: () => void; onDragEnd: () => void; onDrop: () => void;
 }) {
-  const [constant, setConstant] = useState('');
-  const [separator, setSeparator] = useState('_');
   const expression = (next: string) => onChange({ ...value, expression: next });
-  const append = (piece: string) => {
-    try {
-      const parsed = parseWorkflowExpression(value.expression);
-      if (parsed.kind === 'join') { expression(formatWorkflowExpression({ ...parsed, args: [...parsed.args, parseWorkflowExpression(piece)] })); return; }
-    } catch { /* The incomplete expression remains visible until the author fixes it. */ }
-    expression(value.expression.trim() ? `${value.expression}+${piece}` : piece);
-  };
-  const join = () => {
-    try {
-      const parsed = parseWorkflowExpression(value.expression);
-      expression(formatWorkflowExpression(parsed.kind === 'join' ? { ...parsed, args: [{ kind: 'literal', value: separator }, ...parsed.args.slice(1)] } : { kind: 'join', args: [{ kind: 'literal', value: separator }, parsed] }));
-    } catch { expression(`join(${JSON.stringify(separator)},${tokens[0] ?? '""'})`); }
-  };
   let preview = '';
   try { const result = evaluateV3Expression(value.expression, slots, system); preview = result === undefined ? '（尚未填写）' : JSON.stringify(result); }
   catch (error) { preview = error instanceof Error ? error.message : '表达式无效'; }
@@ -39,11 +26,7 @@ function AssignmentRow({ value, index, targets, tokens, system, slots, errors, o
         <label className="grid min-w-0 gap-1 text-xs">来源／受控表达式<textarea aria-label={`组装表达式 ${index + 1}`} className="min-h-10 min-w-0 resize-y rounded border px-2 py-1 font-mono" rows={1} value={value.expression} onChange={(event) => expression(event.target.value)} placeholder={'A 或 join("_",WorldPrefix+Class,A)'} /></label>
       </div>
     </div>
-    <details className="mt-2 rounded bg-slate-50 p-2 text-xs"><summary className="cursor-pointer">表达式构造器</summary><div className="mt-2 flex flex-wrap items-center gap-2">
-      <select aria-label={`添加槽位或系统字段 ${index + 1}`} className="max-w-full rounded border px-2 py-1" value="" onChange={(event) => { if (event.target.value) append(event.target.value); }}><option value="">添加槽位／系统字段</option>{tokens.map((token) => <option key={token} value={token}>{token}</option>)}</select>
-      <input aria-label={`固定文本 ${index + 1}`} className="min-w-0 rounded border px-2 py-1" value={constant} onChange={(event) => setConstant(event.target.value)} placeholder="固定文本" /><button type="button" className="rounded border px-2 py-1" onClick={() => append(JSON.stringify(constant))}>添加文本</button>
-      <label>分隔符<input className="ml-1 w-16 rounded border px-2 py-1" value={separator} onChange={(event) => setSeparator(event.target.value)} /></label><button type="button" className="rounded border px-2 py-1" onClick={join}>使用可选段 join</button>
-    </div><p className="mt-2 text-slate-500">直接选择槽位或系统字段；文本使用引号，+ 拼接；join 自动跳过空片段。World 由活动世界提供。</p></details>
+    <WorkflowExpressionEditor value={value.expression} onChange={expression} tokens={tokenInfo} slots={slots} system={system} target={value.target}/>
     <div className="mt-2 flex min-w-0 flex-wrap items-start gap-2 text-xs"><code className="min-w-0 flex-1 break-all">{value.target || '（未选择目标）'} ← {preview}</code><button type="button" className="shrink-0 rounded border px-2 py-1" onClick={onCopy}>复制行</button><button type="button" className="shrink-0 rounded border px-2 py-1 text-rose-700" onClick={onDelete}>删除行</button></div>
     <WorkflowValueConditionEditor value={value.when} tokens={tokens} onChange={when => onChange({ ...value, when })} />
     {errors.length ? <ul role="alert" className="mt-2 space-y-1 text-xs text-rose-700">{errors.map((error, i) => <li key={i}>{error}</li>)}</ul> : null}
@@ -53,8 +36,10 @@ function AssignmentRow({ value, index, targets, tokens, system, slots, errors, o
 export function WorkflowOutputEditor({ config, workflow, output, slots, world, onChange }: { config: ConfigPackageV3; workflow: WorkflowDefinition; output: WorkflowOutput; slots: V3WorkflowValueMap; world?: string; onChange: (next: WorkflowOutput) => void }) {
   const [dragId, setDragId] = useState<string>();
   const targets = resolveSelectableFields(config, output.classification).map((field) => field.key);
+  workflow=resolveWorkflowFields(config,workflow);
   const controlSlots = workflow.steps.flatMap((step) => step.controls ?? []).flatMap((control) => control.slot ? [control.slot] : []);
   const tokens = [...new Set([...controlSlots, ...workflowDerivedPointTokens(workflow), ...WORKFLOW_SYSTEM_TOKENS, ...workflow.outputs.flatMap((_, index) => WORKFLOW_SYSTEM_TOKENS.map((token) => `${token}_${index + 1}`))])];
+  const tokenInfo=tokens.map(token=>{const control=workflow.steps.flatMap(step=>step.controls??[]).find(item=>item.slot===token);return {token,label:control?.label.zh??({World:'活动世界',WorldPrefix:'世界前缀',Creator:'填写人',Class:'主分类',Kind:'分类',Skind:'子分类',Skind2:'末级分类',ID:'要素 ID'} as Record<string,string>)[token]??token,type:control?.optionValueType??control?.kind};});
   slots = normalizeV3WorkflowSlots(workflow, slots);
   const system = workflowOutputSystem(workflow, slots, { world }, output.id);
   const issues = useMemo(() => validateWorkflowDefinition(workflow, config).issues, [workflow, config]);
@@ -65,5 +50,5 @@ export function WorkflowOutputEditor({ config, workflow, output, slots, world, o
     if (from < 0 || to < 0) return;
     const [row] = next.splice(from, 1); next.splice(to, 0, row); setDragId(undefined); set(next);
   };
-  return <details open className="mt-3 min-w-0 rounded border border-emerald-200 bg-emerald-50 p-3"><summary className="cursor-pointer font-medium">输出分类、字段绑定与组装 · {output.assignments.length} 行</summary><div className="mt-3 space-y-2">{output.assignments.map((row, index) => <AssignmentRow key={row.id} value={row} index={index} targets={targets} tokens={tokens} slots={slots} system={system} errors={issues.filter((issue) => issue.path === `workflows/${workflow.id}/outputs/${output.id}/assignments/${row.id}`).map((issue) => issue.message)} onChange={(next) => set(output.assignments.map((item) => item.id === row.id ? next : item))} onDelete={() => set(output.assignments.filter((item) => item.id !== row.id))} onCopy={() => { const next = [...output.assignments]; next.splice(index + 1, 0, { ...row, id: uid() }); set(next); }} onDragStart={() => setDragId(row.id)} onDragEnd={() => setDragId(undefined)} onDrop={() => move(row.id)} />)}<button type="button" className="inline-flex items-center gap-1 rounded border bg-white px-2 py-1 text-sm" onClick={() => set([...output.assignments, { id: uid(), target: '', expression: '' }])}><Plus className="h-4 w-4" />添加组装行</button></div></details>;
+  return <details open className="mt-3 min-w-0 rounded border border-emerald-200 bg-emerald-50 p-3"><summary className="cursor-pointer font-medium">输出分类、字段绑定与组装 · {output.assignments.length} 行</summary><div className="mt-3 space-y-2">{output.assignments.map((row, index) => <AssignmentRow key={row.id} value={row} index={index} targets={targets} tokens={tokens} tokenInfo={tokenInfo} slots={slots} system={system} errors={issues.filter((issue) => issue.path === `workflows/${workflow.id}/outputs/${output.id}/assignments/${row.id}`).map((issue) => issue.message)} onChange={(next) => set(output.assignments.map((item) => item.id === row.id ? next : item))} onDelete={() => set(output.assignments.filter((item) => item.id !== row.id))} onCopy={() => { const next = [...output.assignments]; next.splice(index + 1, 0, { ...row, id: uid() }); set(next); }} onDragStart={() => setDragId(row.id)} onDragEnd={() => setDragId(undefined)} onDrop={() => move(row.id)} />)}<button type="button" className="inline-flex items-center gap-1 rounded border bg-white px-2 py-1 text-sm" onClick={() => set([...output.assignments, { id: uid(), target: '', expression: '' }])}><Plus className="h-4 w-4" />添加组装行</button></div></details>;
 }
