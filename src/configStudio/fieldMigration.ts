@@ -1,4 +1,5 @@
 import type { ConfigPackageV3, SelectOption } from './types';
+import { migrateWorkflowDrawings } from './workflowDrawingMigration';
 import { resolveEffectiveFields } from './runtime';
 
 /** Imports retain the old executed list before discarding registry pointers. */
@@ -34,6 +35,9 @@ export function migrateFieldsToR8(value: ConfigPackageV3): ConfigPackageV3 {
     }
   }
   for (const workflow of config.workflows) for (const step of workflow.steps) for (const control of step.controls ?? []) copied(control);
+  config.workflows=config.workflows.map(migrateWorkflowDrawings);
+  const tpp=config.nodes.find(node=>node.path.class==='TPP'&&!node.path.kind);
+  if(tpp&&!tpp.fields.some(field=>field.key==='TGTcoordinate'))tpp.fields.push({fieldId:'TPP-TGTcoordinate',key:'TGTcoordinate',type:'json',cardinality:'single',input:'json',labels:{zh:'目标坐标',en:''},description:{zh:'目标点绘制返回的单点坐标对象。',en:''},coordinateFormat:'pointObject'});
   delete config.registries.optionSets;
   config.contractRevision = 8;
   return config;

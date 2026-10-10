@@ -4489,7 +4489,8 @@ const upsertWorkflowPreview = (
   key: string,
   kind: WorkflowPreviewKind,
   points: WorldPoint[],
-  style?: WorkflowPreviewStyle
+  style?: WorkflowPreviewStyle,
+  geometry?: import('@/core/geometry/multipartGeometry').MultipartGeometry
 ) => {
   const proj = projectionRef.current;
   const root = workflowRootRef.current;
@@ -4506,7 +4507,10 @@ const upsertWorkflowPreview = (
   const latlngs = (points ?? []).map(p => proj.locationToLatLng(p.x, 64, p.z));
 
   let layer: L.Layer;
-  if (kind === 'point') {
+  if(geometry) {
+    const project=(point:{x:number;z:number})=>proj.locationToLatLng(point.x,64,point.z);
+    layer=L.layerGroup(geometry.type==='Point'?geometry.parts.map(point=>L.circleMarker(project(point),{color,fillColor:color,radius:6})):geometry.type==='LineString'?geometry.parts.map(part=>L.polyline(part.map(project),{color,weight,dashArray})):geometry.parts.map(part=>L.polygon(part.map(ring=>ring.map(project)),{color,weight,dashArray})));
+  } else if (kind === 'point') {
     if (latlngs.length === 0) return;
     layer = L.circleMarker(latlngs[0], { color, fillColor: color, radius: 6 });
   } else if (kind === 'polygon') {

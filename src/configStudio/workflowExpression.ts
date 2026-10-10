@@ -41,10 +41,10 @@ export function workflowConditionMatches(condition: import('./types').WorkflowVa
 }
 
 export function workflowCaptureSlots(workflow: import('./types').WorkflowDefinition): string[] {
-  return workflow.steps.flatMap(step => [step.drawing?.pointSlot, ...(step.drawing?.auxiliaryPoints ?? []).map(point => point.slot)]).filter((slot): slot is string => Boolean(slot));
+  return workflow.steps.flatMap(step => [...new Set([step.drawing?.pointSlot, step.drawing?.captureSlot, ...(step.drawing?.auxiliaryPoints ?? []).map(point => point.slot)])]).filter((slot): slot is string => Boolean(slot));
 }
 export function workflowDerivedPointTokens(workflow: import('./types').WorkflowDefinition): string[] {
-  return workflowCaptureSlots(workflow).flatMap(slot => [slot, `${slot}_X`, `${slot}_Y`, `${slot}_Z`]);
+  return workflowCaptureSlots(workflow).flatMap(slot => [slot, `${slot}_X`, `${slot}_Y`, `${slot}_Z`, `${slot}_HEIGHT`]);
 }
 
 /** Resolve final-ID dependencies by stable output identity, retaining display order. */

@@ -6353,6 +6353,32 @@
         "label"
       ]
     },
+    "t111": {
+      "type": "object",
+      "properties": {
+        "outputId": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "const": "geometry"
+            },
+            {
+              "const": "height"
+            }
+          ]
+        }
+      },
+      "required": [
+        "outputId",
+        "target",
+        "value"
+      ]
+    },
     "t109": {
       "type": "object",
       "properties": {
@@ -6406,6 +6432,56 @@
               "type": "array",
               "items": {
                 "ref": "t110"
+              }
+            }
+          ]
+        },
+        "captureSlot": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "returnFormat": {
+          "anyOf": [
+            {
+              "const": "coordP"
+            },
+            {
+              "const": "pointObject"
+            },
+            {
+              "const": "coordL"
+            },
+            {
+              "const": "coordG"
+            }
+          ]
+        },
+        "multiple": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "heightSlot": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "bindings": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t111"
               }
             }
           ]
@@ -6485,6 +6561,23 @@
             }
           ]
         },
+        "geometryRole": {
+          "anyOf": [
+            {
+              "const": "output"
+            },
+            {
+              "const": "auxiliary"
+            }
+          ]
+        },
+        "when": {
+          "anyOf": [
+            {
+              "ref": "t102"
+            }
+          ]
+        },
         "specialKey": {
           "anyOf": [
             {
@@ -6520,7 +6613,7 @@
         "label"
       ]
     },
-    "t112": {
+    "t113": {
       "type": "object",
       "properties": {
         "id": {
@@ -6546,7 +6639,7 @@
         "expression"
       ]
     },
-    "t113": {
+    "t114": {
       "type": "object",
       "properties": {
         "selected": {
@@ -6587,7 +6680,7 @@
         "selected"
       ]
     },
-    "t111": {
+    "t112": {
       "type": "object",
       "properties": {
         "id": {
@@ -6599,11 +6692,18 @@
         "assignments": {
           "type": "array",
           "items": {
-            "ref": "t112"
+            "ref": "t113"
           }
         },
+        "when": {
+          "anyOf": [
+            {
+              "ref": "t102"
+            }
+          ]
+        },
         "geometry": {
-          "ref": "t113"
+          "ref": "t114"
         }
       },
       "required": [
@@ -6613,7 +6713,7 @@
         "geometry"
       ]
     },
-    "t114": {
+    "t115": {
       "type": "object",
       "properties": {
         "componentKey": {
@@ -6648,7 +6748,7 @@
         "reason"
       ]
     },
-    "t115": {
+    "t116": {
       "type": "object",
       "properties": {
         "runtimeMode": {
@@ -6724,7 +6824,7 @@
         "outputs": {
           "type": "array",
           "items": {
-            "ref": "t111"
+            "ref": "t112"
           }
         },
         "assignments": {
@@ -6732,7 +6832,7 @@
             {
               "type": "array",
               "items": {
-                "ref": "t112"
+                "ref": "t113"
               }
             }
           ]
@@ -6740,14 +6840,14 @@
         "external": {
           "anyOf": [
             {
-              "ref": "t114"
+              "ref": "t115"
             }
           ]
         },
         "legacy": {
           "anyOf": [
             {
-              "ref": "t115"
+              "ref": "t116"
             }
           ]
         }
@@ -6760,7 +6860,7 @@
         "outputs"
       ]
     },
-    "t117": {
+    "t118": {
       "type": "object",
       "properties": {
         "kind": {
@@ -6817,7 +6917,7 @@
         "status"
       ]
     },
-    "t116": {
+    "t117": {
       "type": "object",
       "properties": {
         "schemaVersion": {
@@ -6833,7 +6933,7 @@
         "entries": {
           "type": "array",
           "items": {
-            "ref": "t117"
+            "ref": "t118"
           }
         },
         "generatedAt": {
@@ -6928,7 +7028,7 @@
         "parity": {
           "anyOf": [
             {
-              "ref": "t116"
+              "ref": "t117"
             }
           ]
         }

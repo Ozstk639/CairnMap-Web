@@ -759,9 +759,19 @@ export type WorkflowStep = {
   geometry?: GeometryKind[];
   /** Geometry pages are bound one-to-one to an output for composed flows. */
   outputId?: string;
+  geometryRole?: 'output' | 'auxiliary';
+  when?: WorkflowValueCondition;
   specialKey?: string;
   tagsExtensions?: { tagsEnabled: boolean; extensionsEnabled: boolean };
-  drawing?: { enabledFromThisPage?: boolean; drawMode?: string; allowBack?: boolean; keepDrawingWhenBack?: boolean; pointSlot?: string; auxiliaryPoints?: WorkflowAuxiliaryPoint[] };
+  drawing?: {
+    enabledFromThisPage?: boolean; drawMode?: string; allowBack?: boolean; keepDrawingWhenBack?: boolean;
+    pointSlot?: string; auxiliaryPoints?: WorkflowAuxiliaryPoint[];
+    captureSlot?: string;
+    returnFormat?: 'coordP' | 'pointObject' | 'coordL' | 'coordG';
+    multiple?: boolean;
+    heightSlot?: string;
+    bindings?: Array<{ outputId:string; target:string; value:'geometry' | 'height' }>;
+  };
   legacyPage?: Record<string, unknown>;
 };
 
@@ -774,6 +784,7 @@ export type WorkflowOutput = {
   /** Default category scope. The system creates Classification N controls if it has descendants. */
   classification: ClassificationPath;
   assignments: WorkflowAssignment[];
+  when?: WorkflowValueCondition;
   /** A V3.2 output has one fixed drawing type. `allowed` is r2 import data. */
   geometry: { selected: GeometryKind; allowed?: GeometryKind[] };
 };

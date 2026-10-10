@@ -82,7 +82,8 @@ export type WorkflowBridge = {
     key: string,
     kind: WorkflowPreviewKind,
     points: WorldPoint[],
-    style?: WorkflowPreviewStyle
+    style?: WorkflowPreviewStyle,
+    geometry?: import('@/core/geometry/multipartGeometry').MultipartGeometry
   ) => void;
   clearWorkflowPreview: (key?: string) => void;
 

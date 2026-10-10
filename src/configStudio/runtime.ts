@@ -830,8 +830,8 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
   if (!geometryIndexes.length || geometryIndexes[geometryIndexes.length - 1] !== workflow.steps.length - 1) issue(issues, 'error', 'workflow-geometry-must-be-last', base, '最后一步必须是任一绘制页。');
   if (tailIndex < 0 || !geometryIndexes.length || tailIndex !== geometryIndexes[0] - 1) issue(issues, 'error', 'workflow-tail-before-geometry-required', base, 'tags/extensions 尾部区必须紧邻第一张绘制页。');
   if (formIndexes.some((index) => index <= actorIndex || (tailIndex >= 0 && index >= tailIndex))) issue(issues, 'error', 'workflow-form-page-order-invalid', base, '基本信息页必须位于填写人和 tags/extensions 尾部区之间。');
-  if (geometryIndexes.length !== workflow.outputs.length) issue(issues, 'error', 'workflow-geometry-output-count-invalid', base, '每个工作流输出必须有且只有一个尾部绘制页。');
-  const geometryOutputIds = workflow.steps.filter((step) => step.kind === 'geometry').map((step) => step.outputId);
+  if (workflow.steps.filter(step=>step.kind==='geometry'&&step.geometryRole!=='auxiliary').length !== workflow.outputs.length) issue(issues, 'error', 'workflow-geometry-output-count-invalid', base, '每个工作流输出必须有且只有一个尾部绘制页。');
+  const geometryOutputIds = workflow.steps.filter((step) => step.kind === 'geometry' && step.geometryRole!=='auxiliary').map((step) => step.outputId);
   if (new Set(geometryOutputIds).size !== workflow.outputs.length || workflow.outputs.some((output) => !geometryOutputIds.includes(output.id))) issue(issues, 'error', 'workflow-geometry-output-binding-invalid', base, '绘制页必须逐一绑定对应工作流输出。');
 
   const slots = new Set<string>();
@@ -841,6 +841,28 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
   const derivedTokens = workflowDerivedPointTokens(workflow);
   for (const token of derivedTokens) if (!/^[A-Z][A-Z0-9_]*$/.test(token) || controlList.some(control => control.slot === token) || derivedTokens.filter(item => item === token).length > 1 || WORKFLOW_SYSTEM_TOKENS.some(system => token === system || new RegExp(`^${system}_\\d+$`).test(token))) issue(issues, 'error', 'workflow-capture-slot-invalid', base, `坐标槽位 ${token} 无效、重复或占用系统 token。`);
   if (config.contractRevision === 5 && captured.length) issue(issues, 'error', 'workflow-capture-revision-invalid', base, '坐标槽位要求原生 r6。');
+  const earlierTokens=new Set<string>(['World','Creator']);
+  for(const step of workflow.steps) {
+    if(step.kind==='geometry') {
+      const path=`${base}/steps/${step.id}`;
+      const condition=step.when??workflow.outputs.find(output=>output.id===step.outputId)?.when;
+      validateWorkflowValueCondition(condition,earlierTokens,path,issues);
+      const drawing=step.drawing;
+      if(step.geometryRole==='auxiliary'&&!drawing?.captureSlot)issue(issues,'error','workflow-extra-slot-required',path,'额外绘制必须定义返回槽位。');
+      const expected=step.geometry?.[0]==='Point'?['coordP','pointObject']:step.geometry?.[0]==='LineString'?['coordL']:['coordG'];
+      if(drawing?.returnFormat&&!expected.includes(drawing.returnFormat))issue(issues,'error','workflow-drawing-format-invalid',path,'返回格式与点/线/面类型不匹配。');
+      if(drawing?.returnFormat==='pointObject'&&drawing.multiple)issue(issues,'error','workflow-drawing-format-invalid',path,'坐标对象只能选择单点。');
+      for(const binding of drawing?.bindings??[]) {
+        const output=workflow.outputs.find(output=>output.id===binding.outputId);
+        const field=output&&resolveEffectiveFields(config,output.classification).find(field=>field.key===binding.target);
+        if(!output||!isSafeWorkflowTarget(binding.target)||PROTECTED_WORKFLOW_TARGETS.has(binding.target.split('.')[0])||!field&&!/^(tags|extensions)\./.test(binding.target))issue(issues,'error','workflow-drawing-target-invalid',path,`绘制绑定 ${binding.target} 必须选择对应输出的有效字段。`);
+        if(field&&binding.value==='geometry'&&(field.type!=='json'||field.coordinateFormat&&field.coordinateFormat!==drawing?.returnFormat))issue(issues,'error','workflow-drawing-target-format-invalid',path,'坐标返回格式与目标字段结构不一致。');
+        if(field&&binding.value==='height'&&field.type!=='number')issue(issues,'error','workflow-drawing-target-format-invalid',path,'高度目标必须为数值字段。');
+      }
+      for(const slot of [drawing?.captureSlot,drawing?.pointSlot])if(slot)for(const token of [slot,`${slot}_X`,`${slot}_Y`,`${slot}_Z`,`${slot}_HEIGHT`])earlierTokens.add(token);
+    }
+    for(const control of step.controls??[])if(control.slot)earlierTokens.add(control.slot);
+  }
   for (const step of workflow.steps) {
     if (step.drawing?.drawMode && step.drawing.drawMode !== ({ Point: 'point', LineString: 'polyline', Polygon: 'polygon' } as const)[step.geometry?.[0] ?? 'Point']) issue(issues, 'error', 'workflow-draw-mode-invalid', `${base}/steps/${step.id}`, '绘制模式必须与固定几何类型一致。');
     const ids = (step.drawing?.auxiliaryPoints ?? []).map(point => point.id);
