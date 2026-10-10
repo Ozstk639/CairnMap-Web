@@ -44,13 +44,13 @@ try:
  b.click('撤销');assert b.evaluate("document.querySelector('textarea[aria-label=\"表达式构造编辑区\"]').value")=='+ "_"'
  b.click('重做');assert b.evaluate("document.querySelector('textarea[aria-label=\"表达式构造编辑区\"]').value")=='A+ "_"'
  checks.append('calculator inserts a double-clicked field at the caret and preserves undo/redo')
- b.evaluate("window.tagUnit=[...document.querySelectorAll('textarea[placeholder=控件标题]')].find(e=>e.value==='标签与扩展').closest('article');window.firstUnit=document.querySelector('input[placeholder=槽位]').closest('article')")
+ b.evaluate("window.tagUnit=[...document.querySelectorAll('textarea[placeholder=控件标题]')].find(e=>e.value==='标签与扩展').closest('article');window.firstUnit=document.querySelector('input[placeholder=槽位]').closest('article');true")
  drag('window.tagUnit','window.firstUnit')
  assert b.evaluate("document.querySelector('input[placeholder=槽位]').closest('article').querySelector('textarea[placeholder=控件标题]').value")=='标签与扩展'
  assert not b.evaluate("document.querySelector('input[placeholder=槽位]').closest('article').querySelector('button')")
  b.click('要素设计');assert b.evaluate("document.querySelector('[role=tab][aria-selected=true]').textContent")=='工作流设计'
  checks.append('fixed annotations move by grip, remain nondeletable and workflow drafts block tab switches')
- b.screenshot('r8-studio-calculator.png');b.click('放弃')
+ b.screenshot('r8-studio-calculator.png');b.click('放弃草稿')
  assert not b.errors,b.errors
  (OUT/'r8-studio-acceptance.json').write_text(json.dumps({'checks':checks,'runtimeErrors':b.errors},ensure_ascii=False,indent=2),encoding='utf-8')
  print(json.dumps({'checks':checks,'runtimeErrors':b.errors},ensure_ascii=False))

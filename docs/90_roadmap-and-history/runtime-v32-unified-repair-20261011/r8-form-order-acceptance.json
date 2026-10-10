@@ -1,0 +1,1030 @@
+{
+  "cases": [
+    {
+      "workflowId": "v3-isg_ngf_lad",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "abbr",
+        "nomenclator",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "isg_ngf_lad-classification",
+          "text": "类型（Kind=NGF, SKind=LAD） *"
+        },
+        {
+          "id": "isg_ngf_lad-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "isg_ngf_lad-abbr-E",
+          "text": "字符简称（用于ID） *"
+        },
+        {
+          "id": "isg_ngf_lad-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "isg_ngf_lad-wiki-C",
+          "text": "wiki链接（可选，将写入 extensions.link.wiki）"
+        },
+        {
+          "id": "isg_ngf_lad-brief-D",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "isg_ngf_lad-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-isg_ngf_lis",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "abbr",
+        "nomenclator",
+        "Land",
+        "Adm",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "isg_ngf_lis-classification",
+          "text": "类型（Kind=NGF, SKind=LIS） *"
+        },
+        {
+          "id": "isg_ngf_lis-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "isg_ngf_lis-abbr-G",
+          "text": "字符简称（用于ID） *"
+        },
+        {
+          "id": "isg_ngf_lis-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "isg_ngf_lis-Land-C",
+          "text": "所属地理单元（可选，将写入 tags.Land）"
+        },
+        {
+          "id": "isg_ngf_lis-Adm-D",
+          "text": "所属聚落(一级)（可选，将写入 tags.Adm）"
+        },
+        {
+          "id": "isg_ngf_lis-wiki-E",
+          "text": "wiki链接（可选，将写入 extensions.link.wiki）"
+        },
+        {
+          "id": "isg_ngf_lis-brief-F",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "isg_ngf_lis-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-isg_ngf_wtb",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "abbr",
+        "nomenclator",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "isg_ngf_wtb-classification",
+          "text": "类型（Kind=NGF, SKind=WTB） *"
+        },
+        {
+          "id": "isg_ngf_wtb-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "isg_ngf_wtb-abbr-E",
+          "text": "字符简称（用于ID） *"
+        },
+        {
+          "id": "isg_ngf_wtb-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "isg_ngf_wtb-wiki-C",
+          "text": "wiki链接（可选，将写入 extensions.link.wiki）"
+        },
+        {
+          "id": "isg_ngf_wtb-brief-D",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "isg_ngf_wtb-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-isg_adm_dbz",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "abbr",
+        "nomenclator",
+        "Land",
+        "UAdm",
+        "Pop",
+        "GAdm",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "isg_adm_dbz-classification",
+          "text": "类型（Kind=ADM, SKind=DBZ） *"
+        },
+        {
+          "id": "isg_adm_dbz-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "isg_adm_dbz-abbr-I",
+          "text": "字符简称（用于ID） *"
+        },
+        {
+          "id": "isg_adm_dbz-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "isg_adm_dbz-Land-C",
+          "text": "所属地理单元（可选，将写入 tags.Land）"
+        },
+        {
+          "id": "isg_adm_dbz-UAdm-D",
+          "text": "所属上级要素（可选，将写入 tags.UAdm）"
+        },
+        {
+          "id": "isg_adm_dbz-Pop-E",
+          "text": "相关人员（可选，将写入 tags.Pop）"
+        },
+        {
+          "id": "isg_adm_dbz-GAdm-F",
+          "text": "所属聚落群(名称)（可选，将写入 tags.GAdm）"
+        },
+        {
+          "id": "isg_adm_dbz-wiki-G",
+          "text": "wiki链接（可选，将写入 extensions.link.wiki）"
+        },
+        {
+          "id": "isg_adm_dbz-brief-H",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "isg_adm_dbz-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-isg_adm_plz",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "abbr",
+        "nomenclator",
+        "Land",
+        "UAdm",
+        "Pop",
+        "GAdm",
+        "YTime",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "isg_adm_plz-classification",
+          "text": "类型（Kind=ADM, SKind=PLZ） *"
+        },
+        {
+          "id": "isg_adm_plz-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "isg_adm_plz-abbr-J",
+          "text": "字符简称（用于ID） *"
+        },
+        {
+          "id": "isg_adm_plz-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "isg_adm_plz-Land-C",
+          "text": "所属地理单元（可选，将写入 tags.Land）"
+        },
+        {
+          "id": "isg_adm_plz-UAdm-D",
+          "text": "所属上级要素（可选，将写入 tags.UAdm）"
+        },
+        {
+          "id": "isg_adm_plz-Pop-E",
+          "text": "负责人员（可选，将写入 tags.Pop）"
+        },
+        {
+          "id": "isg_adm_plz-GAdm-F",
+          "text": "所属聚落群(名称)（可选，将写入 tags.GAdm）"
+        },
+        {
+          "id": "isg_adm_plz-YTime-G",
+          "text": "预期完成时间（可选，将写入 tags.YTime）"
+        },
+        {
+          "id": "isg_adm_plz-wiki-H",
+          "text": "wiki链接（可选，将写入 extensions.link.wiki）"
+        },
+        {
+          "id": "isg_adm_plz-brief-I",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "isg_adm_plz-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-isl_ngf_wtr",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "abbr",
+        "nomenclator",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "isl_ngf_wtr-classification",
+          "text": "类型（Kind=NGF, SKind=WTR） *"
+        },
+        {
+          "id": "isl_ngf_wtr-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "isl_ngf_wtr-abbr-E",
+          "text": "字符简称（用于ID） *"
+        },
+        {
+          "id": "isl_ngf_wtr-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "isl_ngf_wtr-wiki-C",
+          "text": "wiki链接（可选，将写入 extensions.link.wiki）"
+        },
+        {
+          "id": "isl_ngf_wtr-brief-D",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "isl_ngf_wtr-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-isl_ngf_bod",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "abbr",
+        "nomenclator",
+        "BNgf1",
+        "BNgf2",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "isl_ngf_bod-classification",
+          "text": "类型（Kind=NGF, SKind=BOD） *"
+        },
+        {
+          "id": "isl_ngf_bod-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "isl_ngf_bod-abbr-G",
+          "text": "字符简称（用于ID） *"
+        },
+        {
+          "id": "isl_ngf_bod-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "isl_ngf_bod-BNgf1-C",
+          "text": "边界1（可选，将写入 tags.BNgf1）"
+        },
+        {
+          "id": "isl_ngf_bod-BNgf2-D",
+          "text": "边界2（可选，将写入 tags.BNgf2）"
+        },
+        {
+          "id": "isl_ngf_bod-wiki-E",
+          "text": "wiki链接（可选，将写入 extensions.link.wiki）"
+        },
+        {
+          "id": "isl_ngf_bod-brief-F",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "isl_ngf_bod-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-isl_adm_dbl",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "abbr",
+        "nomenclator",
+        "Land",
+        "BAdm1",
+        "BAdm2",
+        "GAdm",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "isl_adm_dbl-classification",
+          "text": "类型（Kind=ADM 下所有线要素） *"
+        },
+        {
+          "id": "isl_adm_dbl-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "isl_adm_dbl-abbr-I",
+          "text": "字符简称（用于ID） *"
+        },
+        {
+          "id": "isl_adm_dbl-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "isl_adm_dbl-Land-C",
+          "text": "所属地理单元（可选，将写入 tags.Land）"
+        },
+        {
+          "id": "isl_adm_dbl-BAdm1-D",
+          "text": "边界1（可选，将写入 tags.BAdm1）"
+        },
+        {
+          "id": "isl_adm_dbl-BAdm2-E",
+          "text": "边界2（可选，将写入 tags.BAdm2）"
+        },
+        {
+          "id": "isl_adm_dbl-GAdm-F",
+          "text": "所属聚落群(名称)（可选，将写入 tags.GAdm）"
+        },
+        {
+          "id": "isl_adm_dbl-wiki-G",
+          "text": "wiki链接（可选，将写入 extensions.link.wiki）"
+        },
+        {
+          "id": "isl_adm_dbl-brief-H",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "isl_adm_dbl-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-isl_adm_pll",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "abbr",
+        "nomenclator",
+        "Land",
+        "BAdm1",
+        "BAdm2",
+        "GAdm",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "isl_adm_pll-classification",
+          "text": "类型（Kind=ADM 下所有线要素） *"
+        },
+        {
+          "id": "isl_adm_pll-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "isl_adm_pll-abbr-I",
+          "text": "字符简称（用于ID） *"
+        },
+        {
+          "id": "isl_adm_pll-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "isl_adm_pll-Land-C",
+          "text": "所属地理单元（可选，将写入 tags.Land）"
+        },
+        {
+          "id": "isl_adm_pll-BAdm1-D",
+          "text": "边界1（可选，将写入 tags.BAdm1）"
+        },
+        {
+          "id": "isl_adm_pll-BAdm2-E",
+          "text": "边界2（可选，将写入 tags.BAdm2）"
+        },
+        {
+          "id": "isl_adm_pll-GAdm-F",
+          "text": "所属聚落群(名称)（可选，将写入 tags.GAdm）"
+        },
+        {
+          "id": "isl_adm_pll-wiki-G",
+          "text": "wiki链接（可选，将写入 extensions.link.wiki）"
+        },
+        {
+          "id": "isl_adm_pll-brief-H",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "isl_adm_pll-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-isp_ngf_scp",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "abbr",
+        "nomenclator",
+        "Land",
+        "UAdm",
+        "Pop",
+        "event",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "isp_ngf_scp-classification",
+          "text": "类型（Kind=NGF 下所有点要素） *"
+        },
+        {
+          "id": "isp_ngf_scp-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "isp_ngf_scp-abbr-I",
+          "text": "字符简称（用于ID） *"
+        },
+        {
+          "id": "isp_ngf_scp-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "isp_ngf_scp-Land-C",
+          "text": "所属地理单元（可选，将写入 tags.Land）"
+        },
+        {
+          "id": "isp_ngf_scp-UAdm-D",
+          "text": "所属上级要素（可选，将写入 tags.UAdm）"
+        },
+        {
+          "id": "isp_ngf_scp-Pop-E",
+          "text": "参与人员（可选，将写入 tags.Pop）"
+        },
+        {
+          "id": "isp_ngf_scp-event-F",
+          "text": "事件或类型（可选，将写入 extensions.character.event）"
+        },
+        {
+          "id": "isp_ngf_scp-wiki-G",
+          "text": "wiki链接（可选，将写入 extensions.link.wiki）"
+        },
+        {
+          "id": "isp_ngf_scp-brief-H",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "isp_ngf_scp-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-isp_adm_dbp",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "abbr",
+        "nomenclator",
+        "Land",
+        "UAdm",
+        "Pop",
+        "event",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "isp_adm_dbp-classification",
+          "text": "类型（Kind=ADM 下所有点要素） *"
+        },
+        {
+          "id": "isp_adm_dbp-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "isp_adm_dbp-abbr-I",
+          "text": "字符简称（用于ID） *"
+        },
+        {
+          "id": "isp_adm_dbp-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "isp_adm_dbp-Land-C",
+          "text": "所属地理单元（可选，将写入 tags.Land）"
+        },
+        {
+          "id": "isp_adm_dbp-UAdm-D",
+          "text": "所属上级要素（可选，将写入 tags.UAdm）"
+        },
+        {
+          "id": "isp_adm_dbp-Pop-E",
+          "text": "参与人员（可选，将写入 tags.Pop）"
+        },
+        {
+          "id": "isp_adm_dbp-event-F",
+          "text": "事件或类型（可选，将写入 extensions.character.event）"
+        },
+        {
+          "id": "isp_adm_dbp-wiki-G",
+          "text": "wiki链接（可选，将写入 extensions.link.wiki）"
+        },
+        {
+          "id": "isp_adm_dbp-brief-H",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "isp_adm_dbp-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-isp_adm_plp",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "abbr",
+        "nomenclator",
+        "Land",
+        "UAdm",
+        "Pop",
+        "event",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "isp_adm_plp-classification",
+          "text": "类型（Kind=ADM 下所有点要素） *"
+        },
+        {
+          "id": "isp_adm_plp-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "isp_adm_plp-abbr-I",
+          "text": "字符简称（用于ID） *"
+        },
+        {
+          "id": "isp_adm_plp-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "isp_adm_plp-Land-C",
+          "text": "所属地理单元（可选，将写入 tags.Land）"
+        },
+        {
+          "id": "isp_adm_plp-UAdm-D",
+          "text": "所属上级要素（可选，将写入 tags.UAdm）"
+        },
+        {
+          "id": "isp_adm_plp-Pop-E",
+          "text": "参与人员（可选，将写入 tags.Pop）"
+        },
+        {
+          "id": "isp_adm_plp-event-F",
+          "text": "事件或类型（可选，将写入 extensions.character.event）"
+        },
+        {
+          "id": "isp_adm_plp-wiki-G",
+          "text": "wiki链接（可选，将写入 extensions.link.wiki）"
+        },
+        {
+          "id": "isp_adm_plp-brief-H",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "isp_adm_plp-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-bud_building",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "catAbbr",
+        "abbr",
+        "nomenclator",
+        "Land",
+        "Adm",
+        "Pop",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "bud_building-classification",
+          "text": "类型（Class=BUD） *"
+        },
+        {
+          "id": "bud_building-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "bud_building-catAbbr-H",
+          "text": "所属分类代号（仅用于ID组装，可选）"
+        },
+        {
+          "id": "bud_building-abbr-I",
+          "text": "字符简称（用于ID后缀） *"
+        },
+        {
+          "id": "bud_building-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "bud_building-Land-C",
+          "text": "所属地理单元（可选，将写入 tags.Land）"
+        },
+        {
+          "id": "bud_building-Adm-D",
+          "text": "所属聚落(一级)（可选，将写入 tags.Adm）"
+        },
+        {
+          "id": "bud_building-Pop-E",
+          "text": "相关成员（可选）"
+        },
+        {
+          "id": "bud_building-wiki-F",
+          "text": "wiki链接（可选）"
+        },
+        {
+          "id": "bud_building-brief-G",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "bud_building-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-flr_unit",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "catAbbr",
+        "abbr",
+        "nomenclator",
+        "BuildingID",
+        "NofFloor",
+        "Land",
+        "Adm",
+        "Pop",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "flr_unit-classification",
+          "text": "类型（Class=FLR） *"
+        },
+        {
+          "id": "flr_unit-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "flr_unit-catAbbr-J",
+          "text": "所属分类代号（仅用于ID组装，可选）"
+        },
+        {
+          "id": "flr_unit-abbr-K",
+          "text": "字符简称（用于ID后缀） *"
+        },
+        {
+          "id": "flr_unit-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "flr_unit-BuildingID-C",
+          "text": "所属建筑（BuildingID）[必填] *"
+        },
+        {
+          "id": "flr_unit-NofFloor-D",
+          "text": "楼层（NofFloor）[必填] *"
+        },
+        {
+          "id": "flr_unit-Land-E",
+          "text": "所属地理单元（可选，将写入 tags.Land）"
+        },
+        {
+          "id": "flr_unit-Adm-F",
+          "text": "所属聚落(一级)（可选，将写入 tags.Adm）"
+        },
+        {
+          "id": "flr_unit-Pop-G",
+          "text": "相关成员（可选）"
+        },
+        {
+          "id": "flr_unit-wiki-H",
+          "text": "wiki链接（可选）"
+        },
+        {
+          "id": "flr_unit-brief-I",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "flr_unit-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-rod_road",
+      "actualDomKeys": [
+        "classification",
+        "Level",
+        "Oneway",
+        "Enter",
+        "Exit",
+        "SelfJunction",
+        "Name",
+        "catAbbr",
+        "abbr",
+        "ConnectL",
+        "Blacklist",
+        "Mode",
+        "Speed",
+        "nomenclator",
+        "Land",
+        "UAdm",
+        "UAdmG",
+        "wiki",
+        "brief",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "rod_road-classification",
+          "text": "道路类型（Class=ROD） *"
+        },
+        {
+          "id": "rod_road-Level-F",
+          "text": "道路层级（Level，必选） *"
+        },
+        {
+          "id": "rod_road-Oneway-G",
+          "text": "是否单向（Oneway，必选） *"
+        },
+        {
+          "id": "rod_road-Enter-H",
+          "text": "是否可进入（Enter，可选，缺省=true）"
+        },
+        {
+          "id": "rod_road-Exit-I",
+          "text": "是否可离开（Exit，可选，缺省=true）"
+        },
+        {
+          "id": "rod_road-SelfJunction-J",
+          "text": "是否允许自交（SelfJunction，可选，缺省=false）"
+        },
+        {
+          "id": "rod_road-Name-A",
+          "text": "道路名称（Name） *"
+        },
+        {
+          "id": "rod_road-catAbbr-N",
+          "text": "所属分类代号（仅用于ID组装，可选）"
+        },
+        {
+          "id": "rod_road-abbr-O",
+          "text": "字符简称（用于ID末尾） *"
+        },
+        {
+          "id": "rod_road-ConnectL-P",
+          "text": "显式连接关系（ConnectL，可选）"
+        },
+        {
+          "id": "rod_road-Blacklist-Q",
+          "text": "黑名单（Blacklist，可选）"
+        },
+        {
+          "id": "rod_road-Mode-R",
+          "text": "允许的出行方式（Mode，可选）"
+        },
+        {
+          "id": "rod_road-Speed-K",
+          "text": "限速（Speed，可选，float）"
+        },
+        {
+          "id": "rod_road-nomenclator-B",
+          "text": "命名者（tags.nomenclator，可选）"
+        },
+        {
+          "id": "rod_road-Land-C",
+          "text": "所属地理单元（可选，将写入 tags.Land）"
+        },
+        {
+          "id": "rod_road-UAdm-D",
+          "text": "所属聚落(地标点)（可选，将写入 tags.UAdm）"
+        },
+        {
+          "id": "rod_road-UAdmG-E",
+          "text": "所属聚落(区划)（可选，将写入 tags.UAdmG）"
+        },
+        {
+          "id": "rod_road-wiki-L",
+          "text": "Wiki（可选，将写入 extensions.link.wiki）"
+        },
+        {
+          "id": "rod_road-brief-M",
+          "text": "简介（可选，将写入 extensions.character.brief）"
+        },
+        {
+          "id": "rod_road-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-tpp_teleport",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "abbr",
+        "hub",
+        "Land",
+        "UAdm",
+        "UAdmG",
+        "wiki",
+        "TGTWarp",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "tpp_teleport-classification",
+          "text": "类型（Class=TPP） *"
+        },
+        {
+          "id": "tpp_teleport-Name-A",
+          "text": "名称 *"
+        },
+        {
+          "id": "tpp_teleport-abbr-H",
+          "text": "字符简称（用于ID） *"
+        },
+        {
+          "id": "tpp_teleport-hub-B",
+          "text": "所属枢纽区（可选，将写入 hub）"
+        },
+        {
+          "id": "tpp_teleport-Land-C",
+          "text": "所属地理单元（可选，将写入 tags.Land）"
+        },
+        {
+          "id": "tpp_teleport-UAdm-D",
+          "text": "所属聚落(地标点)（可选，将写入 tags.UAdm）"
+        },
+        {
+          "id": "tpp_teleport-UAdmG-E",
+          "text": "所属聚落(区划)（可选，将写入 tags.UAdmG）"
+        },
+        {
+          "id": "tpp_teleport-wiki-G",
+          "text": "wiki链接（可选，将写入 extensions.link.wiki）"
+        },
+        {
+          "id": "tpp_teleport-TGTWarp-F",
+          "text": "目标Warp点(若有)（可选，将写入 TGTWarp；填写后将跳过“目标点坐标”页面）"
+        },
+        {
+          "id": "tpp_teleport-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    },
+    {
+      "workflowId": "v3-wrp_warp",
+      "actualDomKeys": [
+        "classification",
+        "Name",
+        "abbr",
+        "WRPointI2D",
+        "hub",
+        "Land",
+        "UAdm",
+        "UAdmG",
+        "wiki",
+        "annotations"
+      ],
+      "actualTitles": [
+        {
+          "id": "wrp_warp-classification",
+          "text": "类别（Kind/SKind） *"
+        },
+        {
+          "id": "wrp_warp-Name-B",
+          "text": "Warp点名称（Name） *"
+        },
+        {
+          "id": "wrp_warp-abbr-H",
+          "text": "字符简称（用于组装 ID） *"
+        },
+        {
+          "id": "wrp_warp-WRPointI2D-A",
+          "text": "服内Warp名（必填，将写入 WRPointI2D） *"
+        },
+        {
+          "id": "wrp_warp-hub-C",
+          "text": "所属枢纽区（可选，hub）"
+        },
+        {
+          "id": "wrp_warp-Land-D",
+          "text": "所属地理单元（可选，写入 tags.Land）"
+        },
+        {
+          "id": "wrp_warp-UAdm-E",
+          "text": "所属聚落(地标点)（可选，写入 tags.UAdm）"
+        },
+        {
+          "id": "wrp_warp-UAdmG-F",
+          "text": "所属聚落(区划)（可选，写入 tags.UAdmG）"
+        },
+        {
+          "id": "wrp_warp-wiki-G",
+          "text": "wiki链接（可选，写入 extensions.link.wiki）"
+        },
+        {
+          "id": "wrp_warp-tail",
+          "text": "标签与扩展"
+        }
+      ]
+    }
+  ],
+  "source": "real r8 production MeasuringModule form DOM; relative order requirements from frozen V1 component audit and approved feedback",
+  "runtimeErrors": []
+}

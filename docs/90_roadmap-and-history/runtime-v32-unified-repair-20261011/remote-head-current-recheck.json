@@ -1,0 +1,10 @@
+{
+  "checkedAtLocal": "2026-10-11 Asia/Shanghai",
+  "repository": "OpenRIAMap/OpenRIAMap-Data",
+  "branch": "main",
+  "command": "gh api repos/OpenRIAMap/OpenRIAMap-Data/commits/main --jq .sha",
+  "currentSha": "a13ffc97e517cb52d84d5fdd49eb0402cb0f14f9",
+  "matchesFullAudit": true,
+  "auditJsonFiles": 714,
+  "fullAuditRerun": false
+}

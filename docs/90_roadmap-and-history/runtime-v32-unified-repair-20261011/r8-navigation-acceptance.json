@@ -1,0 +1,11 @@
+{
+  "checks": [
+    "temporary native records appear in actual route endpoint search; road route is computed and drawn in App"
+  ],
+  "route": {
+    "text": "路径规划\n铁路(新)\n传送(新)\n道路\n铁路\n传送\n步行\n起点\n图上选取\n终点\n图上选取\n出行方式\n步行（4.3格/秒）\n马（10格/秒）\n鞘翅\n起点层数\n-10\n-9\n-8\n-7\n-6\n-5\n-4\n-3\n-2\n-1\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n终点层数\n-10\n-9\n-8\n-7\n-6\n-5\n-4\n-3\n-2\n-1\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n搜索\n道路\n到达时间 02:15\n全程约 5分25秒距离 12998m方式 步行\n进入道路·鞘翅接驳\n6526m · 2分43秒\n定位\n出发·滨海大道\n0m · 0秒\n定位\n到达终点·滨海大道\n0m · 0秒\n定位\n离开道路·鞘翅接驳\n6472m · 2分42秒\n定位",
+    "paths": 15
+  },
+  "scope": "actual search and road route UI; road/rail topology algorithms unchanged and external records compared separately",
+  "runtimeErrors": []
+}
