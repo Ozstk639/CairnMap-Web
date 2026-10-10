@@ -67,7 +67,7 @@ for zoom in [0,1,2]:
     b.screenshot('preview-low-zoom'+str(zoom)+'.png')
 results['lowZoomTiles']=low
 results['roundTrip']=b.evaluate('window.acceptance.roundTrip().then(c=>({same:JSON.stringify(c.workflows,(k,v)=>v&&typeof v==="object"&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort()):v)===JSON.stringify(window.acceptance.config.workflows,(k,v)=>v&&typeof v==="object"&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort()):v),revision:c.contractRevision}))')
-assert results['roundTrip']=={'same':True,'revision':7},results['roundTrip']
+assert results['roundTrip']=={'same':True,'revision':8},results['roundTrip']
 assert not b.errors,b.errors
 results['runtimeErrors']=b.errors
 (OUT/'render-browser-result.json').write_text(json.dumps(results,ensure_ascii=False,indent=2),encoding='utf-8')

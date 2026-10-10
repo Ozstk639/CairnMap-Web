@@ -82,7 +82,6 @@ export function NativeWorkflowHost({ config, workflow, bridge, registry, onCommi
       const coords=selected.map(point=>({x:point.x,y:point.y??-64,z:point.z}));
       const rawPoint=selected[0];drafts.current.set(outputId,selected.map(point=>({...point})));
       if(coords.length>=(geometry==='Point'?1:geometry==='LineString'?2:3))bridgeRef.current.upsertWorkflowPreview(`native:${outputId}`,geometry==='Point'?'point':geometry==='LineString'?'polyline':'polygon',coords);
-      if(activeCapture.current===outputId)bridgeRef.current.suspendDrawMode();
       return {coordinates:coords,point:rawPoint?{x:rawPoint.x,y:rawPoint.y,z:rawPoint.z}:undefined};
     }}
     onSubmit={outputs => { if (normalizeV3WorldId(bridgeRef.current.getCurrentWorldId()) !== snapshot.world) throw new Error('当前世界与工作流坐标不一致。'); onCommit(snapshot.config, snapshot.workflow, outputs); onExit(); }}

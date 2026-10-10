@@ -1,7 +1,7 @@
 import type { ConfigPackageV3, SelectOption } from './types';
 import { migrateWorkflowForms, migrateUnmodifiedFactoryOrder } from './workflowFormMigration';
 import { migrateWorkflowDrawings } from './workflowDrawingMigration';
-import { resolveEffectiveFields } from './runtime';
+import { resolveEffectiveFields, resolveGeometryProfile } from './runtime';
 
 /** Imports retain the old executed list before discarding registry pointers. */
 export function migrateFieldsToR8(value: ConfigPackageV3): ConfigPackageV3 {
@@ -37,6 +37,9 @@ export function migrateFieldsToR8(value: ConfigPackageV3): ConfigPackageV3 {
   }
   for (const workflow of config.workflows) for (const step of workflow.steps) for (const control of step.controls ?? []) copied(control);
   config.workflows=config.workflows.map(workflow=>migrateUnmodifiedFactoryOrder(migrateWorkflowForms(migrateWorkflowDrawings(workflow))));
+  for(const workflow of config.workflows)for(const step of workflow.steps.filter(step=>step.kind==='geometry'&&step.geometryRole!=='auxiliary')){
+    const output=workflow.outputs.find(output=>output.id===step.outputId);if(output&&step.drawing)step.drawing.multiple??=resolveGeometryProfile(config,output.classification,output.geometry.selected)?.allowMultipleParts??false;
+  }
   const tpp=config.nodes.find(node=>node.path.class==='TPP'&&!node.path.kind);
   if(tpp&&!tpp.fields.some(field=>field.key==='TGTcoordinate'))tpp.fields.push({fieldId:'TPP-TGTcoordinate',key:'TGTcoordinate',type:'json',cardinality:'single',input:'json',labels:{zh:'目标坐标',en:''},description:{zh:'目标点绘制返回的单点坐标对象。',en:''},coordinateFormat:'pointObject'});
   delete config.registries.optionSets;

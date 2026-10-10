@@ -21,7 +21,7 @@ fs.mkdirSync(out, { recursive: true });
 const config = createEditableConfigPackageFromCurrentProject();
 const validation = validateConfigPackage(config);
 assert(validation.valid, JSON.stringify(validation.issues.filter(issue => issue.severity === 'error')));
-assert.equal(config.contractRevision, 7); assert.equal(config.revision, 3);
+assert.equal(config.contractRevision, 8); assert.equal(config.revision, 4);
 assert.equal(config.workflows.filter(workflow => workflow.mode === 'composed').length, 17);
 assert.equal(config.workflows.filter(workflow => workflow.mode === 'external').length, 3);
 assert(Object.isFrozen(compileConfigRuntime(config)));
@@ -31,16 +31,16 @@ const archive = await buildConfigPackageArchive(config, validation);
 const expected = JSON.parse(JSON.stringify(config));
 assert.deepEqual(await readConfigPackage(new File([archive], 'runtime-editor.zip')), expected);
 assert.deepEqual(await readConfigPackage(new File([JSON.stringify(config)], 'runtime-editor.json')), expected);
-const basename = 'CairnMap_V32_RuntimeEditor_r3';
+const basename = 'CairnMap_V32_FieldReuse_Drawing_r4';
 const files = [
   { name: `${basename}.config.json`, bytes: Buffer.from(JSON.stringify(config, null, 2) + '\n') },
   { name: `${basename}.zip`, bytes: Buffer.from(await archive.arrayBuffer()) },
 ];
 for (const file of files) fs.writeFileSync(path.join(out, file.name), file.bytes);
 fs.writeFileSync(path.join(out, 'delivery-validation.json'), JSON.stringify(validation, null, 2) + '\n');
-fs.writeFileSync(path.join(out, 'render-migration-sources.json'), JSON.stringify({ issues: migration.issues, sources: migration.sources, deterministicComparisons: 5130, evidence: 'npm run test:render-r7; independent browser evidence recorded separately' }, null, 2) + '\n');
+fs.writeFileSync(path.join(out, 'render-migration-sources.json'), JSON.stringify({ issues: migration.issues, sources: migration.sources, deterministicComparisons: 5130, evidence: 'npm run test:unified-r8; independent browser evidence recorded separately' }, null, 2) + '\n');
 const manifest = {
-  schemaVersion: 'cairnmap.v32-local-delivery.v2', candidateSourceHead: git('.', 'rev-parse', 'HEAD'),
+  schemaVersion: 'cairnmap.v32-local-delivery.v3', candidateSourceHead: git('.', 'rev-parse', 'HEAD'),
   branch: git('.', 'branch', '--show-current'), frozenV1: baseline.frozenSha,
   verifiedFrozenSourceFiles: baseline.sources.length, frozenInventorySha256: sha(JSON.stringify(baseline.sources)),
   packageId: config.packageId, contractRevision: config.contractRevision, packageRevision: config.revision,

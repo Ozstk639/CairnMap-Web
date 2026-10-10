@@ -150,6 +150,7 @@ export function evaluateWorkflowExpression(source: string, slots: Record<string,
     if(expression.kind==='call') {
       const values=expression.args.map(run); const value=values[0];
       const numeric=(raw:unknown)=>{if(raw==null||typeof raw==='string'&&!raw.trim())throw new Error('数值参数尚未填写。');const number=Number(raw);if(!Number.isFinite(number))throw new Error('数值参数无效。');return number;};
+      const finite=(value:number)=>{if(!Number.isFinite(value))throw new Error('计算结果超出有限数值范围。');return value;};
       const coordinate=(raw:unknown):{x:number;y:number;z:number}=>{
         if(raw&&typeof raw==='object'&&!Array.isArray(raw)){const point=raw as Record<string,unknown>;return {x:numeric(point.x),y:numeric(point.y),z:numeric(point.z)};}
         let point=raw;while(Array.isArray(point)&&Array.isArray(point[0]))point=point[0];
@@ -164,10 +165,10 @@ export function evaluateWorkflowExpression(source: string, slots: Record<string,
         case 'lower':return text(value).toLowerCase();
         case 'abs':return Math.abs(numeric(value));
         case 'round':return Math.round(numeric(value));
-        case 'add':return numeric(value)+numeric(values[1]);
-        case 'subtract':return numeric(value)-numeric(values[1]);
-        case 'multiply':return numeric(value)*numeric(values[1]);
-        case 'divide':{const divisor=numeric(values[1]);if(divisor===0)throw new Error('不能除以零。');return numeric(value)/divisor;}
+        case 'add':return finite(numeric(value)+numeric(values[1]));
+        case 'subtract':return finite(numeric(value)-numeric(values[1]));
+        case 'multiply':return finite(numeric(value)*numeric(values[1]));
+        case 'divide':{const divisor=numeric(values[1]);if(divisor===0)throw new Error('不能除以零。');return finite(numeric(value)/divisor);}
         case 'point':if(Array.isArray(value)&&(value.length!==1||!Array.isArray(value[0])||value[0].length!==3||value[0].some(Array.isArray)))throw new Error('单点对象转换只允许一个点。');return coordinate(value);
         case 'x':return coordinate(value).x;
         case 'y':return coordinate(value).y;

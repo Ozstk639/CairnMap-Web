@@ -81,17 +81,19 @@ function relationValues(raw: unknown, item: CardItem): string[] {
     .filter(Boolean);
 }
 
-function lineChipsRow(item: CardItem, record: FeatureRecord, railIndex?: RailNewIndex | null): CardRow | undefined {
+function lineChipsRow(item: CardItem, record: FeatureRecord, config:ConfigPackageV3, railIndex?: RailNewIndex | null): CardRow | undefined {
   const source = item.options?.lineChipSource;
-  if (source === 'platform') return { ...buildPlatformLineChipsRow(record, railIndex), label: labelFor(item) };
-  if (source === 'station') return { ...buildStationLineChipsRow(record, railIndex), label: labelFor(item) };
-  if (source === 'stationBuilding') return { ...buildStationBuildingLineChipsRow(record, railIndex), label: labelFor(item) };
+  if (source === 'platform') return { ...buildPlatformLineChipsRow(record, railIndex), label: labelFor(item,config,record) };
+  if (source === 'station') return { ...buildStationLineChipsRow(record, railIndex), label: labelFor(item,config,record) };
+  if (source === 'stationBuilding') return { ...buildStationBuildingLineChipsRow(record, railIndex), label: labelFor(item,config,record) };
   return undefined;
 }
 
 function rowFor(item: CardItem, record: FeatureRecord, config: ConfigPackageV3, railIndex?: RailNewIndex | null): CardRow | undefined {
   if (!item.visible) return undefined;
-  if (item.renderer === 'lineChips') return lineChipsRow(item, record, railIndex);
+  const defined = resolveEffectiveFields(config,classificationFor(record)).find(field=>field.key===item.source);
+  if(item.valueMode==='field'&&item.options?.format===undefined&&defined?.format)item={...item,options:{...item.options,format:defined.format}};
+  if (item.renderer === 'lineChips') return lineChipsRow(item, record, config, railIndex);
 
   const raw = [item.source, ...(item.fallbackSources ?? [])].map(source => valueAt(record, source)).find(value => !isEmpty(value));
   const rawText = text(raw).trim();
@@ -137,9 +139,9 @@ function rowFor(item: CardItem, record: FeatureRecord, config: ConfigPackageV3, 
     const level = path.skind2 ? 'skind2' : path.skind ? 'skind' : path.kind ? 'kind' : 'class';
     return { label, value: node?.classificationLabels?.[level]?.zh || [path.kind,path.skind,path.skind2].filter(Boolean).join('/') || path.class };
   }
-  const defined = resolveEffectiveFields(config,classificationFor(record)).find(field=>field.key===item.source);
   const mappedOptions = item.valueMode === 'field' ? defined?.options : item.valueOptions;
   const shown = mappedOptions?.find(option=>option.value===rawText)?.label.zh;
+  if(item.renderer==='text'&&Array.isArray(raw)&&mappedOptions?.length){const values=raw.map(value=>mappedOptions.find(option=>option.value===text(value))?.label.zh??value);return {label,value:values};}
   if (shown !== undefined && item.renderer === 'text') return {label,value:shown};
   if (item.options?.format === 'enum') {
     if (item.valueMode === 'override') return {label,value:shown ?? rawText};

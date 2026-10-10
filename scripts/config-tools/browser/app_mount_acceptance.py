@@ -3,7 +3,7 @@ import json,time
 from browser_check import Browser,OUT
 from app_probe import PROBE,POINT
 b=Browser();checks=[]
-config=json.loads((OUT/'CairnMap_V32_RuntimeEditor_r3.config.json').read_text(encoding='utf-8'))
+config=json.loads((OUT/'CairnMap_V32_FieldReuse_Drawing_r4.config.json').read_text(encoding='utf-8'))
 workflow=next(w for w in config['workflows'] if w['id']=='v3-wrp_warp')
 keys=['ria_temp_rule_sources_v1','ria_temp_rule_override_ids_v1','ria_temp_rule_delete_ids_v1']
 b.call('Page.navigate',{'url':'http://127.0.0.1:5188/?workspace=config-lab&configMode=v3'})
@@ -35,7 +35,9 @@ try:
   for c in step.get('controls',[]):
    sel='[data-workflow-control='+json.dumps(c['id'])+']'
    if c['kind']=='classificationPicker':
-    b.evaluate("(()=>{const s=document.querySelector("+json.dumps(sel+' select')+");s.value=[...s.options].find(o=>o.value).value;s.dispatchEvent(new Event('change',{bubbles:true}));return true;})()")
+    for title in ['Class','Kind','SKind','SKind2']:
+     select=sel+' select[aria-label="工作流分类 '+title+'"]'
+     if b.evaluate('!!document.querySelector('+json.dumps(select)+')'):b.evaluate("(()=>{const s=document.querySelector("+json.dumps(select)+");s.value=[...s.options].find(o=>o.value).value;s.dispatchEvent(new Event('change',{bubbles:true}));})()")
    elif c['kind'] in ['text','number']:
     if '-Name-' in c['id']:value(sel+' input','BP10UI')
     elif '-abbr-' in c['id']:value(sel+' input','BP10_UI')
@@ -43,7 +45,6 @@ try:
   if step['kind']=='geometry':
    click('进入绘制');b.evaluate(PROBE);point=b.evaluate('('+POINT+')(15,17)')
    for typ in ['mousePressed','mouseReleased']:b.call('Input.dispatchMouseEvent',{'type':typ,'button':'left','clickCount':1,**point})
-   click('采用当前绘制')
   click('确认保存输出' if step is workflow['steps'][-1] else '下一页')
  b.wait(PROBE.replace('return map&&projection?', 'return map&&projection&&measurement?'),30)
  b.wait('window.appProbe.measurement.getCommittedFeatures().length===1')

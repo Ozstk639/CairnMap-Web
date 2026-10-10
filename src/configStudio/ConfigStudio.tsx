@@ -1,3 +1,4 @@
+import { ValueOptionsEditor } from './ValueOptionsEditor';
 import { ModuleHelp } from './ModuleHelp';
 import { GripOrderControls } from './GripOrderControls';
 import { UnifiedRuleExtensions } from './UnifiedRuleExtensions';
@@ -406,11 +407,7 @@ export function LegacyFieldEditor({ config, node, onChange }: { config: ConfigPa
   })}</div></section>;
 }
 
-function FieldOptionRows({ value, disabled, onChange }: { value?: FieldDefinition['options']; disabled: boolean; onChange: (value: NonNullable<FieldDefinition['options']>) => void }) {
-  const rows = value ?? [];
-  const update = (index: number, patch: Omit<Partial<NonNullable<FieldDefinition['options']>[number]>, 'label'> & { label?: Partial<NonNullable<FieldDefinition['options']>[number]['label']> }) => onChange(rows.map((entry, entryIndex) => entryIndex === index ? { value: patch.value ?? entry.value, label: { zh: patch.label?.zh ?? entry.label.zh, en: patch.label?.en ?? entry.label.en } } : entry));
-  return <div className="mt-2 rounded border bg-slate-50 p-2 text-xs"><p className="font-medium">值与显示名称对照（下拉输入同时使用这些选项）</p>{rows.map((option, index) => <div key={`${option.value}-${index}`} className="mt-1 grid gap-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"><input disabled={disabled} className="min-w-0 rounded border px-2 py-1 disabled:bg-slate-100" placeholder="名称（zh）" value={option.label.zh} onChange={(event) => update(index, { label: { zh: event.target.value } })} /><input disabled={disabled} className="min-w-0 rounded border px-2 py-1 disabled:bg-slate-100" placeholder="名称（en）" value={option.label.en} onChange={(event) => update(index, { label: { en: event.target.value } })} /><input disabled={disabled} className="min-w-0 rounded border px-2 py-1 disabled:bg-slate-100" placeholder="存储值" value={option.value} onChange={(event) => update(index, { value: event.target.value })} /><button type="button" disabled={disabled} className="text-rose-700 disabled:text-slate-300" onClick={() => onChange(rows.filter((_, entryIndex) => entryIndex !== index))}>删除</button></div>)}<button type="button" disabled={disabled} className="mt-2 rounded border bg-white px-2 py-1 disabled:text-slate-300" onClick={() => onChange([...rows, { value: '', label: { zh: '', en: '' } }])}>添加选项</button></div>;
-}
+function FieldOptionRows({value,disabled,onChange}:{value?:FieldDefinition['options'];disabled:boolean;onChange:(value:NonNullable<FieldDefinition['options']>)=>void}) {return <ValueOptionsEditor value={value} disabled={disabled} onChange={onChange}/>;}
 
 function FieldCard({ field, local, onUpdate, onDelete, onOverride }: { field: FieldDefinition; local: boolean; onUpdate: (patch: Partial<FieldDefinition>) => void; onDelete: () => void; onOverride: () => void }) {
   const disabled = !local;

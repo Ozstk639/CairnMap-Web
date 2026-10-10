@@ -288,17 +288,18 @@ function systemFieldDefinition(key: string): FieldDefinition {
 }
 
 export function resolveSelectableFields(config: ConfigPackageV3, scope: ClassificationPath, options: { includeSystem?: boolean } = {}): FieldDefinition[] {
+  const systemKeys=[...SYSTEM_FIELD_KEYS].filter(key=>config.contractRevision!==8||!['Skind','Skind2'].includes(key));
   const compiled = compiledConfigs.get(config); const cacheKey = `${compiledPathKey(scope)}:${options.includeSystem !== false}`;
   const cached = compiled?.selectable.get(cacheKey);
   if (cached) { compiled!.hits++; return cached; }
   const concrete = config.nodes.filter((node) => pathMatchesScope(node.path, scope) && !hasDescendants(config, node.path));
   const candidates = concrete.length ? concrete : config.nodes.filter((node) => pathMatchesScope(node.path, scope));
-  if (!candidates.length) return options.includeSystem === false ? [] : [...SYSTEM_FIELD_KEYS].map(systemFieldDefinition);
+  if (!candidates.length) return options.includeSystem === false ? [] : systemKeys.map(systemFieldDefinition);
   const fieldSets = candidates.map((node) => new Map(resolveEffectiveFields(config, node.path).map((field) => [field.key, field])));
   const common = [...fieldSets[0].values()].filter((field) => fieldSets.every((set) => set.has(field.key)));
   if (options.includeSystem === false) return compiled ? cachedPathValue(compiled.selectable, cacheKey, freezeData(common)) : common;
   const custom = new Set(common.map((field) => field.key));
-  const result = [...[...SYSTEM_FIELD_KEYS].filter((key) => !custom.has(key)).map(systemFieldDefinition), ...common];
+  const result = [...systemKeys.filter((key) => !custom.has(key)).map(systemFieldDefinition), ...common];
   return compiled ? cachedPathValue(compiled.selectable, cacheKey, freezeData(result)) : result;
 }
 
@@ -714,6 +715,8 @@ function validateCard(node: CategoryNode, config: ConfigPackageV3, issues: Confi
     if (!sourceExists(item.source, fields)) issue(issues, 'error', 'card-field-missing', itemPath, `信息卡字段 ${item.source} 未定义。`, { field: item.source });
     const mapped = item.valueOptions ?? [];
     if (mapped.some(option=>!option.value.trim()) || new Set(mapped.map(option=>option.value)).size!==mapped.length) issue(issues,'error','card-value-map-invalid',itemPath,'信息卡覆写对照必须有唯一非空的存储值。');
+    const definition=resolveEffectiveFields(config,node.path).find(field=>field.key===item.source);
+    if(config.contractRevision===8&&item.valueMode==='override'&&definition?.type==='enum'&&mapped.some(option=>!definition.options?.some(value=>value.value===option.value)))issue(issues,'error','card-field-map-conflict',itemPath,`信息卡 ${item.source} 覆写对照使用了来源字段已删除的选项，请调整覆写或恢复跟随。`);
     if (item.options?.format && !['plain','externalLink','boolean','json','classification','enum','date','world'].includes(item.options.format)) issue(issues, 'error', 'card-format-invalid', itemPath, '未知的信息卡格式。');
     if (config.contractRevision === 5 && item.options?.format && ['classification','enum','date','world'].includes(item.options.format)) issue(issues, 'error', 'card-format-revision-invalid', itemPath, '该信息卡格式要求原生 r6。');
     if (item.renderer === 'lineChips' && !item.options?.lineChipSource) issue(issues, 'error', 'card-line-chips-source-required', itemPath, '关联线路胶囊必须选择平台、车站或车站建筑来源。');
@@ -776,10 +779,14 @@ export function validateWorkflowOutput(output: WorkflowOutput, _outputIndex: num
     if (!assignment.id || assignmentIds.has(assignment.id)) issue(issues, 'error', 'workflow-assignment-id-invalid', assignmentPath, '组装行标识必须存在且不能重复。');
     const field=resolveEffectiveFields(config,output.classification).find(field=>field.key===assignment.target);
     const control=controlsFor(workflow).find(control=>control.slot===assignment.expression.trim());
-    if (control?.fieldSource && field) {
-      if ((field.cardinality==='multiple') !== (control.kind==='group')) issue(issues,'error','field-import-target-conflict',assignmentPath,'字段输入与输出目标的值数量不兼容。');
-      if (field.type==='enum' && (control.options??[]).some(option=>!field.options?.some(target=>target.value===option.value))) issue(issues,'error','field-import-target-conflict',assignmentPath,'工作流选项包含输出目标字段不允许的保存值。');
-      if (field.type==='number' && !['number','group'].includes(control.kind) || field.type==='boolean' && !['toggle','group','select'].includes(control.kind)) issue(issues,'error','field-import-target-conflict',assignmentPath,'输入控件与输出目标字段类型不兼容。');
+    if (control && field && (control.fieldSource||config.contractRevision===8)) {
+      const leaf=control.kind==='group'?control.group?.itemFields[0]:control;
+      const returned=leaf&&(leaf.kind==='featureSearch'||leaf.kind==='coarseSearch')&&leaf.search?resolveSelectableFields(config,leaf.search.target).find(field=>field.key===leaf.search!.returnField):undefined;
+      const actualType=control.kind==='group'&&control.group?.storage==='object'?'json':leaf?.kind==='number'?'number':leaf?.kind==='toggle'?'boolean':leaf?.kind==='select'?leaf.optionValueType??'string':returned?returned.type==='enum'?returned.optionValueType??'string':returned.type==='reference'?'string':returned.type:leaf?.kind==='json'?'json':'string';
+      const actualMultiple=control.kind==='group'||returned?.cardinality==='multiple';
+      const expectedType=field.type==='enum'?field.optionValueType??'string':field.type==='reference'?'string':field.type;
+      if (field.type!=='json' && ((field.cardinality==='multiple')!==Boolean(actualMultiple)||actualType!==expectedType))issue(issues,'error','field-import-target-conflict',assignmentPath,'输入控件与输出目标的保存值类型或值数量不兼容。');
+      if(field.type==='enum'&&(control.kind==='group'?control.group?.itemFields[0]?.options:control.options)?.some(option=>!field.options?.some(target=>target.value===option.value)))issue(issues,'error','field-import-target-conflict',assignmentPath,'工作流选项包含输出目标字段不允许的保存值。');
     }
     assignmentIds.add(assignment.id);
     try {
@@ -849,10 +856,11 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
   for(const step of workflow.steps) {
     if(step.kind==='geometry') {
       const path=`${base}/steps/${step.id}`;
-      const condition=step.when??workflow.outputs.find(output=>output.id===step.outputId)?.when;
-      validateWorkflowValueCondition(condition,earlierTokens,path,issues);
+      validateWorkflowValueCondition(step.when,earlierTokens,path,issues);
+      validateWorkflowValueCondition(workflow.outputs.find(output=>output.id===step.outputId)?.when,earlierTokens,path,issues);
       const drawing=step.drawing;
       if(step.geometryRole==='auxiliary'&&!drawing?.captureSlot)issue(issues,'error','workflow-extra-slot-required',path,'额外绘制必须定义返回槽位。');
+      if(drawing?.heightSlot&&!controlsFor(workflow).some(control=>control.slot===drawing.heightSlot&&control.kind==='number'))issue(issues,'error','workflow-height-slot-invalid',path,'高度输入必须绑定已存在的数值槽位。');
       const expected=step.geometry?.[0]==='Point'?['coordP','pointObject']:step.geometry?.[0]==='LineString'?['coordL']:['coordG'];
       if(drawing?.returnFormat&&!expected.includes(drawing.returnFormat))issue(issues,'error','workflow-drawing-format-invalid',path,'返回格式与点/线/面类型不匹配。');
       if(drawing?.returnFormat==='pointObject'&&drawing.multiple)issue(issues,'error','workflow-drawing-format-invalid',path,'坐标对象只能选择单点。');
@@ -877,7 +885,10 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
     if (control.kind !== 'select') return;
     const options = 'optionSource' in control ? resolveWorkflowSelectOptions(config, control as WorkflowControl) : control.options ?? [];
     const values = options.map((option) => option.value);
-    if (!values.length || values.some((value) => !value.trim()) || new Set(values).size !== values.length) issue(issues, 'error', 'workflow-select-options-invalid', path, '下拉选项必须具有非空且唯一的保存值。');
+    const normalized = values.map(value=>('optionValueType' in control&&control.optionValueType==='number')?String(Number(value)):value);
+    const typed=control as Pick<WorkflowControl,'optionValueType'>;
+    if(typed.optionValueType==='number'&&values.some(value=>!Number.isFinite(Number(value)))||typed.optionValueType==='boolean'&&values.some(value=>!['true','false'].includes(value)))issue(issues,'error','workflow-option-value-type-invalid',path,'下拉选项保存值与数字/布尔类型不符。');
+    if (!values.length || values.some((value) => !value.trim()) || new Set(normalized).size !== values.length) issue(issues, 'error', 'workflow-select-options-invalid', path, '下拉选项必须具有非空且唯一的保存值。');
   };
   for (const step of workflow.steps) for (const control of step.controls ?? []) {
     const controlPath = `${base}/steps/${step.id}/controls/${control.id}`;

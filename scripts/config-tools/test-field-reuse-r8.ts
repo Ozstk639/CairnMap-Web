@@ -11,7 +11,7 @@ assert.equal(config.contractRevision,8);assert.equal(config.registries.optionSet
 assert.equal(validateConfigPackage(config).valid,true);
 assert(resolveSelectableFields(config,{class:'PFB'}).some(field=>field.key==='LineID'));
 assert(!resolveSelectableFields(config,{class:'RLE'}).some(field=>field.key==='LineID'));
-assert(!resolveSelectableFields(config,{class:'WRP'}).some(field=>field.key==='ModifiedBy'));
+assert(!resolveSelectableFields(config,{class:'WRP'}).some(field=>['ModifiedBy','Skind','Skind2'].includes(field.key)));
 const root=config.nodes.find(node=>node.path.class==='WRP'&&!node.path.kind)!;
 const field:FieldDefinition={fieldId:'status-definition',key:'tags.status',type:'enum',cardinality:'single',input:'select',options:[{value:'0',label:{zh:'关闭',en:''}},{value:'1',label:{zh:'开启',en:'On'}}],optionValueType:'number',defaultValue:0,labels:{zh:'状态',en:''},description:{zh:'',en:''}};
 root.fields.push(field);

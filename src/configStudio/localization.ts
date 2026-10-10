@@ -7,6 +7,7 @@ export function normalizeImportedText(zh: unknown, en: unknown): LocalizedText {
 }
 
 export function normalizeImportedLocalization(config: ConfigPackageV3): ConfigPackageV3 {
+  if(config.contractRevision===8)return structuredClone(config);
   const visit = (value: unknown): unknown => {
     if (Array.isArray(value)) return value.map(visit);
     if (!value || typeof value !== 'object') return value;

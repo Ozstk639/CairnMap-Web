@@ -23,15 +23,18 @@ function requiredConditions(field: FieldDefinition, workflow: WorkflowDefinition
     const bindings = workflow.outputs.flatMap(output => output.assignments).filter(item => item.target === condition.field && /^[A-Z][A-Z0-9_]*$/.test(item.expression));
     const tokens = [...new Set(bindings.map(item => item.expression))];
     if (tokens.length !== 1) throw new Error(`请先将条件字段 ${condition.field} 明确绑定到一个输入槽位。`);
-    if (condition.kind === 'fieldEquals') return [{ token: tokens[0], operator: 'equals' as const, value: condition.value }];
+    const source=workflow.steps.flatMap(step=>step.controls??[]).find(control=>control.slot===tokens[0]);
+    const typed=(value:string)=>source?.kind==='number'||source?.optionValueType==='number'?Number(value):source?.kind==='toggle'||source?.optionValueType==='boolean'?value==='true':value;
+    if (condition.kind === 'fieldEquals') return [{ token: tokens[0], operator: 'equals' as const, value: typed(condition.value) }];
     if (condition.kind === 'fieldPresent') return [{ token: tokens[0], operator: condition.present ? 'present' as const : 'empty' as const }];
-    return [{ token:tokens[0],operator:'in' as const,values:condition.values }];
+    return [{ token:tokens[0],operator:'in' as const,values:condition.values.map(typed) }];
   });
 }
 export function importFieldIntoControl(config: ConfigPackageV3, workflow: WorkflowDefinition, control: WorkflowControl, nodeId: string, field: FieldDefinition): WorkflowControl {
   const imported = workflowControlFromField(field, control.slot ?? control.id, control.id, config);
   return { ...control, ...imported, columns: control.columns,
-    requiredWhen: requiredConditions(field, workflow), fieldFormat: field.format, optionValueType: field.optionValueType,
+    required: Boolean(field.required||field.requiredWhen?.length),
+    requiredWhen: field.required||field.requiredWhen?.some(condition=>condition.kind==='always')?[]:field.requiredWhen?.length?[{token:'',operator:'present',any:requiredConditions(field, workflow)}]:[], fieldFormat: field.format, optionValueType: imported.optionValueType,
     fieldSource: { nodeId, fieldId: field.fieldId, snapshot: fieldSourceSnapshot(field), overrides: [] } };
 }
 export function resolveImportedControl(config: ConfigPackageV3, workflow: WorkflowDefinition, control: WorkflowControl): WorkflowControl {
@@ -71,6 +74,7 @@ export function fieldImportErrors(config: ConfigPackageV3, workflow: WorkflowDef
   const field = resolveSourceField(config,source);
   if (!field) return [`来源分类/字段 ${source.nodeId}/${source.snapshot.key} 已不存在或不再有效。`];
   const errors: string[] = [];
+  if(field.type==='enum'&&(field.optionValueType??'string')!==(source.snapshot.optionValueType??'string'))errors.push(`来源字段 ${field.key} 的保存值类型已变化，请重新导入。`);
   if (field.type !== source.snapshot.type || field.cardinality !== source.snapshot.cardinality) errors.push(`来源字段 ${field.key} 的类型或值数量已变化，请重新导入后确认绑定。`);
   if (source.overrides.some(key=>!(FIELD_IMPORT_PROPERTIES as readonly string[]).includes(key))) errors.push('存在未知字段覆写项。');
   if (field.scenes?.workflow === false) errors.push(`来源字段 ${field.key} 已关闭工作流使用。`);
@@ -80,6 +84,7 @@ export function fieldImportErrors(config: ConfigPackageV3, workflow: WorkflowDef
 export function storedOptionValue(value: unknown, kind: FieldDefinition['optionValueType']): unknown {
   if (value === '' || value == null) return value;
   if (kind === 'number') return Number(value);
-  if (kind === 'boolean') return value === true || value === 'true';
+  if (kind === 'boolean') return value===true||value==='true'?true:value===false||value==='false'?false:value;
+  if (kind === 'string') return typeof value==='object'?value:String(value);
   return value;
 }

@@ -1,3 +1,4 @@
+import { coerceWorkflowValues } from './workflowValues';
 import { multipartGeometryFromSinglePath, serializeMultipartGeometry, validateMultipartGeometry, type MultipartCoord, type MultipartGeometry } from '../core/geometry/multipartGeometry';
 import type { WorkflowDefinition, WorkflowStep } from './types';
 import { workflowConditionMatches } from './workflowExpression';
@@ -17,6 +18,7 @@ export function serializeDrawingCapture(step:WorkflowStep,capture:WorkflowDrawin
   const geometry=capture.geometry??multipartGeometryFromSinglePath(type,capture.coordinates);
   const error=validateMultipartGeometry(geometry);if(error)throw new Error(error);
   if(geometry.type!==type)throw new Error('采集几何与绘制类型不一致。');
+  if(step.drawing?.returnFormat==='pointObject'&&geometry.parts.length!==1)throw new Error('单点坐标对象格式必须且只能采集一个点。');
   if(step.drawing?.multiple===false&&geometry.parts.length>1)throw new Error('此绘制只允许一个部件。');
   const entered=step.drawing?.heightSlot?slots[step.drawing.heightSlot]:undefined;
   const rawHeight=capture.point?.y;
@@ -31,7 +33,7 @@ export function serializeDrawingCapture(step:WorkflowStep,capture:WorkflowDrawin
 }
 /** Every final batch reads the same draft snapshot, never React's old state. */
 export function captureDrawingSnapshot(workflow:WorkflowDefinition,rawSlots:Record<string,unknown>,previous:Record<string,WorkflowDrawingCapture>,capture?:((id:string,type:string)=>WorkflowDrawingCapture | MultipartCoord[])) {
-  const slots={...rawSlots};const captures={...previous};
+  const slots=coerceWorkflowValues(workflow,rawSlots);const captures={...previous};
   for(const step of workflow.steps.filter(step=>step.kind==='geometry')) {
     const key=drawingKey(step);if(!enabledDrawing(step,workflow,slots)){for(const slot of [step.drawing?.captureSlot,step.drawing?.pointSlot])if(slot)for(const token of [slot,`${slot}_RAW_POINT`,`${slot}_X`,`${slot}_Y`,`${slot}_Z`,`${slot}_HEIGHT`])delete slots[token];for(const control of step.controls??[])if(control.slot)delete slots[control.slot];continue;}
     if(capture){const next=capture(key,step.geometry![0]);captures[key]=Array.isArray(next)?{coordinates:next}:next;}

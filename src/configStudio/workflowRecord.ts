@@ -4,7 +4,7 @@ import type { ConfigPackageV3, WorkflowOutput } from './types';
 import { isSafeWorkflowTarget } from './workflowExpression';
 
 /** Serialize authored V3 fields into the shared feature record contract. */
-export function finalizeV3WorkflowRecord(config: ConfigPackageV3, output: WorkflowOutput, raw: Record<string, unknown>, options: { coords: MultipartCoord[]; geometry?:MultipartGeometry; now: Date }): Record<string, unknown> {
+export function finalizeV3WorkflowRecord(config: ConfigPackageV3, output: WorkflowOutput, raw: Record<string, unknown>, options: { coords: MultipartCoord[]; geometry?:MultipartGeometry; now: Date; preservePaths?:string[] }): Record<string, unknown> {
   const fields = new Map(resolveEffectiveFields(config, output.classification).map((field) => [field.key, field]));
   const input = structuredClone(raw);
   for (const field of fields.values()) if (field.defaultValue !== undefined && isSafeWorkflowTarget(field.key)) {
@@ -20,18 +20,19 @@ export function finalizeV3WorkflowRecord(config: ConfigPackageV3, output: Workfl
     if (blocked) continue;
     const key = parts[parts.length - 1]; if (node[key] === undefined) node[key] = structuredClone(field.defaultValue);
   }
+  const preserved=new Set(options.preservePaths??[]);
   const clean = (value: unknown, path: string): unknown => {
     if (value === undefined) return undefined;
-    if (Array.isArray(value)) return value.length ? value.map((item) => clean(item, path)) : undefined;
+    if (Array.isArray(value)) return value.length ? value.map((item) => clean(item, path)) : preserved.has(path)?[]:undefined;
     if (value && typeof value === 'object') {
       const entries = Object.entries(value).flatMap(([key, item]) => {
         const next = clean(item, path ? `${path}.${key}` : key);
         return next === undefined ? [] : [[key, next]];
       });
-      return entries.length ? Object.fromEntries(entries) : undefined;
+      return entries.length ? Object.fromEntries(entries) : preserved.has(path)?{}:undefined;
     }
     const field = fields.get(path);
-    if (value === '' && !field?.required && field?.emptyValue !== 'preserve') return undefined;
+    if (value === '' && !preserved.has(path) && !field?.required && field?.emptyValue !== 'preserve') return undefined;
     if (field?.type === 'number' && value !== null && value !== '') { const number = Number(value); return Number.isFinite(number) ? number : value; }
     if (field?.type === 'boolean' && typeof value === 'string') return value === 'true' ? true : value === 'false' ? false : value;
     return value;

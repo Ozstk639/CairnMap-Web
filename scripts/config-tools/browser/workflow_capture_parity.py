@@ -19,12 +19,14 @@ b.call('Page.navigate',{'url':'http://127.0.0.1:5188/scripts/config-tools/workfl
 b.wait('!!window.workflowAcceptance?.measurement');freeze_time();b.click('测绘');b.click('开始测绘(快捷)')
 b.evaluate("(() => {const s=[...document.querySelectorAll('select')].find(e=>[...e.options].some(o=>o.value==='v3-tpp_teleport'));s.value='v3-tpp_teleport';s.dispatchEvent(new Event('change',{bubbles:true}));return true;})()")
 b.click('开始');b.wait("!!document.querySelector('input[aria-label=填写人]')");set_input('填写人','capture-author');b.click('下一页')
-b.evaluate("(() => {const s=[...document.querySelectorAll('select')].find(e=>e.getBoundingClientRect().height&&[...e.options].some(o=>o.value.includes('\"class\":\"TPP\"')));s.value=JSON.stringify({class:'TPP',kind:'NOM',skind:'NOM'});s.dispatchEvent(new Event('change',{bubbles:true}));return true;})()")
-set_input('名称','Captured teleport');set_input('字符简称','CAPTURE');b.click('下一页');b.click('下一页')
-set_input('起点高度',0);map_click(700,650);b.click('采用当前绘制')
+for level,title in [('kind','Kind'),('skind','SKind')]:
+ b.evaluate("(() => {const s=document.querySelector('select[aria-label=\"工作流分类 "+title+"\"]');s.value='NOM';s.dispatchEvent(new Event('change',{bubbles:true}));return true;})()")
+set_input('名称','Captured teleport');set_input('字符简称','CAPTURE');b.click('下一页')
+set_input('起点高度',0);map_click(700,650);b.click('下一页')
 b.click('确认保存输出');time.sleep(.3)
 assert b.evaluate('window.workflowAcceptance.measurement.getCommittedFeatures().length')==0,'missing target must block writes'
-b.click('进入目标点坐标绘制');map_click(900,750);b.click('采用目标点坐标');set_input('目标点高度',32);b.click('确认保存输出')
+assert b.evaluate('document.querySelector(\"[data-workflow-step]\").innerText.includes(\"目标点坐标\")')
+set_input('目标点高度',32);map_click(900,750);b.click('确认保存输出')
 b.wait('window.workflowAcceptance.measurement.getCommittedFeatures().length===1')
 v3=b.evaluate('window.workflowAcceptance.measurement.getCommittedFeatures()[0]')
 v1['World']='zth' # Declared canonical World migration: numeric 0 -> zth.

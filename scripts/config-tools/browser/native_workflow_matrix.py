@@ -20,7 +20,7 @@ def field(selector,definition,data):
 
 for index,fixture in enumerate(fixtures):
  b.call('Page.navigate',{'url':'http://127.0.0.1:5188/scripts/config-tools/workflow-acceptance.html'})
- b.wait('!!window.workflowAcceptance?.measurement')
+ b.wait('!!window.workflowAcceptance?.measurement',40)
  b.evaluate("(() => {const OriginalDate=Date;window.Date=class extends OriginalDate { constructor(...args){if(args.length)super(...args);else super('2026-10-07T00:00:00Z');}static now(){return OriginalDate.now();} };})()")
  workflow=b.evaluate('window.workflowAcceptance.config.workflows.find(w=>w.id==='+json.dumps('v3-'+fixture['schemaKey'])+')')
  assert workflow and workflow['mode']=='composed'
@@ -43,10 +43,15 @@ for index,fixture in enumerate(fixtures):
  b.click('开始');b.wait("!!document.querySelector('input[aria-label=填写人]')")
  value('input[aria-label=填写人]','fixture-user');b.click('下一页')
  for step in workflow['steps'][1:]:
+  if not b.evaluate('!!document.querySelector('+json.dumps('[data-workflow-step='+json.dumps(step['id'])+']')+')'):continue
   for c in step.get('controls',[]):
    selector='[data-workflow-control='+json.dumps(c['id'])+']'
+   if c['kind']=='tagsExtensions':continue
    if c['kind']=='classificationPicker':
-    b.evaluate("(() => {const s=document.querySelector("+json.dumps(selector+' select')+");s.value=[...s.options].find(o=>{try{const p=JSON.parse(o.value),f="+json.dumps(fixture['classification'])+";return JSON.stringify(p)===JSON.stringify(f)}catch{return false}}).value;s.dispatchEvent(new Event('change',{bubbles:true}));})()")
+    for level in ['class','kind','skind','skind2']:
+     title={'class':'Class','kind':'Kind','skind':'SKind','skind2':'SKind2'}[level]
+     select=selector+' select[aria-label="工作流分类 '+title+'"]'
+     if b.evaluate('!!document.querySelector('+json.dumps(select)+')'):value(select,fixture['classification'].get(level,''))
     continue
    slot=c.get('slot');key=c['id'][len(fixture['schemaKey'])+1:-(len(slot)+1)] if slot else ''
    data=fixture['inputs'].get(key)
@@ -66,8 +71,8 @@ for index,fixture in enumerate(fixtures):
     point=b.evaluate('window.workflowAcceptance.screenPointAt('+str(x)+','+str(z)+')')
     for typ in ['mousePressed','mouseReleased']:b.call('Input.dispatchMouseEvent',{'type':typ,'button':'left','clickCount':1,**point})
     time.sleep(.06)
-   b.click('采用当前绘制')
-  if step is workflow['steps'][-1]:b.click('确认保存输出')
+  if b.evaluate("[...document.querySelectorAll('button')].some(e=>e.textContent.trim()==='确认保存输出'&&e.getBoundingClientRect().height)"):
+   b.click('确认保存输出');break
   else:b.click('下一页')
  b.wait('window.workflowAcceptance.measurement.getCommittedFeatures().length===1',8)
  actual=b.evaluate('window.workflowAcceptance.measurement.getCommittedFeatures()[0]')
@@ -76,5 +81,5 @@ for index,fixture in enumerate(fixtures):
  results.append({'schemaKey':fixture['schemaKey'],'classification':fixture['classification'],'inputVariant':index%2,'record':actual})
  print(f'composed production UI: {index+1}/{len(fixtures)} {fixture["schemaKey"]}',flush=True)
 assert not b.errors,b.errors
-(OUT/'native-workflow-matrix.json').write_text(json.dumps({'cases':results,'errors':b.errors,'sourceSha':'0b82863d4fea3791f98917ba6d13f70e1f27eb15','expected':'frozen schema final-record fixtures','actual':'production MeasuringModule + native Runner + real map clicks'},ensure_ascii=False,indent=2),encoding='utf-8')
+(OUT/'native-workflow-matrix.json').write_text(json.dumps({'cases':results,'errors':b.errors,'sourceSha':'0b82863d4fea3791f98917ba6d13f70e1f27eb15','expected':'frozen schema final-record fixtures','actual':'r8 production MeasuringModule + native Runner + real map clicks; direct save without adoption'},ensure_ascii=False,indent=2),encoding='utf-8')
 print('All 17 composed workflows, 34 production UI submissions: complete record equality: OK')

@@ -45,4 +45,7 @@ assert.deepEqual(activeOutputIds(conditional,{F:''}),[]);assert.throws(()=>prepa
 const forward=structuredClone(workflow);forward.steps.find(step=>step.kind==='geometry')!.when={token:'TARGET_POINT',operator:'present'};
 assert(!validateWorkflowDefinition(forward,config).valid);
 assert.equal(drawingKey(extra),extra.id);
+const numeric=structuredClone(workflow);numeric.steps[1].controls!.push({id:'numeric-condition',slot:'NUMERIC_GATE',kind:'number',columns:1,label:{zh:'启动值',en:''}});numeric.outputs[0].when={token:'NUMERIC_GATE',operator:'equals',value:0};
+const typed=captureDrawingSnapshot(numeric,{...values,NUMERIC_GATE:'0'},{},capture);assert.equal(typed.slots.NUMERIC_GATE,0);assert(typed.captures[output.id]);
+const badHeight=structuredClone(workflow);badHeight.steps.find(step=>step.kind==='geometry')!.drawing!.heightSlot='UNKNOWN_HEIGHT';assert(!validateWorkflowDefinition(badHeight,config).valid);
 console.log('workflow-drawing-r8: TPP legacy final record equality, Warp skip and residual removal, typed point formats, zero/default heights, multipart/hole capture and condition dependencies: OK');

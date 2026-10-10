@@ -22,10 +22,11 @@ export function workflowControlFromField(field: FieldDefinition, slot: string, i
     matcher: 'contains' as const, minQueryLength: 1, maxResults: 30, debounceMs: 180, cacheScope: 'world' as const,
   } : undefined : undefined;
   if (kind === 'featureSearch' && !search) throw new Error('要素搜索输入需要先在字段定义中设置引用目标。');
-  const common = { id, slot, columns: 1 as const, label: structuredClone(field.labels), required: field.required, placeholder: field.placeholder, defaultValue: structuredClone(field.defaultValue), optionValueType:field.optionValueType, fieldFormat:field.format };
+  const common = { id, slot, columns: 1 as const, label: structuredClone(field.labels), required: field.required, placeholder: field.placeholder, defaultValue: structuredClone(field.defaultValue), optionValueType:field.optionValueType??(field.type==='number'?'number':field.type==='boolean'?'boolean':undefined), fieldFormat:field.format };
+  if(field.type==='json'&&field.cardinality==='multiple')return {...common,kind:'json'};
   if (field.cardinality === 'multiple') return { ...common, kind: 'group', group: {
     storage: 'scalar', optional: !field.required, addLabel: { zh: `添加${field.labels.zh}`, en: '' },
-    itemFields: [{ key: '', kind, label: structuredClone(field.labels), options: config ? resolveWorkflowSelectOptions(config,field) : field.options, search, required: true, placeholder: field.placeholder, optionValueType:field.optionValueType,fieldFormat:field.format }],
+    itemFields: [{ key: '', kind, label: structuredClone(field.labels), options: config ? resolveWorkflowSelectOptions(config,field) : field.options, search, required: true, placeholder: field.placeholder, optionValueType:field.optionValueType??(field.type==='number'?'number':field.type==='boolean'?'boolean':undefined),fieldFormat:field.format }],
   } };
   return { ...common, kind, options: field.options, optionSource: field.optionSource, search };
 }

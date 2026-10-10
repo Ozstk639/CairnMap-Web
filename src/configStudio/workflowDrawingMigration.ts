@@ -13,7 +13,7 @@ export function migrateWorkflowDrawings(value:WorkflowDefinition):WorkflowDefini
     for(const point of points??[]){
       const moved=(main.controls??[]).filter(control=>point.when && JSON.stringify(control.when)===JSON.stringify(point.when));
       main.controls=main.controls?.filter(control=>!moved.includes(control));
-      const extra:WorkflowStep={id:`extra-${point.id}`,kind:'geometry',geometryRole:'auxiliary',label:point.label,when:point.when,geometry:['Point'],controls:moved,drawing:{enabledFromThisPage:true,allowBack:true,keepDrawingWhenBack:true,captureSlot:point.slot,returnFormat:'pointObject',multiple:false,heightSlot:moved.find(control=>control.kind==='number')?.slot,bindings:[]}};
+      const extra:WorkflowStep={id:`extra-${point.id}`,kind:'geometry',geometryRole:'auxiliary',label:point.label,when:point.when,geometry:['Point'],controls:moved.map(control=>{const{when:_when,...next}=control;return next;}),drawing:{enabledFromThisPage:true,allowBack:true,keepDrawingWhenBack:true,captureSlot:point.slot,returnFormat:'pointObject',multiple:false,heightSlot:moved.find(control=>control.kind==='number')?.slot,bindings:[]}};
       steps.push(extra);
       const output=workflow.outputs.find(output=>output.id===original.outputId);
       if(output?.classification.class==='TPP'){
@@ -31,5 +31,11 @@ export function migrateWorkflowDrawings(value:WorkflowDefinition):WorkflowDefini
       }
     }
   }
-  workflow.steps=steps;return workflow;
+  workflow.steps=steps;
+  for(const step of steps.filter(step=>step.geometryRole==='output'&&step.drawing?.pointSlot)){
+    const slot=step.drawing!.pointSlot!;
+    const used=workflow.outputs.some(output=>output.assignments.some(row=>new RegExp(`\\b${slot}(?:_[XYZ])?\\b`).test(row.expression)||JSON.stringify(row.when??{}).includes(`"${slot}`)))||steps.some(item=>JSON.stringify([item.when,...(item.controls??[]).flatMap(control=>[control.when,...(control.requiredWhen??[])])]).includes(`"${slot}`))||workflow.outputs.some(output=>JSON.stringify(output.when??{}).includes(`"${slot}`));
+    if(!used)delete step.drawing!.pointSlot;
+  }
+  return workflow;
 }
