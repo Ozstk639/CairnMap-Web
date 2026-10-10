@@ -56,7 +56,8 @@ function text(value: unknown): string {
   try { return JSON.stringify(value); } catch { return String(value); }
 }
 
-function labelFor(item: CardItem): string {
+function labelFor(item: CardItem, config?: ConfigPackageV3, record?: FeatureRecord): string {
+  if (item.labelMode === 'field' && config && record) return resolveEffectiveFields(config,classificationFor(record)).find(field=>field.key===item.source)?.labels.zh ?? item.source;
   return item.label?.zh?.trim() || item.source;
 }
 
@@ -94,7 +95,7 @@ function rowFor(item: CardItem, record: FeatureRecord, config: ConfigPackageV3, 
 
   const raw = [item.source, ...(item.fallbackSources ?? [])].map(source => valueAt(record, source)).find(value => !isEmpty(value));
   const rawText = text(raw).trim();
-  const label = labelFor(item);
+  const label = labelFor(item,config,record);
   const colorText = text(valueAt(record, item.options?.colorSource || item.source)).trim();
   const needsValue = item.renderer !== 'media' && item.renderer !== 'colorCapsule';
   if (!rawText && needsValue && item.hideWhenEmpty !== false && item.options?.format !== 'classification') return undefined;
@@ -136,7 +137,12 @@ function rowFor(item: CardItem, record: FeatureRecord, config: ConfigPackageV3, 
     const level = path.skind2 ? 'skind2' : path.skind ? 'skind' : path.kind ? 'kind' : 'class';
     return { label, value: node?.classificationLabels?.[level]?.zh || [path.kind,path.skind,path.skind2].filter(Boolean).join('/') || path.class };
   }
+  const defined = resolveEffectiveFields(config,classificationFor(record)).find(field=>field.key===item.source);
+  const mappedOptions = item.valueMode === 'field' ? defined?.options : item.valueOptions;
+  const shown = mappedOptions?.find(option=>option.value===rawText)?.label.zh;
+  if (shown !== undefined && item.renderer === 'text') return {label,value:shown};
   if (item.options?.format === 'enum') {
+    if (item.valueMode === 'override') return {label,value:shown ?? rawText};
     const field = resolveEffectiveFields(config, classificationFor(record)).find(field => field.key === item.source);
     return { label, value: field?.options?.find(option => String(option.value) === rawText)?.label.zh || rawText };
   }

@@ -17,7 +17,7 @@ function contradictory(items: RenderFieldCondition[]): boolean {
 /** Failure produces diagnostics only; the caller retains the valid r6 package. */
 export function migrateRenderRulesToR7(value: ConfigPackageV3): RenderMigrationResult {
   const issues: string[] = []; const sources: RenderMigrationResult['sources'] = [];
-  if (value.contractRevision === 7) return { config: structuredClone(value), issues, sources };
+  if (value.contractRevision >= 7) return { config: structuredClone(value), issues, sources };
   if (value.contractRevision !== 6) return { issues: ['请先将旧包规范化为有效原生 r6。'], sources };
   const config = structuredClone(value);
   for (const node of config.nodes) for (const [geometry, profile] of Object.entries(node.geometryProfiles)) {

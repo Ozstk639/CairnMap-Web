@@ -43,6 +43,10 @@ export type FieldDefinition = {
   labels: LocalizedText;
   description: LocalizedText;
   options?: SelectOption[];
+  /** Options are serialized text keys; this controls the actual stored scalar. */
+  optionValueType?: 'string' | 'number' | 'boolean';
+  format?: 'plain' | 'externalLink' | 'boolean' | 'json' | 'date';
+  coordinateFormat?: 'coordP' | 'pointObject' | 'coordL' | 'coordG';
   optionSource?: { registryKey: string; runtimeField?: string };
   placeholder?: string;
   defaultValue?: unknown;
@@ -605,6 +609,10 @@ export type CardItem = {
   /** Defaults to true for V1-compatible cards. */
   hideWhenEmpty?: boolean;
   label?: LocalizedText;
+  /** New items follow field definitions; old authored titles stay explicit. */
+  labelMode?: 'field' | 'override';
+  valueMode?: 'field' | 'override';
+  valueOptions?: SelectOption[];
   options?: {
     colorSource?: string;
     nameSource?: string;
@@ -693,6 +701,17 @@ export type WorkflowGroupField = {
   defaultValue?: unknown;
   rows?: number;
   search?: SearchProfile;
+  optionValueType?: FieldDefinition['optionValueType'];
+  fieldFormat?: FieldDefinition['format'];
+  fieldSource?: WorkflowFieldSource;
+  requiredWhen?: WorkflowValueCondition[];
+  valueNormalization?: 'none' | 'trim' | 'abbr' | 'number';
+};
+export type WorkflowFieldSource = {
+  nodeId: string;
+  fieldId: string;
+  snapshot: Pick<FieldDefinition, 'key' | 'type' | 'cardinality' | 'labels' | 'options' | 'optionValueType' | 'format' | 'defaultValue' | 'required' | 'requiredWhen' | 'input' | 'placeholder' | 'reference'>;
+  overrides: string[];
 };
 export type WorkflowRepeatGroup = {
   itemFields: WorkflowGroupField[];
@@ -710,6 +729,10 @@ export type WorkflowControl = {
   kind: WorkflowControlKind;
   columns: 1 | 2 | 3;
   label: LocalizedText;
+  fieldSource?: WorkflowFieldSource;
+  fieldFormat?: FieldDefinition['format'];
+  optionValueType?: FieldDefinition['optionValueType'];
+  requiredWhen?: WorkflowValueCondition[];
   options?: SelectOption[];
   optionSource?: { registryKey: string };
   placeholder?: string;
@@ -743,7 +766,7 @@ export type WorkflowStep = {
 };
 
 /** Target paths include fields, tags.xxx and extensions.xxx. */
-export type WorkflowValueCondition = { token: string; operator: 'empty' | 'present' | 'equals'; value?: string | number | boolean };
+export type WorkflowValueCondition = { token: string; operator: 'empty' | 'present' | 'equals' | 'in'; value?: string | number | boolean; values?: Array<string | number | boolean>; all?: WorkflowValueCondition[]; any?: WorkflowValueCondition[] };
 export type WorkflowAuxiliaryPoint = { id: string; slot: string; label: LocalizedText; required?: boolean; when?: WorkflowValueCondition };
 export type WorkflowAssignment = { id: string; target: string; expression: string; when?: WorkflowValueCondition };
 export type WorkflowOutput = {
@@ -799,7 +822,7 @@ export type ParityReport = { schemaVersion: 'cairnmap.v1-parity-report.v2'; sour
 export type ConfigPackageV3 = {
   schemaVersion: 'cairnmap.config-package.v3';
   /** Contract revision is API compatibility, not the user-facing package revision. */
-  contractRevision: 3 | 4 | 5 | 6 | 7;
+  contractRevision: 3 | 4 | 5 | 6 | 7 | 8;
   packageId: string;
   projectId: string;
   /** Persistence version only; the save dialog requires a monotonic integer. */

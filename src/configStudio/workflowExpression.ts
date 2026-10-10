@@ -10,10 +10,13 @@ export const PROTECTED_WORKFLOW_TARGETS = new Set(['World', 'Class', 'Kind', 'Sk
 
 export function workflowConditionMatches(condition: import('./types').WorkflowValueCondition | undefined, slots: Record<string, unknown>, system: Record<string, unknown> = {}): boolean {
   if (!condition) return true;
+  if (condition.all) return condition.all.every(item=>workflowConditionMatches(item,slots,system));
+  if (condition.any) return condition.any.some(item=>workflowConditionMatches(item,slots,system));
   const value = Object.prototype.hasOwnProperty.call(system, condition.token) ? system[condition.token] : slots[condition.token];
   const empty = value == null || typeof value === 'string' && !value.trim();
   if (condition.operator === 'empty') return empty;
   if (condition.operator === 'present') return !empty;
+  if (condition.operator === 'in') return condition.values?.includes(value as string | number | boolean) ?? false;
   return value === condition.value;
 }
 

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createEditableConfigPackageFromCurrentProject, copyRenderRuleContent, normalizeEditedRenderRule, editableGeometryProfile } from '../../src/configStudio/renderRuleTemplates';
 import { compileConfigRuntime, validateConfigPackage } from '../../src/configStudio/runtime';
 const config = createEditableConfigPackageFromCurrentProject();
-assert.equal(config.contractRevision, 7); assert.equal(config.revision, 3); assert(validateConfigPackage(config).valid);
+assert.equal(config.contractRevision, 8); assert.equal(config.revision, 4); assert(validateConfigPackage(config).valid);
 const source = Object.values(config.nodes.find(n => n.path.class === 'ROD' && !n.path.kind)!.geometryProfiles)[0]!.zoomPriority.rules[0];
 source.when!.fields = { op: 'all', items: [{ kind: 'fieldEquals', field: 'Name', value: 'example' }] };
 source.extensions = { ...source.extensions, lineLabel: { ...source.extensions?.lineLabel, profile: 'standard', candidateMax: 17 }, visibility: { mode: 'lineContainmentChoice', lineContainmentChoice: { field: 'Name', primaryValue: 'a', overlayValues: ['b'], switchZoom: 8 } } };

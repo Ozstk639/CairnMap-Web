@@ -25,13 +25,14 @@ import type {
   ZoomPriorityRule,
 } from './types';
 import { isSafeWorkflowTarget, parseWorkflowExpression, workflowExpressionTokens, WORKFLOW_SYSTEM_TOKENS, PROTECTED_WORKFLOW_TARGETS, workflowOutputAssemblyOrder, workflowCaptureSlots, workflowDerivedPointTokens } from './workflowExpression';
+import { fieldImportErrors, resolveWorkflowFields } from './fieldReuse';
 import { createBlankV32Package } from './v32Defaults';
 import { validateNativeStructure } from './nativeContractValidation';
 
 const GEOMETRIES: GeometryKind[] = ['Point', 'LineString', 'Polygon'];
 const SYSTEM_FIELD_KEYS = new Set([
   'ID', 'Name', 'World', 'Class', 'Kind', 'Skind', 'Skind2', 'SKind', 'SKind2',
-  'Creator', 'CreatedAt', 'Editor', 'EditedAt', 'Type', 'CreateBy', 'CreateTime', 'createBy', 'createTime', 'ModifityTime', 'ModifyTime', 'ModifiedTime', 'modifityTime', 'modifyTime', 'modifiedTime', 'ModifityBy', 'ModifyBy', 'ModifiedBy', 'modifityBy', 'modifyBy', 'modifiedBy', 'CoordP', 'CoordL', 'CoordG',
+  'Type', 'CreateBy', 'CreateTime', 'ModifityTime', 'ModifityBy', 'CoordP', 'CoordL', 'CoordG',
 ]);
 /** Name is a V1-configured field in several classes, even though it is also universally selectable. */
 const PROTECTED_FIELD_KEYS = new Set([...SYSTEM_FIELD_KEYS].filter((key) => key !== 'Name'));
@@ -269,6 +270,7 @@ export function resolveEffectiveFields(config: ConfigPackageV3, path: Classifica
 }
 
 export function resolveWorkflowSelectOptions(config: ConfigPackageV3, control: Pick<WorkflowControl, 'options' | 'optionSource'>): SelectOption[] {
+  if (config.contractRevision === 8) return control.options ?? [];
   return control.optionSource ? config.registries.optionSets?.find(set => set.id === control.optionSource?.registryKey)?.options ?? [] : control.options ?? [];
 }
 
@@ -396,8 +398,9 @@ function validateField(field: FieldDefinition, path: string, known: Set<string>,
   if (field.type === 'enum' && (!field.options?.length && !field.optionSource?.registryKey)) issue(issues, 'error', 'enum-options-required', path, '枚举字段必须提供静态选项或受控选项注册表。', { field: field.key });
   const optionValues = new Set<string>();
   for (const option of field.options ?? []) {
-    if (!option.value.trim() || optionValues.has(option.value)) issue(issues, 'error', 'field-option-invalid', path, '下拉选项的存储值不能为空且不能重复。', { field: field.key });
-    optionValues.add(option.value);
+    const normalized = field.optionValueType==='number'?String(Number(option.value)):option.value;
+    if (!option.value.trim() || optionValues.has(normalized) || field.optionValueType==='number'&&!Number.isFinite(Number(option.value)) || field.optionValueType==='boolean'&&!['true','false'].includes(option.value)) issue(issues, 'error', 'field-option-invalid', path, '对照存储值必须有效、符合类型且不能重复。', { field: field.key });
+    optionValues.add(normalized);
   }
   if (!isSafeWorkflowTarget(field.key)) issue(issues, 'error', 'field-key-unsafe', path, '字段路径包含不安全的属性名。');
   field.requiredWhen?.forEach((item, index) => validateCondition(item, `${path}/requiredWhen/${index}`, issues));
@@ -405,7 +408,7 @@ function validateField(field: FieldDefinition, path: string, known: Set<string>,
   if (field.requiredWhen?.some(condition => condition.kind === 'zoomRange' || condition.kind === 'bboxArea')) issue(issues, 'error', 'field-required-context-unsupported', path, '条件必填使用字段条件；Zoom/面积条件属于显示规则。');
   if (field.defaultValue !== undefined) {
     const values = field.cardinality === 'multiple' && Array.isArray(field.defaultValue) ? field.defaultValue : [field.defaultValue];
-    if (field.cardinality === 'multiple' && !Array.isArray(field.defaultValue) || values.some(value => field.type === 'number' ? typeof value !== 'number' || !Number.isFinite(value) : field.type === 'boolean' ? typeof value !== 'boolean' : ['string','reference','enum'].includes(field.type) ? typeof value !== 'string' : false)) issue(issues, 'error', 'field-default-invalid', path, '默认值与字段类型/值数量不一致。');
+    if (field.cardinality === 'multiple' && !Array.isArray(field.defaultValue) || values.some(value => field.type === 'number' ? typeof value !== 'number' || !Number.isFinite(value) : field.type === 'boolean' ? typeof value !== 'boolean' : field.type === 'enum' ? typeof value !== (field.optionValueType ?? 'string') || !field.options?.some(option=>option.value===String(value)) : ['string','reference'].includes(field.type) ? typeof value !== 'string' : false)) issue(issues, 'error', 'field-default-invalid', path, '默认值与字段类型/值数量不一致。');
   }
 }
 
@@ -599,7 +602,7 @@ function validateProfile(profile: GeometryProfile, geometry: GeometryKind, path:
     const rulePath = `${path}/renderRules/${rule.id || index + 1}`;
     const min = rule.when?.zoom.min ?? rule.minZoom;
     const max = rule.when?.zoom.max ?? rule.maxZoom;
-    if (config.contractRevision === 7) {
+    if (config.contractRevision >= 7) {
       if (!rule.when || !Number.isInteger(min) || !Number.isInteger(max) || min! < 0 || max! > 8 || min! > max!) issue(issues, 'error', 'render-match-zoom-required', rulePath, 'r7 必须填写 0–8 的闭区间整数 Zoom，允许单级区间。');
       if (rule.minZoom !== undefined || rule.maxZoom !== undefined || rule.minExclusive !== undefined || rule.maxExclusive !== undefined || rule.conditionalOverrides !== undefined) issue(issues, 'error', 'render-legacy-match-forbidden', rulePath, 'r7 只使用 when.zoom 和非分类字段组合，不能保留旧匹配或分支。');
       for (const message of validateRenderFields(rule.when?.fields, resolveEffectiveFields(config, sourcePath), resolveSelectableFields(config, sourcePath).map(field => field.key))) issue(issues, 'error', 'render-field-condition-invalid', `${rulePath}/when/fields`, message);
@@ -663,7 +666,7 @@ function validateProfile(profile: GeometryProfile, geometry: GeometryKind, path:
   }
   for (let left = 0; left < intervals.length; left += 1) for (let right = left + 1; right < intervals.length; right += 1) {
     const a = intervals[left]; const b = intervals[right];
-    if (config.contractRevision === 7) {
+    if (config.contractRevision >= 7) {
       if (a.min === b.min && a.max === b.max && canonicalRenderFields(profile.zoomPriority.rules[left].when?.fields) === canonicalRenderFields(profile.zoomPriority.rules[right].when?.fields)) issue(issues, 'error', 'render-match-duplicate', path, `渲染规则 ${a.id} 与 ${b.id} 的完整条件重复。`);
       else if (a.min >= b.min && a.max <= b.max && !profile.zoomPriority.rules[right].when?.fields) issue(issues, 'warning', 'render-match-shadowed', path, `规则 ${a.id} 被后项 ${b.id} 完全覆盖。`);
     } else if (a.min <= b.max && b.min <= a.max) issue(issues, 'error', 'render-zoom-interval-overlap', path, `渲染规则 ${a.id} 与 ${b.id} 的闭区间重叠。`);
@@ -709,6 +712,8 @@ function validateCard(node: CategoryNode, config: ConfigPackageV3, issues: Confi
     if (!CARD_RENDERERS.has(item.renderer)) issue(issues, 'error', 'card-renderer-invalid', itemPath, `未知的信息卡显示器 ${String(item.renderer)}。`);
     if (item.section !== undefined && item.section !== 'main' && item.section !== 'other') issue(issues, 'error', 'card-section-invalid', itemPath, '信息卡区域只能为主要信息或其他信息。');
     if (!sourceExists(item.source, fields)) issue(issues, 'error', 'card-field-missing', itemPath, `信息卡字段 ${item.source} 未定义。`, { field: item.source });
+    const mapped = item.valueOptions ?? [];
+    if (mapped.some(option=>!option.value.trim()) || new Set(mapped.map(option=>option.value)).size!==mapped.length) issue(issues,'error','card-value-map-invalid',itemPath,'信息卡覆写对照必须有唯一非空的存储值。');
     if (item.options?.format && !['plain','externalLink','boolean','json','classification','enum','date','world'].includes(item.options.format)) issue(issues, 'error', 'card-format-invalid', itemPath, '未知的信息卡格式。');
     if (config.contractRevision === 5 && item.options?.format && ['classification','enum','date','world'].includes(item.options.format)) issue(issues, 'error', 'card-format-revision-invalid', itemPath, '该信息卡格式要求原生 r6。');
     if (item.renderer === 'lineChips' && !item.options?.lineChipSource) issue(issues, 'error', 'card-line-chips-source-required', itemPath, '关联线路胶囊必须选择平台、车站或车站建筑来源。');
@@ -769,6 +774,13 @@ export function validateWorkflowOutput(output: WorkflowOutput, _outputIndex: num
     if (!assignment.target.trim() || !assignment.expression.trim()) issue(issues, 'error', 'workflow-assignment-invalid', assignmentPath, '字段组装必须同时指定目标和表达式。');
     if (!isSafeWorkflowTarget(assignment.target) || (!fields.has(assignment.target) && !/^tags\.[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)*$/.test(assignment.target) && !/^extensions\.[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)*$/.test(assignment.target) && !SYSTEM_FIELD_KEYS.has(assignment.target))) issue(issues, 'error', 'workflow-assignment-target-invalid', assignmentPath, `字段组装目标 ${assignment.target} 不是有效字段、tags 或 extensions 路径。`);
     if (!assignment.id || assignmentIds.has(assignment.id)) issue(issues, 'error', 'workflow-assignment-id-invalid', assignmentPath, '组装行标识必须存在且不能重复。');
+    const field=resolveEffectiveFields(config,output.classification).find(field=>field.key===assignment.target);
+    const control=controlsFor(workflow).find(control=>control.slot===assignment.expression.trim());
+    if (control?.fieldSource && field) {
+      if ((field.cardinality==='multiple') !== (control.kind==='group')) issue(issues,'error','field-import-target-conflict',assignmentPath,'字段输入与输出目标的值数量不兼容。');
+      if (field.type==='enum' && (control.options??[]).some(option=>!field.options?.some(target=>target.value===option.value))) issue(issues,'error','field-import-target-conflict',assignmentPath,'工作流选项包含输出目标字段不允许的保存值。');
+      if (field.type==='number' && !['number','group'].includes(control.kind) || field.type==='boolean' && !['toggle','group','select'].includes(control.kind)) issue(issues,'error','field-import-target-conflict',assignmentPath,'输入控件与输出目标字段类型不兼容。');
+    }
     assignmentIds.add(assignment.id);
     try {
       for (const token of workflowExpressionTokens(parseWorkflowExpression(assignment.expression))) if (!tokens.has(token)) issue(issues, 'error', 'workflow-assignment-slot-missing', assignmentPath, `字段组装引用了不存在的输入槽位或系统字段 ${token}。`);
@@ -778,11 +790,24 @@ export function validateWorkflowOutput(output: WorkflowOutput, _outputIndex: num
 
 function validateWorkflowValueCondition(condition: import('./types').WorkflowValueCondition | undefined, tokens: Set<string>, path: string, issues: ConfigValidationIssue[]): void {
   if (!condition) return;
-  if (!tokens.has(condition.token) || !['empty','present','equals'].includes(condition.operator)) issue(issues, 'error', 'workflow-value-condition-invalid', path, '执行条件必须使用已声明 token 与受控操作。');
+  if (condition.all || condition.any) {
+    const items=condition.all ?? condition.any ?? [];
+    if (!items.length || condition.all && condition.any) issue(issues,'error','workflow-value-condition-invalid',path,'组合条件必须有内容且只能选择全部或任意。');
+    for (const child of items) validateWorkflowValueCondition(child,tokens,path,issues);
+    return;
+  }
+  if (!tokens.has(condition.token) || !['empty','present','equals','in'].includes(condition.operator)) issue(issues, 'error', 'workflow-value-condition-invalid', path, '执行条件必须使用已声明 token 与受控操作。');
   if (condition.operator === 'equals' && !['string','number','boolean'].includes(typeof condition.value)) issue(issues, 'error', 'workflow-value-condition-invalid', path, '相等条件必须有有效比较值。');
+  if (condition.operator==='in' && (!condition.values?.length || condition.values.some(value=>!['string','number','boolean'].includes(typeof value)))) issue(issues,'error','workflow-value-condition-invalid',path,'属于条件必须包含有效比较值。');
 }
 
 function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3, issues: ConfigValidationIssue[]): void {
+  for (const step of workflow.steps) for (const control of step.controls ?? []) {
+    const path = `workflows/${workflow.id}/steps/${step.id}/controls/${control.id}`;
+    for (const message of fieldImportErrors(config,workflow,control)) issue(issues,'error','field-import-conflict',path,message);
+    for (const field of control.group?.itemFields ?? []) for (const message of fieldImportErrors(config,workflow,field)) issue(issues,'error','field-import-conflict',`${path}/group/${field.key}`,message);
+  }
+  workflow = resolveWorkflowFields(config,workflow);
   const base = `workflows/${workflow.id}`;
   try { workflowOutputAssemblyOrder(workflow); } catch (error) { issue(issues, 'error', 'workflow-output-dependency-invalid', base, error instanceof Error ? error.message : '输出依赖无效。'); }
   const checkIds = (items: Array<{ id: string }>, kind: string) => {
@@ -831,6 +856,7 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
   for (const step of workflow.steps) for (const control of step.controls ?? []) {
     const controlPath = `${base}/steps/${step.id}/controls/${control.id}`;
     validateWorkflowValueCondition(control.when, allTokens, controlPath, issues);
+    for (const condition of control.requiredWhen ?? []) validateWorkflowValueCondition(condition,allTokens,controlPath,issues);
     if (['notice', 'runtimeValue', 'component'].includes(control.kind)) issue(issues, 'error', 'workflow-control-kind-not-composed', controlPath, '组合式工作流只允许标准表单控件；专有流程应切换为外部整体工作流。');
     if (control.slot) {
       if (!/^[A-Z][A-Z0-9_]*$/.test(control.slot) || slots.has(control.slot) || WORKFLOW_SYSTEM_TOKENS.some(token => control.slot === token || new RegExp(`^${token}_\\d+$`).test(control.slot!))) issue(issues, 'error', 'workflow-slot-invalid', controlPath, `输出槽位 ${control.slot} 无效、重复或与系统 token 冲突。`);
@@ -840,7 +866,7 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
     validateOptions(control, controlPath);
     if (control.rows !== undefined && (!Number.isInteger(control.rows) || control.rows < 1)) issue(issues, 'error', 'workflow-control-rows-invalid', controlPath, '输入行数必须为正整数。');
     if (control.defaultValue !== undefined) {
-      if (control.kind === 'number' && !Number.isFinite(Number(control.defaultValue)) || control.kind === 'toggle' && typeof control.defaultValue !== 'boolean' || control.kind === 'select' && !resolveWorkflowSelectOptions(config, control).some(option => option.value === control.defaultValue)) issue(issues, 'error', 'workflow-default-invalid', controlPath, '默认值与输入类型/选项不一致。');
+      if (control.kind === 'number' && !Number.isFinite(Number(control.defaultValue)) || control.kind === 'toggle' && typeof control.defaultValue !== 'boolean' || control.kind === 'select' && !resolveWorkflowSelectOptions(config, control).some(option => option.value === String(control.defaultValue))) issue(issues, 'error', 'workflow-default-invalid', controlPath, '默认值与输入类型/选项不一致。');
       if (control.kind === 'json') try { if (typeof control.defaultValue === 'string') JSON.parse(control.defaultValue); } catch { issue(issues, 'error', 'workflow-default-invalid', controlPath, '默认值必须为有效 JSON。'); }
     }
     if (control.kind === 'featureSearch' || control.kind === 'coarseSearch') validateSearch(control, config, controlPath, issues);
@@ -1033,6 +1059,7 @@ export function validateConfigPackage(config: ConfigPackageV3, mountedRecords: M
   const issues: ConfigValidationIssue[] = [];
   const structure = validateNativeStructure(config);
   if (structure.length) return { schemaVersion: 'cairnmap.config-validation-report.v3', valid: false, createdAt: new Date().toISOString(), issues: structure.map(item => ({ severity: 'error', code: 'native-contract-structure-invalid', ...item })) };
+  if (config.contractRevision===8 && (config.registries.optionSets || config.nodes.some(node=>node.fields.some(field=>field.optionSource)) || config.workflows.some(workflow=>controlsFor(workflow).some(control=>control.optionSource)))) issue(issues,'error','legacy-option-source-forbidden','registries','r8 使用字段内对照；旧全局选项来源必须先迁移。');
   if (config.schemaVersion !== 'cairnmap.config-package.v3') issue(issues, 'error', 'schema-version-invalid', 'manifest', '配置包不是 cairnmap.config-package.v3。');
   if (!isNativeConfigRevision(config.contractRevision)) issue(issues, 'error', 'contract-revision-invalid', 'manifest', '配置包必须使用 V3.2 原生契约 revision 5/6。');
   validateEngine(config, issues);
@@ -1071,7 +1098,7 @@ export function validateConfigPackage(config: ConfigPackageV3, mountedRecords: M
     node.fields.forEach((field, index) => validateField(field, `${base}/fields/${index}`, keys, issues));
     for (const geometry of GEOMETRIES) {
       const profile = node.geometryProfiles[geometry];
-      if (config.contractRevision === 7 && profile?.enabled && resolveCategoryNodes(config, node.path).some(ancestor => ancestor.nodeId !== node.nodeId && ancestor.geometryType && ancestor.geometryType !== geometry)) issue(issues, 'error', 'geometry-type-inheritance-invalid', `${base}/geometry/${geometry}`, '本级几何与祖先已指定的类型不一致。');
+      if (config.contractRevision >= 7 && profile?.enabled && resolveCategoryNodes(config, node.path).some(ancestor => ancestor.nodeId !== node.nodeId && ancestor.geometryType && ancestor.geometryType !== geometry)) issue(issues, 'error', 'geometry-type-inheritance-invalid', `${base}/geometry/${geometry}`, '本级几何与祖先已指定的类型不一致。');
       if (profile) validateProfile(profile, geometry, `${base}/geometry/${geometry}`, config, node.path, issues);
       if (node.geometryType && geometry !== node.geometryType && profile?.enabled) issue(issues, 'error', 'geometry-type-multiple-enabled', `${base}/geometry/${geometry}`, '同一分类节点只能启用一种几何类型。');
     }

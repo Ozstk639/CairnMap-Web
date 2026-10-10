@@ -3190,6 +3190,54 @@
             }
           ]
         },
+        "optionValueType": {
+          "anyOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            }
+          ]
+        },
+        "format": {
+          "anyOf": [
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "plain"
+            },
+            {
+              "const": "externalLink"
+            },
+            {
+              "const": "date"
+            }
+          ]
+        },
+        "coordinateFormat": {
+          "anyOf": [
+            {
+              "const": "coordP"
+            },
+            {
+              "const": "pointObject"
+            },
+            {
+              "const": "coordL"
+            },
+            {
+              "const": "coordG"
+            }
+          ]
+        },
         "optionSource": {
           "anyOf": [
             {
@@ -4779,10 +4827,10 @@
               "const": "externalLink"
             },
             {
-              "const": "classification"
+              "const": "date"
             },
             {
-              "const": "date"
+              "const": "classification"
             },
             {
               "const": "world"
@@ -4947,6 +4995,36 @@
           "anyOf": [
             {
               "ref": "t1"
+            }
+          ]
+        },
+        "labelMode": {
+          "anyOf": [
+            {
+              "const": "field"
+            },
+            {
+              "const": "override"
+            }
+          ]
+        },
+        "valueMode": {
+          "anyOf": [
+            {
+              "const": "field"
+            },
+            {
+              "const": "override"
+            }
+          ]
+        },
+        "valueOptions": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t40"
+              }
             }
           ]
         },
@@ -5318,7 +5396,288 @@
         "required"
       ]
     },
+    "t101": {
+      "type": "object",
+      "properties": {
+        "placeholder": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "ref": "t56"
+            }
+          ]
+        },
+        "required": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "enum"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "reference"
+            }
+          ]
+        },
+        "cardinality": {
+          "anyOf": [
+            {
+              "const": "single"
+            },
+            {
+              "const": "multiple"
+            }
+          ]
+        },
+        "labels": {
+          "ref": "t1"
+        },
+        "options": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t40"
+              }
+            }
+          ]
+        },
+        "optionValueType": {
+          "anyOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            }
+          ]
+        },
+        "format": {
+          "anyOf": [
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "plain"
+            },
+            {
+              "const": "externalLink"
+            },
+            {
+              "const": "date"
+            }
+          ]
+        },
+        "defaultValue": {},
+        "requiredWhen": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "ref": "t48"
+                  },
+                  {
+                    "ref": "t49"
+                  },
+                  {
+                    "ref": "t50"
+                  },
+                  {
+                    "ref": "t51"
+                  },
+                  {
+                    "ref": "t52"
+                  },
+                  {
+                    "ref": "t53"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "input": {
+          "anyOf": [
+            {
+              "const": "text"
+            },
+            {
+              "const": "select"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "textarea"
+            },
+            {
+              "const": "toggle"
+            },
+            {
+              "const": "featureSearch"
+            }
+          ]
+        }
+      },
+      "required": [
+        "key",
+        "type",
+        "cardinality",
+        "labels",
+        "input"
+      ]
+    },
     "t100": {
+      "type": "object",
+      "properties": {
+        "nodeId": {
+          "type": "string"
+        },
+        "fieldId": {
+          "type": "string"
+        },
+        "snapshot": {
+          "ref": "t101"
+        },
+        "overrides": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "nodeId",
+        "fieldId",
+        "snapshot",
+        "overrides"
+      ]
+    },
+    "t102": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "operator": {
+          "anyOf": [
+            {
+              "const": "empty"
+            },
+            {
+              "const": "present"
+            },
+            {
+              "const": "equals"
+            },
+            {
+              "const": "in"
+            }
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "values": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "const": false
+                  },
+                  {
+                    "const": true
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "all": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t102"
+              }
+            }
+          ]
+        },
+        "any": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t102"
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "token",
+        "operator"
+      ]
+    },
+    "t103": {
       "type": "object",
       "properties": {
         "registryKey": {
@@ -5329,7 +5688,7 @@
         "registryKey"
       ]
     },
-    "t102": {
+    "t105": {
       "type": "object",
       "properties": {
         "matcher": {
@@ -5368,7 +5727,7 @@
         "maxResults"
       ]
     },
-    "t101": {
+    "t104": {
       "type": "object",
       "properties": {
         "target": {
@@ -5488,7 +5847,7 @@
         "coarse": {
           "anyOf": [
             {
-              "ref": "t102"
+              "ref": "t105"
             }
           ]
         }
@@ -5498,48 +5857,7 @@
         "cacheScope"
       ]
     },
-    "t103": {
-      "type": "object",
-      "properties": {
-        "token": {
-          "type": "string"
-        },
-        "operator": {
-          "anyOf": [
-            {
-              "const": "empty"
-            },
-            {
-              "const": "present"
-            },
-            {
-              "const": "equals"
-            }
-          ]
-        },
-        "value": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "number"
-            },
-            {
-              "const": false
-            },
-            {
-              "const": true
-            }
-          ]
-        }
-      },
-      "required": [
-        "token",
-        "operator"
-      ]
-    },
-    "t105": {
+    "t107": {
       "type": "object",
       "properties": {
         "key": {
@@ -5614,7 +5932,72 @@
         "search": {
           "anyOf": [
             {
-              "ref": "t101"
+              "ref": "t104"
+            }
+          ]
+        },
+        "optionValueType": {
+          "anyOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            }
+          ]
+        },
+        "fieldFormat": {
+          "anyOf": [
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "plain"
+            },
+            {
+              "const": "externalLink"
+            },
+            {
+              "const": "date"
+            }
+          ]
+        },
+        "fieldSource": {
+          "anyOf": [
+            {
+              "ref": "t100"
+            }
+          ]
+        },
+        "requiredWhen": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t102"
+              }
+            }
+          ]
+        },
+        "valueNormalization": {
+          "anyOf": [
+            {
+              "const": "number"
+            },
+            {
+              "const": "none"
+            },
+            {
+              "const": "trim"
+            },
+            {
+              "const": "abbr"
             }
           ]
         }
@@ -5625,13 +6008,13 @@
         "kind"
       ]
     },
-    "t104": {
+    "t106": {
       "type": "object",
       "properties": {
         "itemFields": {
           "type": "array",
           "items": {
-            "ref": "t105"
+            "ref": "t107"
           }
         },
         "storage": {
@@ -5761,6 +6144,55 @@
         "label": {
           "ref": "t1"
         },
+        "fieldSource": {
+          "anyOf": [
+            {
+              "ref": "t100"
+            }
+          ]
+        },
+        "fieldFormat": {
+          "anyOf": [
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "plain"
+            },
+            {
+              "const": "externalLink"
+            },
+            {
+              "const": "date"
+            }
+          ]
+        },
+        "optionValueType": {
+          "anyOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            }
+          ]
+        },
+        "requiredWhen": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t102"
+              }
+            }
+          ]
+        },
         "options": {
           "anyOf": [
             {
@@ -5774,7 +6206,7 @@
         "optionSource": {
           "anyOf": [
             {
-              "ref": "t100"
+              "ref": "t103"
             }
           ]
         },
@@ -5796,7 +6228,7 @@
         "search": {
           "anyOf": [
             {
-              "ref": "t101"
+              "ref": "t104"
             }
           ]
         },
@@ -5827,7 +6259,7 @@
         "when": {
           "anyOf": [
             {
-              "ref": "t103"
+              "ref": "t102"
             }
           ]
         },
@@ -5844,7 +6276,7 @@
         "group": {
           "anyOf": [
             {
-              "ref": "t104"
+              "ref": "t106"
             }
           ]
         },
@@ -5870,7 +6302,7 @@
         "label"
       ]
     },
-    "t106": {
+    "t108": {
       "type": "object",
       "properties": {
         "tagsEnabled": {
@@ -5885,7 +6317,7 @@
         "extensionsEnabled"
       ]
     },
-    "t108": {
+    "t110": {
       "type": "object",
       "properties": {
         "id": {
@@ -5910,7 +6342,7 @@
         "when": {
           "anyOf": [
             {
-              "ref": "t103"
+              "ref": "t102"
             }
           ]
         }
@@ -5921,7 +6353,7 @@
         "label"
       ]
     },
-    "t107": {
+    "t109": {
       "type": "object",
       "properties": {
         "enabledFromThisPage": {
@@ -5973,7 +6405,7 @@
             {
               "type": "array",
               "items": {
-                "ref": "t108"
+                "ref": "t110"
               }
             }
           ]
@@ -6063,14 +6495,14 @@
         "tagsExtensions": {
           "anyOf": [
             {
-              "ref": "t106"
+              "ref": "t108"
             }
           ]
         },
         "drawing": {
           "anyOf": [
             {
-              "ref": "t107"
+              "ref": "t109"
             }
           ]
         },
@@ -6088,7 +6520,7 @@
         "label"
       ]
     },
-    "t110": {
+    "t112": {
       "type": "object",
       "properties": {
         "id": {
@@ -6103,7 +6535,7 @@
         "when": {
           "anyOf": [
             {
-              "ref": "t103"
+              "ref": "t102"
             }
           ]
         }
@@ -6114,7 +6546,7 @@
         "expression"
       ]
     },
-    "t111": {
+    "t113": {
       "type": "object",
       "properties": {
         "selected": {
@@ -6155,7 +6587,7 @@
         "selected"
       ]
     },
-    "t109": {
+    "t111": {
       "type": "object",
       "properties": {
         "id": {
@@ -6167,11 +6599,11 @@
         "assignments": {
           "type": "array",
           "items": {
-            "ref": "t110"
+            "ref": "t112"
           }
         },
         "geometry": {
-          "ref": "t111"
+          "ref": "t113"
         }
       },
       "required": [
@@ -6181,7 +6613,7 @@
         "geometry"
       ]
     },
-    "t112": {
+    "t114": {
       "type": "object",
       "properties": {
         "componentKey": {
@@ -6216,7 +6648,7 @@
         "reason"
       ]
     },
-    "t113": {
+    "t115": {
       "type": "object",
       "properties": {
         "runtimeMode": {
@@ -6292,7 +6724,7 @@
         "outputs": {
           "type": "array",
           "items": {
-            "ref": "t109"
+            "ref": "t111"
           }
         },
         "assignments": {
@@ -6300,7 +6732,7 @@
             {
               "type": "array",
               "items": {
-                "ref": "t110"
+                "ref": "t112"
               }
             }
           ]
@@ -6308,14 +6740,14 @@
         "external": {
           "anyOf": [
             {
-              "ref": "t112"
+              "ref": "t114"
             }
           ]
         },
         "legacy": {
           "anyOf": [
             {
-              "ref": "t113"
+              "ref": "t115"
             }
           ]
         }
@@ -6328,7 +6760,7 @@
         "outputs"
       ]
     },
-    "t115": {
+    "t117": {
       "type": "object",
       "properties": {
         "kind": {
@@ -6385,7 +6817,7 @@
         "status"
       ]
     },
-    "t114": {
+    "t116": {
       "type": "object",
       "properties": {
         "schemaVersion": {
@@ -6401,7 +6833,7 @@
         "entries": {
           "type": "array",
           "items": {
-            "ref": "t115"
+            "ref": "t117"
           }
         },
         "generatedAt": {
@@ -6436,6 +6868,9 @@
             },
             {
               "const": 7
+            },
+            {
+              "const": 8
             }
           ]
         },
@@ -6493,7 +6928,7 @@
         "parity": {
           "anyOf": [
             {
-              "ref": "t114"
+              "ref": "t116"
             }
           ]
         }

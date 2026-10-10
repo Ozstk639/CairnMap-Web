@@ -1,4 +1,5 @@
 import type { ConfigPackageV3, GeometryKind, GeometryProfile, ZoomPriorityRule } from './types';
+import { migrateFieldsToR8 } from './fieldMigration';
 import { createDefaultGeometryProfile } from './v32Defaults';
 import { renderRuleRange } from './renderRuleConditions';
 import { migrateRenderRulesToR7 } from './renderRuleMigration';
@@ -10,7 +11,7 @@ export function copyRenderRuleContent(source: ZoomPriorityRule, id = newConfigId
   return { ...content, id };
 }
 export function normalizeEditedRenderRule(rule: ZoomPriorityRule, revision: number): ZoomPriorityRule {
-  if (revision !== 7) return rule;
+  if (revision < 7) return rule;
   const range = renderRuleRange(rule);
   const { minZoom, maxZoom, minExclusive: _mi, maxExclusive: _ma, conditionalOverrides: _branches, ...rest } = rule;
   return { ...rest, when: { ...rule.when, zoom: { min: minZoom ?? range.min, max: maxZoom ?? range.max } } };
@@ -19,7 +20,7 @@ export function createEditableConfigPackageFromCurrentProject(): ConfigPackageV3
   const source = createConfigPackageFromCurrentProject();
   const migration = migrateRenderRulesToR7(source);
   if (!migration.config) throw new Error(`原生 r7 工厂包迁移失败：${migration.issues.join('；')}`);
-  return { ...migration.config, revision: source.revision + 1 };
+  return { ...migrateFieldsToR8(migration.config), revision: source.revision + 2 };
 }
 export function editableGeometryProfile(geometry: GeometryKind, revision: number): GeometryProfile {
   const profile = createDefaultGeometryProfile(geometry);

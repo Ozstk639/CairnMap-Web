@@ -4,6 +4,7 @@ import { normalizeRuleSourceWorldId } from '@/components/Rules/data/ruleDataSour
 import type { ClassificationPath, GeometryKind, ConfigPackageV3, MountedFeatureRecord, SearchProfile, WorkflowControl, WorkflowDefinition, WorkflowGroupField, WorkflowStep } from './types';
 import { listCategoryPaths, normalizeSearchProfile, optionLabel, pathMatchesScope, readRecordPath, workflowPathLabel, hasCategoryNode, hasDescendants, resolveGeometryProfile, resolveEffectiveFields, resolveWorkflowSelectOptions } from './runtime';
 
+import { resolveWorkflowFields, storedOptionValue } from './fieldReuse';
 import { finalizeV3WorkflowRecord } from './workflowRecord';
 import { multipartGeometryFromSinglePath, validateMultipartGeometry, type MultipartCoord } from '../core/geometry/multipartGeometry';
 import { evaluateWorkflowExpression, isSafeWorkflowTarget, PROTECTED_WORKFLOW_TARGETS, workflowOutputAssemblyOrder, workflowCaptureSlots, workflowConditionMatches } from './workflowExpression';
@@ -56,6 +57,8 @@ export function normalizeV3WorkflowSlots(workflow: WorkflowDefinition, raw: V3Wo
   for (const control of workflow.steps.flatMap((step) => step.controls ?? [])) {
     if (!control.slot || slots[control.slot] == null) continue;
     const value = slots[control.slot];
+    if (control.kind==='select') {slots[control.slot]=storedOptionValue(value,control.optionValueType);continue;}
+    if (control.kind==='group' && Array.isArray(value) && control.group) { slots[control.slot]=value.map(row=>control.group!.storage==='scalar'?storedOptionValue(row,control.group!.itemFields[0]?.optionValueType):Object.fromEntries(Object.entries(row as Record<string,unknown>).map(([key,v])=>[key,storedOptionValue(v,control.group!.itemFields.find(field=>field.key===key)?.optionValueType)]))); } 
     if (control.kind === 'json' && typeof value === 'string' && value.trim()) { try { slots[control.slot] = JSON.parse(value); } catch { /* Input validation reports incomplete JSON. */ } continue; }
     if (control.valueNormalization === 'abbr') slots[control.slot] = String(value).trim().replace(/\s+/g, '').replace(/[^A-Za-z0-9_-]/g, '');
     else if (control.valueNormalization === 'trim') slots[control.slot] = String(value).replace(/\r\n?/g, '\n').trim();
@@ -82,6 +85,7 @@ export function workflowOutputSystem(workflow: WorkflowDefinition, slots: V3Work
 }
 
 export function evaluateV3WorkflowOutputs(workflow: WorkflowDefinition, slots: V3WorkflowValueMap, options: { world?: string; classifications?: Record<string, ClassificationPath | undefined>; config?: ConfigPackageV3; coordinates?: Record<string, MultipartCoord[]>; now?: Date } = {}): V3WorkflowRunResult {
+  if (options.config) workflow=resolveWorkflowFields(options.config,workflow);
   slots = normalizeV3WorkflowSlots(workflow, slots);
   const world = normalizeV3WorldId(options.world ?? slots.World ?? 'zth');
   const assembled = new Map<number, V3WorkflowRunResult[number]>();
@@ -149,13 +153,14 @@ export function findV3SearchCandidates(records: MountedFeatureRecord[], profile:
 
 export function validateV3WorkflowInputs(workflow: WorkflowDefinition, slots: V3WorkflowValueMap, steps = workflow.steps, config?: ConfigPackageV3): V3WorkflowInputIssue[] {
   if (workflow.mode !== 'composed') return [];
+  if(config){workflow=resolveWorkflowFields(config,workflow);steps=resolveWorkflowFields(config,{...workflow,steps}).steps;}
   const issues: V3WorkflowInputIssue[] = [];
   for (const step of steps) if (step.kind === 'actor' && workflow.actor?.required !== false && empty(slots.actor)) issues.push({ stepId: step.id, message: '填写人为必填项。' });
   const validateValue = (field: WorkflowControl | WorkflowGroupField, value: unknown, report: (message: string) => void) => {
-    if (field.required && empty(value)) report(`${field.label.zh} 为必填项。`);
+    if (field.required && (!field.requiredWhen?.length || field.requiredWhen.every(condition=>workflowConditionMatches(condition,slots))) && empty(value)) report(`${field.label.zh} 为必填项。`);
     if (empty(value)) return;
     if (field.kind === 'number' && !Number.isFinite(Number(value))) report(`${field.label.zh} 必须是有限数值。`);
-    if (field.kind === 'select' && !field.options?.some((option) => option.value === value)) report(`${field.label.zh} 必须选择有效的保存值。`);
+    if (field.kind === 'select' && !field.options?.some((option) => option.value === String(value))) report(`${field.label.zh} 必须选择有效的保存值。`);
     if (field.kind === 'json') try { if (typeof value === 'string') JSON.parse(value); } catch { report(`${field.label.zh} 必须是有效 JSON。`); }
   };
   for (const step of steps) for (const control of step.controls ?? []) {
@@ -266,7 +271,7 @@ function ControlInput({ control, value, onChange, config, records, world, fixedG
 
 /** Usable generic runner. It runs V3-composed flows and performs the same
  * target-scoped search used by saved workflows; external units remain intact. */
-export function V3WorkflowRunner({ config, workflow, records = [], worldId, initialActor = '', onSubmit, onRequestExternal, onRequestGeometry, onCaptureGeometry, onStepChange, onPreviewSlotsChange }: {
+export function V3WorkflowRunner({ config, workflow:sourceWorkflow, records = [], worldId, initialActor = '', onSubmit, onRequestExternal, onRequestGeometry, onCaptureGeometry, onStepChange, onPreviewSlotsChange }: {
   config: ConfigPackageV3; workflow: WorkflowDefinition; records?: MountedFeatureRecord[]; worldId?: string; initialActor?: string;
   onSubmit?: (result: V3WorkflowRunResult) => void | Promise<void>;
   onRequestExternal?: (workflow: WorkflowDefinition) => void;
@@ -282,6 +287,7 @@ export function V3WorkflowRunner({ config, workflow, records = [], worldId, init
   const activeWorld = normalizeV3WorldId(worldId ?? records.find(record => String(record.World ?? '').trim())?.World ?? 'zth');
   const defaults = () => Object.fromEntries(workflow.steps.flatMap(item => item.controls ?? []).flatMap(control => control.defaultValue === undefined ? [] : [[control.slot ?? control.id, structuredClone(control.defaultValue)]]));
   const [page, setPage] = useState(0);
+  const workflow=useMemo(()=>resolveWorkflowFields(config,sourceWorkflow),[config,sourceWorkflow]);
   const [slots, setSlots] = useState<V3WorkflowValueMap>(() => ({ ...defaults(), actor: initialActor, World: activeWorld }));
   const [classifications, setClassifications] = useState<Record<string, ClassificationPath | undefined>>({});
   const [submitted, setSubmitted] = useState<V3WorkflowRunResult | null>(null);
