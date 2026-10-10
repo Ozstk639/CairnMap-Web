@@ -683,7 +683,7 @@ export type SearchProfile = {
 };
 
 /** Composed workflows expose only the standard reusable input controls. */
-export type ComposedWorkflowControlKind = 'text' | 'textarea' | 'number' | 'select' | 'toggle' | 'json' | 'classificationPicker' | 'featureSearch' | 'coarseSearch' | 'group';
+export type ComposedWorkflowControlKind = 'text' | 'textarea' | 'number' | 'select' | 'toggle' | 'json' | 'classificationPicker' | 'featureSearch' | 'coarseSearch' | 'group' | 'tagsExtensions';
 /** Legacy values are retained solely so an old package can be migrated with a precise diagnostic. */
 export type WorkflowControlKind = ComposedWorkflowControlKind | 'notice' | 'json' | 'runtimeValue' | 'component';
 /**
@@ -694,7 +694,7 @@ export type WorkflowControlKind = ComposedWorkflowControlKind | 'notice' | 'json
 export type WorkflowGroupField = {
   key: string;
   label: LocalizedText;
-  kind: Exclude<ComposedWorkflowControlKind, 'classificationPicker' | 'group'>;
+  kind: Exclude<ComposedWorkflowControlKind, 'classificationPicker' | 'group' | 'tagsExtensions'>;
   required?: boolean;
   options?: SelectOption[];
   placeholder?: string;
@@ -746,6 +746,7 @@ export type WorkflowControl = {
   when?: WorkflowValueCondition;
   systemManaged?: boolean;
   group?: WorkflowRepeatGroup;
+  tagsExtensions?: { tagsEnabled: boolean; extensionsEnabled: boolean };
   componentKey?: string;
   legacyBlock?: Record<string, unknown>;
 };

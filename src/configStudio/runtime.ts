@@ -828,14 +828,18 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
   if (actorIndex !== 0) issue(issues, 'error', 'workflow-actor-must-be-first', base, '填写人页必须且只能位于工作流第一步。');
   if (!formIndexes.length) issue(issues, 'error', 'workflow-form-page-required', base, '工作流至少需要一个基本信息填卡页。');
   if (!geometryIndexes.length || geometryIndexes[geometryIndexes.length - 1] !== workflow.steps.length - 1) issue(issues, 'error', 'workflow-geometry-must-be-last', base, '最后一步必须是任一绘制页。');
-  if (tailIndex < 0 || !geometryIndexes.length || tailIndex !== geometryIndexes[0] - 1) issue(issues, 'error', 'workflow-tail-before-geometry-required', base, 'tags/extensions 尾部区必须紧邻第一张绘制页。');
-  if (formIndexes.some((index) => index <= actorIndex || (tailIndex >= 0 && index >= tailIndex))) issue(issues, 'error', 'workflow-form-page-order-invalid', base, '基本信息页必须位于填写人和 tags/extensions 尾部区之间。');
+  if (config.contractRevision!==8 && (tailIndex < 0 || !geometryIndexes.length || tailIndex !== geometryIndexes[0] - 1)) issue(issues, 'error', 'workflow-tail-before-geometry-required', base, 'tags/extensions 尾部区必须紧邻第一张绘制页。');
+  if (formIndexes.some((index) => index <= actorIndex || (geometryIndexes.length && index >= geometryIndexes[0]))) issue(issues, 'error', 'workflow-form-page-order-invalid', base, '基本信息页必须位于填写人和 tags/extensions 尾部区之间。');
   if (workflow.steps.filter(step=>step.kind==='geometry'&&step.geometryRole!=='auxiliary').length !== workflow.outputs.length) issue(issues, 'error', 'workflow-geometry-output-count-invalid', base, '每个工作流输出必须有且只有一个尾部绘制页。');
   const geometryOutputIds = workflow.steps.filter((step) => step.kind === 'geometry' && step.geometryRole!=='auxiliary').map((step) => step.outputId);
   if (new Set(geometryOutputIds).size !== workflow.outputs.length || workflow.outputs.some((output) => !geometryOutputIds.includes(output.id))) issue(issues, 'error', 'workflow-geometry-output-binding-invalid', base, '绘制页必须逐一绑定对应工作流输出。');
 
   const slots = new Set<string>();
   const controlList = controlsFor(workflow);
+  if(config.contractRevision===8){
+    const modules=controlList.filter(control=>control.kind==='tagsExtensions');
+    if(tailIndex>=0||modules.length!==1||!modules[0]?.systemManaged||workflow.steps.some(step=>step.kind!=='form'&&step.controls?.some(control=>control.kind==='tagsExtensions')))issue(issues,'error','workflow-inline-annotations-required',base,'必须在信息收集页保留一个不可删除、可移动的标签与扩展固定单元。');
+  }
   const allTokens = new Set([...controlList.flatMap(control => control.slot ? [control.slot] : []), ...workflowDerivedPointTokens(workflow), ...WORKFLOW_SYSTEM_TOKENS, ...workflow.outputs.flatMap((_, index) => WORKFLOW_SYSTEM_TOKENS.map(token => `${token}_${index + 1}`))]);
   const captured = workflowCaptureSlots(workflow);
   const derivedTokens = workflowDerivedPointTokens(workflow);

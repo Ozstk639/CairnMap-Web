@@ -1,8 +1,11 @@
+import { WorkflowCategoryInput } from './WorkflowCategoryInput';
+import { WorkflowAnnotationsInput } from './WorkflowAnnotationsInput';
+import { annotationsForOutput, mergeAnnotations } from './workflowAnnotations';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { normalizeRuleSourceWorldId } from '@/components/Rules/data/ruleDataSources';
 import type { ClassificationPath, GeometryKind, ConfigPackageV3, MountedFeatureRecord, SearchProfile, WorkflowControl, WorkflowDefinition, WorkflowGroupField, WorkflowStep } from './types';
-import { listCategoryPaths, normalizeSearchProfile, optionLabel, pathMatchesScope, readRecordPath, workflowPathLabel, hasCategoryNode, hasDescendants, resolveGeometryProfile, resolveEffectiveFields, resolveWorkflowSelectOptions } from './runtime';
+import { normalizeSearchProfile, optionLabel, pathMatchesScope, readRecordPath, hasCategoryNode, hasDescendants, resolveGeometryProfile, resolveEffectiveFields, resolveWorkflowSelectOptions } from './runtime';
 
 import { activeOutputIds, enabledDrawing, drawingKey, captureDrawingSnapshot, mergeDrawingCapture, serializeDrawingCapture, type WorkflowDrawingCapture } from './workflowDrawing';
 import { resolveWorkflowFields, storedOptionValue } from './fieldReuse';
@@ -111,7 +114,7 @@ export function evaluateV3WorkflowOutputs(workflow: WorkflowDefinition, slots: V
     const actor = String(slots.actor ?? '').trim(); if (actor) record.Creator = actor;
     for (const namespace of ['tags', 'extensions'] as const) {
       const value = parseStructuredOutput(namespace, slots[namespace]);
-      if (value && typeof value === 'object' && !Array.isArray(value)) record[namespace] = value;
+      if (value && typeof value === 'object' && !Array.isArray(value)) record[namespace] = structuredClone(value);
     }
     const assignmentOrder = [...output.assignments.filter(assignment => assignment.target === 'ID'), ...output.assignments.filter(assignment => assignment.target !== 'ID')];
     for (const assignment of assignmentOrder) {
@@ -125,6 +128,11 @@ export function evaluateV3WorkflowOutputs(workflow: WorkflowDefinition, slots: V
       if (value !== undefined) setPath(record, assignment.target, value);
       system.ID = record.ID ?? '';
       system[`ID_${index + 1}`] = record.ID ?? '';
+    }
+    const custom=annotationsForOutput(workflow,slots,output.id);
+    for(const namespace of ['tags','extensions'] as const)if(Object.keys(custom[namespace]).length){
+      if(record[namespace]!=null&&(typeof record[namespace]!=='object'||Array.isArray(record[namespace])))throw new Error(`${namespace} 自动组装必须为对象。`);
+      record[namespace]??={};mergeAnnotations(record[namespace] as Record<string,unknown>,custom[namespace],namespace);
     }
     record.World = world;
     for(const step of workflow.steps.filter(step=>step.kind==='geometry'&&enabledDrawing(step,workflow,slots)))for(const binding of step.drawing?.bindings??[])if(binding.outputId===output.id){
@@ -192,6 +200,12 @@ export function validateV3WorkflowInputs(workflow: WorkflowDefinition, slots: V3
     if (!workflowConditionMatches(control.when, slots) || control.kind==='classificationPicker' && control.outputId && !activeOutputIds(workflow,slots).includes(control.outputId)) continue;
     const value = slots[control.slot ?? control.id];
     const report = (message: string) => issues.push({ stepId: step.id, controlId: control.id, message });
+    if(control.kind==='classificationPicker' && config && !empty(value)){
+      const path=decodePath(String(value));if(!path||!hasCategoryNode(config,path)||hasDescendants(config,path)||!pathMatchesScope(path,control.classificationScope??{class:''}))report('请选择范围内最终子分类。');
+    }
+    if(control.kind==='tagsExtensions'){
+      try {for(const output of workflow.outputs)annotationsForOutput({...workflow,steps:[{...step,controls:[control]}]},slots,output.id);}catch(error){report(error instanceof Error?error.message:'标签/扩展无效。');}continue;
+    }
     validateValue(config && control.kind === 'select' ? { ...control, options: resolveWorkflowSelectOptions(config, control) } : control, value, report);
     if (control.kind !== 'group') continue;
     const group = control.group; const scalar = group?.storage === 'scalar';
@@ -242,7 +256,6 @@ export function validateV3WorkflowRecords(config: ConfigPackageV3, workflow: Wor
   return issues;
 }
 
-function encodePath(path: ClassificationPath): string { return JSON.stringify(path); }
 function decodePath(value: string): ClassificationPath | undefined { try { const parsed = JSON.parse(value); return parsed?.class ? parsed as ClassificationPath : undefined; } catch { return undefined; } }
 
 function ToggleInput({ value, onChange }: { value: unknown; onChange: (value: boolean) => void }) {
@@ -287,8 +300,7 @@ function ControlInput({ control, value, onChange, config, records, world, fixedG
   if (control.kind === 'toggle') return <ToggleInput value={value} onChange={onChange} />;
   if (control.kind === 'select') return <select {...common}><option value="">请选择</option>{resolveWorkflowSelectOptions(config, control).map((item) => <option key={item.value} value={item.value}>{optionLabel(item)}</option>)}</select>;
   if (control.kind === 'classificationPicker') {
-    const options = listCategoryPaths(config, control.classificationScope ?? { class: '' }).filter((path) => !hasDescendants(config, path) && pathMatchesScope(path, control.classificationScope ?? { class: '' }) && (!fixedGeometry || resolveGeometryProfile(config,path,fixedGeometry)?.enabled));
-    return <select className="w-full rounded border px-2 py-1 text-sm" value={String(value ?? '')} onChange={(event) => onChange(event.target.value)}><option value="">请选择分类</option>{options.map((path) => <option key={encodePath(path)} value={encodePath(path)}>{workflowPathLabel(config, path)}</option>)}</select>;
+    return <WorkflowCategoryInput config={config} scope={control.classificationScope??{class:''}} value={String(value??'')} onChange={onChange} geometry={fixedGeometry}/>;
   }
   if (control.kind === 'featureSearch' || control.kind === 'coarseSearch') return <FeatureSearchInput profile={control.search} records={records} value={value} onChange={onChange} placeholder={control.placeholder} world={world} />;
   return <input {...common} type={control.kind === 'number' ? 'number' : 'text'} />;
@@ -395,11 +407,11 @@ export function V3WorkflowRunner({ config, workflow:sourceWorkflow, records = []
       return <fieldset key={point.id} className="mt-3 rounded border p-2 text-sm"><legend>{point.label.zh}{point.required ? ' *' : ''}</legend>{onCaptureGeometry ? <><button type="button" className="rounded border px-2 py-1" disabled={!captures.current[drawingKey(step)]?.coordinates.length} onClick={() => { void onRequestGeometry?.(`auxiliary:${point.id}`, 'Point'); }}>进入{point.label.zh}绘制</button><button type="button" className="ml-2 rounded border px-2 py-1" onClick={() => { try { const capture = onCaptureGeometry(`auxiliary:${point.id}`, 'Point'); const raw = Array.isArray(capture) ? capture[0] : capture.point; if (!raw || !Number.isFinite(raw.x) || !Number.isFinite(raw.z)) throw new Error('请先绘制目标点。'); update(raw); setInputIssues([]); } catch (error) { setInputIssues([{ stepId: step.id, message: error instanceof Error ? error.message : '辅助点无效。' }]); } }}>采用{point.label.zh}</button></> : <div className="grid grid-cols-3 gap-2">{(['x','y','z'] as const).map(axis => <label key={axis}>{axis.toUpperCase()}<input type="number" className="w-full rounded border" value={value?.[axis] ?? ''} onChange={event => update({ ...value, [axis]: event.target.value === '' ? undefined : Number(event.target.value) })} /></label>)}</div>}<p className="mt-1 text-xs">{value ? `已采用：X=${value.x}，Z=${value.z}${value.y === undefined ? '' : `，Y=${value.y}`}` : '尚未采用坐标'}</p></fieldset>;
     })}
     {step.controls?.length ? <div className="grid gap-2 md:grid-cols-6">{step.controls.filter(control => workflowConditionMatches(control.when, slots)).map(control => <div key={control.id} data-workflow-control={control.id} className={`grid min-w-0 gap-1 text-sm ${control.columns === 1 ? 'md:col-span-6' : control.columns === 2 ? 'md:col-span-3' : 'md:col-span-2'}`}>
-      <span>{control.label.zh}{control.required ? ' *' : ''}</span><ControlInput control={control} fixedGeometry={workflow.outputs.find(output => output.id === control.outputId)?.geometry.selected} value={slots[control.slot ?? control.id]} config={config} records={records} world={activeWorld} onChange={value => {
-        if (control.kind === 'classificationPicker') { const classification = decodePath(String(value)); if (classification && control.outputId) setClassifications(current => ({ ...current, [control.outputId!]: classification })); }
+      <span>{control.label.zh}{control.required ? ' *' : ''}</span>{control.kind==='tagsExtensions'?<WorkflowAnnotationsInput config={config} workflow={workflow} control={control} value={slots[control.id]} classifications={classifications} onChange={value=>{setSlots(current=>({...current,[control.id]:value}));setInputIssues([]);}}/>:<ControlInput control={control} fixedGeometry={workflow.outputs.find(output => output.id === control.outputId)?.geometry.selected} value={slots[control.slot ?? control.id]} config={config} records={records} world={activeWorld} onChange={value => {
+        if (control.kind === 'classificationPicker') { const classification = decodePath(String(value)); if (control.outputId) setClassifications(current => ({ ...current, [control.outputId!]: classification })); }
         setSlots(current => ({ ...current, [control.slot ?? control.id]: value })); setInputIssues([]);
       }} />
-    </div>)}</div> : null}
+    }</div>)}</div> : null}
     {currentIssues.length ? <ul role="alert" className="mt-3 rounded border border-rose-200 bg-rose-50 p-2 text-xs text-rose-800">{currentIssues.map((issue, index) => <li key={index}>{issue.message}</li>)}</ul> : null}
     <div className="mt-3 flex justify-between"><button type="button" disabled={page === 0 || saving || step.kind === 'geometry' && step.drawing?.allowBack === false} className="rounded border px-3 py-1 disabled:opacity-40" onClick={() => { setInputIssues([]); if (step.kind === 'geometry' && step.drawing?.keepDrawingWhenBack === false) { setCoordinates(current => ({ ...current, [step.outputId!]: [] })); setSlots(current => { const next = { ...current }; for (const key of [step.drawing?.pointSlot, ...(step.drawing?.auxiliaryPoints ?? []).map(point => point.slot)]) if (key) delete next[key]; return next; }); } setPage(value => Math.max(0, value - 1)); }}>上一页</button>
       {page === steps.length - 1 ? <button type="button" disabled={saving || Boolean(submitted)} className="rounded bg-emerald-600 px-3 py-1 text-white disabled:opacity-40" onClick={() => void submit()}>{saving ? '保存中…' : onSubmit ? '确认保存输出' : '生成预览输出'}</button> : <button type="button" className="rounded bg-blue-600 px-3 py-1 text-white" onClick={next}>下一页</button>}

@@ -1,4 +1,5 @@
 import type { ConfigPackageV3, GeometryKind, GeometryProfile, ZoomPriorityRule } from './types';
+import { orderFactoryWorkflowForms } from './workflowFormMigration';
 import { migrateFieldsToR8 } from './fieldMigration';
 import { createDefaultGeometryProfile } from './v32Defaults';
 import { renderRuleRange } from './renderRuleConditions';
@@ -20,7 +21,8 @@ export function createEditableConfigPackageFromCurrentProject(): ConfigPackageV3
   const source = createConfigPackageFromCurrentProject();
   const migration = migrateRenderRulesToR7(source);
   if (!migration.config) throw new Error(`原生 r7 工厂包迁移失败：${migration.issues.join('；')}`);
-  return { ...migrateFieldsToR8(migration.config), revision: source.revision + 2 };
+  const config=migrateFieldsToR8(migration.config);config.workflows=config.workflows.map(orderFactoryWorkflowForms);
+  return { ...config, revision: source.revision + 2 };
 }
 export function editableGeometryProfile(geometry: GeometryKind, revision: number): GeometryProfile {
   const profile = createDefaultGeometryProfile(geometry);

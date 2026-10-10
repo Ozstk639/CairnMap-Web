@@ -33,7 +33,7 @@ export function serializeDrawingCapture(step:WorkflowStep,capture:WorkflowDrawin
 export function captureDrawingSnapshot(workflow:WorkflowDefinition,rawSlots:Record<string,unknown>,previous:Record<string,WorkflowDrawingCapture>,capture?:((id:string,type:string)=>WorkflowDrawingCapture | MultipartCoord[])) {
   const slots={...rawSlots};const captures={...previous};
   for(const step of workflow.steps.filter(step=>step.kind==='geometry')) {
-    const key=drawingKey(step);if(!enabledDrawing(step,workflow,slots)){if(step.drawing?.captureSlot)delete slots[step.drawing.captureSlot];if(step.drawing?.pointSlot)delete slots[step.drawing.pointSlot];for(const control of step.controls??[])if(control.slot)delete slots[control.slot];continue;}
+    const key=drawingKey(step);if(!enabledDrawing(step,workflow,slots)){for(const slot of [step.drawing?.captureSlot,step.drawing?.pointSlot])if(slot)for(const token of [slot,`${slot}_RAW_POINT`,`${slot}_X`,`${slot}_Y`,`${slot}_Z`,`${slot}_HEIGHT`])delete slots[token];for(const control of step.controls??[])if(control.slot)delete slots[control.slot];continue;}
     if(capture){const next=capture(key,step.geometry![0]);captures[key]=Array.isArray(next)?{coordinates:next}:next;}
     const result=serializeDrawingCapture(step,captures[key]??{coordinates:[]},slots);
     if(step.drawing?.captureSlot){slots[step.drawing.captureSlot]=result.value;slots[`${step.drawing.captureSlot}_RAW_POINT`]=captures[key]?.point??captures[key]?.coordinates[0];}
