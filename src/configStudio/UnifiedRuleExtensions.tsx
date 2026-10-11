@@ -1,3 +1,4 @@
+import {ColorBindingEditor} from './ColorBindingEditor';
 import { ModuleHelp } from './ModuleHelp';
 import type { ConfigPackageV3, ClassificationPath, GeometryKind, ZoomPriorityRule } from './types';
 import { RenderRuleExtensionsEditor } from './RenderRuleExtensionsEditor';
@@ -9,6 +10,6 @@ export function UnifiedRuleExtensions({ config, path, geometry, fields, rule, on
     <RenderRuleExtensionsEditor embedded config={config} sourcePath={path} fields={fields} geometry={geometry} rule={rule} onChange={onChange} />
     <DisplayPrioritySettings rule={rule} onChange={onChange} fields={fields} geometry={geometry} />
     <ExtraRuleSettings rule={rule} onChange={onChange} config={config} geometry={geometry} />
-    <RuleInteractionSettings rule={rule} onChange={onChange} baseline={config.engine!.interactionBaselines[geometry]} />
+    <RuleInteractionSettings rule={rule} onChange={onChange} baseline={config.engine!.interactionBaselines[geometry]} colorEditor={(visual,update)=><ColorBindingEditor config={config} sourcePath={path} fields={fields} label="交互描边取色" value={visual.strokeColorBinding??{mode:'fixed',color:visual.strokeColor}} onChange={strokeColorBinding=>update({strokeColorBinding})}/>} />
   </details>;
 }

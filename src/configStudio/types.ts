@@ -25,8 +25,9 @@ export type Condition =
   | { kind: 'fieldEquals'; field: string; value: string }
   | { kind: 'fieldIn'; field: string; values: string[] }
   | { kind: 'fieldPresent'; field: string; present: boolean };
-export type RenderFieldCondition = Extract<Condition, { field: string }>;
-export type RenderFieldGroup = { op: 'all' | 'any' | 'not'; items: Array<RenderFieldCondition | RenderFieldGroup> };
+export type RenderFieldCondition = Extract<Condition, { field: string }> | {kind:'fieldCompare';field:string;operator:'eq'|'ne'|'in'|'notIn'|'present'|'empty'|'gt'|'ge'|'lt'|'le';value?:string|number|boolean;values?:Array<string|number|boolean>};
+export type RenderConditionFormula={expression:string;manual?:boolean;terms:Array<{id:string;relation:'AND'|'OR'|'NOT';condition:RenderFieldCondition}>;groups?:Array<{id:string;expression:string}>};
+export type RenderFieldGroup = { op: 'all' | 'any' | 'not'; items: Array<RenderFieldCondition | RenderFieldGroup>;formula?:RenderConditionFormula };
 export type RenderRuleMatch = { zoom: { min: number; max: number }; fields?: RenderFieldGroup };
 
 export type FieldDefinition = {
@@ -68,6 +69,7 @@ export type PriorityMetric = 'area' | 'length' | 'partCount' | 'field';
  * a classified relation.  This deliberately mirrors relationLink rather than
  * inventing a second, incompatible target-selection protocol. */
 export type RenderColorBinding =
+  | {mode:'valueMap';field:string;entries:Array<{value:string|number|boolean;color:string}>;fallbackColor:string}
   | { mode: 'fixed'; color: string }
   | { mode: 'field'; field: string; fallbackColor?: string }
   | { mode: 'external'; target: ClassificationPath; targetIdField: string; targetColorField: string; fallbackColor?: string }

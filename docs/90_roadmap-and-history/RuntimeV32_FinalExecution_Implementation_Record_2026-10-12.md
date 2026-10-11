@@ -33,3 +33,11 @@
 主题 03 提交：0eb954e。主题 04 证据见 r9-category-creation-acceptance.json、test:r9-category-initialization 和 theme-04 检查日志。传递中的父级字段作为基底保留；模板仅增量加入；字段 key 冲突重写同次复制的显示/卡片引用。旧重复 Class/子分类入口已移除。
 
 主题 04 提交：f4f3f59。主题 05 证据见 r9-category-tree-acceptance.json 和 test:r9-category-artifact。真实测试修复了内部读取错误复制主包、内部保存未先完成恢复记录写入的问题。外层同 Class 整体替换，范围外内容保留；实际持久事务拒绝过期 expected 配置。草稿用 IndexedDB 保存，避免多层完整树超出 sessionStorage 容量。
+
+## 主题 6：条件公式与字段值设色
+
+- 父提交：2735526。条件在规则头部统一以稳定编号、前置关系和受控公式编辑；自动 NOT 为 AND NOT，手动公式排序不改写。命名组循环、未知引用、分类字段/别名、非法标量值、预算和可证明矛盾阻断。旧 AST 在 r9 迁移时等价展开。
+- 公式在配置激活时编译，冻结实例复用 AST/条件索引；按字段保存值设色共享类型严格的索引和回退，编辑入口复用于几何、支持取色的 Label、规则交互覆盖。
+- `npm run verify:config-v32`：34 组通过；`npm run build`：通过，仅现有体积告警。新增真假表、解析预算、旧 AST 匹配集合、0/false、非法映射、实际渲染/交互对照验证。
+- 独立 Edge 真实 DOM：前置关系、自动/手动模式、稳定编号排序、删除引用报错、记录预览、设色保存及刷新回读通过，运行错误 0；证据 `r9-render-acceptance.json`、`r9-formula-color.png`。
+- 后续：标准再编辑、铁路/车站七类模板、TRP 外部编辑、最终 r9/r5 包与全量验收尚待完成；本条不代表整轮已交付。

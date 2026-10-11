@@ -6,7 +6,7 @@ export type RenderMigrationResult = { config?: ConfigPackageV3; issues: string[]
 function contradictory(items: RenderFieldCondition[]): boolean {
   const sets = new Map<string, Set<string>>();
   for (const item of items) {
-    if (item.kind === 'fieldPresent') continue;
+    if (item.kind === 'fieldPresent' || item.kind === 'fieldCompare') continue;
     const values = new Set(item.kind === 'fieldEquals' ? [item.value] : item.values);
     const prior = sets.get(item.field);
     const current = prior ? new Set([...prior].filter(value => values.has(value))) : values;

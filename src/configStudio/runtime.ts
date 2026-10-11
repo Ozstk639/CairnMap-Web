@@ -1,3 +1,6 @@
+import {compileRenderFormula} from './renderBooleanFormula';
+import {resolveMappedColor} from './renderScalar';
+import {scalarValueErrors, validMappedColor} from './renderScalar';
 import { isNativeConfigRevision } from './contract';
 import { canonicalRenderFields, matchesRenderFields, renderRuleRange, validateRenderFields } from './renderRuleConditions';
 import type {
@@ -92,6 +95,10 @@ export function compileConfigRuntime(value: ConfigPackageV3, validated = false):
   for (const geometry of GEOMETRIES) {
     resolveRenderExtensions(config, geometry);
     for (const node of config.nodes) for (const rule of node.geometryProfiles[geometry]?.zoomPriority.rules ?? []) resolveRenderExtensions(config, geometry, rule.extensions);
+  }
+  for(const node of config.nodes)for(const profile of Object.values(node.geometryProfiles))for(const rule of profile?.zoomPriority.rules??[]) {
+    if(rule.when?.fields?.formula)compileRenderFormula(rule.when.fields.formula);
+    for(const binding of [rule.style?.stroke,rule.style?.fill,rule.label?.style?.color,...Object.values(rule.extensions?.interaction??{}).map(state=>state?.strokeColorBinding)])if(binding?.mode==='valueMap')resolveMappedColor(binding,undefined);
   }
   return config;
 }
@@ -418,6 +425,20 @@ function validateRenderColorBinding(binding: unknown, config: ConfigPackageV3, s
   if (!binding || typeof binding !== 'object') { issue(issues, 'error', 'render-color-binding-required', path, '渲染颜色必须设置为直接颜色、当前字段或外部要素字段。'); return; }
   const value = binding as { mode?: string; color?: string; field?: string; target?: ClassificationPath; targetIdField?: string; targetColorField?: string; strategy?: string };
   const sourceFields = new Set(resolveEffectiveFields(config, sourcePath).map((field) => field.key));
+  if(value.mode==='valueMap') {
+    const mapping=binding as Extract<import('./types').RenderColorBinding,{mode:'valueMap'}>, field=resolveSelectableFields(config,sourcePath).find(f=>f.key===mapping.field);
+    if(config.contractRevision<9)issue(issues,'error','render-color-r9-required',path,'按值设色需要 r9。');
+    if(!field)issue(issues,'error','render-color-map-field-invalid',path,'设色字段不存在。');
+    if(!validMappedColor(mapping.fallbackColor))issue(issues,'error','render-color-map-fallback-invalid',path,'回退颜色必须为六位十六进制颜色。');
+    if(!Array.isArray(mapping.entries)||!mapping.entries.length){issue(issues,'error','render-color-map-empty',path,'至少需要一个设色值。');return;}
+    const seen=new Set<unknown>();
+    for(const entry of mapping.entries) {
+      if(seen.has(entry.value))issue(issues,'error','render-color-map-duplicate',path,'设色保存值重复。');seen.add(entry.value);
+      if(!validMappedColor(entry.color))issue(issues,'error','render-color-map-color-invalid',path,'映射颜色必须为六位十六进制颜色。');
+      if(field)for(const message of scalarValueErrors(field,entry.value))issue(issues,'error','render-color-map-value-invalid',path,message);
+    }
+    return;
+  }
   if (value.mode === 'fixed') {
     if (!value.color?.trim()) issue(issues, 'error', 'render-color-fixed-required', path, '直接颜色模式必须选择颜色。');
     return;

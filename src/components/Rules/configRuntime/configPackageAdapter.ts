@@ -1,3 +1,4 @@
+import {resolveMappedColor} from '../../../configStudio/renderScalar';
 import { isNativeConfigRevision } from '../../../configStudio/contract';
 import type {
   ConfigPackageV3,
@@ -301,6 +302,7 @@ function resolveRelatedLineColor(record: FeatureRecord, strategy: Extract<Render
 
 function resolveColor(record: FeatureRecord, binding: RenderColorBinding | undefined, fallback: string, store?: FeatureStore): string {
   if (!binding) return fallback;
+  if(binding.mode==='valueMap')return resolveMappedColor(binding,featureValue(record,binding.field));
   if (binding.mode === 'fixed') return normalizeColor(binding.color, fallback);
   if (binding.mode === 'field') return normalizeColor(featureValue(record, binding.field) ?? binding.fallbackColor, fallback);
   if (binding.mode === 'relatedLine') return normalizeColor(resolveRelatedLineColor(record, binding.strategy, store) ?? binding.fallbackColor, fallback);

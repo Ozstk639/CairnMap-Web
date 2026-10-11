@@ -1,0 +1,7 @@
+{
+  "checks": [
+    "actual formula rows put relation first; classifications excluded; 0 typed; automatic AND NOT; stable IDs and manual expression survive sorting; deleted reference reports error; record preview works",
+    "actual discrete color map and formula save and survive reload without affecting classification identity"
+  ],
+  "runtimeErrors": []
+}

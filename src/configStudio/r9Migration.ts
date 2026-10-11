@@ -3,6 +3,7 @@ import { resolveCardConfiguration, resolveEffectiveFields } from './runtime';
 import { resolveWorkflowFields, fieldImportErrors } from './fieldReuse';
 import { migrateFieldsToR8 } from './fieldMigration';
 import { migrateRenderRulesToR7 } from './renderRuleMigration';
+import {renderGroupToFormula} from './renderBooleanFormula';
 
 /** Materialise the old executed values before removing live source metadata. */
 export function migrateConfigToR9(value:ConfigPackageV3):ConfigPackageV3 {
@@ -23,6 +24,7 @@ export function migrateConfigToR9(value:ConfigPackageV3):ConfigPackageV3 {
     return resolved;
   });
   for(const node of config.nodes) {
+    for(const profile of Object.values(node.geometryProfiles))for(const rule of profile?.zoomPriority.rules??[])if(rule.when?.fields)rule.when.fields={op:'all',items:[],formula:renderGroupToFormula(rule.when.fields)};
     const card=resolveCardConfiguration(original,node.path);
     if(card?.mode==='fields') {
       const fields=resolveEffectiveFields(original,node.path);
