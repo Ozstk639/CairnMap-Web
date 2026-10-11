@@ -1,0 +1,8 @@
+{
+  "checks": [
+    "one creation entry; selected parent determines Kind; selection and synced geometry lock; invalid ancestor geometry leaves no partial child",
+    "valid blank child saves, survives reload and can be read again with inherited fields and no display rules",
+    "empty selection creates a new Class without a separate root checkbox"
+  ],
+  "runtimeErrors": []
+}

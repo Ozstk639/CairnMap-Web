@@ -23,7 +23,7 @@ checks.append('real control prefill injects numeric options and empty English; m
 b.evaluate("(async()=>{const p=await import('/src/configStudio/defaultConfigProvider.ts');const c=structuredClone(p.getActiveConfigSnapshot()),n=c.nodes.find(n=>n.path.class==='WRP'&&!n.path.kind);n.fields.find(f=>f.key==='tags.status').labels.zh='来源更新';await p.persistActiveConfig(c,true);})()")
 b.navigate('?workspace=config-studio&tab=workflows');set_value('section[aria-label="工作流编辑区域"] select','v3-wrp_warp');b.click('读取')
 assert b.evaluate("[...document.querySelectorAll('textarea[placeholder=\"控件标题\"]')].some(e=>e.value==='验收状态')")
-b.click('放弃草稿');b.click('要素设计');set_value('select[aria-label="编辑分类 Class"]','WRP');b.click('读取/新建')
+b.click('放弃草稿');b.click('要素设计');set_value('select[aria-label="编辑分类 Class"]','WRP');b.click('读取分类')
 assert not b.evaluate("document.body.innerText.includes('默认值、提示、条件与引用')")
 assert not b.evaluate("document.body.innerText.includes('信息卡手动覆写对照')")
 assert not b.evaluate("document.body.innerText.includes('覆写值对照')")

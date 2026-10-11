@@ -14,7 +14,7 @@
 | 输入可见性、重复设置 | 已完成：verify/build；真实 1440/390 DOM 边框及单一设置入口通过，零运行错误 |
 | 默认种子和活动配置统一 | 已完成：verify/build；独立新浏览器六条持久性路径通过，零运行错误 |
 | r9 迁移、一次性预填、纯净字段/卡片 | 已完成：31 组 verify/build；5130 渲染结果、34 完整 V1 records、98 独立 V1 卡片相等；真实控件和卡片预填/保存通过 |
-| 唯一分类入口、三模式/四同步/冲突报告 | 待实施 |
+| 唯一分类入口、三模式/四同步/冲突报告 | 已完成：32 组 verify/build；创建/继承/一致跳过/重命名和依赖阻断单测；真实 Class/Kind 创建、失败隔离及保存回读通过 |
 | 分类文件、Class 树替换事务 | 待实施 |
 | 条件公式、值分类设色 | 待实施 |
 | 工作流编辑资格、回填、更新状态机 | 待实施 |
@@ -29,3 +29,5 @@
 主题 01 提交：f18d29b。主题 02 发布原 r8/r4 JSON 为独立资源，SHA256 与原件相同，活动选择和包版本同事务提交，恢复副本不覆盖 latest。六条浏览器证据见 r9-default-config-acceptance.json；CDP 9240 为工作树 .cache 下新独立 Edge profile。
 
 主题 02 提交：35998e3；Windows 摘要资源 EOL 固定提交：f373cdb。主题 03 证据见 theme-03-verify/build.log、r9-prefill-acceptance.json；增加 test:r9-migration-prefill 到统一验证。r9迁移先展开旧有效值再去来源关系；字段默认值/提示移出，TPP 条件记录约束保留。默认资源仍为冻结 r8/r4，最终全部新能力通过后再安装 r9/r5。
+
+主题 03 提交：0eb954e。主题 04 证据见 r9-category-creation-acceptance.json、test:r9-category-initialization 和 theme-04 检查日志。传递中的父级字段作为基底保留；模板仅增量加入；字段 key 冲突重写同次复制的显示/卡片引用。旧重复 Class/子分类入口已移除。

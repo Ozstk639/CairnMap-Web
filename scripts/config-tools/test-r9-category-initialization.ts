@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import { createEditableConfigPackageFromCurrentProject,editableGeometryProfile } from '../../src/configStudio/renderRuleTemplates';
+import { migrateConfigToR9 } from '../../src/configStudio/r9Migration';
+import { initializeCategory,type CategoryInitialization } from '../../src/configStudio/categoryInitialization';
+import { resolveEffectiveFields,validateConfigPackage } from '../../src/configStudio/runtime';
+import type { CategoryNode } from '../../src/configStudio/types';
+
+const config=migrateConfigToR9(createEditableConfigPackageFromCurrentProject()),before=JSON.stringify(config);
+const baseRequest:CategoryInitialization={code:'NEW',labels:{zh:'新分类',en:''},mode:'blank',sync:{fields:false,geometry:false,display:false,card:false},geometry:'Point',multiple:false,anchor:'featureBbox'};
+const blank=initializeCategory(config,baseRequest);assert.equal(blank.node.path.class,'NEW');assert.equal(blank.node.geometryProfiles.Point!.zoomPriority.rules.length,0);assert.equal(blank.node.geometryProfiles.Point!.renderState,'unconfigured');assert(validateConfigPackage(blank.config).valid);
+const bud=config.nodes.find(node=>node.path.class==='BUD'&&!node.path.kind)!;
+const parent=initializeCategory(config,{...baseRequest,parentId:bud.nodeId,code:'NEW_KIND',mode:'parent',sync:{fields:true,geometry:true,display:true,card:true}});
+assert.equal(parent.node.path.kind,'NEW_KIND');assert.equal(parent.node.geometryType,'Polygon');assert(resolveEffectiveFields(parent.config,parent.node.path).length>=resolveEffectiveFields(config,bud.path).length);
+const minimum=initializeCategory(config,{...baseRequest,parentId:bud.nodeId,code:'MINIMUM',geometry:'Polygon'});
+assert(resolveEffectiveFields(minimum.config,minimum.node.path).length>=resolveEffectiveFields(config,bud.path).length);
+assert.throws(()=>initializeCategory(config,{...baseRequest,parentId:bud.nodeId}),/祖先固定几何/);
+assert.throws(()=>initializeCategory(config,{...baseRequest,mode:'parent'}),/没有父级/);
+assert.throws(()=>initializeCategory(parent.config,{...baseRequest,parentId:bud.nodeId,code:'NEW_KIND'}),/已经存在/);
+
+const field={fieldId:'base',key:'tags.status',type:'enum' as const,cardinality:'single' as const,input:'select' as const,labels:{zh:'状态',en:''},description:{zh:'',en:''},options:[{value:'0',label:{zh:'关',en:''}}]};
+const ancestor:CategoryNode={nodeId:'ancestor',path:{class:'ANCESTOR_INIT'},children:[],fields:[{...structuredClone(field),inheritance:'sealed'}],inheritDown:{fields:true,display:true,card:true},geometryType:'Point',geometryProfiles:{Point:editableGeometryProfile('Point',9)},card:{mode:'fields',items:[]}};
+const template:CategoryNode={...structuredClone(ancestor),nodeId:'template',path:{class:'TEMPLATE_INIT'},fields:[{...structuredClone(field),fieldId:'source',inheritance:'sealed'}]};
+const local={...config,nodes:[...config.nodes,ancestor,template]};
+const exact=initializeCategory(local,{...baseRequest,parentId:ancestor.nodeId,mode:'template',sourceId:template.nodeId,sync:{fields:true,geometry:true,display:true,card:true}});
+assert.equal(exact.node.fields.length,0);assert(exact.report.actions.some(action=>action.includes('一致跳过')));
+template.fields[0].labels.zh='来源名称不同';template.geometryProfiles.Point!.zoomPriority.rules[0].style!.stroke={mode:'field',field:'tags.status'};template.card={mode:'fields',items:[{id:'source-card',source:'tags.status',visible:true,renderer:'text',label:{zh:'状态',en:''}}]};
+const renamed=initializeCategory(local,{...baseRequest,parentId:ancestor.nodeId,mode:'template',sourceId:template.nodeId,sync:{fields:true,geometry:true,display:true,card:true}});
+assert.equal(renamed.report.renamed['tags.status'],'tags.status_1');assert.equal(renamed.node.fields[0].key,'tags.status_1');assert.equal(renamed.node.geometryProfiles.Point!.zoomPriority.rules[0].style!.stroke.mode,'field');assert.equal((renamed.node.geometryProfiles.Point!.zoomPriority.rules[0].style!.stroke as any).field,'tags.status_1');assert.equal((renamed.node.card as any).items[0].source,'tags.status_1');
+assert.throws(()=>initializeCategory(local,{...baseRequest,mode:'template',sourceId:template.nodeId,sync:{fields:false,geometry:true,display:true,card:true}}),/未同步依赖字段/);
+ancestor.fields.push({...structuredClone(field),fieldId:'occupied',key:'tags.status_1'});
+const suffix=initializeCategory(local,{...baseRequest,parentId:ancestor.nodeId,mode:'template',sourceId:template.nodeId,sync:{fields:true,geometry:true,display:true,card:true}});assert.equal(suffix.report.renamed['tags.status'],'tags.status_2');
+assert.equal(JSON.stringify(config),before);
+console.log('r9-category-initialization: Class/Kind, parent constraints, legal blank, full inheritance, exact skip, semantic difference rename and dependency rewrite/rejection: OK');
