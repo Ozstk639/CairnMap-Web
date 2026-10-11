@@ -2775,6 +2775,52 @@
         "fields": {
           "anyOf": [
             {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "geometry": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "display": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "card": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t47": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "anyOf": [
+            {
               "const": "sealed"
             },
             {
@@ -2831,7 +2877,7 @@
         "card"
       ]
     },
-    "t48": {
+    "t49": {
       "type": "object",
       "properties": {
         "kind": {
@@ -2842,7 +2888,7 @@
         "kind"
       ]
     },
-    "t49": {
+    "t50": {
       "type": "object",
       "properties": {
         "kind": {
@@ -2867,7 +2913,7 @@
         "kind"
       ]
     },
-    "t50": {
+    "t51": {
       "type": "object",
       "properties": {
         "kind": {
@@ -2903,7 +2949,7 @@
         "scope"
       ]
     },
-    "t51": {
+    "t52": {
       "type": "object",
       "properties": {
         "kind": {
@@ -2922,7 +2968,7 @@
         "value"
       ]
     },
-    "t52": {
+    "t53": {
       "type": "object",
       "properties": {
         "kind": {
@@ -2944,7 +2990,7 @@
         "values"
       ]
     },
-    "t53": {
+    "t54": {
       "type": "object",
       "properties": {
         "kind": {
@@ -2963,7 +3009,7 @@
         "present"
       ]
     },
-    "t54": {
+    "t55": {
       "type": "object",
       "properties": {
         "registryKey": {
@@ -2981,7 +3027,7 @@
         "registryKey"
       ]
     },
-    "t55": {
+    "t56": {
       "type": "object",
       "properties": {
         "workflow": {
@@ -3027,7 +3073,7 @@
       },
       "required": []
     },
-    "t56": {
+    "t57": {
       "type": "object",
       "properties": {
         "classCode": {
@@ -3049,7 +3095,7 @@
         "matchField"
       ]
     },
-    "t47": {
+    "t48": {
       "type": "object",
       "properties": {
         "fieldId": {
@@ -3152,9 +3198,6 @@
               "items": {
                 "anyOf": [
                   {
-                    "ref": "t48"
-                  },
-                  {
                     "ref": "t49"
                   },
                   {
@@ -3168,6 +3211,9 @@
                   },
                   {
                     "ref": "t53"
+                  },
+                  {
+                    "ref": "t54"
                   }
                 ]
               }
@@ -3241,7 +3287,7 @@
         "optionSource": {
           "anyOf": [
             {
-              "ref": "t54"
+              "ref": "t55"
             }
           ]
         },
@@ -3273,14 +3319,14 @@
         "scenes": {
           "anyOf": [
             {
-              "ref": "t55"
+              "ref": "t56"
             }
           ]
         },
         "reference": {
           "anyOf": [
             {
-              "ref": "t56"
+              "ref": "t57"
             }
           ]
         },
@@ -3315,7 +3361,7 @@
         "description"
       ]
     },
-    "t59": {
+    "t60": {
       "type": "object",
       "properties": {
         "weight": {
@@ -3349,7 +3395,7 @@
       },
       "required": []
     },
-    "t60": {
+    "t61": {
       "type": "object",
       "properties": {
         "zLevel": {
@@ -3374,7 +3420,7 @@
         "zLevel"
       ]
     },
-    "t63": {
+    "t64": {
       "type": "object",
       "properties": {
         "kind": {
@@ -3447,7 +3493,7 @@
         "rounding"
       ]
     },
-    "t62": {
+    "t63": {
       "type": "object",
       "properties": {
         "role": {
@@ -3492,7 +3538,7 @@
         "metric": {
           "anyOf": [
             {
-              "ref": "t63"
+              "ref": "t64"
             }
           ]
         },
@@ -3510,7 +3556,7 @@
         "hideWhenColliding"
       ]
     },
-    "t61": {
+    "t62": {
       "type": "object",
       "properties": {
         "visible": {
@@ -3531,9 +3577,6 @@
           "items": {
             "anyOf": [
               {
-                "ref": "t48"
-              },
-              {
                 "ref": "t49"
               },
               {
@@ -3547,12 +3590,15 @@
               },
               {
                 "ref": "t53"
+              },
+              {
+                "ref": "t54"
               }
             ]
           }
         },
         "collision": {
-          "ref": "t62"
+          "ref": "t63"
         }
       },
       "required": [
@@ -3562,7 +3608,7 @@
         "collision"
       ]
     },
-    "t67": {
+    "t68": {
       "type": "object",
       "properties": {
         "min": {
@@ -3577,7 +3623,7 @@
         "max"
       ]
     },
-    "t68": {
+    "t69": {
       "type": "object",
       "properties": {
         "op": {
@@ -3598,16 +3644,16 @@
           "items": {
             "anyOf": [
               {
-                "ref": "t51"
-              },
-              {
                 "ref": "t52"
               },
               {
                 "ref": "t53"
               },
               {
-                "ref": "t68"
+                "ref": "t54"
+              },
+              {
+                "ref": "t69"
               }
             ]
           }
@@ -3618,16 +3664,16 @@
         "items"
       ]
     },
-    "t66": {
+    "t67": {
       "type": "object",
       "properties": {
         "zoom": {
-          "ref": "t67"
+          "ref": "t68"
         },
         "fields": {
           "anyOf": [
             {
-              "ref": "t68"
+              "ref": "t69"
             }
           ]
         }
@@ -3636,7 +3682,7 @@
         "zoom"
       ]
     },
-    "t70": {
+    "t71": {
       "type": "object",
       "properties": {
         "x": {
@@ -3651,7 +3697,7 @@
         "y"
       ]
     },
-    "t71": {
+    "t72": {
       "type": "object",
       "properties": {
         "source": {
@@ -3697,13 +3743,13 @@
         "fallback"
       ]
     },
-    "t69": {
+    "t70": {
       "type": "object",
       "properties": {
         "symbolOffsetPx": {
           "anyOf": [
             {
-              "ref": "t70"
+              "ref": "t71"
             }
           ]
         },
@@ -3752,7 +3798,7 @@
         "icon": {
           "anyOf": [
             {
-              "ref": "t71"
+              "ref": "t72"
             }
           ]
         },
@@ -3860,7 +3906,7 @@
         "strokeOpacity"
       ]
     },
-    "t74": {
+    "t75": {
       "type": "object",
       "properties": {
         "italic": {
@@ -3896,7 +3942,7 @@
       },
       "required": []
     },
-    "t73": {
+    "t74": {
       "type": "object",
       "properties": {
         "family": {
@@ -3930,7 +3976,7 @@
         "modifiers": {
           "anyOf": [
             {
-              "ref": "t74"
+              "ref": "t75"
             }
           ]
         },
@@ -3956,7 +4002,7 @@
         "size"
       ]
     },
-    "t75": {
+    "t76": {
       "type": "object",
       "properties": {},
       "required": [],
@@ -3971,7 +4017,7 @@
         ]
       }
     },
-    "t72": {
+    "t73": {
       "type": "object",
       "properties": {
         "visible": {
@@ -3980,7 +4026,7 @@
         "style": {
           "anyOf": [
             {
-              "ref": "t73"
+              "ref": "t74"
             }
           ]
         },
@@ -4054,7 +4100,7 @@
         "fallbackValueFormats": {
           "anyOf": [
             {
-              "ref": "t75"
+              "ref": "t76"
             }
           ]
         },
@@ -4133,7 +4179,7 @@
           ]
         },
         "collision": {
-          "ref": "t62"
+          "ref": "t63"
         }
       },
       "required": [
@@ -4141,7 +4187,7 @@
         "collision"
       ]
     },
-    "t77": {
+    "t78": {
       "type": "object",
       "properties": {
         "point": {
@@ -4197,18 +4243,18 @@
       },
       "required": []
     },
-    "t76": {
+    "t77": {
       "type": "object",
       "properties": {
         "triggers": {
-          "ref": "t77"
+          "ref": "t78"
         }
       },
       "required": [
         "triggers"
       ]
     },
-    "t79": {
+    "t80": {
       "type": "object",
       "properties": {
         "mode": {
@@ -4231,7 +4277,7 @@
         "metric": {
           "anyOf": [
             {
-              "ref": "t63"
+              "ref": "t64"
             }
           ]
         }
@@ -4240,7 +4286,7 @@
         "mode"
       ]
     },
-    "t78": {
+    "t79": {
       "type": "object",
       "properties": {
         "id": {
@@ -4250,9 +4296,6 @@
           "type": "array",
           "items": {
             "anyOf": [
-              {
-                "ref": "t48"
-              },
               {
                 "ref": "t49"
               },
@@ -4267,6 +4310,9 @@
               },
               {
                 "ref": "t53"
+              },
+              {
+                "ref": "t54"
               }
             ]
           }
@@ -4290,28 +4336,28 @@
         "style": {
           "anyOf": [
             {
-              "ref": "t69"
+              "ref": "t70"
             }
           ]
         },
         "label": {
           "anyOf": [
             {
-              "ref": "t72"
+              "ref": "t73"
             }
           ]
         },
         "geometryStack": {
           "anyOf": [
             {
-              "ref": "t60"
+              "ref": "t61"
             }
           ]
         },
         "priority": {
           "anyOf": [
             {
-              "ref": "t79"
+              "ref": "t80"
             }
           ]
         },
@@ -4328,13 +4374,13 @@
         "when"
       ]
     },
-    "t81": {
+    "t82": {
       "type": "object",
       "properties": {},
       "required": [],
       "additionalProperties": {}
     },
-    "t82": {
+    "t83": {
       "type": "object",
       "properties": {
         "preserveFallback": {
@@ -4357,55 +4403,55 @@
       },
       "required": []
     },
-    "t80": {
+    "t81": {
       "type": "object",
       "properties": {
         "predicates": {
           "anyOf": [
             {
-              "ref": "t81"
+              "ref": "t82"
             }
           ]
         },
         "visibility": {
           "anyOf": [
             {
-              "ref": "t81"
+              "ref": "t82"
             }
           ]
         },
         "geometry": {
           "anyOf": [
             {
-              "ref": "t81"
+              "ref": "t82"
             }
           ]
         },
         "symbol": {
           "anyOf": [
             {
-              "ref": "t81"
+              "ref": "t82"
             }
           ]
         },
         "label": {
           "anyOf": [
             {
-              "ref": "t81"
+              "ref": "t82"
             }
           ]
         },
         "collision": {
           "anyOf": [
             {
-              "ref": "t81"
+              "ref": "t82"
             }
           ]
         },
         "selection": {
           "anyOf": [
             {
-              "ref": "t81"
+              "ref": "t82"
             }
           ]
         },
@@ -4422,14 +4468,14 @@
         "legacyRuntime": {
           "anyOf": [
             {
-              "ref": "t82"
+              "ref": "t83"
             }
           ]
         }
       },
       "required": []
     },
-    "t65": {
+    "t66": {
       "type": "object",
       "properties": {
         "id": {
@@ -4438,7 +4484,7 @@
         "when": {
           "anyOf": [
             {
-              "ref": "t66"
+              "ref": "t67"
             }
           ]
         },
@@ -4475,28 +4521,28 @@
         "style": {
           "anyOf": [
             {
-              "ref": "t69"
+              "ref": "t70"
             }
           ]
         },
         "label": {
           "anyOf": [
             {
-              "ref": "t72"
+              "ref": "t73"
             }
           ]
         },
         "interaction": {
           "anyOf": [
             {
-              "ref": "t76"
+              "ref": "t77"
             }
           ]
         },
         "geometryStack": {
           "anyOf": [
             {
-              "ref": "t60"
+              "ref": "t61"
             }
           ]
         },
@@ -4512,7 +4558,7 @@
             {
               "type": "array",
               "items": {
-                "ref": "t78"
+                "ref": "t79"
               }
             }
           ]
@@ -4520,7 +4566,7 @@
         "advanced": {
           "anyOf": [
             {
-              "ref": "t80"
+              "ref": "t81"
             }
           ]
         },
@@ -4560,7 +4606,7 @@
         "priority": {
           "anyOf": [
             {
-              "ref": "t79"
+              "ref": "t80"
             }
           ]
         }
@@ -4569,13 +4615,13 @@
         "id"
       ]
     },
-    "t64": {
+    "t65": {
       "type": "object",
       "properties": {
         "rules": {
           "type": "array",
           "items": {
-            "ref": "t65"
+            "ref": "t66"
           }
         }
       },
@@ -4583,18 +4629,18 @@
         "rules"
       ]
     },
-    "t83": {
+    "t84": {
       "type": "object",
       "properties": {
         "triggers": {
-          "ref": "t77"
+          "ref": "t78"
         }
       },
       "required": [
         "triggers"
       ]
     },
-    "t84": {
+    "t85": {
       "type": "object",
       "properties": {
         "ruleIds": {
@@ -4622,9 +4668,19 @@
         "specialLogicKeys"
       ]
     },
-    "t58": {
+    "t59": {
       "type": "object",
       "properties": {
+        "renderState": {
+          "anyOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "unconfigured"
+            }
+          ]
+        },
         "enabled": {
           "type": "boolean"
         },
@@ -4651,38 +4707,38 @@
         "style": {
           "anyOf": [
             {
-              "ref": "t59"
+              "ref": "t60"
             }
           ]
         },
         "geometryStack": {
           "anyOf": [
             {
-              "ref": "t60"
+              "ref": "t61"
             }
           ]
         },
         "label": {
           "anyOf": [
             {
-              "ref": "t61"
+              "ref": "t62"
             }
           ]
         },
         "zoomPriority": {
-          "ref": "t64"
+          "ref": "t65"
         },
         "interaction": {
           "anyOf": [
             {
-              "ref": "t83"
+              "ref": "t84"
             }
           ]
         },
         "legacyDisplay": {
           "anyOf": [
             {
-              "ref": "t84"
+              "ref": "t85"
             }
           ]
         }
@@ -4693,34 +4749,34 @@
         "zoomPriority"
       ]
     },
-    "t57": {
+    "t58": {
       "type": "object",
       "properties": {
         "Point": {
           "anyOf": [
             {
-              "ref": "t58"
+              "ref": "t59"
             }
           ]
         },
         "LineString": {
           "anyOf": [
             {
-              "ref": "t58"
+              "ref": "t59"
             }
           ]
         },
         "Polygon": {
           "anyOf": [
             {
-              "ref": "t58"
+              "ref": "t59"
             }
           ]
         }
       },
       "required": []
     },
-    "t85": {
+    "t86": {
       "type": "object",
       "properties": {
         "enabled": {
@@ -4755,7 +4811,7 @@
         "enabled"
       ]
     },
-    "t88": {
+    "t89": {
       "type": "object",
       "properties": {
         "colorSource": {
@@ -4850,7 +4906,7 @@
       },
       "required": []
     },
-    "t89": {
+    "t90": {
       "type": "object",
       "properties": {
         "targetClassification": {
@@ -4914,7 +4970,7 @@
       },
       "required": []
     },
-    "t87": {
+    "t88": {
       "type": "object",
       "properties": {
         "id": {
@@ -5031,14 +5087,14 @@
         "options": {
           "anyOf": [
             {
-              "ref": "t88"
+              "ref": "t89"
             }
           ]
         },
         "relation": {
           "anyOf": [
             {
-              "ref": "t89"
+              "ref": "t90"
             }
           ]
         }
@@ -5050,7 +5106,7 @@
         "renderer"
       ]
     },
-    "t90": {
+    "t91": {
       "type": "object",
       "properties": {
         "enabled": {
@@ -5120,7 +5176,7 @@
         "includeSystem"
       ]
     },
-    "t86": {
+    "t87": {
       "type": "object",
       "properties": {
         "mode": {
@@ -5129,13 +5185,13 @@
         "items": {
           "type": "array",
           "items": {
-            "ref": "t87"
+            "ref": "t88"
           }
         },
         "remaining": {
           "anyOf": [
             {
-              "ref": "t90"
+              "ref": "t91"
             }
           ]
         }
@@ -5145,7 +5201,7 @@
         "items"
       ]
     },
-    "t91": {
+    "t92": {
       "type": "object",
       "properties": {
         "mode": {
@@ -5157,7 +5213,7 @@
         "options": {
           "anyOf": [
             {
-              "ref": "t81"
+              "ref": "t82"
             }
           ]
         }
@@ -5167,7 +5223,7 @@
         "layoutId"
       ]
     },
-    "t92": {
+    "t93": {
       "type": "object",
       "properties": {
         "mode": {
@@ -5179,7 +5235,7 @@
         "options": {
           "anyOf": [
             {
-              "ref": "t81"
+              "ref": "t82"
             }
           ]
         }
@@ -5189,7 +5245,7 @@
         "componentKey"
       ]
     },
-    "t93": {
+    "t94": {
       "type": "object",
       "properties": {
         "classCode": {
@@ -5218,7 +5274,7 @@
         "source": {
           "anyOf": [
             {
-              "ref": "t81"
+              "ref": "t82"
             }
           ]
         }
@@ -5257,17 +5313,24 @@
             }
           ]
         },
-        "policies": {
+        "receiveFromParent": {
           "anyOf": [
             {
               "ref": "t46"
             }
           ]
         },
+        "policies": {
+          "anyOf": [
+            {
+              "ref": "t47"
+            }
+          ]
+        },
         "fields": {
           "type": "array",
           "items": {
-            "ref": "t47"
+            "ref": "t48"
           }
         },
         "geometryType": {
@@ -5284,32 +5347,32 @@
           ]
         },
         "geometryProfiles": {
-          "ref": "t57"
+          "ref": "t58"
         },
         "containment": {
           "anyOf": [
             {
-              "ref": "t85"
+              "ref": "t86"
             }
           ]
         },
         "card": {
           "anyOf": [
             {
-              "ref": "t86"
-            },
-            {
-              "ref": "t91"
+              "ref": "t87"
             },
             {
               "ref": "t92"
+            },
+            {
+              "ref": "t93"
             }
           ]
         },
         "legacy": {
           "anyOf": [
             {
-              "ref": "t93"
+              "ref": "t94"
             }
           ]
         }
@@ -5322,7 +5385,7 @@
         "geometryProfiles"
       ]
     },
-    "t95": {
+    "t96": {
       "type": "object",
       "properties": {
         "classification": {
@@ -5337,7 +5400,7 @@
         "referenceField"
       ]
     },
-    "t94": {
+    "t95": {
       "type": "object",
       "properties": {
         "id": {
@@ -5347,10 +5410,10 @@
           "ref": "t1"
         },
         "host": {
-          "ref": "t95"
+          "ref": "t96"
         },
         "member": {
-          "ref": "t95"
+          "ref": "t96"
         },
         "memberSelectorField": {
           "anyOf": [
@@ -5385,7 +5448,7 @@
         "profile"
       ]
     },
-    "t97": {
+    "t98": {
       "type": "object",
       "properties": {
         "required": {
@@ -5396,7 +5459,7 @@
         "required"
       ]
     },
-    "t101": {
+    "t102": {
       "type": "object",
       "properties": {
         "placeholder": {
@@ -5409,7 +5472,7 @@
         "reference": {
           "anyOf": [
             {
-              "ref": "t56"
+              "ref": "t57"
             }
           ]
         },
@@ -5511,9 +5574,6 @@
               "items": {
                 "anyOf": [
                   {
-                    "ref": "t48"
-                  },
-                  {
                     "ref": "t49"
                   },
                   {
@@ -5527,6 +5587,9 @@
                   },
                   {
                     "ref": "t53"
+                  },
+                  {
+                    "ref": "t54"
                   }
                 ]
               }
@@ -5564,7 +5627,7 @@
         "input"
       ]
     },
-    "t100": {
+    "t101": {
       "type": "object",
       "properties": {
         "nodeId": {
@@ -5574,7 +5637,7 @@
           "type": "string"
         },
         "snapshot": {
-          "ref": "t101"
+          "ref": "t102"
         },
         "overrides": {
           "type": "array",
@@ -5590,7 +5653,7 @@
         "overrides"
       ]
     },
-    "t102": {
+    "t103": {
       "type": "object",
       "properties": {
         "token": {
@@ -5656,7 +5719,7 @@
             {
               "type": "array",
               "items": {
-                "ref": "t102"
+                "ref": "t103"
               }
             }
           ]
@@ -5666,7 +5729,7 @@
             {
               "type": "array",
               "items": {
-                "ref": "t102"
+                "ref": "t103"
               }
             }
           ]
@@ -5677,7 +5740,7 @@
         "operator"
       ]
     },
-    "t103": {
+    "t104": {
       "type": "object",
       "properties": {
         "registryKey": {
@@ -5688,7 +5751,7 @@
         "registryKey"
       ]
     },
-    "t105": {
+    "t106": {
       "type": "object",
       "properties": {
         "matcher": {
@@ -5727,7 +5790,7 @@
         "maxResults"
       ]
     },
-    "t104": {
+    "t105": {
       "type": "object",
       "properties": {
         "target": {
@@ -5847,7 +5910,7 @@
         "coarse": {
           "anyOf": [
             {
-              "ref": "t105"
+              "ref": "t106"
             }
           ]
         }
@@ -5857,9 +5920,16 @@
         "cacheScope"
       ]
     },
-    "t107": {
+    "t108": {
       "type": "object",
       "properties": {
+        "prefillField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
         "key": {
           "type": "string"
         },
@@ -5932,7 +6002,7 @@
         "search": {
           "anyOf": [
             {
-              "ref": "t104"
+              "ref": "t105"
             }
           ]
         },
@@ -5971,7 +6041,7 @@
         "fieldSource": {
           "anyOf": [
             {
-              "ref": "t100"
+              "ref": "t101"
             }
           ]
         },
@@ -5980,7 +6050,7 @@
             {
               "type": "array",
               "items": {
-                "ref": "t102"
+                "ref": "t103"
               }
             }
           ]
@@ -6008,13 +6078,13 @@
         "kind"
       ]
     },
-    "t106": {
+    "t107": {
       "type": "object",
       "properties": {
         "itemFields": {
           "type": "array",
           "items": {
-            "ref": "t107"
+            "ref": "t108"
           }
         },
         "storage": {
@@ -6056,7 +6126,7 @@
         "itemFields"
       ]
     },
-    "t108": {
+    "t109": {
       "type": "object",
       "properties": {
         "tagsEnabled": {
@@ -6071,9 +6141,16 @@
         "extensionsEnabled"
       ]
     },
-    "t99": {
+    "t100": {
       "type": "object",
       "properties": {
+        "prefillField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
         "id": {
           "type": "string"
         },
@@ -6165,7 +6242,7 @@
         "fieldSource": {
           "anyOf": [
             {
-              "ref": "t100"
+              "ref": "t101"
             }
           ]
         },
@@ -6206,7 +6283,7 @@
             {
               "type": "array",
               "items": {
-                "ref": "t102"
+                "ref": "t103"
               }
             }
           ]
@@ -6224,7 +6301,7 @@
         "optionSource": {
           "anyOf": [
             {
-              "ref": "t103"
+              "ref": "t104"
             }
           ]
         },
@@ -6246,7 +6323,7 @@
         "search": {
           "anyOf": [
             {
-              "ref": "t104"
+              "ref": "t105"
             }
           ]
         },
@@ -6277,7 +6354,7 @@
         "when": {
           "anyOf": [
             {
-              "ref": "t102"
+              "ref": "t103"
             }
           ]
         },
@@ -6294,14 +6371,14 @@
         "group": {
           "anyOf": [
             {
-              "ref": "t106"
+              "ref": "t107"
             }
           ]
         },
         "tagsExtensions": {
           "anyOf": [
             {
-              "ref": "t108"
+              "ref": "t109"
             }
           ]
         },
@@ -6315,7 +6392,7 @@
         "legacyBlock": {
           "anyOf": [
             {
-              "ref": "t81"
+              "ref": "t82"
             }
           ]
         }
@@ -6327,7 +6404,7 @@
         "label"
       ]
     },
-    "t109": {
+    "t110": {
       "type": "object",
       "properties": {
         "tagsEnabled": {
@@ -6342,7 +6419,7 @@
         "extensionsEnabled"
       ]
     },
-    "t111": {
+    "t112": {
       "type": "object",
       "properties": {
         "id": {
@@ -6367,7 +6444,7 @@
         "when": {
           "anyOf": [
             {
-              "ref": "t102"
+              "ref": "t103"
             }
           ]
         }
@@ -6378,7 +6455,7 @@
         "label"
       ]
     },
-    "t112": {
+    "t113": {
       "type": "object",
       "properties": {
         "outputId": {
@@ -6404,7 +6481,7 @@
         "value"
       ]
     },
-    "t110": {
+    "t111": {
       "type": "object",
       "properties": {
         "enabledFromThisPage": {
@@ -6456,7 +6533,7 @@
             {
               "type": "array",
               "items": {
-                "ref": "t111"
+                "ref": "t112"
               }
             }
           ]
@@ -6506,7 +6583,7 @@
             {
               "type": "array",
               "items": {
-                "ref": "t112"
+                "ref": "t113"
               }
             }
           ]
@@ -6514,7 +6591,7 @@
       },
       "required": []
     },
-    "t98": {
+    "t99": {
       "type": "object",
       "properties": {
         "id": {
@@ -6554,7 +6631,7 @@
             {
               "type": "array",
               "items": {
-                "ref": "t99"
+                "ref": "t100"
               }
             }
           ]
@@ -6599,7 +6676,7 @@
         "when": {
           "anyOf": [
             {
-              "ref": "t102"
+              "ref": "t103"
             }
           ]
         },
@@ -6613,21 +6690,21 @@
         "tagsExtensions": {
           "anyOf": [
             {
-              "ref": "t109"
+              "ref": "t110"
             }
           ]
         },
         "drawing": {
           "anyOf": [
             {
-              "ref": "t110"
+              "ref": "t111"
             }
           ]
         },
         "legacyPage": {
           "anyOf": [
             {
-              "ref": "t81"
+              "ref": "t82"
             }
           ]
         }
@@ -6638,7 +6715,7 @@
         "label"
       ]
     },
-    "t114": {
+    "t115": {
       "type": "object",
       "properties": {
         "id": {
@@ -6653,7 +6730,7 @@
         "when": {
           "anyOf": [
             {
-              "ref": "t102"
+              "ref": "t103"
             }
           ]
         }
@@ -6664,7 +6741,7 @@
         "expression"
       ]
     },
-    "t115": {
+    "t116": {
       "type": "object",
       "properties": {
         "selected": {
@@ -6705,7 +6782,7 @@
         "selected"
       ]
     },
-    "t113": {
+    "t114": {
       "type": "object",
       "properties": {
         "id": {
@@ -6717,18 +6794,18 @@
         "assignments": {
           "type": "array",
           "items": {
-            "ref": "t114"
+            "ref": "t115"
           }
         },
         "when": {
           "anyOf": [
             {
-              "ref": "t102"
+              "ref": "t103"
             }
           ]
         },
         "geometry": {
-          "ref": "t115"
+          "ref": "t116"
         }
       },
       "required": [
@@ -6738,7 +6815,7 @@
         "geometry"
       ]
     },
-    "t116": {
+    "t117": {
       "type": "object",
       "properties": {
         "componentKey": {
@@ -6773,7 +6850,7 @@
         "reason"
       ]
     },
-    "t117": {
+    "t118": {
       "type": "object",
       "properties": {
         "runtimeMode": {
@@ -6793,21 +6870,21 @@
         "output": {
           "anyOf": [
             {
-              "ref": "t81"
+              "ref": "t82"
             }
           ]
         },
         "source": {
           "anyOf": [
             {
-              "ref": "t81"
+              "ref": "t82"
             }
           ]
         }
       },
       "required": []
     },
-    "t96": {
+    "t97": {
       "type": "object",
       "properties": {
         "id": {
@@ -6829,7 +6906,7 @@
         "actor": {
           "anyOf": [
             {
-              "ref": "t97"
+              "ref": "t98"
             }
           ]
         },
@@ -6843,13 +6920,13 @@
         "steps": {
           "type": "array",
           "items": {
-            "ref": "t98"
+            "ref": "t99"
           }
         },
         "outputs": {
           "type": "array",
           "items": {
-            "ref": "t113"
+            "ref": "t114"
           }
         },
         "assignments": {
@@ -6857,7 +6934,7 @@
             {
               "type": "array",
               "items": {
-                "ref": "t114"
+                "ref": "t115"
               }
             }
           ]
@@ -6865,14 +6942,14 @@
         "external": {
           "anyOf": [
             {
-              "ref": "t116"
+              "ref": "t117"
             }
           ]
         },
         "legacy": {
           "anyOf": [
             {
-              "ref": "t117"
+              "ref": "t118"
             }
           ]
         }
@@ -6885,7 +6962,7 @@
         "outputs"
       ]
     },
-    "t119": {
+    "t120": {
       "type": "object",
       "properties": {
         "kind": {
@@ -6942,7 +7019,7 @@
         "status"
       ]
     },
-    "t118": {
+    "t119": {
       "type": "object",
       "properties": {
         "schemaVersion": {
@@ -6958,7 +7035,7 @@
         "entries": {
           "type": "array",
           "items": {
-            "ref": "t119"
+            "ref": "t120"
           }
         },
         "generatedAt": {
@@ -6996,6 +7073,9 @@
             },
             {
               "const": 8
+            },
+            {
+              "const": 9
             }
           ]
         },
@@ -7039,7 +7119,7 @@
             {
               "type": "array",
               "items": {
-                "ref": "t94"
+                "ref": "t95"
               }
             }
           ]
@@ -7047,13 +7127,13 @@
         "workflows": {
           "type": "array",
           "items": {
-            "ref": "t96"
+            "ref": "t97"
           }
         },
         "parity": {
           "anyOf": [
             {
-              "ref": "t118"
+              "ref": "t119"
             }
           ]
         }

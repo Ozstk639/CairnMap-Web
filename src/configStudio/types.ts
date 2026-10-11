@@ -486,6 +486,8 @@ export type ZoomPriorityRule = {
 
 export type GeometryInteractionTriggers = { point?: boolean; line?: boolean; boundary?: boolean; interior?: boolean; label?: boolean };
 export type GeometryProfile = {
+  /** r9: geometry capability remains usable before a display is authored. */
+  renderState?: 'enabled' | 'unconfigured';
   enabled: boolean;
   /** Whether this representation accepts multipart input, not its current drawing mode. */
   allowMultipleParts: boolean;
@@ -644,6 +646,8 @@ export type CategoryNode = {
   children: string[];
   /** The three explicitly editable inheritance switches. */
   inheritDown?: InheritanceControls;
+  /** Optional incoming modules; sealed inherited fields cannot be disabled. */
+  receiveFromParent?: { fields?: boolean; geometry?: boolean; display?: boolean; card?: boolean };
   /** Compatibility metadata for V3.0 imports; runtime uses inheritDown first. */
   policies?: { fields: InheritanceMode; display: InheritanceMode; card: InheritanceMode; workflow?: InheritanceMode };
   fields: FieldDefinition[];
@@ -692,6 +696,8 @@ export type WorkflowControlKind = ComposedWorkflowControlKind | 'notice' | 'json
  * keep their individual fields, options and required state editable.
  */
 export type WorkflowGroupField = {
+  /** Local target hint copied once by prefill; no source identity is retained. */
+  prefillField?: string;
   key: string;
   label: LocalizedText;
   kind: Exclude<ComposedWorkflowControlKind, 'classificationPicker' | 'group' | 'tagsExtensions'>;
@@ -723,6 +729,7 @@ export type WorkflowRepeatGroup = {
   addLabel?: LocalizedText;
 };
 export type WorkflowControl = {
+  prefillField?: string;
   id: string;
   slot?: string;
   valueNormalization?: 'none' | 'trim' | 'abbr' | 'number';
@@ -834,7 +841,7 @@ export type ParityReport = { schemaVersion: 'cairnmap.v1-parity-report.v2'; sour
 export type ConfigPackageV3 = {
   schemaVersion: 'cairnmap.config-package.v3';
   /** Contract revision is API compatibility, not the user-facing package revision. */
-  contractRevision: 3 | 4 | 5 | 6 | 7 | 8;
+  contractRevision: 3 | 4 | 5 | 6 | 7 | 8 | 9;
   packageId: string;
   projectId: string;
   /** Persistence version only; the save dialog requires a monotonic integer. */

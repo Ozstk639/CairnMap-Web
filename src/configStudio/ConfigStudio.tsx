@@ -1,3 +1,4 @@
+import { migrateConfigToR9 } from './r9Migration';
 import { getActiveConfigSnapshot, persistActiveConfig, restoreApplicationDefault } from './defaultConfigProvider';
 import { ValueOptionsEditor } from './ValueOptionsEditor';
 import { ModuleHelp } from './ModuleHelp';
@@ -400,7 +401,7 @@ export function LegacyFieldEditor({ config, node, onChange }: { config: ConfigPa
 
 function FieldOptionRows({value,disabled,onChange}:{value?:FieldDefinition['options'];disabled:boolean;onChange:(value:NonNullable<FieldDefinition['options']>)=>void}) {return <ValueOptionsEditor value={value} disabled={disabled} onChange={onChange}/>;}
 
-function FieldCard({ field, local, onUpdate, onDelete, onOverride }: { field: FieldDefinition; local: boolean; onUpdate: (patch: Partial<FieldDefinition>) => void; onDelete: () => void; onOverride: () => void }) {
+function FieldCard({ field, local, onUpdate, onDelete, onOverride, contractRevision=8 }: { field: FieldDefinition; local: boolean; contractRevision?:number; onUpdate: (patch: Partial<FieldDefinition>) => void; onDelete: () => void; onOverride: () => void }) {
   const disabled = !local;
   const scope = fieldScope(field);
   const shortKey = fieldShortKey(field);
@@ -416,7 +417,7 @@ function FieldCard({ field, local, onUpdate, onDelete, onOverride }: { field: Fi
       <label className="inline-flex items-center gap-1"><input disabled={disabled} type="checkbox" checked={Boolean(field.required)} onChange={(event) => onUpdate({ required: event.target.checked })} />必填</label>
       {local ? <button type="button" className="ml-auto text-xs text-rose-700" onClick={onDelete}>删除</button> : <button type="button" className="ml-auto text-xs text-blue-700" onClick={onOverride}>建立覆盖</button>}
     </div>
-    <div className="mt-2 grid min-w-0 gap-2 md:grid-cols-2"><label className="min-w-0 text-xs">名称（zh）<input disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.labels.zh} onChange={(event) => onUpdate({ labels: { ...field.labels, zh: event.target.value } })} /></label><label className="min-w-0 text-xs">名称（en）<input disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.labels.en} onChange={(event) => onUpdate({ labels: { ...field.labels, en: event.target.value } })} /></label><label className="min-w-0 text-xs">定义（zh）<textarea disabled={disabled} className="mt-1 min-h-16 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.description.zh} onChange={(event) => onUpdate({ description: { ...field.description, zh: event.target.value } })} /></label><label className="min-w-0 text-xs">定义（en）<textarea disabled={disabled} className="mt-1 min-h-16 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.description.en} onChange={(event) => onUpdate({ description: { ...field.description, en: event.target.value } })} /></label></div><FieldOptionRows value={field.options} disabled={disabled} onChange={(options) => onUpdate({ options })} /><FieldAdvancedSettings field={field} disabled={disabled} onChange={onUpdate} /></article>;
+    <div className="mt-2 grid min-w-0 gap-2 md:grid-cols-2"><label className="min-w-0 text-xs">名称（zh）<input disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.labels.zh} onChange={(event) => onUpdate({ labels: { ...field.labels, zh: event.target.value } })} /></label><label className="min-w-0 text-xs">名称（en）<input disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.labels.en} onChange={(event) => onUpdate({ labels: { ...field.labels, en: event.target.value } })} /></label><label className="min-w-0 text-xs">定义（zh）<textarea disabled={disabled} className="mt-1 min-h-16 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.description.zh} onChange={(event) => onUpdate({ description: { ...field.description, zh: event.target.value } })} /></label><label className="min-w-0 text-xs">定义（en）<textarea disabled={disabled} className="mt-1 min-h-16 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.description.en} onChange={(event) => onUpdate({ description: { ...field.description, en: event.target.value } })} /></label></div><FieldOptionRows value={field.options} disabled={disabled} onChange={(options) => onUpdate({ options })} /><FieldAdvancedSettings contractRevision={contractRevision} field={field} disabled={disabled} onChange={onUpdate} /></article>;
 }
 
 function FieldEditor({ config, node, onChange }: { config: ConfigPackageV3; node: CategoryNode; onChange: (node: CategoryNode) => void }) {
@@ -448,7 +449,7 @@ function FieldEditor({ config, node, onChange }: { config: ConfigPackageV3; node
       </div>
       {fields.length ? <div className="mt-2 space-y-2">{fields.map((field) => {
         const isLocal = local.has(field.key);
-        return <FieldCard key={field.fieldId} field={field} local={isLocal} onUpdate={(patch) => update(field.fieldId, patch)} onDelete={() => onChange({ ...node, fields: node.fields.filter((item) => item.fieldId !== field.fieldId) })} onOverride={() => onChange({ ...node, fields: [...node.fields, { ...clone(field), fieldId: uid('field-override'), overrideOf: field.key }] })} />;
+        return <FieldCard contractRevision={config.contractRevision} key={field.fieldId} field={field} local={isLocal} onUpdate={(patch) => update(field.fieldId, patch)} onDelete={() => onChange({ ...node, fields: node.fields.filter((item) => item.fieldId !== field.fieldId) })} onOverride={() => onChange({ ...node, fields: [...node.fields, { ...clone(field), fieldId: uid('field-override'), overrideOf: field.key }] })} />;
       })}</div> : <p className="mt-2 text-xs text-slate-500">当前没有此字段组的已定义字段。</p>}
     </section>;
   };
@@ -621,16 +622,7 @@ export function ConfigStudio({ onClose, mountedRecords, initialTab }: { onClose:
 
   const readSelected = () => {
     if (!selected) { setMessage('请先新建或选择一个分类。'); return; }
-    if (config.contractRevision === 6 || config.contractRevision === 7) {
-      const migration = migrateRenderRulesToR7(config);
-      if (migration.config) {
-        try { sessionStorage.setItem('cairnmap-config-studio-r6-before-migration', JSON.stringify(config)); } catch { /* original remains the saved config until save */ }
-        setDraftConfig({ ...migrateFieldsToR8(migration.config), revision: config.revision + 1 }); setEditing(true); setReport(null);
-        setMessage(`已生成原生 r8 字段复用迁移草稿；包修订版 r${config.revision + 1}，保存后生效。`); return;
-      }
-      if (!draftConfig) setDraftConfig(clone(savedConfig));
-      setEditing(true); setReport(null); setMessage(`旧包继续使用原生 r6；新规则迁移需处理：${migration.issues.slice(0, 3).join('；')}`); return;
-    }
+    if (config.contractRevision < 9) {try{setDraftConfig(migrateConfigToR9(config));setEditing(true);setReport(null);setMessage('已建立 r9 迁移草稿，核验保存后生效。');}catch(error){setMessage(String(error));}return;}
     if (!draftConfig) setDraftConfig(clone(savedConfig));
     setEditing(true); setReport(null); setMessage(`已读取 ${nodeLabel(selected)} 到本地草稿。`);
   };

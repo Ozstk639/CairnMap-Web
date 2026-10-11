@@ -35,7 +35,7 @@ function makeControl(): WorkflowControl {
  * control. Classification N is generated solely from workflow outputs. */
 export function canonicalizeWorkflow(value: WorkflowDefinition, config: ConfigPackageV3): WorkflowDefinition {
   if (value.mode === 'external') return { ...value, steps: [], outputs: [] };
-  const workflow=config.contractRevision===8?migrateWorkflowForms(value):structuredClone(value);
+  const workflow=config.contractRevision>=8?migrateWorkflowForms(value):structuredClone(value);
   const outputs = workflow.outputs.length ? workflow.outputs : [{ id: uid('output'), classification: { class: '' }, assignments: [], geometry: { selected: 'Point' as GeometryKind } }];
   const forms = workflow.steps.filter(step=>step.kind==='form');
   if(!forms.length)forms.push({id:uid('form'),kind:'form',label:{zh:'基本信息',en:''},controls:[]});
@@ -54,7 +54,7 @@ export function canonicalizeWorkflow(value: WorkflowDefinition, config: ConfigPa
   });
   for(const [index,output] of outputs.entries())if(!drawings.some(step=>step.geometryRole!=='auxiliary'&&step.outputId===output.id))drawings.push({id:`geometry-${output.id}`,kind:'geometry',outputId:output.id,geometry:[output.geometry.selected],label:{zh:`绘制 ${index+1}`,en:''},drawing:{enabledFromThisPage:true,keepDrawingWhenBack:true}});
   const actor=workflow.steps.find(step=>step.kind==='actor')??{id:'actor',kind:'actor' as const,label:{zh:'填写人',en:''}};
-  const tail=config.contractRevision===8?[]:[workflow.steps.find(step=>step.kind==='tagsExtensions')??{id:'tail',kind:'tagsExtensions' as const,label:{zh:'标签与扩展',en:''},tagsExtensions:{tagsEnabled:true,extensionsEnabled:true}}];
+  const tail=config.contractRevision>=8?[]:[workflow.steps.find(step=>step.kind==='tagsExtensions')??{id:'tail',kind:'tagsExtensions' as const,label:{zh:'标签与扩展',en:''},tagsExtensions:{tagsEnabled:true,extensionsEnabled:true}}];
   return {...workflow,target:workflow.target??outputs[0].classification,outputs,steps:[actor,...forms,...tail,...drawings]};
 }
 

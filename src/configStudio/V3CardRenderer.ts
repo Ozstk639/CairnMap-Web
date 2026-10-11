@@ -91,7 +91,7 @@ function lineChipsRow(item: CardItem, record: FeatureRecord, config:ConfigPackag
 
 function rowFor(item: CardItem, record: FeatureRecord, config: ConfigPackageV3, railIndex?: RailNewIndex | null): CardRow | undefined {
   if (!item.visible) return undefined;
-  const defined = resolveEffectiveFields(config,classificationFor(record)).find(field=>field.key===item.source);
+  const defined = config.contractRevision<9?resolveEffectiveFields(config,classificationFor(record)).find(field=>field.key===item.source):undefined;
   if(item.valueMode==='field'&&item.options?.format===undefined&&defined?.format)item={...item,options:{...item.options,format:defined.format}};
   if (item.renderer === 'lineChips') return lineChipsRow(item, record, config, railIndex);
 
@@ -144,7 +144,7 @@ function rowFor(item: CardItem, record: FeatureRecord, config: ConfigPackageV3, 
   if(item.renderer==='text'&&Array.isArray(raw)&&mappedOptions?.length){const values=raw.map(value=>mappedOptions.find(option=>option.value===text(value))?.label.zh??value);return {label,value:values};}
   if (shown !== undefined && item.renderer === 'text') return {label,value:shown};
   if (item.options?.format === 'enum') {
-    if (item.valueMode === 'override') return {label,value:shown ?? rawText};
+    if (config.contractRevision>=9 || item.valueMode === 'override') return {label,value:shown ?? rawText};
     const field = resolveEffectiveFields(config, classificationFor(record)).find(field => field.key === item.source);
     return { label, value: field?.options?.find(option => String(option.value) === rawText)?.label.zh || rawText };
   }

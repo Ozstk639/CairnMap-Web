@@ -6,7 +6,7 @@ import { resolveEffectiveFields, resolveGeometryProfile } from './runtime';
 /** Imports retain the old executed list before discarding registry pointers. */
 export function migrateFieldsToR8(value: ConfigPackageV3): ConfigPackageV3 {
   const config = structuredClone(value);
-  if (value.contractRevision === 8) return config;
+  if (value.contractRevision >= 8) return config;
   const sets = new Map(config.registries.optionSets?.map(set=>[set.id,set.options]) ?? []);
   const copied = (source: { options?:SelectOption[];optionSource?:{registryKey:string} }, field=false) => {
     if (!source.optionSource) return;

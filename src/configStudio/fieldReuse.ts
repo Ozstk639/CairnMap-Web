@@ -38,7 +38,7 @@ export function importFieldIntoControl(config: ConfigPackageV3, workflow: Workfl
     fieldSource: { nodeId, fieldId: field.fieldId, snapshot: fieldSourceSnapshot(field), overrides: [] } };
 }
 export function resolveImportedControl(config: ConfigPackageV3, workflow: WorkflowDefinition, control: WorkflowControl): WorkflowControl {
-  if (!control.fieldSource) return control;
+  if (config.contractRevision>=9 || !control.fieldSource) return control;
   const field = resolveSourceField(config,control.fieldSource);
   if (!field) return control; // Preflight keeps the failed reference visible.
   let generated: WorkflowControl;

@@ -257,6 +257,7 @@ export function resolveEffectiveFields(config: ConfigPackageV3, path: Classifica
   let inherited = true;
   for (const [index, node] of resolveCategoryNodes(config, path).entries()) {
     if (index > 0 && !inherited) values.clear();
+    if(index>0&&config.contractRevision>=9&&node.receiveFromParent?.fields===false)for(const [key,field] of values)if(field.inheritance!=='sealed')values.delete(key);
     if (index > 0) for (const [key,field] of values) if (field.inheritance === 'localOnly') values.delete(key);
     for (const field of node.fields) {
       const key = field.overrideOf || field.key;
@@ -270,7 +271,7 @@ export function resolveEffectiveFields(config: ConfigPackageV3, path: Classifica
 }
 
 export function resolveWorkflowSelectOptions(config: ConfigPackageV3, control: Pick<WorkflowControl, 'options' | 'optionSource'>): SelectOption[] {
-  if (config.contractRevision === 8) return control.options ?? [];
+  if (config.contractRevision >= 8) return control.options ?? [];
   return control.optionSource ? config.registries.optionSets?.find(set => set.id === control.optionSource?.registryKey)?.options ?? [] : control.options ?? [];
 }
 
@@ -288,7 +289,7 @@ function systemFieldDefinition(key: string): FieldDefinition {
 }
 
 export function resolveSelectableFields(config: ConfigPackageV3, scope: ClassificationPath, options: { includeSystem?: boolean } = {}): FieldDefinition[] {
-  const systemKeys=[...SYSTEM_FIELD_KEYS].filter(key=>config.contractRevision!==8||!['Skind','Skind2'].includes(key));
+  const systemKeys=[...SYSTEM_FIELD_KEYS].filter(key=>config.contractRevision<8||!['Skind','Skind2'].includes(key));
   const compiled = compiledConfigs.get(config); const cacheKey = `${compiledPathKey(scope)}:${options.includeSystem !== false}`;
   const cached = compiled?.selectable.get(cacheKey);
   if (cached) { compiled!.hits++; return cached; }
@@ -308,7 +309,7 @@ function resolveInheritedValue<T>(config: ConfigPackageV3, path: ClassificationP
   let result: T | undefined;
   let inherited = true;
   for (const [index, node] of resolveCategoryNodes(config, path).entries()) {
-    if (index > 0 && !inherited) result = undefined;
+    if (index > 0 && (!inherited || config.contractRevision>=9&&node.receiveFromParent?.[branch]===false)) result = undefined;
     const candidate = read(node);
     if (candidate !== undefined) result = candidate;
     inherited = inheritanceControls(node)[branch];
@@ -597,7 +598,8 @@ function validateProfile(profile: GeometryProfile, geometry: GeometryKind, path:
   const triggers = profile.interaction?.triggers ?? {};
   for (const [key, enabled] of Object.entries(triggers)) if (enabled && !allowed.has(key)) issue(issues, 'error', 'interaction-trigger-geometry-invalid', path, `${key} 不适用于 ${geometry}。`);
   if (profile.enabled && !Object.values(triggers).some(Boolean)) issue(issues, 'warning', 'interaction-trigger-none', path, '已启用的几何类型没有交互触发器，将不能通过地图打开信息卡。');
-  if (!profile.zoomPriority.rules.length) issue(issues, 'error', 'render-rule-missing', path, '每种已启用几何至少需要一个渲染规则。');
+  if (!profile.zoomPriority.rules.length && !(config.contractRevision>=9&&profile.renderState==='unconfigured')) issue(issues, 'error', 'render-rule-missing', path, '每种已启用几何至少需要一个渲染规则。');
+  if(config.contractRevision>=9&&profile.renderState==='unconfigured'&&profile.zoomPriority.rules.length)issue(issues,'error','unconfigured-render-has-rules',path,'未配置显示状态不能含有活动规则。');
   const intervals: Array<{ id: string; min: number; max: number }> = [];
   for (const [index, rule] of profile.zoomPriority.rules.entries()) {
     const rulePath = `${path}/renderRules/${rule.id || index + 1}`;
@@ -686,6 +688,7 @@ function sourceExists(source: string, fields: Set<string>): boolean {
 
 function validateCard(node: CategoryNode, config: ConfigPackageV3, issues: ConfigValidationIssue[]): void {
   const path = `nodes/${node.nodeId}/card`;
+  if(config.contractRevision>=9&&node.card?.mode==='fields'&&node.card.items.some(item=>item.labelMode||item.valueMode))issue(issues,'error','live-card-source-forbidden',path,'r9 信息卡不保留跟随/覆写状态，请先迁移。');
   const card = resolveCardConfiguration(config, node.path);
   if (!card) {
     // A blank r5 package may intentionally contain only rendering rules.
@@ -716,7 +719,7 @@ function validateCard(node: CategoryNode, config: ConfigPackageV3, issues: Confi
     const mapped = item.valueOptions ?? [];
     if (mapped.some(option=>!option.value.trim()) || new Set(mapped.map(option=>option.value)).size!==mapped.length) issue(issues,'error','card-value-map-invalid',itemPath,'信息卡覆写对照必须有唯一非空的存储值。');
     const definition=resolveEffectiveFields(config,node.path).find(field=>field.key===item.source);
-    if(config.contractRevision===8&&item.valueMode==='override'&&definition?.type==='enum'&&mapped.some(option=>!definition.options?.some(value=>value.value===option.value)))issue(issues,'error','card-field-map-conflict',itemPath,`信息卡 ${item.source} 覆写对照使用了来源字段已删除的选项，请调整覆写或恢复跟随。`);
+    if(config.contractRevision>=8&&item.valueMode==='override'&&definition?.type==='enum'&&mapped.some(option=>!definition.options?.some(value=>value.value===option.value)))issue(issues,'error','card-field-map-conflict',itemPath,`信息卡 ${item.source} 覆写对照使用了来源字段已删除的选项，请调整覆写或恢复跟随。`);
     if (item.options?.format && !['plain','externalLink','boolean','json','classification','enum','date','world'].includes(item.options.format)) issue(issues, 'error', 'card-format-invalid', itemPath, '未知的信息卡格式。');
     if (config.contractRevision === 5 && item.options?.format && ['classification','enum','date','world'].includes(item.options.format)) issue(issues, 'error', 'card-format-revision-invalid', itemPath, '该信息卡格式要求原生 r6。');
     if (item.renderer === 'lineChips' && !item.options?.lineChipSource) issue(issues, 'error', 'card-line-chips-source-required', itemPath, '关联线路胶囊必须选择平台、车站或车站建筑来源。');
@@ -779,7 +782,7 @@ export function validateWorkflowOutput(output: WorkflowOutput, _outputIndex: num
     if (!assignment.id || assignmentIds.has(assignment.id)) issue(issues, 'error', 'workflow-assignment-id-invalid', assignmentPath, '组装行标识必须存在且不能重复。');
     const field=resolveEffectiveFields(config,output.classification).find(field=>field.key===assignment.target);
     const control=controlsFor(workflow).find(control=>control.slot===assignment.expression.trim());
-    if (control && field && (control.fieldSource||config.contractRevision===8)) {
+    if (control && field && (control.fieldSource||config.contractRevision>=8)) {
       const leaf=control.kind==='group'?control.group?.itemFields[0]:control;
       const returned=leaf&&(leaf.kind==='featureSearch'||leaf.kind==='coarseSearch')&&leaf.search?resolveSelectableFields(config,leaf.search.target).find(field=>field.key===leaf.search!.returnField):undefined;
       const actualType=control.kind==='group'&&control.group?.storage==='object'?'json':leaf?.kind==='number'?'number':leaf?.kind==='toggle'?'boolean':leaf?.kind==='select'?leaf.optionValueType??'string':returned?returned.type==='enum'?returned.optionValueType??'string':returned.type==='reference'?'string':returned.type:leaf?.kind==='json'?'json':'string';
@@ -816,6 +819,7 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
   }
   workflow = resolveWorkflowFields(config,workflow);
   const base = `workflows/${workflow.id}`;
+  if(config.contractRevision>=9)for(const step of workflow.steps)for(const control of step.controls??[])if([control,...(control.group?.itemFields??[])].some(item=>item.fieldSource))issue(issues,'error','live-field-source-forbidden',base,'r9 预填不保留来源关系，请迁移展开旧控件。');
   try { workflowOutputAssemblyOrder(workflow); } catch (error) { issue(issues, 'error', 'workflow-output-dependency-invalid', base, error instanceof Error ? error.message : '输出依赖无效。'); }
   const checkIds = (items: Array<{ id: string }>, kind: string) => {
     const ids = new Set<string>();
@@ -835,7 +839,7 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
   if (actorIndex !== 0) issue(issues, 'error', 'workflow-actor-must-be-first', base, '填写人页必须且只能位于工作流第一步。');
   if (!formIndexes.length) issue(issues, 'error', 'workflow-form-page-required', base, '工作流至少需要一个基本信息填卡页。');
   if (!geometryIndexes.length || geometryIndexes[geometryIndexes.length - 1] !== workflow.steps.length - 1) issue(issues, 'error', 'workflow-geometry-must-be-last', base, '最后一步必须是任一绘制页。');
-  if (config.contractRevision!==8 && (tailIndex < 0 || !geometryIndexes.length || tailIndex !== geometryIndexes[0] - 1)) issue(issues, 'error', 'workflow-tail-before-geometry-required', base, 'tags/extensions 尾部区必须紧邻第一张绘制页。');
+  if (config.contractRevision<8 && (tailIndex < 0 || !geometryIndexes.length || tailIndex !== geometryIndexes[0] - 1)) issue(issues, 'error', 'workflow-tail-before-geometry-required', base, 'tags/extensions 尾部区必须紧邻第一张绘制页。');
   if (formIndexes.some((index) => index <= actorIndex || (geometryIndexes.length && index >= geometryIndexes[0]))) issue(issues, 'error', 'workflow-form-page-order-invalid', base, '基本信息页必须位于填写人和 tags/extensions 尾部区之间。');
   if (workflow.steps.filter(step=>step.kind==='geometry'&&step.geometryRole!=='auxiliary').length !== workflow.outputs.length) issue(issues, 'error', 'workflow-geometry-output-count-invalid', base, '每个工作流输出必须有且只有一个尾部绘制页。');
   const geometryOutputIds = workflow.steps.filter((step) => step.kind === 'geometry' && step.geometryRole!=='auxiliary').map((step) => step.outputId);
@@ -843,7 +847,7 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
 
   const slots = new Set<string>();
   const controlList = controlsFor(workflow);
-  if(config.contractRevision===8){
+  if(config.contractRevision>=8){
     const modules=controlList.filter(control=>control.kind==='tagsExtensions');
     if(tailIndex>=0||modules.length!==1||!modules[0]?.systemManaged||workflow.steps.some(step=>step.kind!=='form'&&step.controls?.some(control=>control.kind==='tagsExtensions')))issue(issues,'error','workflow-inline-annotations-required',base,'必须在信息收集页保留一个不可删除、可移动的标签与扩展固定单元。');
   }
@@ -1096,7 +1100,7 @@ export function validateConfigPackage(config: ConfigPackageV3, mountedRecords: M
   const issues: ConfigValidationIssue[] = [];
   const structure = validateNativeStructure(config);
   if (structure.length) return { schemaVersion: 'cairnmap.config-validation-report.v3', valid: false, createdAt: new Date().toISOString(), issues: structure.map(item => ({ severity: 'error', code: 'native-contract-structure-invalid', ...item })) };
-  if (config.contractRevision===8 && (config.registries.optionSets || config.nodes.some(node=>node.fields.some(field=>field.optionSource)) || config.workflows.some(workflow=>controlsFor(workflow).some(control=>control.optionSource)))) issue(issues,'error','legacy-option-source-forbidden','registries','r8 使用字段内对照；旧全局选项来源必须先迁移。');
+  if (config.contractRevision>=8 && (config.registries.optionSets || config.nodes.some(node=>node.fields.some(field=>field.optionSource)) || config.workflows.some(workflow=>controlsFor(workflow).some(control=>control.optionSource)))) issue(issues,'error','legacy-option-source-forbidden','registries','r8 使用字段内对照；旧全局选项来源必须先迁移。');
   if (config.schemaVersion !== 'cairnmap.config-package.v3') issue(issues, 'error', 'schema-version-invalid', 'manifest', '配置包不是 cairnmap.config-package.v3。');
   if (!isNativeConfigRevision(config.contractRevision)) issue(issues, 'error', 'contract-revision-invalid', 'manifest', '配置包必须使用 V3.2 原生契约 revision 5/6。');
   validateEngine(config, issues);
@@ -1113,6 +1117,7 @@ export function validateConfigPackage(config: ConfigPackageV3, mountedRecords: M
   const paths = new Set<string>();
   for (const node of config.nodes) {
     const base = `nodes/${node.nodeId}`;
+    if(config.contractRevision>=9)for(const field of node.fields)if(field.defaultValue!==undefined||field.placeholder!==undefined)issue(issues,'error','field-input-setting-forbidden',base,'输入默认值和提示属于控件，不属于字段定义。');
     const parentScope = parentClassificationPath(node.path);
     const inheritedFields = parentScope ? resolveEffectiveFields(config, parentScope) : [];
     for (const field of node.fields) {

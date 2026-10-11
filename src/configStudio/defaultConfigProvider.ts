@@ -62,7 +62,7 @@ export function persistActiveConfig(value: ConfigPackageV3, increment=false): Pr
   });
   state.writes=task;return task;
 }
-export async function restoreApplicationDefault():Promise<void> {await state.writes.catch(()=>undefined);const seed=await loadDefaultConfig();await saveActiveConfigChoice({kind:'default'});state.active=seed;try{localStorage.setItem(CHOICE,JSON.stringify({kind:'default'}));}catch{/* durable pointer is in IndexedDB */}mirror(seed);}
+export async function restoreApplicationDefault():Promise<void> {await state.writes.catch(()=>undefined);const seed=await loadDefaultConfig();if(state.active&&await fingerprint(state.active)!==await fingerprint(seed))await archiveConfigRecovery('before-restore-default',JSON.stringify(state.active));await saveActiveConfigChoice({kind:'default'});state.active=seed;try{localStorage.setItem(CHOICE,JSON.stringify({kind:'default'}));}catch{/* durable pointer is in IndexedDB */}mirror(seed);}
 export async function restoreConfigRecovery(key:string):Promise<void> {const raw=await readConfigRecovery(key);if(!raw)throw Error('恢复副本不存在。');await persistActiveConfig(JSON.parse(raw.raw),true);}
 export async function downloadConfigRecovery(key:string):Promise<void> {const entry=await readConfigRecovery(key);if(!entry)throw Error('恢复副本不存在。');const url=URL.createObjectURL(new Blob([entry.raw],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download='cairnmap-recovery-'+entry.source+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 export const getConfigRecoveries=():Promise<ConfigRecovery[]>=>listConfigRecoveries();

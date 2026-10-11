@@ -4,9 +4,11 @@ import { classificationPathKey, resolveEffectiveFields } from './runtime';
 import { CategoryPathPicker } from './CategoryPathPicker';
 import { fieldImportErrors, importFieldIntoControl } from './fieldReuse';
 import { PROTECTED_WORKFLOW_TARGETS } from './workflowExpression';
+import { WorkflowPrefill } from './WorkflowPrefill';
 
 export function WorkflowFieldImport({config,workflow,value,onChange,onImport,groupField=false}:{config:ConfigPackageV3;workflow:WorkflowDefinition;value:WorkflowControl|WorkflowGroupField;onChange:(value:WorkflowControl|WorkflowGroupField)=>void;onImport?:(control:WorkflowControl,field:string,outputId?:string)=>void;groupField?:boolean}) {
   const [open,setOpen]=useState(false),[query,setQuery]=useState(''),[path,setPath]=useState<ClassificationPath>({class:''}),[picked,setPicked]=useState(''),[error,setError]=useState(''),[bind,setBind]=useState(false),[outputId,setOutputId]=useState(workflow.outputs[0]?.id??'');
+  if(config.contractRevision>=9)return <WorkflowPrefill config={config} workflow={workflow} value={value} onChange={onChange} onImport={onImport} groupField={groupField}/>;
   const matches=config.nodes.flatMap(node=>(path.class && !Object.entries(path).filter(([,v])=>v).every(([key,v])=>node.path[key as keyof ClassificationPath]===v)?[]:resolveEffectiveFields(config,node.path).filter(field=>field.scenes?.workflow!==false && !PROTECTED_WORKFLOW_TARGETS.has(field.key) && field.key!=='ID' && (!groupField||field.cardinality==='single')).map(field=>({node,field}))))
     .filter(({node,field})=>!query.trim()||`${classificationPathKey(node.path)} ${Object.values(node.classificationLabels??{}).map(label=>label.zh).join(' ')} ${field.key} ${field.labels.zh} ${field.labels.en}`.toLowerCase().includes(query.trim().toLowerCase()));
   const selected=matches.find(item=>`${item.node.nodeId}/${item.field.fieldId}`===picked);

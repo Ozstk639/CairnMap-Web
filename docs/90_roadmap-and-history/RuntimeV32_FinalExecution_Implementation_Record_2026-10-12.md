@@ -13,7 +13,7 @@
 | 基线冻结与原件保留 | 30 组 verify 与 build 已通过（保留既有大分块警告） |
 | 输入可见性、重复设置 | 已完成：verify/build；真实 1440/390 DOM 边框及单一设置入口通过，零运行错误 |
 | 默认种子和活动配置统一 | 已完成：verify/build；独立新浏览器六条持久性路径通过，零运行错误 |
-| r9 迁移、一次性预填、纯净字段/卡片 | 待实施 |
+| r9 迁移、一次性预填、纯净字段/卡片 | 已完成：31 组 verify/build；5130 渲染结果、34 完整 V1 records、98 独立 V1 卡片相等；真实控件和卡片预填/保存通过 |
 | 唯一分类入口、三模式/四同步/冲突报告 | 待实施 |
 | 分类文件、Class 树替换事务 | 待实施 |
 | 条件公式、值分类设色 | 待实施 |
@@ -27,3 +27,5 @@
 基线冻结提交：58f07d1。主题 01 证据：theme-01-verify/build.log、r9-editor-surface-acceptance.json、r9-editor-visible-inputs.png。测试脚本覆盖真实 DOM 而不是只搜索源码。
 
 主题 01 提交：f18d29b。主题 02 发布原 r8/r4 JSON 为独立资源，SHA256 与原件相同，活动选择和包版本同事务提交，恢复副本不覆盖 latest。六条浏览器证据见 r9-default-config-acceptance.json；CDP 9240 为工作树 .cache 下新独立 Edge profile。
+
+主题 02 提交：35998e3；Windows 摘要资源 EOL 固定提交：f373cdb。主题 03 证据见 theme-03-verify/build.log、r9-prefill-acceptance.json；增加 test:r9-migration-prefill 到统一验证。r9迁移先展开旧有效值再去来源关系；字段默认值/提示移出，TPP 条件记录约束保留。默认资源仍为冻结 r8/r4，最终全部新能力通过后再安装 r9/r5。
