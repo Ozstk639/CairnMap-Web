@@ -1,3 +1,4 @@
+import { getActiveConfigSnapshot, persistActiveConfig, restoreApplicationDefault } from './defaultConfigProvider';
 import { ValueOptionsEditor } from './ValueOptionsEditor';
 import { ModuleHelp } from './ModuleHelp';
 import { GripOrderControls } from './GripOrderControls';
@@ -17,7 +18,7 @@ import { CollisionMetricEditor } from './CollisionMetricEditor';
 import { LabelPlacementSettings } from './LabelPlacementSettings';
 import { NativeSymbolSettings } from './NativeSymbolSettings';
 import { prepareConfigForActivation } from './configActivation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ChevronDown, ChevronRight, Download, FileUp, Maximize2, Minimize2, Plus, Save, SlidersHorizontal, X } from 'lucide-react';
 import { buildConfigPackageArchive, downloadConfigPackage, readConfigPackage } from './package';
 import { classificationPathKey, fieldScope, fieldShortKey, resolveEffectiveFields, resolveGeometryProfile, resolveRenderExtensions, validateConfigPackage } from './runtime';
@@ -79,17 +80,7 @@ function readMountedRecords(): MountedFeatureRecord[] {
   try { return JSON.parse(sessionStorage.getItem('cairnmap-config-studio-mounted-records') ?? '[]') as MountedFeatureRecord[]; }
   catch { return []; }
 }
-function readLocalConfig(): ConfigPackageV3 | undefined {
-  try {
-    const value = JSON.parse(sessionStorage.getItem('cairnmap-config-studio-saved') ?? sessionStorage.getItem('cairnmap-config-studio-draft') ?? 'null') as ConfigPackageV3 | null;
-    if (value === null) return undefined;
-    if (value?.schemaVersion !== 'cairnmap.config-package.v3') throw new Error('本地配置 schemaVersion 无效；原始 JSON 已保留用于恢复。');
-    return prepareConfigForActivation(value);
-  } catch (error) {
-    try { const raw = sessionStorage.getItem('cairnmap-config-studio-saved') ?? sessionStorage.getItem('cairnmap-config-studio-draft'); if (raw) sessionStorage.setItem('cairnmap-config-studio-rejected-recovery', raw); sessionStorage.setItem('cairnmap-config-studio-recovery-issue', error instanceof Error ? error.message : '本地配置无效。'); } catch { /* storage unavailable */ }
-    return undefined;
-  }
-}
+function readLocalConfig(): ConfigPackageV3 { return getActiveConfigSnapshot(); }
 function updateNode(config: ConfigPackageV3, nodeId: string, updater: (node: CategoryNode) => CategoryNode): ConfigPackageV3 {
   return { ...config, nodes: config.nodes.map((node) => node.nodeId === nodeId ? updater(node) : node) };
 }
@@ -585,7 +576,7 @@ export function ConfigStudio({ onClose, mountedRecords, initialTab }: { onClose:
   const [workflowHasDraft, setWorkflowHasDraft] = useState(false);
   const [savedConfig, setSavedConfig] = useState<ConfigPackageV3>(() => {
     const stored = readLocalConfig();
-    return stored?.nodes.length ? stored : createConfigPackageFromCurrentProject();
+    return stored;
   });
   const [draftConfig, setDraftConfig] = useState<ConfigPackageV3 | null>(null);
   const [selectedId, setSelectedId] = useState('');
@@ -610,10 +601,6 @@ export function ConfigStudio({ onClose, mountedRecords, initialTab }: { onClose:
     setEditing(true);
     setReport(null);
   };
-  useEffect(() => { try {
-    sessionStorage.setItem('cairnmap-config-studio-saved', JSON.stringify(savedConfig));
-    sessionStorage.setItem('cairnmap-config-studio-draft', JSON.stringify(savedConfig));
-  } catch { /* browser storage is an optional convenience */ } }, [savedConfig]);
   const switchTab = (next: StudioTab) => {
     if (!canSwitchStudioTab(activeTab, next, { feature: draftConfig !== null || editing || categoryHasDraft, workflow: workflowHasDraft })) {
       setMessage('请先保存或放弃当前草稿，再切换设计标签。');
@@ -625,12 +612,11 @@ export function ConfigStudio({ onClose, mountedRecords, initialTab }: { onClose:
     target.searchParams.set('tab', next);
     window.history.replaceState(null, '', target);
   };
-  const saveWorkflowPackage = (next: ConfigPackageV3): boolean => {
+  const saveWorkflowPackage = async (next: ConfigPackageV3): Promise<boolean> => {
     const nextReport = validateConfigPackage(next, records);
     setReport(nextReport);
     if (!nextReport.valid) { setMessage('工作流保存被配置包核验阻断。'); return false; }
-    setSavedConfig(next); setMessage('工作流已保存到当前配置包；草稿已结束。');
-    return true;
+    try {setSavedConfig(await persistActiveConfig(next,true)); setMessage('工作流已持久保存到当前活动配置。');return true;}catch(error){setMessage(String(error));return false;}
   };
 
   const readSelected = () => {
@@ -664,18 +650,18 @@ export function ConfigStudio({ onClose, mountedRecords, initialTab }: { onClose:
     const next = validateConfigPackage(config, records);
     setReport(next); setMessage(next.valid ? '核验通过：当前草稿可保存。' : `核验发现 ${next.issues.filter((item) => item.severity === 'error').length} 项阻断问题。`);
   };
-  const save = () => {
+  const save = async () => {
     const next = validateConfigPackage(config, records);
     setReport(next);
     if (!next.valid) { setMessage('保存被阻断；请先处理问题组。'); return; }
     if (!window.confirm('将当前 V3.2 草稿保存到浏览器本地配置。确定继续吗？')) return;
-    setSavedConfig(config); setDraftConfig(null); setEditing(false); setMessage('已保存本地 V3.2 配置。');
+    try {setSavedConfig(await persistActiveConfig(config,true));setDraftConfig(null);setEditing(false);setMessage('已保存本地活动配置，刷新后继续使用。');}catch(error){setMessage(String(error));}
   };
   const discard = () => { setDraftConfig(null); setEditing(false); setReport(null); setMessage('已放弃未保存草稿。'); };
-  const remigrateV1 = () => {
+  const remigrateV1 = async () => {
     if (!window.confirm('这会以当前 V1 工程重新生成 V3.2 迁移包，并覆盖当前本地草稿。继续吗？')) return;
     const next = createConfigPackageFromCurrentProject();
-    setSavedConfig(next); setDraftConfig(null); setSelectedId(''); setEditing(false); setReport(null);
+    try {setSavedConfig(await persistActiveConfig(next,true));}catch(error){setMessage(String(error));return;} setDraftConfig(null); setSelectedId(''); setEditing(false); setReport(null);
     setMessage('已按当前 V1 真实字段重新生成 V3.2 迁移包。');
   };
   const importPackage = async (file?: File) => {
@@ -686,7 +672,7 @@ export function ConfigStudio({ onClose, mountedRecords, initialTab }: { onClose:
       const importedReport = validateConfigPackage(next, records);
       if (importedReport.issues.some(issue => issue.code === 'native-contract-structure-invalid')) { setReport(importedReport); setMessage('导入结构无效；已保存版本保持原样。请按问题路径修正文件后重新导入。'); return; }
       if (!importedReport.valid) { setDraftConfig(next); setSelectedId(''); setEditing(true); setReport(importedReport); setMessage('已载入隔离草案；修正阻断问题前不能保存或启用。'); return; }
-      setSavedConfig(prepareConfigForActivation(next)); setDraftConfig(null); setSelectedId(''); setEditing(false); setReport(importedReport); setMessage(`已导入 ${next.packageId} r${next.revision}。`);
+      setSavedConfig(await persistActiveConfig(prepareConfigForActivation(next))); setDraftConfig(null); setSelectedId(''); setEditing(false); setReport(importedReport); setMessage(`已导入 ${next.packageId} r${next.revision}。`);
     } catch (error) { setMessage(error instanceof Error ? error.message : '配置包读取失败。'); }
   };
   const exportPackage = async () => {
@@ -697,7 +683,7 @@ export function ConfigStudio({ onClose, mountedRecords, initialTab }: { onClose:
     setReport(nextReport);
     if (!nextReport.valid) { setMessage('整包保存被核验阻断。'); return; }
     const blob = await buildConfigPackageArchive(next, nextReport);
-    setSavedConfig(next); downloadConfigPackage(blob, next); setRevisionOpen(false); setMessage(`已下载 ${next.packageId} r${revision}。`);
+    try {setSavedConfig(await persistActiveConfig(next));}catch(error){setMessage(String(error));return;} downloadConfigPackage(blob, next); setRevisionOpen(false); setMessage(`已下载 ${next.packageId} r${revision}。`);
   };
   const inheritedGeometry = selected ? geometries.find((geometry) => Boolean(resolveGeometryProfile(config, selected.path, geometry)?.enabled)) : undefined;
   const geometry = selected?.geometryType ?? inheritedGeometry;
@@ -707,7 +693,7 @@ export function ConfigStudio({ onClose, mountedRecords, initialTab }: { onClose:
   const activeScenario = compatibleScenarios.some((item) => item.id === scenario) ? scenario : compatibleScenarios[0]?.id;
   const updateSelected = (updater: (node: CategoryNode) => CategoryNode) => selected && setConfig((current) => updateNode(current, selected.nodeId, updater));
 
-  return <main className="config-editor fixed inset-0 z-[3000] flex h-screen flex-col overflow-hidden bg-slate-100 text-slate-800"><header className="flex shrink-0 flex-wrap items-center gap-3 border-b bg-white px-5 py-3"><SlidersHorizontal className="h-5 w-5 text-violet-600" /><div className="min-w-0 flex-1"><h1 className="font-bold">配置文件工作台 · V3.2 原生渲染</h1><p className="text-xs text-slate-500">{savedConfig.packageId} · 契约 r{savedConfig.contractRevision} · World 自动归一化、原生渲染、信息卡和标准工作流均以可编辑 V3 配置承接。</p></div><button type="button" className="rounded border px-3 py-1.5 text-sm" disabled={Boolean(draftConfig) || workflowHasDraft} onClick={remigrateV1}>从 V1 重新生成</button><button type="button" className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm" disabled={Boolean(draftConfig) || workflowHasDraft} onClick={() => uploadRef.current?.click()}><FileUp className="h-4 w-4" />导入</button><button type="button" className="inline-flex items-center gap-1 rounded bg-emerald-600 px-3 py-1.5 text-sm text-white" disabled={Boolean(draftConfig) || workflowHasDraft} onClick={() => { setNextRevision(savedConfig.revision + 1); setRevisionOpen(true); }}><Download className="h-4 w-4" />整包下载</button><button type="button" className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm" disabled={!selected} onClick={() => setEditorExpanded((value) => !value)}>{editorExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}{editorExpanded ? '显示验证器' : '编辑器全屏'}</button><button type="button" className="rounded p-2 hover:bg-slate-100" onClick={() => { if (draftConfig || workflowHasDraft || categoryHasDraft) { setMessage('请先保存或放弃当前草稿，再关闭工作台。'); return; } onClose(); }} aria-label="关闭"><X className="h-5 w-5" /></button><input ref={uploadRef} className="hidden" type="file" accept=".zip,.json,application/zip,application/json" onChange={(event) => void importPackage(event.target.files?.[0])} /></header>
+  return <main className="config-editor fixed inset-0 z-[3000] flex h-screen flex-col overflow-hidden bg-slate-100 text-slate-800"><header className="flex shrink-0 flex-wrap items-center gap-3 border-b bg-white px-5 py-3"><SlidersHorizontal className="h-5 w-5 text-violet-600" /><div className="min-w-0 flex-1"><h1 className="font-bold">配置文件工作台 · V3.2 原生渲染</h1><p className="text-xs text-slate-500">{savedConfig.packageId} · 配置 r{savedConfig.revision} · 契约 r{savedConfig.contractRevision} · World 自动归一化、原生渲染、信息卡和标准工作流均以可编辑 V3 配置承接。</p></div><button type="button" className="rounded border px-3 py-1.5 text-sm" disabled={Boolean(draftConfig) || workflowHasDraft} onClick={remigrateV1}>从 V1 重新生成</button><button type="button" className="rounded border px-3 py-1.5 text-sm" disabled={Boolean(draftConfig) || workflowHasDraft || categoryHasDraft} onClick={()=>void restoreApplicationDefault().then(()=>location.reload()).catch(error=>setMessage(String(error)))}>恢复应用默认配置</button><button type="button" className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm" disabled={Boolean(draftConfig) || workflowHasDraft} onClick={() => uploadRef.current?.click()}><FileUp className="h-4 w-4" />导入</button><button type="button" className="inline-flex items-center gap-1 rounded bg-emerald-600 px-3 py-1.5 text-sm text-white" disabled={Boolean(draftConfig) || workflowHasDraft} onClick={() => { setNextRevision(savedConfig.revision + 1); setRevisionOpen(true); }}><Download className="h-4 w-4" />整包下载</button><button type="button" className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm" disabled={!selected} onClick={() => setEditorExpanded((value) => !value)}>{editorExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}{editorExpanded ? '显示验证器' : '编辑器全屏'}</button><button type="button" className="rounded p-2 hover:bg-slate-100" onClick={() => { if (draftConfig || workflowHasDraft || categoryHasDraft) { setMessage('请先保存或放弃当前草稿，再关闭工作台。'); return; } onClose(); }} aria-label="关闭"><X className="h-5 w-5" /></button><input ref={uploadRef} className="hidden" type="file" accept=".zip,.json,application/zip,application/json" onChange={(event) => void importPackage(event.target.files?.[0])} /></header>
     <nav className="flex shrink-0 gap-2 border-b bg-white px-5 py-2" aria-label="设计工作区"><button type="button" role="tab" aria-selected={activeTab === 'features'} className={`rounded px-4 py-2 text-sm ${activeTab === 'features' ? 'bg-violet-600 text-white' : 'bg-slate-100'}`} onClick={() => switchTab('features')}>要素设计</button><button type="button" role="tab" aria-selected={activeTab === 'workflows'} className={`rounded px-4 py-2 text-sm ${activeTab === 'workflows' ? 'bg-violet-600 text-white' : 'bg-slate-100'}`} onClick={() => switchTab('workflows')}>工作流设计</button><span role="status" className="min-w-0 self-center text-xs text-slate-600">{message}</span></nav>
     {activeTab === 'workflows' ? <div className="min-h-0 flex-1 overflow-hidden p-3"><WorkflowWorkbench config={savedConfig} records={records} onChange={saveWorkflowPackage} onDraftStateChange={setWorkflowHasDraft} /></div> : <div className={`grid min-h-0 flex-1 auto-rows-fr grid-cols-1 gap-3 overflow-hidden p-3 ${editorExpanded ? '' : 'xl:grid-cols-2'}`}>{selected && !editorExpanded ? <section className="flex h-full min-h-[40vh] min-w-0 flex-col overflow-hidden rounded-xl border bg-white p-3 xl:min-h-0"><div className="mb-2 flex shrink-0 items-center justify-between gap-2"><strong>显示规则验证器</strong>{activeScenario ? <label className="text-xs">样例状态<select className="ml-1 rounded border px-2 py-1" value={activeScenario} onChange={(event) => setScenario(event.target.value)}>{compatibleScenarios.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label> : null}</div>{selected && activeScenario ? <div className="h-full min-h-[300px] min-w-0 flex-1 overflow-hidden"><ConfigRuntimePreview config={config} node={selected} scenario={activeScenario} onRuntimeError={(error) => setMessage(`验证器错误：${error.message}`)} /></div> : <div className="flex h-full min-h-[300px] items-center justify-center rounded border border-dashed p-6 text-sm text-slate-500">先新建分类、选择几何类型并启用首条渲染规则。验证器会调用与主地图相同的 V3.2 RuleDrivenLayer；中心固定，允许滚轮缩放。</div>}</section> : null}
       <section className={`min-h-0 overflow-y-auto rounded-xl border bg-white p-4 ${editorExpanded ? 'col-span-full' : ''}`}><div className="mb-3 rounded border bg-slate-50 p-2 text-xs text-slate-700">{message}</div><EngineEditor config={config} engine={config.engine ?? createV32EngineDefaults()} onChange={(engine) => setConfig({ ...config, engine })} />

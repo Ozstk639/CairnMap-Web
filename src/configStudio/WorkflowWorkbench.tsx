@@ -26,7 +26,7 @@ type WorkflowArtifact = {
 export interface WorkflowWorkbenchProps {
   config: ConfigPackageV3;
   /** Called only after a workflow has passed its own validation and is saved. */
-  onChange: (config: ConfigPackageV3) => boolean | void;
+  onChange: (config: ConfigPackageV3) => boolean | void | Promise<boolean | void>;
   onDraftStateChange?: (active: boolean) => void;
   records?: MountedFeatureRecord[];
 }
@@ -74,7 +74,7 @@ export function WorkflowWorkbench({ config, onChange, onDraftStateChange, record
     if (!draft) return;
     setReport(validateWorkflowDefinition(canonicalizeWorkflow(draft, config), config));
   };
-  const save = () => {
+  const save = async () => {
     if (!draft) return;
     const next = canonicalizeWorkflow(draft, config);
     const nextReport = validateWorkflowDefinition(next, config);
@@ -90,7 +90,7 @@ export function WorkflowWorkbench({ config, onChange, onDraftStateChange, record
     };
     const packageReport = validateConfigPackage(nextPackage, records);
     setReport(packageReport);
-    if (!packageReport.valid || onChange(nextPackage) === false) return;
+    if (!packageReport.valid || await onChange(nextPackage) === false) return;
     setSelectedId(next.id);
     setDraft(null);
   };

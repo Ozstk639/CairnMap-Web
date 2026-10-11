@@ -8,6 +8,9 @@ const DB_NAME = 'cairnmap-config-lab-v32';
 const STORE = 'packages';
 const LATEST = 'latest';
 const HISTORY_PREFIX = 'revision:';
+const RECOVERY_PREFIX = 'recovery:';
+export type ConfigRecovery = { key: string; source: string; raw: string; createdAt: string; packageId?: string; revision?: number };
+export type ActiveConfigChoice = {kind:'default'|'custom';fingerprint?:string};
 
 function packageKey(config: ConfigPackageV3): string {
   return `${HISTORY_PREFIX}${config.packageId}:${config.revision}`;
@@ -61,7 +64,7 @@ export async function listConfigLabPackages(onRejected?: (diagnostic: string) =>
   }).finally(() => database.close());
 }
 
-export async function saveConfigLabPackage(config: ConfigPackageV3): Promise<void> {
+export async function saveConfigLabPackage(config: ConfigPackageV3, selection?:ActiveConfigChoice): Promise<void> {
   config = prepareConfigForActivation(config);
   const database = await db();
   await new Promise<void>((resolve, reject) => {
@@ -77,8 +80,36 @@ export async function saveConfigLabPackage(config: ConfigPackageV3): Promise<voi
         } catch (error) { transaction.abort(); reject(error); return; }
       }
       store.put(config, packageKey(config)); store.put(config, LATEST);
+      if(selection)store.put(selection,'active-choice');
     };
     transaction.onerror = () => reject(transaction.error ?? new Error('无法保存本地配置。'));
     transaction.oncomplete = () => resolve();
   }).finally(() => database.close());
+}
+
+export async function readActiveConfigChoice():Promise<ActiveConfigChoice|undefined> {
+  const database=await db();return new Promise<ActiveConfigChoice|undefined>((resolve,reject)=>{const request=database.transaction(STORE,'readonly').objectStore(STORE).get('active-choice');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);}).finally(()=>database.close());
+}
+export async function saveActiveConfigChoice(choice:ActiveConfigChoice):Promise<void> {
+  const database=await db();return new Promise<void>((resolve,reject)=>{const transaction=database.transaction(STORE,'readwrite');transaction.objectStore(STORE).put(choice,'active-choice');transaction.oncomplete=()=>resolve();transaction.onerror=()=>reject(transaction.error);}).finally(()=>database.close());
+}
+
+export async function readRawConfigLatest(): Promise<string | undefined> {
+  const database=await db();
+  return new Promise<string|undefined>((resolve,reject)=>{const request=database.transaction(STORE,'readonly').objectStore(STORE).get(LATEST);request.onsuccess=()=>resolve(request.result===undefined?undefined:JSON.stringify(request.result));request.onerror=()=>reject(request.error);}).finally(()=>database.close());
+}
+/** Preserve exact old content without activating it or changing latest. */
+export async function archiveConfigRecovery(source:string,raw:string):Promise<void> {
+  const digest=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(raw)))].map(byte=>byte.toString(16).padStart(2,'0')).join('');
+  let parsed:Partial<ConfigPackageV3>={};try {parsed=JSON.parse(raw);}catch{/* malformed drafts also remain recoverable */}
+  const key=RECOVERY_PREFIX+source+':'+digest,database=await db();
+  return new Promise<void>((resolve,reject)=>{const transaction=database.transaction(STORE,'readwrite'),store=transaction.objectStore(STORE),request=store.get(key);request.onsuccess=()=>{if(!request.result)store.put({key,source,raw,createdAt:new Date().toISOString(),packageId:parsed?.packageId,revision:parsed?.revision} satisfies ConfigRecovery,key);};transaction.oncomplete=()=>resolve();transaction.onerror=()=>reject(transaction.error);}).finally(()=>database.close());
+}
+export async function listConfigRecoveries():Promise<ConfigRecovery[]> {
+  const database=await db();
+  return new Promise<ConfigRecovery[]>((resolve,reject)=>{const values:ConfigRecovery[]=[];const request=database.transaction(STORE,'readonly').objectStore(STORE).openCursor();request.onerror=()=>reject(request.error);request.onsuccess=()=>{const cursor=request.result;if(!cursor){resolve(values.sort((a,b)=>b.createdAt.localeCompare(a.createdAt)));return;}if(String(cursor.key).startsWith(RECOVERY_PREFIX))values.push({...cursor.value,raw:''});cursor.continue();};}).finally(()=>database.close());
+}
+export async function readConfigRecovery(key:string):Promise<ConfigRecovery|undefined> {
+  if(!key.startsWith(RECOVERY_PREFIX))throw Error('不是配置恢复副本。');const database=await db();
+  return new Promise<ConfigRecovery|undefined>((resolve,reject)=>{const request=database.transaction(STORE,'readonly').objectStore(STORE).get(key);request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);}).finally(()=>database.close());
 }

@@ -4,6 +4,7 @@ import FeatureModuleLoadDialog from './components/Common/FeatureModuleLoadDialog
 import FeatureModuleLoadingOverlay from './components/Common/FeatureModuleLoadingOverlay'
 import ConfigStudio from './configStudio/ConfigStudio'
 import ConfigLab from './configStudio/ConfigLab'
+import { ConfigBootstrap } from './configStudio/ConfigBootstrap'
 import WorkflowStudioPage from './configStudio/WorkflowStudioPage'
 import { useEffect, type ReactNode } from 'react'
 import { useFeatureModuleStore } from './store/featureModuleStore'
@@ -51,7 +52,7 @@ function App() {
 
   return (
     <div className="app-root h-screen w-screen">
-      {workspaceContent}
+      {isConfigStudio || isConfigLab || isWorkflowStudio ? <ConfigBootstrap>{workspaceContent}</ConfigBootstrap> : workspaceContent}
       <FeatureModuleLoadDialog />
       <FeatureModuleLoadingOverlay />
     </div>
