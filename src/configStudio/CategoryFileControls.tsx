@@ -1,0 +1,8 @@
+import { useRef, useState } from 'react';
+import type { ConfigPackageV3 } from './types';
+import { createCategoryArtifact, categoryArtifactBlob } from './categoryArtifact';
+
+export function CategoryFileControls({config,selectedId,editing,onImport}:{config:ConfigPackageV3;selectedId:string;editing:boolean;onImport:(file:File)=>void}) {
+  const file=useRef<HTMLInputElement>(null),[kind,setKind]=useState<'node'|'classTree'>('node'),[message,setMessage]=useState('');
+  return <div className="mt-3 flex flex-wrap items-center gap-2 text-xs"><button type="button" disabled={editing} className="rounded border bg-white px-3 py-1.5 disabled:text-slate-400" onClick={()=>file.current?.click()}>导入分类</button><input ref={file} hidden type="file" accept=".json,.zip" onChange={event=>{const selected=event.target.files?.[0];if(selected)onImport(selected);event.target.value='';}}/><select aria-label="分类导出范围" value={kind} onChange={event=>setKind(event.target.value as typeof kind)}><option value="node">当前具体分类</option><option value="classTree">当前 Class 从属分类树</option></select><button type="button" disabled={editing||!selectedId||config.contractRevision!==9} className="rounded border bg-white px-3 py-1.5 disabled:text-slate-400" onClick={()=>void createCategoryArtifact(config,selectedId,kind).then(async artifact=>{const url=URL.createObjectURL(await categoryArtifactBlob(artifact)),link=document.createElement('a');link.href=url;link.download=`${artifact.payload.classCode}-${kind}.cairn-category.zip`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setMessage('分类文件已导出。');}).catch(error=>setMessage(String(error)))}>导出分类</button><span role="status">{message||'导入仅接受此处输出的单分类或 Class 树文件；r9 核验保存后可导出。'}</span></div>;
+}

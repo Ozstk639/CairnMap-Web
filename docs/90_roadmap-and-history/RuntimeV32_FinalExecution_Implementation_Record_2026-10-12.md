@@ -15,7 +15,7 @@
 | 默认种子和活动配置统一 | 已完成：verify/build；独立新浏览器六条持久性路径通过，零运行错误 |
 | r9 迁移、一次性预填、纯净字段/卡片 | 已完成：31 组 verify/build；5130 渲染结果、34 完整 V1 records、98 独立 V1 卡片相等；真实控件和卡片预填/保存通过 |
 | 唯一分类入口、三模式/四同步/冲突报告 | 已完成：32 组 verify/build；创建/继承/一致跳过/重命名和依赖阻断单测；真实 Class/Kind 创建、失败隔离及保存回读通过 |
-| 分类文件、Class 树替换事务 | 待实施 |
+| 分类文件、Class 树替换事务 | 已完成：33 组 verify/build；JSON/ZIP、祖先/固定字段/摘要/过期基线单测；真实 ZIP 六条内外保存、刷新、放弃、冲突和原子保存案例通过 |
 | 条件公式、值分类设色 | 待实施 |
 | 工作流编辑资格、回填、更新状态机 | 待实施 |
 | 铁路/车站七 Class 编辑迁移 | 待实施 |
@@ -31,3 +31,5 @@
 主题 02 提交：35998e3；Windows 摘要资源 EOL 固定提交：f373cdb。主题 03 证据见 theme-03-verify/build.log、r9-prefill-acceptance.json；增加 test:r9-migration-prefill 到统一验证。r9迁移先展开旧有效值再去来源关系；字段默认值/提示移出，TPP 条件记录约束保留。默认资源仍为冻结 r8/r4，最终全部新能力通过后再安装 r9/r5。
 
 主题 03 提交：0eb954e。主题 04 证据见 r9-category-creation-acceptance.json、test:r9-category-initialization 和 theme-04 检查日志。传递中的父级字段作为基底保留；模板仅增量加入；字段 key 冲突重写同次复制的显示/卡片引用。旧重复 Class/子分类入口已移除。
+
+主题 04 提交：f4f3f59。主题 05 证据见 r9-category-tree-acceptance.json 和 test:r9-category-artifact。真实测试修复了内部读取错误复制主包、内部保存未先完成恢复记录写入的问题。外层同 Class 整体替换，范围外内容保留；实际持久事务拒绝过期 expected 配置。草稿用 IndexedDB 保存，避免多层完整树超出 sessionStorage 容量。

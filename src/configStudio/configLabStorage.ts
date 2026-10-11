@@ -1,6 +1,7 @@
 import { isNativeConfigRevision } from './contract';
 import type { ConfigPackageV3 } from './types';
 import { prepareConfigForActivation } from './configActivation';
+import type { StudioEditingSession } from './studioSession';
 
 // V32 deliberately uses a separate store so a partial V3.1 adapter package
 // can never silently become the active native renderer configuration.
@@ -64,27 +65,22 @@ export async function listConfigLabPackages(onRejected?: (diagnostic: string) =>
   }).finally(() => database.close());
 }
 
-export async function saveConfigLabPackage(config: ConfigPackageV3, selection?:ActiveConfigChoice): Promise<void> {
-  config = prepareConfigForActivation(config);
-  const database = await db();
-  await new Promise<void>((resolve, reject) => {
-    const transaction = database.transaction(STORE, 'readwrite');
-    const store = transaction.objectStore(STORE);
-    const existing = store.get(packageKey(config));
-    existing.onsuccess = () => {
-      if (existing.result) {
-        try {
-          const previous = prepareConfigForActivation(existing.result);
-          const stable = (value: unknown): string => JSON.stringify(value, (_key, item) => item && typeof item === 'object' && !Array.isArray(item) ? Object.fromEntries(Object.entries(item).sort(([a],[b]) => a.localeCompare(b))) : item);
-          if (stable(previous) !== stable(config)) { transaction.abort(); reject(new Error('此包 ID/revision 已保存不同内容。请在工作台增加 revision 后保存，历史版本不会被覆盖。')); return; }
-        } catch (error) { transaction.abort(); reject(error); return; }
-      }
-      store.put(config, packageKey(config)); store.put(config, LATEST);
-      if(selection)store.put(selection,'active-choice');
-    };
-    transaction.onerror = () => reject(transaction.error ?? new Error('无法保存本地配置。'));
-    transaction.oncomplete = () => resolve();
-  }).finally(() => database.close());
+export async function saveConfigLabPackage(config:ConfigPackageV3,selection?:ActiveConfigChoice,clearEditing=false,expected?:{config:ConfigPackageV3;kind:'default'|'custom'}):Promise<void> {
+  config=prepareConfigForActivation(config);const database=await db();
+  const stable=(value:unknown):string=>JSON.stringify(value,(_key,item)=>item&&typeof item==='object'&&!Array.isArray(item)?Object.fromEntries(Object.entries(item).sort(([a],[b])=>a.localeCompare(b))):item);
+  return new Promise<void>((resolve,reject)=>{
+    const transaction=database.transaction(STORE,'readwrite'),store=transaction.objectStore(STORE);
+    const reads=[store.get(packageKey(config)),store.get(LATEST),store.get('active-choice')];let ready=0;
+    const fail=(error:unknown)=>{transaction.abort();reject(error);};
+    reads.forEach(request=>{request.onsuccess=()=>{if(++ready!==reads.length)return;
+      try {
+        if(expected){const kind=reads[2].result?.kind??'default';if(kind!==expected.kind||kind==='custom'&&(!reads[1].result||stable(prepareConfigForActivation(reads[1].result))!==stable(expected.config)))throw Error('活动主配置在核验后已变化，请重新核验保存。');}
+        if(reads[0].result&&stable(prepareConfigForActivation(reads[0].result))!==stable(config))throw Error('此包 ID/revision 已保存不同内容。请在工作台增加 revision 后保存，历史版本不会被覆盖。');
+        store.put(config,packageKey(config));store.put(config,LATEST);if(selection)store.put(selection,'active-choice');if(clearEditing)store.delete('studio-editing-session');
+      }catch(error){fail(error);}
+    };});
+    transaction.oncomplete=()=>resolve();transaction.onerror=()=>reject(transaction.error??Error('无法保存本地配置。'));
+  }).finally(()=>database.close());
 }
 
 export async function readActiveConfigChoice():Promise<ActiveConfigChoice|undefined> {
@@ -112,4 +108,11 @@ export async function listConfigRecoveries():Promise<ConfigRecovery[]> {
 export async function readConfigRecovery(key:string):Promise<ConfigRecovery|undefined> {
   if(!key.startsWith(RECOVERY_PREFIX))throw Error('不是配置恢复副本。');const database=await db();
   return new Promise<ConfigRecovery|undefined>((resolve,reject)=>{const request=database.transaction(STORE,'readonly').objectStore(STORE).get(key);request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);}).finally(()=>database.close());
+}
+export async function readStudioEditingSession():Promise<StudioEditingSession|undefined> {
+  const database=await db();return new Promise<StudioEditingSession|undefined>((resolve,reject)=>{const request=database.transaction(STORE,'readonly').objectStore(STORE).get('studio-editing-session');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);}).finally(()=>database.close());
+}
+let sessionWrites:Promise<unknown>=Promise.resolve();
+export function saveStudioEditingSession(value:StudioEditingSession|null):Promise<void> {
+  const task=sessionWrites.catch(()=>undefined).then(async()=>{const database=await db();return new Promise<void>((resolve,reject)=>{const transaction=database.transaction(STORE,'readwrite'),store=transaction.objectStore(STORE);if(value)store.put(value,'studio-editing-session');else store.delete('studio-editing-session');transaction.oncomplete=()=>resolve();transaction.onerror=()=>reject(transaction.error);}).finally(()=>database.close());});sessionWrites=task;return task;
 }
