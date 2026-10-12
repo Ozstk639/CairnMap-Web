@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cairnmap.r9-final-acceptance.v1",
-  "candidateSourceHead": "d360b308767e05f3603a964a81756317295c3d6b",
+  "candidateSourceHead": "ee5c4e6bfeab71e98faa246e41a34b108d49f6ef",
   "branch": "codex/cm-config-runtime-v32-migration-20261007",
   "status": "implementation_and_agent_browser_acceptance_passed_user_confirmation_pending",
   "contractRevision": 9,
@@ -70,115 +70,115 @@
   "requiredEvidence": [
     {
       "name": "r9-final-app-mount-result.json",
-      "sha256": "28793d668a037a12abcfefd182226aea17ede1443c92e82a4c010d71e6d59ed3"
+      "semanticSha256": "cf39150d7d00e41fbaf6c41d8ef266bccccc05a5f5813f04d4886c39390e06cd"
     },
     {
       "name": "r9-final-bud-parity-browser.json",
-      "sha256": "b2212d4307ac7003214f0c7439fcfc81aa6ad709dc8cf10c9bf0f1938398dbd5"
+      "semanticSha256": "a0c6759c4d5ffc2660ecb9ab5517e41864d153a2b20f537d226f816bb0dceefb"
     },
     {
       "name": "r9-final-default-acceptance.json",
-      "sha256": "6ac82d2f5ed0dc34eaa1591436dcda287ac400669e565f2f596a2a141d2b932e"
+      "semanticSha256": "5db70fccffccfdab47b60d0912d6f913bc4282a14532fb0f2b35557507d66b9c"
     },
     {
       "name": "r9-final-editor-surface-acceptance.json",
-      "sha256": "1acf64667f4d0e0f16aa01a7603cb186ff46eb09fc3f885e7f155d3efc3029aa"
+      "semanticSha256": "e2486a4a2613c79f33134ae4e97965e46f085b050da52840ecc8b21e60415145"
     },
     {
       "name": "r9-final-independent-dense.json",
-      "sha256": "eae6360344a741ce4c738d5b76fcf927aab26cb3489bf8bc54ea07cb003abe2d"
+      "semanticSha256": "b22ccc90849f3db0ab88512b62ce7285f814b7c585d90ed8583d26ead8fd1660"
     },
     {
       "name": "r9-final-independent-matrix.json",
-      "sha256": "6cc187d261ec573cd23edb10c639babb7a6c57f44121d7a00da9779074f9bc23"
+      "semanticSha256": "bf17718a82c9fac5981292f26ecf5448bfc373b9414d053a69628bc6579569d3"
     },
     {
       "name": "r9-final-independent-hierarchy.json",
-      "sha256": "8bb1bbfd4fd250b899a036b763b33b31b861dbb333dd38ea5eed9ca63ab9fac1"
+      "semanticSha256": "b80d90f48b052b07daf88c9bed10d6aa39ea19baeefe62df38c425fb79fad9af"
     },
     {
       "name": "r9-final-interaction-browser-result.json",
-      "sha256": "3153b5386531dea98693d7217713dd84fde7e64d4d0b75cd5ebe370e7760fc88"
+      "semanticSha256": "e20c0787bddfb6cc9b6f64a68656c3b9f42cfa8a8cf2abba8f4632e3653f868f"
     },
     {
       "name": "r9-final-interaction-states.json",
-      "sha256": "2552a1e338ec32fbc08499f91481c643625da9c1f21c2bd59ac420b91866bcf8"
+      "semanticSha256": "9c0f5bec84a993cf820970ae638c72a4e635ff62eda911fa27cac5a5f3ed3a9f"
     },
     {
       "name": "r9-final-label-positions.json",
-      "sha256": "01579143622ff677313c30c66cfcb1c695ff482b675574317e90a2d9c90be04d"
+      "semanticSha256": "271343d0a918e08771b2a81b1d6186a03a7afbf53a5a322691036a1a20d40492"
     },
     {
       "name": "r9-final-multipart-edit-acceptance.json",
-      "sha256": "645e6e5c6a93012bdcbe7e044ff66107c17c288682ee05b8ee1a6c990cc2407c"
+      "semanticSha256": "b172914cb22523274bc368c1e09c0c00c13cef6046bbc4fd36f76c4dfb631061"
     },
     {
       "name": "r9-final-native-workflow-matrix.json",
-      "sha256": "3e5e0b7541f807a016a99a60be1729d6da1415c03d25f7ba6b43ea0fe5418dc2"
+      "semanticSha256": "b4c2c1336854a6ec0198665d4034a5f462a6d65cafb5e97be3308012c796dadb"
     },
     {
       "name": "r9-final-prefill-acceptance.json",
-      "sha256": "f2e3a45428dc9a30ff2b22d22510ad2d1b91458e57fba0420473a69441456335"
+      "semanticSha256": "3b38082d0356a8bcf4917f55ccc0c584b289be6046d403a225c4ed7d1125121d"
     },
     {
       "name": "r9-final-r8-navigation-acceptance.json",
-      "sha256": "9e8cc93ed0b785ec15947bf79456bf8fc05d740c21d2c81f42ba91362f46fee6"
+      "semanticSha256": "503d1b97d3251579437785b4c326d29efba49f409c76d266b250d54a39caef22"
     },
     {
       "name": "r9-final-r8-workflow-acceptance.json",
-      "sha256": "eab9fa984a63e2bcbb918caed8c3108620354a3a5a409ab933bece223cc7e5fa"
+      "semanticSha256": "7e169fa7ebaf260a6640974c23bcc4d2771e78c509efe00ceb28dfb2ad1d2837"
     },
     {
       "name": "r9-final-rail-edit-acceptance.json",
-      "sha256": "b32791d982a3103111943374ed5e1585219a19908409943b56ea8307a644f7f9"
+      "semanticSha256": "7af6fb7f3bb5846f7aa008843d97ef01e1bfc710583565672f7cc29572297778"
     },
     {
       "name": "r9-final-svg-offsets.json",
-      "sha256": "d6d8302b6a33c22f3c6c9bb9cd74869ffa460091e81d7947ca9388fdeaea6d97"
+      "semanticSha256": "78009b71d49898be20320b06aff6ac36728fdb4a428ecbdf21999e19d5885f79"
     },
     {
       "name": "r9-final-trp-edit-acceptance.json",
-      "sha256": "39117a9a57bbd6fa7d4a6782257fb059b8d5e8c3042c0fb540da875510d9e261"
+      "semanticSha256": "da567b44a220e0899008cd8aa2d9fc563ace4a80bf8593d8cf9085475f43c741"
     },
     {
       "name": "r9-final-workflow-edit-acceptance.json",
-      "sha256": "0693636744c429fabe0752644f1926506399d8f1aa941745122822c0d17544cb"
+      "semanticSha256": "81fd0bac26ca36acbb1ac09e6a31d9e4c220e5929ea926300dfd200b24093347"
     },
     {
       "name": "r9-final-external-lifecycle.json",
-      "sha256": "8daaf7131a63edde5f7c18e4555bee67c62cb074ac21e27fd7cd8068048031eb"
+      "semanticSha256": "1966d9052a010c9bcd334720d4f36a829930646b2dcbbb4451348800adc4471c"
     },
     {
       "name": "r9-final-studio-acceptance.json",
-      "sha256": "12f1a0bbaf06840c97f582687a18f40baa74eb659eb9b246d13ac68cbec35179"
+      "semanticSha256": "51dda4e17d9671c26752bfea3a4a24d476731983a5c2743de175f1414d1cc696"
     },
     {
       "name": "r9-final-zip-import-acceptance.json",
-      "sha256": "151076731e96d14b8576240a99bddfed320f5e64425444453a372515a09880aa"
+      "semanticSha256": "88d7ea27568c183dd10a25d4905826ee5fd8b8aa6b7e8c30a1ea85cf1c7ebc45"
     },
     {
       "name": "r9-final-module-entry-result.json",
-      "sha256": "e39588fd022c34dfcfd8ca0de5eecb71c437ffea62e9d0ea60f5db0d23d3bd34"
+      "semanticSha256": "92cdebe9f984ed72e4ab77dd19f16016bc3e54b58c7409376d6667209b8df3ef"
     },
     {
       "name": "r9-final-production-performance.json",
-      "sha256": "e9c4e131e06e49450d0fdb3e6b814287d2c1badb1a11858bde4a11f460570f3b"
+      "semanticSha256": "f9c5ab90520ad7ae86aa231c8e0822b9bf616a235b0020a6fbe791ed074db94d"
     },
     {
       "name": "r9-final-runtime-data-result.json",
-      "sha256": "ffae8c7ed523d8ed8bf7c125220cc772b0ac7e10002ec44ae5d3e4829d6c0bad"
+      "semanticSha256": "edb94951b02b6cf3b92b7e8c2d44df358b232f7cf7df2e212d982fa5a23f9efa"
     },
     {
       "name": "r9-category-creation-acceptance.json",
-      "sha256": "191cf4f93c068dc929c7cc73c8d4f10cf6d77abc54d110ceb73bfaa5af76b3cd"
+      "semanticSha256": "7134111dd541290936234f0b6c099ceb88afceb08bad0971aa1b040b59ae85f0"
     },
     {
       "name": "r9-category-tree-acceptance.json",
-      "sha256": "b8e92e5c8bde980a1682fef48a0ce821a63fc6e7ef5c84d64155d543e5ca4461"
+      "semanticSha256": "36bebcacb07a10a281595b798a059c345e422ee528044c96761116ae74b909ac"
     },
     {
       "name": "r9-render-acceptance.json",
-      "sha256": "9e866019ff968d6c72648fb588531d6b2f524b13164849c3e2b9f92f6c56ce46"
+      "semanticSha256": "c22819d82425499205f6408e3656ae2a762b2e7c5a0f5dfb1cc9c39672853bdb"
     }
   ]
 }
