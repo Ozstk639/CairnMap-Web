@@ -18,7 +18,7 @@
 | 分类文件、Class 树替换事务 | 已完成：33 组 verify/build；JSON/ZIP、祖先/固定字段/摘要/过期基线单测；真实 ZIP 六条内外保存、刷新、放弃、冲突和原子保存案例通过 |
 | 条件公式、值分类设色 | 已完成：34 组 verify/build；真实公式和设色保存刷新通过 |
 | 工作流编辑资格、回填、更新状态机 | 已完成标准体系：35 组 verify/build；16 次转换、32 条 V1 记录及真实编辑状态机通过；专用迁移另见后续主题 |
-| 铁路/车站七 Class 编辑迁移 | 待实施 |
+| 铁路/车站七 Class 编辑迁移 | 已完成：36 组 verify/build；七个完整冻结 V1 编辑记录及七类真实前端保存逐一相等，方向反转通过 |
 | TRP 外部编辑成品和用途入口 | 待实施 |
 | 最终包、默认安装、全量浏览器验收 | 待实施 |
 
@@ -50,3 +50,13 @@
 - 真实 DOM：WRP 资格成功、TPP 失败且开关保持关闭、模态背景锁定；实际图层编辑 ID 顶行、回填、直接绘制、取消恢复、单图层替换保存、世界暂停/恢复通过。`r9-workflow-edit-acceptance.json`，运行错误 0。
 - 实际回归发现 V3 canonical World 字符串被旧 V1 数字 World 导入校验拒绝；增加仅在 V3 上已知世界码的校验转换，输出保留原 canonical World，未知世界不猜测。
 - 本主题保留原整体采集与无适用方案的完整编辑入口；铁路/车站七 Class 与 TRP 成品迁移、默认 r9/r5 尚未交付。
+
+## 主题 8：铁路/车站七 Class 编辑迁移
+
+- 父提交 770df82。按冻结 V1 `schema_RAIL` 的 editor 投影迁移 RLE、STA、PLF、PFB、STB、SBP、STF 七个独立 composed 方案，全部专供编辑；普通整体采集不变。
+- 使用冻结 V1 实际 parser/formatter/buildFeatureInfo 生成七类独立完整参照（`v1-rail-editing-reference.json`），其控制顺序、布尔/数字/方向保存值、必需性、重复组，以及真实更新记录逐一对照通过。
+- 未显示的 Wiki/brief 由通用标签扩展单元保留；缺省 optional 组在显示上为空行组，保存仍保留缺省/空数组的原始区别；铁路反转同时交换新编辑槽位端点。
+- 前端发现旧 V1 导入器拒绝复杂 extensions；V3 改用 `prepareNativeFeatureImport` 检查真实分类、字段、世界、几何与安全标签扩展，并保留原记录内容，不经旧表单序列化；V1 导入行为不变。
+- 36 组 `npm run verify:config-v32` 与 `npm run build` 通过。真实 DOM 对七类分别回填和保存，完整 record 与冻结 V1 编辑结果相等，0/false 与未知数据保留，始终七个原图层；RLE 实际反转和便捷测绘列表排除通过。证据 `r9-rail-edit-acceptance.json`，运行错误 0。
+- 冻结参照代码 SHA256：schema_RAIL 86292b74409837302309c9aeedeef804635d7a9710096db2d25d7b5b5f619626；workflowEditorParser 2b3c26fff1629fa4a88c0f81cf02164d19ee5bd7a7eb12b2e2184567e312c25b；featureFormats bb6bebd36e72dad465bcdc1b2b7cdf644cad72b15eebf90ff24443bfe6a6f8bc。
+- TRP 外部成品、默认 r9/r5 发布和最终全量验收仍待完成。

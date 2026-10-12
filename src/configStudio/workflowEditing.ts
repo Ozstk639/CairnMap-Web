@@ -74,3 +74,7 @@ export function assertEditIdentity(record:Record<string,unknown>,original:Record
  // Rewriting arbitrary navigation/reference paths cannot be inferred safely.
  if(String(record.ID)!==String(original.ID)&&others.some(r=>JSON.stringify(r,(key,value)=>key==='ID'?undefined:value).includes(JSON.stringify(String(original.ID)))))throw Error('其他记录引用原 ID，无法安全自动改写所有引用；请保留 ID 或先调整引用。');
 }
+export function reverseWorkflowEditEndpoints(plan:WorkflowEditPlan,draft:WorkflowEditDraft):WorkflowEditDraft {
+ const start=plan.bindings.find(b=>b.target==='startplf'),end=plan.bindings.find(b=>b.target==='endplf');if(!start||!end)return draft;
+ return {...draft,slots:{...draft.slots,[start.slot]:draft.slots[end.slot],[end.slot]:draft.slots[start.slot]}};
+}

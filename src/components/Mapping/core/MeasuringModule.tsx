@@ -1,5 +1,6 @@
+import {prepareNativeFeatureImport} from '@/configStudio/nativeFeatureImport';
 import {NativeWorkflowEditPanel} from '../Workflow/NativeWorkflowEditPanel';
-import {compileWorkflowEditPlan,hydrateWorkflowEdit,findEditingWorkflow,isQuickMappingWorkflow,type WorkflowEditPlan,type WorkflowEditDraft} from '@/configStudio/workflowEditing';
+import {compileWorkflowEditPlan,reverseWorkflowEditEndpoints,hydrateWorkflowEdit,findEditingWorkflow,isQuickMappingWorkflow,type WorkflowEditPlan,type WorkflowEditDraft} from '@/configStudio/workflowEditing';
 import {prepareNativeWorkflowEdit} from '@/configStudio/workflowEditCommit';
 import {normalizeV3WorldId} from '@/configStudio/V3WorkflowRunner';
 import {useRuleDataStore} from '@/store/ruleDataStore';
@@ -17,7 +18,6 @@ import 'leaflet/dist/leaflet.css';
 
 import {
   FORMAT_REGISTRY,
-  WORLD_CODE_BY_WORLD_ID,
   WORKFLOW_FEATURE_CATALOG,
   getSubTypeOptions,
   layerToJsonText,
@@ -3298,16 +3298,15 @@ const runBatchImportFromText = (rawText: string, sourceLabel: string) => {
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    const def = detectImportItemDefinition(item);
+    let nativeImport:ReturnType<typeof prepareNativeFeatureImport>|undefined;
+    if(configRuntime)try{nativeImport=prepareNativeFeatureImport(configRuntime,item,currentWorldId);}catch(error){errors.push(`${sourceLabel} 第 ${i+1} 条：${error instanceof Error?error.message:'原生记录无效。'}`);continue;}
+    const def = detectImportItemDefinition(item)??(nativeImport?FORMAT_REGISTRY['默认']:undefined);
     if (!def) {
       errors.push(`${sourceLabel} 第 ${i + 1} 条导入失败：无法识别条目类型（缺少 Type/Class/必要字段）。`);
       continue;
     }
 
-    // V3 stores canonical World ids; the frozen V1 import validator expects its numeric code.
-    const canonicalWorld=configRuntime&&typeof item.World==='string'&&WORLD_CODE_BY_WORLD_ID[normalizeV3WorldId(item.World)]!==undefined?normalizeV3WorldId(item.World):undefined;
-    const validationItem=canonicalWorld?{...item,World:WORLD_CODE_BY_WORLD_ID[canonicalWorld]}:item;
-    const v = validateImportItemDetailed(def, validationItem, { worldId: currentWorldId, strictSystemFields: true });
+    const v = nativeImport?{ok:true,mode:nativeImport.mode,coords:nativeImport.coords,hydrated:{values:{},groups:{}},missing:[],structuralErrors:[]}:validateImportItemDetailed(def,item,{worldId:currentWorldId,strictSystemFields:true});
     if (!v.ok) {
       const parts: string[] = [];
       if (v.missing.length > 0) parts.push(`必填缺失/为空：\n${formatMissingEntries(v.missing)}`);
@@ -3326,7 +3325,7 @@ const runBatchImportFromText = (rawText: string, sourceLabel: string) => {
     const hydrated = v.hydrated ?? def.hydrate(item);
     const normGroups = normalizeGroupInfoByDef(def, (hydrated.groups ?? {}) as any);
 
-    const featureInfoOut = withCanonicalMultipartGeometry(def.buildFeatureInfo({
+    const featureInfoOut = nativeImport?.record??withCanonicalMultipartGeometry(def.buildFeatureInfo({
       op: 'import',
       mode,
       coords,
@@ -3337,7 +3336,6 @@ const runBatchImportFromText = (rawText: string, sourceLabel: string) => {
       now: new Date(),
     }), importedGeometry.geometry);
 
-    if(canonicalWorld)featureInfoOut.World=canonicalWorld;
     const itemColor = randomColor();
     const group = L.layerGroup();
 
@@ -5739,6 +5737,7 @@ onChange={(e) => {
               setTempPoints(reversed);
               drawDraftGeometry(reversed, 'polyline', drawColor);
 
+              setNativeEdit(current=>current?{...current,draft:reverseWorkflowEditEndpoints(current.plan,current.draft)}:current);
               // 调转起止站台字段（若存在）
               setFeatureInfo((prev: any) => {
                 const start = prev?.startplf;
@@ -6054,6 +6053,7 @@ onChange={(e) => {
               setTempPoints(reversed);
               drawDraftGeometry(reversed, 'polyline', drawColor);
 
+              setNativeEdit(current=>current?{...current,draft:reverseWorkflowEditEndpoints(current.plan,current.draft)}:current);
               // 调转起止站台字段（若存在）
               setFeatureInfo((prev: any) => {
                 const start = prev?.startplf;
