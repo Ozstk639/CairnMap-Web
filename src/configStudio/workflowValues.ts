@@ -2,7 +2,7 @@ import type { WorkflowDefinition,WorkflowControl,WorkflowGroupField } from './ty
 import { storedOptionValue } from './fieldReuse';
 /** Form validation, conditions and final drawing snapshots share value types. */
 function leafValue(field:WorkflowControl|WorkflowGroupField,value:unknown):unknown {
-  if(value==null||typeof value==='object')return value;
+  if(value==null||typeof value==='object'||(field.kind==='featureSearch'||field.kind==='coarseSearch')&&typeof value!=='string')return value;
   if(field.kind==='select')return storedOptionValue(value,field.optionValueType);
   if(field.kind==='json'&&typeof value==='string'&&value.trim()){try{return JSON.parse(value);}catch{return value;}}
   if(field.valueNormalization==='abbr')return String(value).trim().replace(/\s+/g,'').replace(/[^A-Za-z0-9_-]/g,'');

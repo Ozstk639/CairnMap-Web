@@ -86,6 +86,11 @@ export async function saveConfigLabPackage(config:ConfigPackageV3,selection?:Act
 export async function readActiveConfigChoice():Promise<ActiveConfigChoice|undefined> {
   const database=await db();return new Promise<ActiveConfigChoice|undefined>((resolve,reject)=>{const request=database.transaction(STORE,'readonly').objectStore(STORE).get('active-choice');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);}).finally(()=>database.close());
 }
+/** Read keys only: allocating a new revision must not parse every saved tree. */
+export async function highestConfigLabRevision(packageId:string):Promise<number> {
+  const database=await db(),prefix=HISTORY_PREFIX+packageId+':';
+  return new Promise<number>((resolve,reject)=>{const request=database.transaction(STORE,'readonly').objectStore(STORE).getAllKeys();request.onerror=()=>reject(request.error);request.onsuccess=()=>resolve(request.result.reduce<number>((maximum,key)=>{const text=String(key);if(!text.startsWith(prefix))return maximum;const revision=Number(text.slice(prefix.length));return Number.isSafeInteger(revision)?Math.max(maximum,revision):maximum;},0));}).finally(()=>database.close());
+}
 export async function saveActiveConfigChoice(choice:ActiveConfigChoice):Promise<void> {
   const database=await db();return new Promise<void>((resolve,reject)=>{const transaction=database.transaction(STORE,'readwrite');transaction.objectStore(STORE).put(choice,'active-choice');transaction.oncomplete=()=>resolve();transaction.onerror=()=>reject(transaction.error);}).finally(()=>database.close());
 }

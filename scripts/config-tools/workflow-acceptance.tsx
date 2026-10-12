@@ -1,6 +1,8 @@
 import {createTrpEditingWorkflow} from '../../src/configStudio/externalEditRegistry';
 import {installRailEditingWorkflows} from '../../src/configStudio/railEditingTemplates';
 import {migrateConfigToR9} from '../../src/configStudio/r9Migration';
+import finalSeed from '../../src/configStudio/defaults/r9-r5.config.json';
+import type {ConfigPackageV3} from '../../src/configStudio/types';
 // Isolated production MeasuringModule acceptance, never imported by the app.
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -17,7 +19,7 @@ import { MAP_ZOOM_BOUNDS } from '../../src/lib/mapZoom';
 function Ready({ onReady }: { onReady: (map: L.Map) => void }) { const map = useMap(); useEffect(() => onReady(map), [map, onReady]); return null; }
 function Harness() {
   const [world, setWorld] = useState('zth');
-  const [config, setConfig] = useState(()=>{const config=createConfigPackageFromCurrentProject();if(!location.search.includes('edit=1'))return config;const edited=migrateConfigToR9(config);for(const workflow of edited.workflows)if(workflow.mode==='composed'&&workflow.id!=='v3-tpp_teleport')workflow.editor={enabled:true};const withRail=installRailEditingWorkflows(edited);withRail.workflows.push(createTrpEditingWorkflow());return withRail;});
+  const [config, setConfig] = useState(()=>{if(location.search.includes('final=1'))return structuredClone(finalSeed) as ConfigPackageV3;const config=createConfigPackageFromCurrentProject();if(!location.search.includes('edit=1'))return config;const edited=migrateConfigToR9(config);for(const workflow of edited.workflows)if(workflow.mode==='composed'&&workflow.id!=='v3-tpp_teleport')workflow.editor={enabled:true};const withRail=installRailEditingWorkflows(edited);withRail.workflows.push(createTrpEditingWorkflow());return withRail;});
   const runtimeConfig = useMemo(() => compileConfigRuntime(config), [config]);
   const [map, setMap] = useState<L.Map | null>(null);
   const mapRef = useRef<L.Map | null>(null); mapRef.current = map;

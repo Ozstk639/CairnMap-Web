@@ -1,0 +1,1896 @@
+{
+  "cases": [
+    {
+      "mode": "main",
+      "placement": "center",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        580.3828125,
+        441.0
+      ],
+      "actual": {
+        "x": 580.3828125,
+        "y": 441,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "center",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        592.3828125,
+        456.0
+      ],
+      "actual": {
+        "x": 592.3828125,
+        "y": 456,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "center",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        568.3828125,
+        426.0
+      ],
+      "actual": {
+        "x": 568.3828125,
+        "y": 426,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "center",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        592.3828125,
+        426.0
+      ],
+      "actual": {
+        "x": 592.3828125,
+        "y": 426,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "center",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        568.3828125,
+        456.0
+      ],
+      "actual": {
+        "x": 568.3828125,
+        "y": 456,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "N",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        580.3828125,
+        432
+      ],
+      "actual": {
+        "x": 580.3828125,
+        "y": 432,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "N",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        592.3828125,
+        447
+      ],
+      "actual": {
+        "x": 592.3828125,
+        "y": 447,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "N",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        568.3828125,
+        417
+      ],
+      "actual": {
+        "x": 568.3828125,
+        "y": 417,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "N",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        592.3828125,
+        417
+      ],
+      "actual": {
+        "x": 592.3828125,
+        "y": 417,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "N",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        568.3828125,
+        447
+      ],
+      "actual": {
+        "x": 568.3828125,
+        "y": 447,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "S",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        580.3828125,
+        450
+      ],
+      "actual": {
+        "x": 580.3828125,
+        "y": 450,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "S",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        592.3828125,
+        465
+      ],
+      "actual": {
+        "x": 592.3828125,
+        "y": 465,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "S",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        568.3828125,
+        435
+      ],
+      "actual": {
+        "x": 568.3828125,
+        "y": 435,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "S",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        592.3828125,
+        435
+      ],
+      "actual": {
+        "x": 592.3828125,
+        "y": 435,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "S",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        568.3828125,
+        465
+      ],
+      "actual": {
+        "x": 568.3828125,
+        "y": 465,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "E",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        600.0,
+        441.0
+      ],
+      "actual": {
+        "x": 600,
+        "y": 441,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "E",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        612.0,
+        456.0
+      ],
+      "actual": {
+        "x": 612,
+        "y": 456,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "E",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        588.0,
+        426.0
+      ],
+      "actual": {
+        "x": 588,
+        "y": 426,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "E",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        612.0,
+        426.0
+      ],
+      "actual": {
+        "x": 612,
+        "y": 426,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "E",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        588.0,
+        456.0
+      ],
+      "actual": {
+        "x": 588,
+        "y": 456,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "W",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        560.765625,
+        441.0
+      ],
+      "actual": {
+        "x": 560.765625,
+        "y": 441,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "W",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        572.765625,
+        456.0
+      ],
+      "actual": {
+        "x": 572.765625,
+        "y": 456,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "W",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        548.765625,
+        426.0
+      ],
+      "actual": {
+        "x": 548.765625,
+        "y": 426,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "W",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        572.765625,
+        426.0
+      ],
+      "actual": {
+        "x": 572.765625,
+        "y": 426,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "W",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        548.765625,
+        456.0
+      ],
+      "actual": {
+        "x": 548.765625,
+        "y": 456,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "NE",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        600.0,
+        432
+      ],
+      "actual": {
+        "x": 600,
+        "y": 432,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "NE",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        612.0,
+        447
+      ],
+      "actual": {
+        "x": 612,
+        "y": 447,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "NE",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        588.0,
+        417
+      ],
+      "actual": {
+        "x": 588,
+        "y": 417,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "NE",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        612.0,
+        417
+      ],
+      "actual": {
+        "x": 612,
+        "y": 417,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "NE",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        588.0,
+        447
+      ],
+      "actual": {
+        "x": 588,
+        "y": 447,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "NW",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        560.765625,
+        432
+      ],
+      "actual": {
+        "x": 560.765625,
+        "y": 432,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "NW",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        572.765625,
+        447
+      ],
+      "actual": {
+        "x": 572.765625,
+        "y": 447,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "NW",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        548.765625,
+        417
+      ],
+      "actual": {
+        "x": 548.765625,
+        "y": 417,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "NW",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        572.765625,
+        417
+      ],
+      "actual": {
+        "x": 572.765625,
+        "y": 417,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "NW",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        548.765625,
+        447
+      ],
+      "actual": {
+        "x": 548.765625,
+        "y": 447,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "SE",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        600.0,
+        450
+      ],
+      "actual": {
+        "x": 600,
+        "y": 450,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "SE",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        612.0,
+        465
+      ],
+      "actual": {
+        "x": 612,
+        "y": 465,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "SE",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        588.0,
+        435
+      ],
+      "actual": {
+        "x": 588,
+        "y": 435,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "SE",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        612.0,
+        435
+      ],
+      "actual": {
+        "x": 612,
+        "y": 435,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "SE",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        588.0,
+        465
+      ],
+      "actual": {
+        "x": 588,
+        "y": 465,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "SW",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        560.765625,
+        450
+      ],
+      "actual": {
+        "x": 560.765625,
+        "y": 450,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "SW",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        572.765625,
+        465
+      ],
+      "actual": {
+        "x": 572.765625,
+        "y": 465,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "SW",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        548.765625,
+        435
+      ],
+      "actual": {
+        "x": 548.765625,
+        "y": 435,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "SW",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        572.765625,
+        435
+      ],
+      "actual": {
+        "x": 572.765625,
+        "y": 435,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "main",
+      "placement": "SW",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        548.765625,
+        465
+      ],
+      "actual": {
+        "x": 548.765625,
+        "y": 465,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 600,
+        "ay": 450,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "center",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        579.3828125,
+        440.0
+      ],
+      "actual": {
+        "x": 579.3828125,
+        "y": 440,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "center",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        591.3828125,
+        455.0
+      ],
+      "actual": {
+        "x": 591.3828125,
+        "y": 455,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "center",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        567.3828125,
+        425.0
+      ],
+      "actual": {
+        "x": 567.3828125,
+        "y": 425,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "center",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        591.3828125,
+        425.0
+      ],
+      "actual": {
+        "x": 591.3828125,
+        "y": 425,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "center",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        567.3828125,
+        455.0
+      ],
+      "actual": {
+        "x": 567.3828125,
+        "y": 455,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "N",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        579.3828125,
+        431
+      ],
+      "actual": {
+        "x": 579.3828125,
+        "y": 431,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "N",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        591.3828125,
+        446
+      ],
+      "actual": {
+        "x": 591.3828125,
+        "y": 446,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "N",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        567.3828125,
+        416
+      ],
+      "actual": {
+        "x": 567.3828125,
+        "y": 416,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "N",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        591.3828125,
+        416
+      ],
+      "actual": {
+        "x": 591.3828125,
+        "y": 416,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "N",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        567.3828125,
+        446
+      ],
+      "actual": {
+        "x": 567.3828125,
+        "y": 446,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "S",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        579.3828125,
+        449
+      ],
+      "actual": {
+        "x": 579.3828125,
+        "y": 449,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "S",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        591.3828125,
+        464
+      ],
+      "actual": {
+        "x": 591.3828125,
+        "y": 464,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "S",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        567.3828125,
+        434
+      ],
+      "actual": {
+        "x": 567.3828125,
+        "y": 434,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "S",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        591.3828125,
+        434
+      ],
+      "actual": {
+        "x": 591.3828125,
+        "y": 434,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "S",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        567.3828125,
+        464
+      ],
+      "actual": {
+        "x": 567.3828125,
+        "y": 464,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "E",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        599.0,
+        440.0
+      ],
+      "actual": {
+        "x": 599,
+        "y": 440,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "E",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        611.0,
+        455.0
+      ],
+      "actual": {
+        "x": 611,
+        "y": 455,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "E",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        587.0,
+        425.0
+      ],
+      "actual": {
+        "x": 587,
+        "y": 425,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "E",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        611.0,
+        425.0
+      ],
+      "actual": {
+        "x": 611,
+        "y": 425,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "E",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        587.0,
+        455.0
+      ],
+      "actual": {
+        "x": 587,
+        "y": 455,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "W",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        559.765625,
+        440.0
+      ],
+      "actual": {
+        "x": 559.765625,
+        "y": 440,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "W",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        571.765625,
+        455.0
+      ],
+      "actual": {
+        "x": 571.765625,
+        "y": 455,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "W",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        547.765625,
+        425.0
+      ],
+      "actual": {
+        "x": 547.765625,
+        "y": 425,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "W",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        571.765625,
+        425.0
+      ],
+      "actual": {
+        "x": 571.765625,
+        "y": 425,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "W",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        547.765625,
+        455.0
+      ],
+      "actual": {
+        "x": 547.765625,
+        "y": 455,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "NE",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        599.0,
+        431
+      ],
+      "actual": {
+        "x": 599,
+        "y": 431,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "NE",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        611.0,
+        446
+      ],
+      "actual": {
+        "x": 611,
+        "y": 446,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "NE",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        587.0,
+        416
+      ],
+      "actual": {
+        "x": 587,
+        "y": 416,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "NE",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        611.0,
+        416
+      ],
+      "actual": {
+        "x": 611,
+        "y": 416,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "NE",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        587.0,
+        446
+      ],
+      "actual": {
+        "x": 587,
+        "y": 446,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "NW",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        559.765625,
+        431
+      ],
+      "actual": {
+        "x": 559.765625,
+        "y": 431,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "NW",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        571.765625,
+        446
+      ],
+      "actual": {
+        "x": 571.765625,
+        "y": 446,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "NW",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        547.765625,
+        416
+      ],
+      "actual": {
+        "x": 547.765625,
+        "y": 416,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "NW",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        571.765625,
+        416
+      ],
+      "actual": {
+        "x": 571.765625,
+        "y": 416,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "NW",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        547.765625,
+        446
+      ],
+      "actual": {
+        "x": 547.765625,
+        "y": 446,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "SE",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        599.0,
+        449
+      ],
+      "actual": {
+        "x": 599,
+        "y": 449,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "SE",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        611.0,
+        464
+      ],
+      "actual": {
+        "x": 611,
+        "y": 464,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "SE",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        587.0,
+        434
+      ],
+      "actual": {
+        "x": 587,
+        "y": 434,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "SE",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        611.0,
+        434
+      ],
+      "actual": {
+        "x": 611,
+        "y": 434,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "SE",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        587.0,
+        464
+      ],
+      "actual": {
+        "x": 587,
+        "y": 464,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "SW",
+      "offset": [
+        0,
+        0
+      ],
+      "expected": [
+        559.765625,
+        449
+      ],
+      "actual": {
+        "x": 559.765625,
+        "y": 449,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "SW",
+      "offset": [
+        12,
+        15
+      ],
+      "expected": [
+        571.765625,
+        464
+      ],
+      "actual": {
+        "x": 571.765625,
+        "y": 464,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "SW",
+      "offset": [
+        -12,
+        -15
+      ],
+      "expected": [
+        547.765625,
+        434
+      ],
+      "actual": {
+        "x": 547.765625,
+        "y": 434,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "SW",
+      "offset": [
+        12,
+        -15
+      ],
+      "expected": [
+        571.765625,
+        434
+      ],
+      "actual": {
+        "x": 571.765625,
+        "y": 434,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    },
+    {
+      "mode": "preview",
+      "placement": "SW",
+      "offset": [
+        -12,
+        15
+      ],
+      "expected": [
+        547.765625,
+        464
+      ],
+      "actual": {
+        "x": 547.765625,
+        "y": 464,
+        "w": 39.234375,
+        "h": 18,
+        "ax": 599,
+        "ay": 449,
+        "text": "\n    TPP\n  "
+      }
+    }
+  ],
+  "runtimeErrors": [],
+  "scope": "90 actual label outer-box positions, shared main/validator code; no whole-map pixel-equality claim"
+}

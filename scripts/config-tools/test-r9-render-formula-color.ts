@@ -18,6 +18,8 @@ for(const expression of ['C9','C1 AND','(C1','C1 NOT C2','C1;alert(1)','NOT'])as
 assert.throws(()=>compileRenderFormula({...formula,expression:'G1',groups:[{id:'G1',expression:'G2'},{id:'G2',expression:'G1'}]}));
 assert.throws(()=>compileRenderFormula({...formula,expression:'('.repeat(33)+'C1'+')'.repeat(33)}));
 assert(formulaContradiction({...formula,expression:'C1 AND NOT C1'}));assert(!formulaContradiction(formula));
+assert(formulaContradiction({expression:'C1 AND C2',terms:[{id:'C1',relation:'AND',condition:{kind:'fieldCompare',field:'x',operator:'eq',value:0}},{id:'C2',relation:'AND',condition:{kind:'fieldCompare',field:'x',operator:'eq',value:1}}]}));
+assert(!formulaContradiction({expression:'C1 AND C2',terms:[{id:'C1',relation:'AND',condition:{kind:'fieldEquals',field:'x',value:''}},{id:'C2',relation:'AND',condition:{kind:'fieldCompare',field:'x',operator:'present'}}]}),'legacy empty-string match and new array presence can both hold for [null]');
 assert.equal(automaticConditionExpression([{...terms[0],relation:'NOT'},terms[1],{...terms[2],relation:'NOT'}]),'NOT C1 AND C2 AND NOT C3');
 const flat={expression:Array.from({length:256},(_,i)=>'C'+(i+1)).join(' AND '),terms:Array.from({length:256},(_,i)=>({...terms[0],id:'C'+(i+1)}))};assert(compileRenderFormula(flat));assert.throws(()=>compileRenderFormula({...flat,terms:[...flat.terms,{...terms[0],id:'C257'}]}));
 const legacy:RenderFieldGroup={op:'any',items:[{op:'all',items:[{kind:'fieldEquals',field:'x',value:'0'},{op:'not',items:[{kind:'fieldPresent',field:'y',present:true}]}]},{kind:'fieldIn',field:'z',values:['false','a']}]};

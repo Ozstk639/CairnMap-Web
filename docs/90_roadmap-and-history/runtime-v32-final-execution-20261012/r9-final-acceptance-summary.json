@@ -1,0 +1,184 @@
+{
+  "schemaVersion": "cairnmap.r9-final-acceptance.v1",
+  "candidateSourceHead": "d360b308767e05f3603a964a81756317295c3d6b",
+  "branch": "codex/cm-config-runtime-v32-migration-20261007",
+  "status": "implementation_and_agent_browser_acceptance_passed_user_confirmation_pending",
+  "contractRevision": 9,
+  "revision": 5,
+  "nodes": 95,
+  "workflows": 28,
+  "captureChoices": 20,
+  "editingRoutes": 24,
+  "testGroups": 38,
+  "build": "passed_existing_chunk_size_warning",
+  "renderCases": 1161,
+  "mainPreviewPositions": 90,
+  "nativeCreationRecords": 34,
+  "externalCaptureRecords": 7,
+  "railEditRecords": 7,
+  "trpEditRecords": 3,
+  "trpTypeBoundary": "V1 TRP new elevation numeric strings are saved as V3 declared number; frozen reference is retained unchanged.",
+  "productionPerformance": {
+    "records": 463,
+    "V3V1ScriptRatio": 0.710197467798193,
+    "V3CardP95Ms": 27.5,
+    "scope": "matched production builds; five six-zoom batches per mode; 30 repeated real pointer opens of the same first visible record per mode"
+  },
+  "expandedData": [
+    {
+      "records": 1000,
+      "polygonParts": 2000,
+      "firstDataVisibleSeconds": 0.27767410001251847,
+      "sixZoomScriptSeconds": 1.834638,
+      "visibleLabels": 162,
+      "configStats": {
+        "epoch": 2,
+        "nodes": 95,
+        "classes": 16,
+        "cachedPaths": 95,
+        "hits": 110537
+      },
+      "gcHeapBeforeBytes": 195973511,
+      "gcHeapAfterBytes": 223806203
+    },
+    {
+      "records": 5000,
+      "polygonParts": 10000,
+      "firstDataVisibleSeconds": 0.3923122000414878,
+      "sixZoomScriptSeconds": 5.943292,
+      "visibleLabels": 162,
+      "configStats": {
+        "epoch": 2,
+        "nodes": 95,
+        "classes": 16,
+        "cachedPaths": 95,
+        "hits": 534537
+      },
+      "gcHeapBeforeBytes": 223746795,
+      "gcHeapAfterBytes": 287605851
+    }
+  ],
+  "sourceBlueprintSha256": "2deaaf87c50944fa1ade3378e6e0c44868193e05b6490d25e976c67352ffc263",
+  "historicalBlueprintSha256": "f23bab765039e6438e2f342423b7d23389ccc7843486eb1f3ed4822e7ce445ff",
+  "jsonSha256": "999d4afee9e1bfe9daf86639d95e2dae721d6c887cef3771fb1afa0d79df816e",
+  "zipSha256": "c92e1ebc289944058d9b5b16f73e823e9b9ab731c33a1c9158dbc4d21b9ca156",
+  "push": false,
+  "PR": false,
+  "mainUpdated": false,
+  "RIASync": false,
+  "wholeMapPixelEqualityClaimed": false,
+  "requiredEvidence": [
+    {
+      "name": "r9-final-app-mount-result.json",
+      "sha256": "28793d668a037a12abcfefd182226aea17ede1443c92e82a4c010d71e6d59ed3"
+    },
+    {
+      "name": "r9-final-bud-parity-browser.json",
+      "sha256": "b2212d4307ac7003214f0c7439fcfc81aa6ad709dc8cf10c9bf0f1938398dbd5"
+    },
+    {
+      "name": "r9-final-default-acceptance.json",
+      "sha256": "6ac82d2f5ed0dc34eaa1591436dcda287ac400669e565f2f596a2a141d2b932e"
+    },
+    {
+      "name": "r9-final-editor-surface-acceptance.json",
+      "sha256": "1acf64667f4d0e0f16aa01a7603cb186ff46eb09fc3f885e7f155d3efc3029aa"
+    },
+    {
+      "name": "r9-final-independent-dense.json",
+      "sha256": "eae6360344a741ce4c738d5b76fcf927aab26cb3489bf8bc54ea07cb003abe2d"
+    },
+    {
+      "name": "r9-final-independent-matrix.json",
+      "sha256": "6cc187d261ec573cd23edb10c639babb7a6c57f44121d7a00da9779074f9bc23"
+    },
+    {
+      "name": "r9-final-independent-hierarchy.json",
+      "sha256": "8bb1bbfd4fd250b899a036b763b33b31b861dbb333dd38ea5eed9ca63ab9fac1"
+    },
+    {
+      "name": "r9-final-interaction-browser-result.json",
+      "sha256": "3153b5386531dea98693d7217713dd84fde7e64d4d0b75cd5ebe370e7760fc88"
+    },
+    {
+      "name": "r9-final-interaction-states.json",
+      "sha256": "2552a1e338ec32fbc08499f91481c643625da9c1f21c2bd59ac420b91866bcf8"
+    },
+    {
+      "name": "r9-final-label-positions.json",
+      "sha256": "01579143622ff677313c30c66cfcb1c695ff482b675574317e90a2d9c90be04d"
+    },
+    {
+      "name": "r9-final-multipart-edit-acceptance.json",
+      "sha256": "645e6e5c6a93012bdcbe7e044ff66107c17c288682ee05b8ee1a6c990cc2407c"
+    },
+    {
+      "name": "r9-final-native-workflow-matrix.json",
+      "sha256": "3e5e0b7541f807a016a99a60be1729d6da1415c03d25f7ba6b43ea0fe5418dc2"
+    },
+    {
+      "name": "r9-final-prefill-acceptance.json",
+      "sha256": "f2e3a45428dc9a30ff2b22d22510ad2d1b91458e57fba0420473a69441456335"
+    },
+    {
+      "name": "r9-final-r8-navigation-acceptance.json",
+      "sha256": "9e8cc93ed0b785ec15947bf79456bf8fc05d740c21d2c81f42ba91362f46fee6"
+    },
+    {
+      "name": "r9-final-r8-workflow-acceptance.json",
+      "sha256": "eab9fa984a63e2bcbb918caed8c3108620354a3a5a409ab933bece223cc7e5fa"
+    },
+    {
+      "name": "r9-final-rail-edit-acceptance.json",
+      "sha256": "b32791d982a3103111943374ed5e1585219a19908409943b56ea8307a644f7f9"
+    },
+    {
+      "name": "r9-final-svg-offsets.json",
+      "sha256": "d6d8302b6a33c22f3c6c9bb9cd74869ffa460091e81d7947ca9388fdeaea6d97"
+    },
+    {
+      "name": "r9-final-trp-edit-acceptance.json",
+      "sha256": "39117a9a57bbd6fa7d4a6782257fb059b8d5e8c3042c0fb540da875510d9e261"
+    },
+    {
+      "name": "r9-final-workflow-edit-acceptance.json",
+      "sha256": "0693636744c429fabe0752644f1926506399d8f1aa941745122822c0d17544cb"
+    },
+    {
+      "name": "r9-final-external-lifecycle.json",
+      "sha256": "8daaf7131a63edde5f7c18e4555bee67c62cb074ac21e27fd7cd8068048031eb"
+    },
+    {
+      "name": "r9-final-studio-acceptance.json",
+      "sha256": "12f1a0bbaf06840c97f582687a18f40baa74eb659eb9b246d13ac68cbec35179"
+    },
+    {
+      "name": "r9-final-zip-import-acceptance.json",
+      "sha256": "151076731e96d14b8576240a99bddfed320f5e64425444453a372515a09880aa"
+    },
+    {
+      "name": "r9-final-module-entry-result.json",
+      "sha256": "e39588fd022c34dfcfd8ca0de5eecb71c437ffea62e9d0ea60f5db0d23d3bd34"
+    },
+    {
+      "name": "r9-final-production-performance.json",
+      "sha256": "e9c4e131e06e49450d0fdb3e6b814287d2c1badb1a11858bde4a11f460570f3b"
+    },
+    {
+      "name": "r9-final-runtime-data-result.json",
+      "sha256": "ffae8c7ed523d8ed8bf7c125220cc772b0ac7e10002ec44ae5d3e4829d6c0bad"
+    },
+    {
+      "name": "r9-category-creation-acceptance.json",
+      "sha256": "191cf4f93c068dc929c7cc73c8d4f10cf6d77abc54d110ceb73bfaa5af76b3cd"
+    },
+    {
+      "name": "r9-category-tree-acceptance.json",
+      "sha256": "b8e92e5c8bde980a1682fef48a0ce821a63fc6e7ef5c84d64155d543e5ca4461"
+    },
+    {
+      "name": "r9-render-acceptance.json",
+      "sha256": "9e866019ff968d6c72648fb588531d6b2f524b13164849c3e2b9f92f6c56ce46"
+    }
+  ]
+}

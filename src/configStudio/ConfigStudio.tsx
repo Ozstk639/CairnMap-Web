@@ -629,7 +629,7 @@ export function ConfigStudio({ onClose, mountedRecords, initialTab }: { onClose:
       const importedReport = validateConfigPackage(next, records);
       if (importedReport.issues.some(issue => issue.code === 'native-contract-structure-invalid')) { setReport(importedReport); setMessage('导入结构无效；已保存版本保持原样。请按问题路径修正文件后重新导入。'); return; }
       if (!importedReport.valid) { setDraftConfig(next); setSelectedId(''); setEditing(true); setReport(importedReport); setMessage('已载入隔离草案；修正阻断问题前不能保存或启用。'); return; }
-      setSavedConfig(await persistActiveConfig(prepareConfigForActivation(next))); setDraftConfig(null); setSelectedId(''); setEditing(false); setReport(importedReport); setMessage(`已导入 ${next.packageId} r${next.revision}。`);
+      const saved=await persistActiveConfig(prepareConfigForActivation(next));setSavedConfig(saved); setDraftConfig(null); setSelectedId(''); setEditing(false); setReport(importedReport); setMessage(`已导入 ${saved.packageId} r${saved.revision}。${saved.revision!==next.revision?'原修订版已有不同历史内容，已使用新修订版并保留历史。':''}`);
     } catch (error) { setMessage(error instanceof Error ? error.message : '配置包读取失败。'); }
   };
   const exportPackage = async () => {

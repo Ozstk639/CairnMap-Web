@@ -631,7 +631,7 @@ function validateProfile(profile: GeometryProfile, geometry: GeometryKind, path:
     if (config.contractRevision >= 7) {
       if (!rule.when || !Number.isInteger(min) || !Number.isInteger(max) || min! < 0 || max! > 8 || min! > max!) issue(issues, 'error', 'render-match-zoom-required', rulePath, 'r7 必须填写 0–8 的闭区间整数 Zoom，允许单级区间。');
       if (rule.minZoom !== undefined || rule.maxZoom !== undefined || rule.minExclusive !== undefined || rule.maxExclusive !== undefined || rule.conditionalOverrides !== undefined) issue(issues, 'error', 'render-legacy-match-forbidden', rulePath, 'r7 只使用 when.zoom 和非分类字段组合，不能保留旧匹配或分支。');
-      for (const message of validateRenderFields(rule.when?.fields, resolveEffectiveFields(config, sourcePath), resolveSelectableFields(config, sourcePath).map(field => field.key))) issue(issues, 'error', 'render-field-condition-invalid', `${rulePath}/when/fields`, message);
+      for (const message of validateRenderFields(rule.when?.fields, resolveSelectableFields(config, sourcePath), resolveSelectableFields(config, sourcePath).map(field => field.key))) issue(issues, 'error', 'render-field-condition-invalid', `${rulePath}/when/fields`, message);
     } else if (rule.when) issue(issues, 'error', 'render-match-revision-invalid', rulePath, '组合规则需要原生 r7；旧包请先无损迁移。');
     if (!rule.representation) issue(issues, 'error', 'render-representation-required', rulePath, '渲染规则必须选择显示种类。');
     else if (!['hidden', 'geometry', 'point', 'labelOnly'].includes(rule.representation)) issue(issues, 'error', 'render-representation-invalid', rulePath, '未知显示种类。');

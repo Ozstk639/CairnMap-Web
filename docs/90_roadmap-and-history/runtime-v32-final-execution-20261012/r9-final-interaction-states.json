@@ -1,0 +1,145 @@
+{
+  "cases": [
+    {
+      "state": "hover",
+      "entered": [
+        {
+          "stroke": "#111827",
+          "fill": "#f97316",
+          "width": "2"
+        },
+        {
+          "stroke": "#e6007e",
+          "fill": "#e6007e",
+          "width": "6"
+        }
+      ],
+      "disabled": [
+        {
+          "stroke": "#111827",
+          "fill": "#f97316",
+          "width": "2"
+        }
+      ],
+      "recovered": [
+        {
+          "stroke": "#111827",
+          "fill": "#f97316",
+          "width": "2"
+        }
+      ]
+    },
+    {
+      "state": "selected",
+      "entered": [
+        {
+          "stroke": "#111827",
+          "fill": "#f97316",
+          "width": "2"
+        },
+        {
+          "stroke": "#e6007e",
+          "fill": "#e6007e",
+          "width": "6"
+        }
+      ],
+      "disabled": [
+        {
+          "stroke": "#111827",
+          "fill": "#f97316",
+          "width": "2"
+        }
+      ],
+      "recovered": [
+        {
+          "stroke": "#111827",
+          "fill": "#f97316",
+          "width": "2"
+        }
+      ]
+    },
+    {
+      "state": "searchResult",
+      "entered": [
+        {
+          "stroke": "#111827",
+          "fill": "#f97316",
+          "width": "2"
+        },
+        {
+          "stroke": "#e6007e",
+          "fill": "#e6007e",
+          "width": "6"
+        }
+      ],
+      "disabled": [
+        {
+          "stroke": "#111827",
+          "fill": "#f97316",
+          "width": "2"
+        }
+      ],
+      "recovered": [
+        {
+          "stroke": "#111827",
+          "fill": "#f97316",
+          "width": "2"
+        }
+      ]
+    },
+    {
+      "state": "editing",
+      "entered": [
+        {
+          "stroke": "#111827",
+          "fill": "#f97316",
+          "width": "2"
+        },
+        {
+          "stroke": "#e6007e",
+          "fill": "#e6007e",
+          "width": "6"
+        }
+      ],
+      "disabled": [
+        {
+          "stroke": "#111827",
+          "fill": "#f97316",
+          "width": "2"
+        }
+      ],
+      "recovered": [
+        {
+          "stroke": "#111827",
+          "fill": "#f97316",
+          "width": "2"
+        }
+      ]
+    },
+    {
+      "state": "deletionMarked",
+      "entered": [
+        {
+          "stroke": "#111827",
+          "fill": "#f97316",
+          "width": "2"
+        },
+        {
+          "stroke": "#e6007e",
+          "fill": "#e6007e",
+          "width": "6"
+        }
+      ],
+      "disabled": [],
+      "recovered": [
+        {
+          "stroke": "#111827",
+          "fill": "#f97316",
+          "width": "2"
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "events": "CDP real pointer; production search-select/close; MeasuringModule temp-source storage and change events"
+}

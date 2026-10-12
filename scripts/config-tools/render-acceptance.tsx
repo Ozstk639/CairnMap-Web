@@ -7,6 +7,8 @@ import '../../src/styles/index.css';
 import 'leaflet/dist/leaflet.css';
 import { ConfigRuntimePreview, makeConfigPreviewFixture } from '../../src/configStudio/ConfigRuntimePreview';
 import { createEditableConfigPackageFromCurrentProject as createConfigPackageFromCurrentProject } from '../../src/configStudio/renderRuleTemplates';
+import finalSeed from '../../src/configStudio/defaults/r9-r5.config.json';
+import type {ConfigPackageV3} from '../../src/configStudio/types';
 import { compileConfigRuntime, configCompilationStats, resolveGeometryProfile, validateConfigPackage } from '../../src/configStudio/runtime';
 import type { PreviewScenario } from '../../src/configStudio/types';
 import { createDynmapCRS, DynmapProjection, ZTH_FLAT_CONFIG } from '../../src/lib/DynmapProjection';
@@ -23,7 +25,7 @@ function Ready({ ready }: { ready: (map: L.Map) => void }) {
 }
 function Harness() {
   const params = new URLSearchParams(location.search);
-  const [config, setConfig] = useState(createConfigPackageFromCurrentProject);
+  const [config, setConfig] = useState(()=>params.get('final')==='1'?structuredClone(finalSeed) as ConfigPackageV3:createConfigPackageFromCurrentProject());
   // Controlled geometry probes may intentionally combine authoring-incompatible
   // profiles. This test-only entry compiles them; production activation validates.
   const runtimeConfig = useMemo(() => compileConfigRuntime(config, true), [config]);

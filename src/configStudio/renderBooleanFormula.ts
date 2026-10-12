@@ -43,7 +43,18 @@ export function matchesRenderFormula(formula:RenderConditionFormula,read:(key:st
   try {const ast=compileRenderFormula(formula);let terms=termCache.get(formula);if(!terms){terms=new Map(formula.terms.map(t=>[t.id,t.condition]));if(Object.isFrozen(formula))termCache.set(formula,terms);}const values=new Map<string,boolean>();return evaluate(ast,id=>{if(!values.has(id))values.set(id,matchesAtomicCondition(terms!.get(id)!,read));return values.get(id)!;});}catch{return false;}
 }
 export function formulaContradiction(formula:RenderConditionFormula):boolean {
-  const ast=compileRenderFormula(formula);if(formula.terms.length>10)return false;
+  const ast=compileRenderFormula(formula);
+  const facts:Array<{condition:RenderFieldCondition;positive:boolean}>=[],terms=new Map(formula.terms.map(t=>[t.id,t.condition]));
+  const conjunction=(node:Ast,positive=true):boolean=>node.kind==='term'?(facts.push({condition:terms.get(node.id)!,positive}),true):node.kind==='not'?conjunction(node.child,!positive):node.kind==='and'&&positive?conjunction(node.left)&&conjunction(node.right):node.kind==='or'&&!positive?conjunction(node.left,false)&&conjunction(node.right,false):false;
+  if(conjunction(ast))for(const field of new Set(facts.map(f=>f.condition.field))) {
+    const constraints=facts.filter(f=>f.condition.field===field),literals=constraints.flatMap(({condition:c})=>c.kind==='fieldEquals'?[c.value]:c.kind==='fieldIn'?c.values:c.kind==='fieldCompare'?c.values??(c.value!==undefined?[c.value]:[]):[]);
+    if(literals.length>256)continue;
+    const numbers=[...new Set(literals.flatMap(v=>typeof v==='number'?[v]:typeof v==='string'&&v.trim()&&Number.isFinite(Number(v))?[Number(v)]:[]))].sort((a,b)=>a-b);
+    const candidates:unknown[]=[undefined,null,'',0,false,true,[],[null],[''],{},...literals.map(value=>[value]),...literals,...numbers,...numbers.flatMap((v,i)=>[v-Math.max(1,Math.abs(v)*.1),v+Math.max(1,Math.abs(v)*.1),...(i?[numbers[i-1]/2+v/2]:[])])];
+    let other='__other__';while(literals.includes(other))other+='_';candidates.push(other);
+    if(!candidates.some(value=>constraints.every(({condition,positive})=>matchesAtomicCondition(condition,()=>value)===positive)))return true;
+  }
+  if(formula.terms.length>10)return false;
   for(let mask=0;mask<2**formula.terms.length;mask++)if(evaluate(ast,id=>Boolean(mask&(1<<formula.terms.findIndex(t=>t.id===id)))))return false;return true;
 }
 export function automaticConditionExpression(terms:RenderConditionFormula['terms']):string {return terms.map((term,index)=>`${index?(term.relation==='NOT'?'AND NOT ':term.relation+' '):term.relation==='NOT'?'NOT ':''}${term.id}`).join(' ');}

@@ -3,15 +3,16 @@ import type { ConfigPackageV3 } from './types';
 import type { StudioEditingSession } from './studioSession';
 import { readStudioEditingSession } from './configLabStorage';
 import { prepareConfigForActivation } from './configActivation';
-import { readRawConfigLatest, saveConfigLabPackage, archiveConfigRecovery, listConfigRecoveries, readConfigRecovery, readActiveConfigChoice, saveActiveConfigChoice, type ConfigRecovery } from './configLabStorage';
+import { highestConfigLabRevision, readRawConfigLatest, saveConfigLabPackage, archiveConfigRecovery, listConfigRecoveries, readConfigRecovery, readActiveConfigChoice, saveActiveConfigChoice, type ConfigRecovery } from './configLabStorage';
 
 const CHOICE = 'cairnmap-config-active-choice-v1';
 const SAVED = 'cairnmap-config-studio-saved';
 const LEGACY_DRAFT = 'cairnmap-config-studio-draft';
-type ProviderState={active?:ConfigPackageV3;editingSession?:StudioEditingSession;seedPromise?:Promise<ConfigPackageV3>;activePromise?:Promise<ConfigPackageV3>;writes:Promise<unknown>};
+type ProviderState={active?:ConfigPackageV3;editingSession?:StudioEditingSession;seedHash?:string;seedPromise?:Promise<ConfigPackageV3>;activePromise?:Promise<ConfigPackageV3>;writes:Promise<unknown>};
 const slot=Symbol.for('cairnmap.config.active-provider');
 const providers=globalThis as unknown as Record<symbol,ProviderState>;
 const state=providers[slot]??={writes:Promise.resolve()};
+if(state.seedHash!==manifest.sha256){state.seedPromise=undefined;state.activePromise=undefined;state.seedHash=manifest.sha256;}
 
 export function stableConfigText(value: unknown): string {
   if (Array.isArray(value)) return '['+value.map(item=>stableConfigText(item)??'null').join(',')+']';
@@ -28,7 +29,7 @@ async function preserveSessionDrafts(candidate:ConfigPackageV3) {
 }
 
 export function loadDefaultConfig(): Promise<ConfigPackageV3> {
-  return state.seedPromise??=fetch(new URL('./defaults/r8-r4.config.json',import.meta.url).href).then(async response=>{
+  return state.seedPromise??=fetch(new URL('./defaults/r9-r5.config.json',import.meta.url).href).then(async response=>{
     if(!response.ok)throw Error('无法加载应用默认配置。');
     const text=await response.text();if(await hash(text)!==manifest.sha256)throw Error('应用默认配置摘要不一致，未启用。');
     return prepareConfigForActivation(JSON.parse(text));
@@ -44,10 +45,12 @@ export function loadActiveConfig(): Promise<ConfigPackageV3> {
     let latest:ConfigPackageV3|undefined;
     const latestRaw=await readRawConfigLatest();
     try {if(latestRaw)latest=prepareConfigForActivation(JSON.parse(latestRaw));}catch{if(latestRaw)await archiveConfigRecovery('rejected-local-latest',latestRaw);}
-    if(selected?.kind==='custom'&&latest&&(!selected.fingerprint||await fingerprint(latest)===selected.fingerprint)) {await preserveSessionDrafts(latest);state.active=latest;mirror(state.active);return state.active;}
+    const latestFingerprint=latest?await fingerprint(latest):undefined;
+    const untouchedPreviousDefault=latestFingerprint!==undefined&&manifest.legacyDefaultFingerprints.includes(latestFingerprint);
+    if(selected?.kind==='custom'&&latest&&(!selected.fingerprint||latestFingerprint===selected.fingerprint)) {await preserveSessionDrafts(latest);state.active=latest;mirror(state.active);return state.active;}
     const seed=await loadDefaultConfig();
     if(selected?.kind!=='default') {
-      if(latest&&await fingerprint(latest)!==manifest.semanticFingerprint)await archiveConfigRecovery(manifest.legacyDefaultFingerprints.includes(await fingerprint(latest))?'previous-default-r2':'previous-local-latest',JSON.stringify(latest));
+      if(latest&&latestFingerprint!==manifest.semanticFingerprint)await archiveConfigRecovery(untouchedPreviousDefault?'previous-default-seed':'previous-local-latest',JSON.stringify(latest));
     }
     await preserveSessionDrafts(seed);await saveActiveConfigChoice({kind:'default'});state.active=seed;try{localStorage.setItem(CHOICE,JSON.stringify({kind:'default'}));}catch{/* durable pointer is in IndexedDB */}mirror(state.active);return state.active;
   })();
@@ -60,7 +63,7 @@ export function persistActiveConfig(value: ConfigPackageV3, increment=false, exp
     if(increment&&state.active?.packageId===value.packageId&&stableConfigText(state.active)!==stableConfigText(value))candidate={...value,revision:Math.max(value.revision,state.active.revision+1)};
     let config=prepareConfigForActivation(candidate);
     for(let attempt=0;;attempt++) {
-      try {await saveConfigLabPackage(config,{kind:'custom',fingerprint:await fingerprint(config)},true,expected);break;}catch(error){if(!increment||attempt>=20||!(error instanceof Error)||!error.message.includes('ID/revision'))throw error;config=prepareConfigForActivation({...config,revision:config.revision+1});}
+      try {await saveConfigLabPackage(config,{kind:'custom',fingerprint:await fingerprint(config)},true,expected);break;}catch(error){const savingSeed=await fingerprint(value)===manifest.semanticFingerprint;if((!increment&&!savingSeed)||attempt>=3||!(error instanceof Error)||!error.message.includes('ID/revision'))throw error;config=prepareConfigForActivation({...config,revision:Math.max(config.revision+1,(await highestConfigLabRevision(config.packageId))+1)});}
     }
     try{localStorage.setItem(CHOICE,JSON.stringify({kind:'custom',fingerprint:await fingerprint(config)}));}catch{/* durable pointer is in IndexedDB */}state.active=config;state.editingSession=undefined;mirror(config);return config;
   });

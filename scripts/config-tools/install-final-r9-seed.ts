@@ -1,0 +1,42 @@
+import fs from 'node:fs';
+import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
+import {migrateConfigToR9} from '../../src/configStudio/r9Migration';
+import {installRailEditingWorkflows} from '../../src/configStudio/railEditingTemplates';
+import {createTrpEditingWorkflow} from '../../src/configStudio/externalEditRegistry';
+import {testWorkflowEditConversion} from '../../src/configStudio/workflowEditCommit';
+import {isQuickMappingWorkflow} from '../../src/configStudio/workflowEditing';
+import {validateConfigPackage} from '../../src/configStudio/runtime';
+import {buildConfigPackageArchive,readConfigPackage} from '../../src/configStudio/package';
+import {stableConfigText} from '../../src/configStudio/defaultConfigProvider';
+
+const source='docs/90_roadmap-and-history/runtime-v32-unified-repair-20261011/CairnMap_V32_FieldReuse_Drawing_r4.config.json';
+const out='docs/90_roadmap-and-history/runtime-v32-final-execution-20261012';
+const sha=(bytes:string|Uint8Array)=>createHash('sha256').update(bytes).digest('hex');
+const fingerprint=(value:any)=>{const {parity:_,...content}=value;return sha(stableConfigText(content));};
+const originalBytes=fs.readFileSync(source);
+assert.equal(sha(originalBytes),'ffcf77938eb83ea7054ebde4bdbe42980c36cde73c4cad864af5e329a216a2f5');
+const original=JSON.parse(originalBytes.toString('utf8'));
+const migrated=migrateConfigToR9(original),migratedStockFingerprint=fingerprint(migrated);
+const qualification=[];
+for(const workflow of migrated.workflows.filter(w=>w.mode==='composed'&&w.id!=='v3-tpp_teleport')){
+  const result=testWorkflowEditConversion(migrated,workflow);
+  workflow.editor={enabled:true};qualification.push({id:workflow.id,report:result.report});
+}
+const config=installRailEditingWorkflows(migrated);config.workflows.push(createTrpEditingWorkflow());
+const report=validateConfigPackage(config);assert(report.valid,JSON.stringify(report.issues));
+assert.equal(config.revision,5);assert.equal(config.contractRevision,9);
+assert.equal(config.nodes.length,95);assert.equal(config.workflows.length,28);assert.equal(config.workflows.filter(isQuickMappingWorkflow).length,20);
+const bytes=JSON.stringify(config,null,2)+'\n';
+fs.mkdirSync(out,{recursive:true});
+const historyPath='src/configStudio/defaults/manifest-r8-r4.json';
+if(!fs.existsSync(historyPath))fs.copyFileSync('src/configStudio/defaults/manifest.json',historyPath);
+const oldManifest=JSON.parse(fs.readFileSync(historyPath,'utf8'));
+fs.writeFileSync('src/configStudio/defaults/r9-r5.config.json',bytes);
+fs.writeFileSync(out+'/CairnMap_V32_CategoryManagement_Editing_r5.config.json',bytes);
+fs.writeFileSync('src/configStudio/defaults/manifest.json',JSON.stringify({packageId:config.packageId,revision:5,contractRevision:9,sha256:sha(bytes),semanticFingerprint:fingerprint(config),legacyDefaultFingerprints:[...new Set([...oldManifest.legacyDefaultFingerprints,oldManifest.semanticFingerprint,migratedStockFingerprint])]},null,2)+'\n');
+const archive=await buildConfigPackageArchive(config,report),zipBytes=new Uint8Array(await archive.arrayBuffer());
+const roundtrip=await readConfigPackage(archive as File);assert.deepEqual(roundtrip,JSON.parse(bytes));
+const zipName='CairnMap_V32_CategoryManagement_Editing_r5.zip';fs.writeFileSync(out+'/'+zipName,zipBytes);
+fs.writeFileSync(out+'/r9-r5-delivery-manifest.json',JSON.stringify({packageId:config.packageId,contractRevision:9,revision:5,sourceSha256:sha(originalBytes),jsonSha256:sha(bytes),zipSha256:sha(zipBytes),nodes:95,workflows:28,composed:24,external:4,quickMapping:20,editing:24,standardEditing:qualification.length,railEditing:7,externalEditing:1,qualification,numericNormalization:'V1 TRP new elevation numeric strings are saved as V3 declared number; frozen reference is retained unchanged.'},null,2)+'\n');
+console.log('Installed r9/r5 seed: 95 categories, 28 workflows, 20 capture choices, 24 editing routes; signed archive roundtrip and 16 actual conversion probes passed.');

@@ -1,0 +1,11 @@
+{
+  "checks": [
+    "host preview contains only selected host",
+    "each of three component labels opens original host record",
+    "per-part point geometry and labels share identical screen anchors",
+    "positive X and negative Y label remains clickable at displayed position",
+    "same-URL icon size/anchor updates and rectangular hit proxy follow pixels",
+    "member preview includes its larger external host"
+  ],
+  "runtimeErrors": []
+}

@@ -571,7 +571,7 @@ function nativeRule(config: ConfigPackageV3, record: FeatureRecord, ctx: RenderC
   const binding = runtimeBinding(config, record, ctx, store);
   const { geometry, profile } = binding;
   const path = pathFor(record);
-  if (!profile?.enabled) return null;
+  if (!profile?.enabled || profile.renderState==='unconfigured') return null;
 
   // World is an engine-assigned system field; it scopes loaded data rather than
   // being a per-Zoom condition.

@@ -1,0 +1,201 @@
+{
+  "checks": [
+    "actual BUD edit restores two parts and one hole; array undo/redo, both outer rings and hole edits save latest coordinates into one original layer",
+    "cancel after a real multipart geometry modification restores the complete saved record, all rings and unknown data"
+  ],
+  "baseline": {
+    "ID": "R9_MULTI_BUD",
+    "Name": "sample",
+    "Kind": "NOM",
+    "SKind": "NOM",
+    "tags": {
+      "nomenclator": "sample",
+      "Land": "sample",
+      "Adm": "sample",
+      "Pop": "sample"
+    },
+    "extensions": {
+      "link": {
+        "wiki": "sample"
+      },
+      "character": {
+        "brief": "sample"
+      }
+    },
+    "CoordG": [
+      [
+        [
+          [
+            0,
+            -64,
+            0
+          ],
+          [
+            100,
+            -64,
+            0
+          ],
+          [
+            100,
+            -64,
+            100
+          ],
+          [
+            0,
+            -64,
+            100
+          ]
+        ],
+        [
+          [
+            20,
+            -64,
+            20
+          ],
+          [
+            30,
+            -64,
+            20
+          ],
+          [
+            30,
+            -64,
+            30
+          ]
+        ]
+      ],
+      [
+        [
+          [
+            300,
+            -64,
+            0
+          ],
+          [
+            400,
+            -64,
+            0
+          ],
+          [
+            400,
+            -64,
+            100
+          ],
+          [
+            300,
+            -64,
+            100
+          ]
+        ]
+      ]
+    ],
+    "Type": "Polygon",
+    "Class": "BUD",
+    "World": "zth",
+    "CreateTime": "20261007",
+    "CreateBy": "fixture-user",
+    "opaque": {
+      "kept": 0,
+      "flag": false
+    }
+  },
+  "updated": {
+    "ID": "R9_MULTI_BUD",
+    "Name": "sample",
+    "Kind": "NOM",
+    "SKind": "NOM",
+    "tags": {
+      "nomenclator": "sample",
+      "Land": "sample",
+      "Adm": "sample",
+      "Pop": "sample"
+    },
+    "extensions": {
+      "link": {
+        "wiki": "sample"
+      },
+      "character": {
+        "brief": "sample"
+      }
+    },
+    "CoordG": [
+      [
+        [
+          [
+            0,
+            -64,
+            0
+          ],
+          [
+            110,
+            -64,
+            0
+          ],
+          [
+            100,
+            -64,
+            100
+          ],
+          [
+            0,
+            -64,
+            100
+          ]
+        ],
+        [
+          [
+            20,
+            -64,
+            20
+          ],
+          [
+            35,
+            -64,
+            20
+          ],
+          [
+            30,
+            -64,
+            30
+          ]
+        ]
+      ],
+      [
+        [
+          [
+            300,
+            -64,
+            0
+          ],
+          [
+            410,
+            -64,
+            0
+          ],
+          [
+            400,
+            -64,
+            100
+          ],
+          [
+            300,
+            -64,
+            100
+          ]
+        ]
+      ]
+    ],
+    "Type": "Polygon",
+    "Class": "BUD",
+    "World": "zth",
+    "CreateTime": "20261007",
+    "CreateBy": "fixture-user",
+    "opaque": {
+      "kept": 0,
+      "flag": false
+    },
+    "ModifityBy": "multipart-r9-editor",
+    "ModifityTime": "20261012"
+  },
+  "runtimeErrors": []
+}

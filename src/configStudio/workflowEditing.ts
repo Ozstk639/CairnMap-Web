@@ -4,6 +4,8 @@ import {parseWorkflowExpression,workflowExpressionTokens,evaluateWorkflowExpress
 import {pathMatchesScope,classificationPathKey,readRecordPath,resolveSelectableFields} from './runtime';
 import {coerceWorkflowValues} from './workflowValues';
 import {normalizeRuleSourceWorldId} from '../components/Rules/data/ruleDataSources';
+import {readMultipartGeometry,type MultipartGeometry} from '../core/geometry/multipartGeometry';
+import {captureDrawingSnapshot,drawingKey} from './workflowDrawing';
 export type WorkflowEditPlan={workflow:WorkflowDefinition;scope:ClassificationPath;controls:WorkflowControl[];removed:WorkflowControl[];bindings:Array<{slot:string;target:string}>};
 export type WorkflowEditDraft={slots:Record<string,unknown>;classification:ClassificationPath;initialSlots:Record<string,unknown>};
 export const recordClassification=(record:Record<string,unknown>):ClassificationPath=>({class:String(record.Class??''),...(record.Kind?{kind:String(record.Kind)}:{}),...(record.SKind??record.Skind?{skind:String(record.SKind??record.Skind)}:{}),...(record.SKind2??record.Skind2?{skind2:String(record.SKind2??record.Skind2)}:{})});
@@ -45,19 +47,33 @@ export function hydrateWorkflowEdit(plan:WorkflowEditPlan,record:Record<string,u
  for(const control of plan.controls){if(control.kind==='classificationPicker'){slots[control.slot??control.id]=JSON.stringify(classification);continue;}if(control.kind==='tagsExtensions'){slots[control.id]=residualAnnotations(plan,record);continue;}
    if(!control.slot)continue;const values=plan.bindings.filter(b=>b.slot===control.slot).map(b=>readRecordPath(record,b.target));if(values.some(v=>!annotationEqual(v,values[0])))throw Error(`槽位 ${control.slot} 的多个回填目标具有不同值，不能猜测。`);slots[control.slot]=structuredClone(values[0]);
  }
- return {slots,classification,initialSlots:structuredClone(slots)};
+ const draft={slots,classification,initialSlots:structuredClone(slots)},filled=workflowEditSlots(plan,record,draft);
+ return {...draft,slots:filled,initialSlots:structuredClone(filled)};
+}
+export function workflowEditSlots(plan:WorkflowEditPlan,original:Record<string,unknown>,draft:WorkflowEditDraft,supplied?:MultipartGeometry):Record<string,unknown> {
+ const geometry=supplied??readMultipartGeometry(original,plan.workflow.outputs[0].geometry.selected).geometry,step=plan.workflow.steps.find(s=>s.kind==='geometry');if(!geometry||!step)return {...draft.slots};
+ const coords=geometry.type==='Point'?geometry.parts:geometry.type==='LineString'?geometry.parts[0]:geometry.parts[0][0];
+ const result=captureDrawingSnapshot(plan.workflow,draft.slots,{[drawingKey(step)]:{geometry,coordinates:coords,point:coords[0]}}).slots;
+ const controls=new Set(plan.controls.flatMap(c=>c.slot?[c.slot]:[]));
+ // Geometry adds derived tokens; hydration never normalizes existing input values.
+ return {...draft.slots,...Object.fromEntries(Object.entries(result).filter(([key])=>!controls.has(key)))};
 }
 /** Patch the original, and never run creation ID assembly or default cleanup. */
-export function buildWorkflowEditRecord(plan:WorkflowEditPlan,original:Record<string,unknown>,draft:WorkflowEditDraft):Record<string,unknown> {
- const record=structuredClone(original),slots=coerceWorkflowValues(plan.workflow,draft.slots),initial=draft.initialSlots;
+export function buildWorkflowEditRecord(plan:WorkflowEditPlan,original:Record<string,unknown>,draft:WorkflowEditDraft,options:{geometry?:MultipartGeometry}={}):Record<string,unknown> {
+ const record=structuredClone(original),slots=coerceWorkflowValues(plan.workflow,workflowEditSlots(plan,original,draft,options.geometry)),initial=draft.initialSlots;
  const id=String(draft.slots.EDIT_ID??'').trim();if(!id)throw Error('ID 不能为空。');record.ID=id;
  if(!pathMatchesScope(draft.classification,plan.scope))throw Error('不能将要素改为工作流作用范围之外的分类。');
  if(!annotationEqual(draft.classification,recordClassification(original))){for(const [key,value] of [['Class',draft.classification.class],['Kind',draft.classification.kind],['SKind',draft.classification.skind],['SKind2',draft.classification.skind2]] as const)if(value)record[key]=value;else delete record[key];}
  const system={ID:id,World:original.World,Class:draft.classification.class,Kind:draft.classification.kind??'',Skind:draft.classification.skind??'',Skind2:draft.classification.skind2??'',Creator:original.CreateBy??''};
+ Object.assign(system,Object.fromEntries(Object.entries(system).map(([key,value])=>[`${key}_1`,value])));
+ const geometryDirty=Boolean(options.geometry&&!annotationEqual(options.geometry,readMultipartGeometry(original,plan.workflow.outputs[0].geometry.selected).geometry));
+ const geometryTokens=new Set(plan.workflow.steps.flatMap(s=>[s.drawing?.captureSlot,s.drawing?.pointSlot]).filter((slot):slot is string=>Boolean(slot)).flatMap(slot=>[slot,`${slot}_X`,`${slot}_Y`,`${slot}_Z`,`${slot}_HEIGHT`]));
+ const beforePath=recordClassification(original),classificationDirty=!annotationEqual(draft.classification,beforePath);
  for(const assignment of plan.workflow.outputs[0].assignments)if(assignment.target!=='ID'){
-   const tokens=workflowExpressionTokens(parseWorkflowExpression(assignment.expression));if(tokens.some(t=>plan.controls.some(c=>c.slot===t)&&!annotationEqual(draft.slots[t],initial[t])))setPath(record,assignment.target,evaluateWorkflowExpression(assignment.expression,slots,system));
+   const tokens=workflowExpressionTokens(parseWorkflowExpression(assignment.expression));if(tokens.some(t=>plan.controls.some(c=>c.slot===t)&&!annotationEqual(draft.slots[t],initial[t])||geometryDirty&&geometryTokens.has(t)||/^ID(?:_1)?$/.test(t)&&id!==String(original.ID)||classificationDirty&&/^(Class|Kind|Skind|Skind2)(?:_1)?$/.test(t)))setPath(record,assignment.target,evaluateWorkflowExpression(assignment.expression,slots,system));
  }
  for(const binding of plan.bindings)if(plan.workflow.steps.some(step=>step.drawing?.heightSlot===binding.slot)&&!annotationEqual(draft.slots[binding.slot],initial[binding.slot]))setPath(record,binding.target,slots[binding.slot]);
+ for(const step of plan.workflow.steps)for(const binding of step.drawing?.bindings??[])if(binding.outputId===plan.workflow.outputs[0].id&&(geometryDirty||step.drawing?.heightSlot&&!annotationEqual(draft.slots[step.drawing.heightSlot],initial[step.drawing.heightSlot]))){const capture=step.drawing?.captureSlot,value=capture?slots[binding.value==='height'?`${capture}_HEIGHT`:capture]:binding.value==='height'&&step.drawing?.heightSlot?slots[step.drawing.heightSlot]:undefined;if(value!==undefined)setPath(record,binding.target,value);}
  for(const control of plan.controls.filter(c=>c.kind==='tagsExtensions'))if(!annotationEqual(draft.slots[control.id],initial[control.id])) {
    const before=annotationsForOutput({...plan.workflow,steps:[{id:'annotations',kind:'form',label:{zh:'',en:''},controls:[control]}]},initial,plan.workflow.outputs[0].id),after=annotationsForOutput({...plan.workflow,steps:[{id:'annotations',kind:'form',label:{zh:'',en:''},controls:[control]}]},draft.slots,plan.workflow.outputs[0].id);
    for(const namespace of ['tags','extensions'] as const){for(const [key,value] of Object.entries(before[namespace]))if(namespace==='extensions'&&value&&typeof value==='object')for(const child of Object.keys(value))removePath(record,`${namespace}.${key}.${child}`);else removePath(record,`${namespace}.${key}`);for(const [key,value] of Object.entries(after[namespace]))if(namespace==='extensions'&&value&&typeof value==='object')for(const [child,data]of Object.entries(value))setPath(record,`${namespace}.${key}.${child}`,data);else setPath(record,`${namespace}.${key}`,value);}

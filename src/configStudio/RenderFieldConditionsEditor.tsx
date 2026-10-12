@@ -26,6 +26,6 @@ export function RenderFieldConditionsEditor({ config, path, value, onChange }: {
   const definitions = resolveEffectiveFields(config, path);
   const all = resolveSelectableFields(config, path);
   const fields = all.filter(field => !isClassificationConditionField(field.key, definitions));
-  const errors = validateRenderFields(value, definitions, all.map(field => field.key));
+  const errors = validateRenderFields(value, all, all.map(field => field.key));
   return <section className="space-y-2 rounded border border-violet-200 bg-violet-50/40 p-2" aria-label="字段组合条件"><label className="text-sm"><input type="checkbox" checked={Boolean(value)} onChange={e => onChange(e.target.checked ? config.contractRevision>=9?{op:'all',items:[],formula:{expression:'C1',manual:false,terms:[{id:'C1',relation:'AND',condition:{kind:'fieldCompare',field:fields[0]?.key??'Name',operator:'present'}}]}}:{ op: 'all', items: [leaf(fields)] } : undefined)} /> 启用字段组合条件（仅非分类字段）</label><p className="text-xs text-slate-600">分类由当前分类树匹配；字段组与必填 Zoom 同时成立才命中。选项显示文本与保存值分开，末项命中的完整规则生效。</p>{value ? config.contractRevision>=9?<RenderFormulaEditor value={value} fields={fields} onChange={onChange}/>:<Group value={value} fields={fields} onChange={onChange} /> : null}{errors.length ? <ul role="alert" className="list-disc pl-5 text-xs text-rose-700">{errors.map(message => <li key={message}>{message}</li>)}</ul> : null}</section>;
 }

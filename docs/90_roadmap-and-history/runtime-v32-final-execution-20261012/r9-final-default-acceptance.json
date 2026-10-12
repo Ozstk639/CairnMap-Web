@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "clean browser loads the shipped r9/r5 seed without upload",
+    "previous default r2 is archived and refresh consistently selects r5",
+    "implicit untouched r8/r4 latest upgrades to r9/r5 and archives its bytes",
+    "explicit old-version selection remains selected across refresh, even when its bytes equal an old stock seed",
+    "custom old content is preserved exactly and can be explicitly restored",
+    "uploaded/selected version survives refresh and is shared by Studio and Lab",
+    "actual workflow Save increments the package and persists edited content across reload",
+    "restore default returns to r5 while saved user versions remain in history",
+    "same-ID r5 collision jumps past immutable r1005 history; saving the new default does not overwrite old bytes or loop through every version"
+  ],
+  "runtimeErrors": []
+}
