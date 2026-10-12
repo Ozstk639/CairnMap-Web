@@ -1,3 +1,4 @@
+import {validateExternalEditBinding} from './externalEditRegistry';
 import {testWorkflowEditConversion} from './workflowEditCommit';
 import {compileRenderFormula} from './renderBooleanFormula';
 import {resolveMappedColor} from './renderScalar';
@@ -852,6 +853,22 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
   };
   checkIds(workflow.steps, '页面'); checkIds(workflow.outputs, '输出'); checkIds(controlsFor(workflow), '控件');
   if (workflow.mode === 'external') {
+    if(workflow.external?.purpose==='edit') {
+      for(const message of validateExternalEditBinding(workflow))issue(issues,'error','external-editor-invalid',base,message);
+      const scope=workflow.editor?.scope??workflow.target;
+      if(!scope||!hasCategoryNode(config,scope))issue(issues,'error','external-editor-scope-invalid',base,'外部编辑分类范围不存在。');
+      else for(const node of config.nodes.filter(n=>pathMatchesScope(n.path,scope))) {
+        const fields=resolveSelectableFields(config,node.path);
+        for(const [key,type]of [['Name','string'],['Interaction','string'],['Situation','string'],['Trade','json'],['elevation','number'],['tags.Land','string'],['tags.UAdm','string'],['tags.UAdmG','string'],['extensions.link.wiki','string'],['extensions.character.brief','string']]) {
+          const field=fields.find(f=>f.key===key);
+          if(!field&&!key.includes('.')||field&&(field.cardinality!=='single'||field.type!==type&&!(type==='string'&&field.type==='reference')))issue(issues,'error','external-editor-field-contract-conflict',base,`TRP 编辑成品需要 ${classificationPathKey(node.path)} 的 ${key} 为单值 ${type} 字段。`);
+        }
+        if(!hasDescendants(config,node.path)&&!resolveGeometryProfile(config,node.path,'Point')?.enabled)issue(issues,'error','external-editor-geometry-conflict',base,`TRP 编辑范围 ${classificationPathKey(node.path)} 未启用点几何。`);
+      }
+      return;
+    }
+    if(workflow.editor?.enabled)issue(issues,'error','external-capture-editor-forbidden',base,'外部采集方案不能充当编辑器，请选择独立编辑成品。');
+    if(workflow.external?.purpose!==undefined&&workflow.external.purpose!=='capture')issue(issues,'error','external-purpose-invalid',base,'外部用途无效。');
     const allowedComponents = { 'railway-integrated': 'railwayWorkflow', 'station-integrated': 'stationWorkflow', 'trp-integrated': 'tradePointWorkflow' } as const;
     if (!workflow.external?.componentKey || !EXTERNAL_WORKFLOW_REASONS.has(workflow.external.reason) || allowedComponents[workflow.external.reason as keyof typeof allowedComponents] !== workflow.external.componentKey || workflow.steps.length || workflow.outputs.length || !workflow.external.coveredClassifications?.length) issue(issues, 'error', 'external-workflow-invalid', base, '外部整体工作流必须是铁路一体、车站一体或 TRP 一体的受控成品，且必须声明受控分类。');
     return;

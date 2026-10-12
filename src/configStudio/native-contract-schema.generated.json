@@ -7147,6 +7147,13 @@
             }
           ]
         },
+        "version": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
         "reason": {
           "anyOf": [
             {

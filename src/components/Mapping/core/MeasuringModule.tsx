@@ -1,3 +1,5 @@
+import {ExternalFeatureEditHost} from '../Workflow/ExternalFeatureEditHost';
+import {createTrpExternalEditSession,prepareTrpExternalEdit,type TrpExternalEditSession} from '@/configStudio/trpExternalEditing';
 import {prepareNativeFeatureImport} from '@/configStudio/nativeFeatureImport';
 import {NativeWorkflowEditPanel} from '../Workflow/NativeWorkflowEditPanel';
 import {compileWorkflowEditPlan,reverseWorkflowEditEndpoints,hydrateWorkflowEdit,findEditingWorkflow,isQuickMappingWorkflow,type WorkflowEditPlan,type WorkflowEditDraft} from '@/configStudio/workflowEditing';
@@ -10,7 +12,7 @@ import { validateConfigPackage } from '@/configStudio/runtime';
 import { getClassConfigByCode } from '@/core/project/classMetadata';
 import type { ConfigPackageV3, WorkflowDefinition } from '@/configStudio/types';
 import type { V3WorkflowRunResult } from '@/configStudio/V3WorkflowRunner';
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type ChangeEvent } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { createPortal } from 'react-dom';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -725,18 +727,23 @@ const [featureInfo, setFeatureInfo] = useState<any>({});
 const [groupInfo, setGroupInfo] = useState<Record<string, any[]>>({});
 
 // 图层管理编辑专用中间态：命中 workflowEditorRegistry 时使用 workflow-style editor。
-const [editUiMode, setEditUiMode] = useState<'full-fallback' | 'workflow-style' | 'native-workflow'>('full-fallback');
+const [editUiMode, setEditUiMode] = useState<'full-fallback' | 'workflow-style' | 'native-workflow' | 'external-workflow'>('full-fallback');
 const [activeEditorView, setActiveEditorView] = useState<ProjectedRegistryScene | null>(null);
 const [editorDraftValues, setEditorDraftValues] = useState<WorkflowEditorDraftValues>({});
 const [editorDraftUnparsed, setEditorDraftUnparsed] = useState<WorkflowEditorUnparsedEntry[]>([]);
 
 const [nativeEdit,setNativeEdit]=useState<{config:ConfigPackageV3;plan:WorkflowEditPlan;draft:WorkflowEditDraft;original:Record<string,unknown>;world:string}|null>(null);
+const [externalEdit,setExternalEdit]=useState<{config:ConfigPackageV3;workflow:WorkflowDefinition;session:TrpExternalEditSession;world:string}|null>(null);
 const nativeEditDatasets=useRuleDataStore(state=>state.datasets);
-const nativeEditRecords=Object.values(nativeEditDatasets).flatMap(dataset=>dataset.features).map(raw=>(raw.featureInfo&&typeof raw.featureInfo==='object'?raw.featureInfo:raw) as Record<string,unknown>);
+const nativeEditRecords=useMemo(()=>Object.values(nativeEditDatasets).flatMap(dataset=>dataset.features).map(raw=>(raw.featureInfo&&typeof raw.featureInfo==='object'?raw.featureInfo:raw) as Record<string,unknown>),[nativeEditDatasets]);
+const nativeEditSearchRecords=useMemo(()=>[...nativeEditRecords,...layers.flatMap(layer=>layer.jsonInfo?.featureInfo?[layer.jsonInfo.featureInfo]:[])],[nativeEditRecords,layers]);
 const nativeEditWorldMismatch=Boolean(nativeEdit&&nativeEdit.world!==normalizeV3WorldId(currentWorldId));
-useEffect(()=>{if(!nativeEdit)return;if(nativeEdit.world!==normalizeV3WorldId(currentWorldId)){setDrawing(false);clearDraftOverlays();}else {setDrawing(true);drawDraftGeometry(tempPoints,drawMode,drawColor);}},[currentWorldId,nativeEdit?.world]);
+const activeEditWorld=nativeEdit?.world??externalEdit?.world;
+const externalEditWorldMismatch=Boolean(externalEdit&&externalEdit.world!==normalizeV3WorldId(currentWorldId));
+useEffect(()=>{if(!activeEditWorld)return;if(activeEditWorld!==normalizeV3WorldId(currentWorldId)){setDrawing(false);clearDraftOverlays();}else {setDrawing(true);drawDraftGeometry(tempPoints,drawMode,drawColor);}},[currentWorldId,activeEditWorld]);
 const resetWorkflowStyleEditorState = () => {
   setNativeEdit(null);
+  setExternalEdit(null);
   setEditUiMode('full-fallback');
   setActiveEditorView(null);
   setEditorDraftValues({});
@@ -2184,7 +2191,10 @@ const finishLayer = () => {
     editUiMode === 'workflow-style' &&
     activeEditorView !== null;
 
-  if(nativeEdit&&editUiMode==='native-workflow') {
+  if(externalEdit&&editUiMode==='external-workflow') {
+    try {finalFeatureInfo=prepareTrpExternalEdit(externalEdit.config,externalEdit.workflow,externalEdit.session,finalGeometry,currentWorldId,editorIdInput,[...nativeEditRecords,...layersRef.current.filter(layer=>layer.id!==editingLayerId).flatMap(layer=>layer.jsonInfo?.featureInfo?[layer.jsonInfo.featureInfo]:[])]);}
+    catch(error){alert(error instanceof Error?error.message:'外部编辑保存失败。');return;}
+  } else if(nativeEdit&&editUiMode==='native-workflow') {
     try { finalFeatureInfo=prepareNativeWorkflowEdit(nativeEdit.config,nativeEdit.plan.workflow,nativeEdit.original,nativeEdit.draft,finalGeometry,currentWorldId,editorIdInput,[...nativeEditRecords,...layersRef.current.filter(layer=>layer.id!==editingLayerId).flatMap(layer=>layer.jsonInfo?.featureInfo?[layer.jsonInfo.featureInfo]:[])]); }
     catch(error){alert(error instanceof Error?error.message:'编辑保存失败。');return;}
   } else if (useWorkflowStyleEditor && activeEditorView) {
@@ -3101,9 +3111,11 @@ const editLayer = (id: number) => {
   const layer = layers.find(l => l.id === id);
   if (!layer) return;
   let nativeContext:typeof nativeEdit=null;
+  let externalContext:typeof externalEdit=null;
   if(configRuntime&&layer.jsonInfo?.featureInfo)try {
     const workflow=findEditingWorkflow(configRuntime,layer.jsonInfo.featureInfo);
     if(workflow?.mode==='composed'){const config=structuredClone(configRuntime),plan=compileWorkflowEditPlan(workflow,config),original=structuredClone(layer.jsonInfo.featureInfo);nativeContext={config,plan,original,draft:hydrateWorkflowEdit(plan,original),world:normalizeV3WorldId(String(original.World??currentWorldId))};}
+    else if(workflow?.mode==='external'&&workflow.external?.purpose==='edit'){const config=structuredClone(configRuntime),session=createTrpExternalEditSession(config,workflow,layer.jsonInfo.featureInfo);externalContext={config,workflow:structuredClone(workflow),session,world:normalizeV3WorldId(String(session.original.World??currentWorldId))};}
   }catch(error){alert(error instanceof Error?error.message:'工作流编辑回填失败。');return;}
 
   // 从固定容器移除（用 removeLayer 更稳）
@@ -3177,6 +3189,7 @@ const editLayer = (id: number) => {
     setFeatureInfo(hydrated.values ?? {});
     setGroupInfo(hydrated.groups ?? {});
   }  if(nativeContext){setNativeEdit(nativeContext);setEditUiMode('native-workflow');}
+  if(externalContext){setExternalEdit(externalContext);setEditUiMode('external-workflow');}
 };
 
 
@@ -3745,7 +3758,7 @@ const handleImportFileSelected = async (e: ChangeEvent<HTMLInputElement>) => {
 const activeDef = FORMAT_REGISTRY[subType];
 const isWorkflowStyleEditing =
   editingLayerId !== null &&
-  (editUiMode === 'workflow-style' && activeEditorView !== null || editUiMode==='native-workflow'&&nativeEdit!==null);
+  (editUiMode === 'workflow-style' && activeEditorView !== null || editUiMode==='native-workflow'&&nativeEdit!==null||editUiMode==='external-workflow'&&externalEdit!==null);
 
 const setEditorDraftValue = (path: string, value: unknown) => {
   setEditorDraftValues(prev => ({ ...prev, [path]: value }));
@@ -5475,7 +5488,7 @@ onChange={(e) => {
       重做
     </AppButton>
 
-    {measuringVariant === 'full' && (
+    {measuringVariant === 'full' && !externalEdit && (
       <AppButton
         className={`px-3 py-1 rounded-lg flex-1 ${
           isTempMountReadonly ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-green-500 text-white'
@@ -5775,7 +5788,7 @@ onChange={(e) => {
     </div>
 
     {/* 内容：编辑专用模式优先；否则按 special 模式切换渲染 */}
-    {editUiMode==='native-workflow'&&nativeEdit ? (<fieldset disabled={nativeEditWorldMismatch}>{nativeEditWorldMismatch?<p role="alert">请返回 {nativeEdit.world} 后继续编辑或放弃草稿。</p>:null}<NativeWorkflowEditPanel config={nativeEdit.config} plan={nativeEdit.plan} draft={nativeEdit.draft} records={[...nativeEditRecords,...layers.flatMap(layer=>layer.jsonInfo?.featureInfo?[layer.jsonInfo.featureInfo]:[])]} world={nativeEdit.world} editor={editorIdInput} onEditorChange={setEditorIdInput} onCancel={clearTemporaryForVariantSwitch} onChange={draft=>setNativeEdit(current=>current?{...current,draft}:current)}/></fieldset>) : isWorkflowStyleEditing && activeEditorView ? (
+    {editUiMode==='external-workflow'&&externalEdit ? (<div>{externalEditWorldMismatch?<p role="alert">请返回 {externalEdit.world} 后继续编辑。<button type="button" className="ml-2 rounded border px-2 py-1" onClick={clearTemporaryForVariantSwitch}>放弃此编辑</button></p>:null}<fieldset disabled={externalEditWorldMismatch}><ExternalFeatureEditHost config={externalEdit.config} workflow={externalEdit.workflow} session={externalEdit.session} bridge={workflowBridge} context={{initialRecord:externalEdit.session.original,featureIdentity:{layerId:editingLayerId!,originalId:String(externalEdit.session.original.ID)},activeWorld:externalEdit.world,originalGeometry:externalEdit.session.originalGeometry,currentGeometry:multipartDraftRef.current??undefined,editor:editorIdInput,onEditorChange:setEditorIdInput,onUpdate:finishLayer,onCancel:clearTemporaryForVariantSwitch}} onDraftChange={session=>setExternalEdit(current=>current?{...current,session}:current)}/></fieldset></div>) : editUiMode==='native-workflow'&&nativeEdit ? (<fieldset disabled={nativeEditWorldMismatch}>{nativeEditWorldMismatch?<p role="alert">请返回 {nativeEdit.world} 后继续编辑或放弃草稿。</p>:null}<NativeWorkflowEditPanel config={nativeEdit.config} plan={nativeEdit.plan} draft={nativeEdit.draft} records={nativeEditSearchRecords} world={nativeEdit.world} editor={editorIdInput} onEditorChange={setEditorIdInput} onCancel={clearTemporaryForVariantSwitch} onChange={draft=>setNativeEdit(current=>current?{...current,draft}:current)}/></fieldset>) : isWorkflowStyleEditing && activeEditorView ? (
       <WorkflowStyleEditPanel
         view={activeEditorView}
         values={editorDraftValues}
@@ -5895,7 +5908,7 @@ onChange={(e) => {
       重做
     </AppButton>
 
-    {measuringVariant === 'full' && (
+    {measuringVariant === 'full' && !externalEdit && (
       <AppButton
         className={`px-3 py-1 rounded-lg flex-1 ${
           isTempMountReadonly ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-green-500 text-white'
@@ -6091,7 +6104,7 @@ onChange={(e) => {
     </div>
 
     {/* 内容：编辑专用模式优先；否则按 special 模式切换渲染 */}
-    {editUiMode==='native-workflow'&&nativeEdit ? (<fieldset disabled={nativeEditWorldMismatch}>{nativeEditWorldMismatch?<p role="alert">请返回 {nativeEdit.world} 后继续编辑或放弃草稿。</p>:null}<NativeWorkflowEditPanel config={nativeEdit.config} plan={nativeEdit.plan} draft={nativeEdit.draft} records={[...nativeEditRecords,...layers.flatMap(layer=>layer.jsonInfo?.featureInfo?[layer.jsonInfo.featureInfo]:[])]} world={nativeEdit.world} editor={editorIdInput} onEditorChange={setEditorIdInput} onCancel={clearTemporaryForVariantSwitch} onChange={draft=>setNativeEdit(current=>current?{...current,draft}:current)}/></fieldset>) : isWorkflowStyleEditing && activeEditorView ? (
+    {editUiMode==='external-workflow'&&externalEdit ? (<div>{externalEditWorldMismatch?<p role="alert">请返回 {externalEdit.world} 后继续编辑。<button type="button" className="ml-2 rounded border px-2 py-1" onClick={clearTemporaryForVariantSwitch}>放弃此编辑</button></p>:null}<fieldset disabled={externalEditWorldMismatch}><ExternalFeatureEditHost config={externalEdit.config} workflow={externalEdit.workflow} session={externalEdit.session} bridge={workflowBridge} context={{initialRecord:externalEdit.session.original,featureIdentity:{layerId:editingLayerId!,originalId:String(externalEdit.session.original.ID)},activeWorld:externalEdit.world,originalGeometry:externalEdit.session.originalGeometry,currentGeometry:multipartDraftRef.current??undefined,editor:editorIdInput,onEditorChange:setEditorIdInput,onUpdate:finishLayer,onCancel:clearTemporaryForVariantSwitch}} onDraftChange={session=>setExternalEdit(current=>current?{...current,session}:current)}/></fieldset></div>) : editUiMode==='native-workflow'&&nativeEdit ? (<fieldset disabled={nativeEditWorldMismatch}>{nativeEditWorldMismatch?<p role="alert">请返回 {nativeEdit.world} 后继续编辑或放弃草稿。</p>:null}<NativeWorkflowEditPanel config={nativeEdit.config} plan={nativeEdit.plan} draft={nativeEdit.draft} records={nativeEditSearchRecords} world={nativeEdit.world} editor={editorIdInput} onEditorChange={setEditorIdInput} onCancel={clearTemporaryForVariantSwitch} onChange={draft=>setNativeEdit(current=>current?{...current,draft}:current)}/></fieldset>) : isWorkflowStyleEditing && activeEditorView ? (
       <WorkflowStyleEditPanel
         view={activeEditorView}
         values={editorDraftValues}

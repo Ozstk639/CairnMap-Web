@@ -812,7 +812,7 @@ export type WorkflowDefinition = {
   /** V3.0 compatibility assignments; migrated into outputs[0]. */
   assignments?: WorkflowAssignment[];
   /** Only the three deliberately retained, completed workflows may bypass composition. */
-  external?: { componentKey: string; purpose?:'capture'|'edit'; reason: 'railway-integrated' | 'station-integrated' | 'trp-integrated'; coveredClassifications?: ClassificationPath[] };
+  external?: { componentKey: string; purpose?:'capture'|'edit'; version?:number; reason: 'railway-integrated' | 'station-integrated' | 'trp-integrated'; coveredClassifications?: ClassificationPath[] };
   legacy?: { runtimeMode?: string; componentKey?: string; output?: Record<string, unknown>; source?: Record<string, unknown> };
 };
 

@@ -1,3 +1,4 @@
+import type {ReactNode} from 'react';
 import TRPTradeEditor, { type TradeGroup as TRPTradeGroup } from '@/components/Mapping/SpecialInput/TRPTradeEditor';
 import WorkflowFeatureSearchSelect, { type SearchSelectConfig } from '@/components/Mapping/Workflow/WorkflowFeatureSearchSelect';
 import type { WorkflowBridge } from '@/components/Mapping/Workflow/WorkflowHost';
@@ -39,6 +40,9 @@ const SEARCH_CONFIGS: Record<string, SearchSelectConfig> = {
 };
 
 type Props = {
+  idFirst?:boolean;
+  classificationContent?:ReactNode;
+  extraContent?:ReactNode;
   view: ProjectedRegistryScene;
   values: WorkflowEditorDraftValues;
   unparsedEntries: WorkflowEditorUnparsedEntry[];
@@ -113,6 +117,7 @@ export default function WorkflowStyleEditPanel(props: Props) {
     bridge,
     editorId,
     onChangeEditorId,
+    idFirst=false,classificationContent,extraContent,
   } = props;
   const classificationOptions = view.classification?.ref ? getClassificationOptions(view.classification.ref) : [];
 
@@ -122,7 +127,7 @@ export default function WorkflowStyleEditPanel(props: Props) {
 
     if (field.control === 'bool') {
       return (
-        <div key={field.path} className="mb-2 flex items-center gap-2">
+        <div key={field.path} data-editor-field={field.path} className="mb-2 flex items-center gap-2">
           <input
             type="checkbox"
             checked={Boolean(value)}
@@ -135,7 +140,7 @@ export default function WorkflowStyleEditPanel(props: Props) {
 
     if (field.control === 'number') {
       return (
-        <div key={field.path} className="mb-2">
+        <div key={field.path} data-editor-field={field.path} className="mb-2">
           <label className="block text-xs font-semibold mb-1">{label}</label>
           <input
             type="number"
@@ -150,7 +155,7 @@ export default function WorkflowStyleEditPanel(props: Props) {
 
     if (field.control === 'textarea') {
       return (
-        <div key={field.path} className="mb-2">
+        <div key={field.path} data-editor-field={field.path} className="mb-2">
           <label className="block text-xs font-semibold mb-1">{label}</label>
           <textarea
             className="w-full border p-1 rounded text-sm"
@@ -165,7 +170,7 @@ export default function WorkflowStyleEditPanel(props: Props) {
 
     if (field.control === 'trpTrade') {
       return (
-        <div key={field.path} className="mb-3">
+        <div key={field.path} data-editor-field={field.path} className="mb-3">
           <TRPTradeEditor
             value={normalizeTradeGroupsForEditor(value)}
             onChange={(arr) => onChangeValue(field.path, arr)}
@@ -176,7 +181,7 @@ export default function WorkflowStyleEditPanel(props: Props) {
 
     if (field.control === 'json') {
       return (
-        <div key={field.path} className="mb-2">
+        <div key={field.path} data-editor-field={field.path} className="mb-2">
           <label className="block text-xs font-semibold mb-1">{label}</label>
           <textarea
             className="w-full border p-1 rounded font-mono text-xs"
@@ -197,7 +202,7 @@ export default function WorkflowStyleEditPanel(props: Props) {
 
     if (field.control === 'featureSearch' && field.searchConfigKey && SEARCH_CONFIGS[field.searchConfigKey]) {
       return (
-        <div key={field.path} className="mb-2">
+        <div key={field.path} data-editor-field={field.path} className="mb-2">
           <WorkflowFeatureSearchSelect
             bridge={bridge}
             label={label}
@@ -211,7 +216,7 @@ export default function WorkflowStyleEditPanel(props: Props) {
     }
 
     return (
-      <div key={field.path} className="mb-2">
+      <div key={field.path} data-editor-field={field.path} className="mb-2">
         <label className="block text-xs font-semibold mb-1">{label}</label>
         <input
           type="text"
@@ -391,10 +396,11 @@ export default function WorkflowStyleEditPanel(props: Props) {
       onTouchStartCapture={(e) => e.stopPropagation()}
     >
       <div className="rounded border bg-blue-50 px-3 py-2 text-xs text-blue-900">
-        当前使用编辑专用信息卡：{view.displayName}
+        当前使用工作流式编辑：{view.displayName}
       </div>
 
-      {view.classification && classificationOptions.length > 0 && (
+      {idFirst?renderField(view.idField):null}
+      {classificationContent??(view.classification && classificationOptions.length > 0 && (
         <div className="mb-2">
           <label className="block text-xs font-semibold mb-1">{view.classification.label}</label>
           <select
@@ -412,9 +418,9 @@ export default function WorkflowStyleEditPanel(props: Props) {
             })}
           </select>
         </div>
-      )}
+      ))}
 
-      {renderField(view.idField)}
+      {!idFirst?renderField(view.idField):null}
 
       <div className="border-t pt-2">
         {view.fields.length || view.groups.length ? (
@@ -427,6 +433,7 @@ export default function WorkflowStyleEditPanel(props: Props) {
         )}
       </div>
 
+      {extraContent}
       <div className="border-t pt-2">
         <label className="block text-xs font-bold mb-1">编辑者ID</label>
         <input
