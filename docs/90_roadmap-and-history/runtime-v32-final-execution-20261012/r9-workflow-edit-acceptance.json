@@ -1,0 +1,70 @@
+{
+  "checks": [
+    "real success/failure conversion modal isolates background; WRP enables and saves; TPP reports page/auxiliary failure and remains disabled",
+    "actual layer edit hydrates original ID and ordinary inputs, removes ID-only abbreviation, enters drawing; cancel restores the original record without adding a layer",
+    "actual save replaces one existing layer and preserves creation metadata; world mismatch disables editor/drawing until original world resumes"
+  ],
+  "baseline": {
+    "ID": "ZWRPNOMNOM_AB-1",
+    "WRPointI2D": "sample",
+    "Name": "sample",
+    "Kind": "NOM",
+    "SKind": "NOM",
+    "hub": "sample",
+    "tags": {
+      "Land": "sample",
+      "UAdm": "sample",
+      "UAdmG": "sample"
+    },
+    "extensions": {
+      "link": {
+        "wiki": "sample"
+      }
+    },
+    "CoordP": [
+      [
+        0,
+        -64,
+        0
+      ]
+    ],
+    "Type": "Points",
+    "Class": "WRP",
+    "World": "zth",
+    "CreateTime": "20261007",
+    "CreateBy": "fixture-user"
+  },
+  "updated": {
+    "ID": "ZWRPNOMNOM_AB-1",
+    "WRPointI2D": "sample",
+    "Name": "Changed in actual UI",
+    "Kind": "NOM",
+    "SKind": "NOM",
+    "hub": "sample",
+    "tags": {
+      "Land": "sample",
+      "UAdm": "sample",
+      "UAdmG": "sample"
+    },
+    "extensions": {
+      "link": {
+        "wiki": "sample"
+      }
+    },
+    "CoordP": [
+      [
+        0,
+        -64,
+        0
+      ]
+    ],
+    "Type": "Points",
+    "Class": "WRP",
+    "World": "zth",
+    "CreateTime": "20261007",
+    "CreateBy": "fixture-user",
+    "ModifityBy": "actual-r9-editor",
+    "ModifityTime": "20261012"
+  },
+  "runtimeErrors": []
+}

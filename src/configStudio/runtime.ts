@@ -1,3 +1,4 @@
+import {testWorkflowEditConversion} from './workflowEditCommit';
 import {compileRenderFormula} from './renderBooleanFormula';
 import {resolveMappedColor} from './renderScalar';
 import {scalarValueErrors, validMappedColor} from './renderScalar';
@@ -840,6 +841,9 @@ function validateWorkflow(workflow: WorkflowDefinition, config: ConfigPackageV3,
   }
   workflow = resolveWorkflowFields(config,workflow);
   const base = `workflows/${workflow.id}`;
+  if(workflow.editor?.dedicated&&workflow.quickMapping!==false)issue(issues,'error','workflow-editor-dedicated-visible',base,'专供编辑工作流必须关闭便捷测绘。');
+  if(workflow.editor?.enabled&&workflow.mode==='composed')try {testWorkflowEditConversion(config,workflow);}catch(error){issue(issues,'error','workflow-editor-conversion-invalid',base,error instanceof Error?error.message:'编辑资格或回填失败。');}
+  if(config.contractRevision<9&&(workflow.editor||workflow.quickMapping!==undefined||workflow.external?.purpose))issue(issues,'error','workflow-editor-r9-required',base,'工作流编辑用途需要 r9。');
   if(config.contractRevision>=9)for(const step of workflow.steps)for(const control of step.controls??[])if([control,...(control.group?.itemFields??[])].some(item=>item.fieldSource))issue(issues,'error','live-field-source-forbidden',base,'r9 预填不保留来源关系，请迁移展开旧控件。');
   try { workflowOutputAssemblyOrder(workflow); } catch (error) { issue(issues, 'error', 'workflow-output-dependency-invalid', base, error instanceof Error ? error.message : '输出依赖无效。'); }
   const checkIds = (items: Array<{ id: string }>, kind: string) => {
@@ -1186,6 +1190,8 @@ export function validateConfigPackage(config: ConfigPackageV3, mountedRecords: M
     workflowIds.add(workflow.id);
     validateWorkflow(workflow, config, issues);
   }
+  const editorScopes=new Set<string>();
+  for(const workflow of config.workflows.filter(w=>w.editor?.enabled)){const scope=workflow.editor?.scope??workflow.outputs[0]?.classification??workflow.target;if(!scope){issue(issues,'error','workflow-editor-scope-required',`workflows/${workflow.id}`,'编辑工作流缺少作用范围。');continue;}const key=classificationPathKey(scope);if(editorScopes.has(key))issue(issues,'error','workflow-editor-route-duplicate',`workflows/${workflow.id}`,'同一分类范围存在多个编辑工作流。');editorScopes.add(key);}
   validateContextBindings(config, issues);
   for (const node of config.nodes) {
     const hasChildren = node.children.length > 0;

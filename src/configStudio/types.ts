@@ -802,6 +802,8 @@ export type WorkflowDefinition = {
   id: string;
   label: LocalizedText;
   mode: 'composed' | 'external';
+  quickMapping?: boolean;
+  editor?: { enabled:boolean; dedicated?:boolean; scope?:ClassificationPath; backfill?:Array<{slot:string;target:string}> };
   actor?: { required: boolean };
   /** V3.0 compatibility target; composed flows resolve target through outputs[0]. */
   target?: ClassificationPath;
@@ -810,7 +812,7 @@ export type WorkflowDefinition = {
   /** V3.0 compatibility assignments; migrated into outputs[0]. */
   assignments?: WorkflowAssignment[];
   /** Only the three deliberately retained, completed workflows may bypass composition. */
-  external?: { componentKey: string; reason: 'railway-integrated' | 'station-integrated' | 'trp-integrated'; coveredClassifications?: ClassificationPath[] };
+  external?: { componentKey: string; purpose?:'capture'|'edit'; reason: 'railway-integrated' | 'station-integrated' | 'trp-integrated'; coveredClassifications?: ClassificationPath[] };
   legacy?: { runtimeMode?: string; componentKey?: string; output?: Record<string, unknown>; source?: Record<string, unknown> };
 };
 

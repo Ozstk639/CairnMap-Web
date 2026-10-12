@@ -1,3 +1,4 @@
+import {isQuickMappingWorkflow} from '@/configStudio/workflowEditing';
 import { drawingKey, enabledDrawing } from '@/configStudio/workflowDrawing';
 import { migrateWorkflowDrawings } from '@/configStudio/workflowDrawingMigration';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -57,6 +58,7 @@ export function NativeWorkflowHost({ config, workflow, bridge, registry, onCommi
     const actor = String(slots.actor ?? '');
     if (bridgeRef.current.getEditorId() !== actor) bridgeRef.current.setEditorId(actor);
   }, []);
+  if(!isQuickMappingWorkflow(snapshot.workflow))return <p role="alert">此方案专供编辑或已关闭便捷测绘，不能从采集入口执行。</p>;
   if (snapshot.workflow.mode === 'external') {
     const key = { railwayWorkflow: 'railway', stationWorkflow: 'station', tradePointWorkflow: 'trp_point' }[snapshot.workflow.external?.componentKey ?? ''] as WorkflowKey | undefined;
     return key ? <div>{worldMismatch ? <p role="alert">请返回 {snapshot.world} 后继续此工作流。<button type="button" onClick={onExit}>退出工作流</button></p> : null}<fieldset disabled={worldMismatch}><WorkflowHost workflowKey={key} bridge={bridge} registry={registry} onExit={onExit} /></fieldset></div> : <p role="alert">外部工作流未获得受控绑定。</p>;

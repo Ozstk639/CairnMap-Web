@@ -1,3 +1,8 @@
+import {NativeWorkflowEditPanel} from '../Workflow/NativeWorkflowEditPanel';
+import {compileWorkflowEditPlan,hydrateWorkflowEdit,findEditingWorkflow,isQuickMappingWorkflow,type WorkflowEditPlan,type WorkflowEditDraft} from '@/configStudio/workflowEditing';
+import {prepareNativeWorkflowEdit} from '@/configStudio/workflowEditCommit';
+import {normalizeV3WorldId} from '@/configStudio/V3WorkflowRunner';
+import {useRuleDataStore} from '@/store/ruleDataStore';
 import { NativeWorkflowHost } from '../Workflow/NativeWorkflowHost';
 import { prepareNativeWorkflowCommit } from '@/configStudio/nativeWorkflowCommit';
 import { validateConfigPackage } from '@/configStudio/runtime';
@@ -12,6 +17,7 @@ import 'leaflet/dist/leaflet.css';
 
 import {
   FORMAT_REGISTRY,
+  WORLD_CODE_BY_WORLD_ID,
   WORKFLOW_FEATURE_CATALOG,
   getSubTypeOptions,
   layerToJsonText,
@@ -237,7 +243,7 @@ const [workflowKey, setWorkflowKey] = useState<WorkflowKey>('railway');
 const [workflowRunning, setWorkflowRunning] = useState(false);
 const [nativeWorkflowSnapshot, setNativeWorkflowSnapshot] = useState<{config: ConfigPackageV3; workflow: WorkflowDefinition} | null>(null);
 const [nativeHostElement] = useState(() => document.createElement('div'));
-useEffect(() => { if (configRuntime && !workflowRunning && !configRuntime.workflows.some(workflow => workflow.id === workflowKey)) setWorkflowKey((configRuntime.workflows[0]?.id ?? 'railway') as WorkflowKey); }, [configRuntime, workflowRunning, workflowKey]);
+useEffect(() => { if (configRuntime && !workflowRunning && !configRuntime.workflows.some(workflow => workflow.id === workflowKey&&isQuickMappingWorkflow(workflow))) setWorkflowKey((configRuntime.workflows.find(isQuickMappingWorkflow)?.id ?? '') as WorkflowKey); }, [configRuntime, workflowRunning, workflowKey]);
 
 
 // 当前临时点集合（临时绘制的坐标）
@@ -719,12 +725,18 @@ const [featureInfo, setFeatureInfo] = useState<any>({});
 const [groupInfo, setGroupInfo] = useState<Record<string, any[]>>({});
 
 // 图层管理编辑专用中间态：命中 workflowEditorRegistry 时使用 workflow-style editor。
-const [editUiMode, setEditUiMode] = useState<'full-fallback' | 'workflow-style'>('full-fallback');
+const [editUiMode, setEditUiMode] = useState<'full-fallback' | 'workflow-style' | 'native-workflow'>('full-fallback');
 const [activeEditorView, setActiveEditorView] = useState<ProjectedRegistryScene | null>(null);
 const [editorDraftValues, setEditorDraftValues] = useState<WorkflowEditorDraftValues>({});
 const [editorDraftUnparsed, setEditorDraftUnparsed] = useState<WorkflowEditorUnparsedEntry[]>([]);
 
+const [nativeEdit,setNativeEdit]=useState<{config:ConfigPackageV3;plan:WorkflowEditPlan;draft:WorkflowEditDraft;original:Record<string,unknown>;world:string}|null>(null);
+const nativeEditDatasets=useRuleDataStore(state=>state.datasets);
+const nativeEditRecords=Object.values(nativeEditDatasets).flatMap(dataset=>dataset.features).map(raw=>(raw.featureInfo&&typeof raw.featureInfo==='object'?raw.featureInfo:raw) as Record<string,unknown>);
+const nativeEditWorldMismatch=Boolean(nativeEdit&&nativeEdit.world!==normalizeV3WorldId(currentWorldId));
+useEffect(()=>{if(!nativeEdit)return;if(nativeEdit.world!==normalizeV3WorldId(currentWorldId)){setDrawing(false);clearDraftOverlays();}else {setDrawing(true);drawDraftGeometry(tempPoints,drawMode,drawColor);}},[currentWorldId,nativeEdit?.world]);
 const resetWorkflowStyleEditorState = () => {
+  setNativeEdit(null);
   setEditUiMode('full-fallback');
   setActiveEditorView(null);
   setEditorDraftValues({});
@@ -1314,6 +1326,7 @@ const clearTemporaryForVariantSwitch = () => {
   // 编辑/绘制态复位
   setTempPoints([]);
   setRedoStack([]);
+  if(editingLayerId!==null)syncFixedRoot(layersRef.current,null);
   setEditingLayerId(null);
   setDrawing(false);
   setDrawMode('none');
@@ -2171,7 +2184,10 @@ const finishLayer = () => {
     editUiMode === 'workflow-style' &&
     activeEditorView !== null;
 
-  if (useWorkflowStyleEditor && activeEditorView) {
+  if(nativeEdit&&editUiMode==='native-workflow') {
+    try { finalFeatureInfo=prepareNativeWorkflowEdit(nativeEdit.config,nativeEdit.plan.workflow,nativeEdit.original,nativeEdit.draft,finalGeometry,currentWorldId,editorIdInput,[...nativeEditRecords,...layersRef.current.filter(layer=>layer.id!==editingLayerId).flatMap(layer=>layer.jsonInfo?.featureInfo?[layer.jsonInfo.featureInfo]:[])]); }
+    catch(error){alert(error instanceof Error?error.message:'编辑保存失败。');return;}
+  } else if (useWorkflowStyleEditor && activeEditorView) {
     const mergedDraftFeatureInfo = mergeEditorDraftIntoFeatureInfo({
       originalFeatureInfo: prevFeatureInfo ?? {},
       view: activeEditorView,
@@ -3084,6 +3100,11 @@ const editLayer = (id: number) => {
   if (guardTempMountReadonly()) return;
   const layer = layers.find(l => l.id === id);
   if (!layer) return;
+  let nativeContext:typeof nativeEdit=null;
+  if(configRuntime&&layer.jsonInfo?.featureInfo)try {
+    const workflow=findEditingWorkflow(configRuntime,layer.jsonInfo.featureInfo);
+    if(workflow?.mode==='composed'){const config=structuredClone(configRuntime),plan=compileWorkflowEditPlan(workflow,config),original=structuredClone(layer.jsonInfo.featureInfo);nativeContext={config,plan,original,draft:hydrateWorkflowEdit(plan,original),world:normalizeV3WorldId(String(original.World??currentWorldId))};}
+  }catch(error){alert(error instanceof Error?error.message:'工作流编辑回填失败。');return;}
 
   // 从固定容器移除（用 removeLayer 更稳）
   fixedRootRef.current?.removeLayer(layer.leafletGroup);
@@ -3155,7 +3176,7 @@ const editLayer = (id: number) => {
     const hydrated = FORMAT_REGISTRY['默认'].hydrate({});
     setFeatureInfo(hydrated.values ?? {});
     setGroupInfo(hydrated.groups ?? {});
-  }
+  }  if(nativeContext){setNativeEdit(nativeContext);setEditUiMode('native-workflow');}
 };
 
 
@@ -3283,7 +3304,10 @@ const runBatchImportFromText = (rawText: string, sourceLabel: string) => {
       continue;
     }
 
-    const v = validateImportItemDetailed(def, item, { worldId: currentWorldId, strictSystemFields: true });
+    // V3 stores canonical World ids; the frozen V1 import validator expects its numeric code.
+    const canonicalWorld=configRuntime&&typeof item.World==='string'&&WORLD_CODE_BY_WORLD_ID[normalizeV3WorldId(item.World)]!==undefined?normalizeV3WorldId(item.World):undefined;
+    const validationItem=canonicalWorld?{...item,World:WORLD_CODE_BY_WORLD_ID[canonicalWorld]}:item;
+    const v = validateImportItemDetailed(def, validationItem, { worldId: currentWorldId, strictSystemFields: true });
     if (!v.ok) {
       const parts: string[] = [];
       if (v.missing.length > 0) parts.push(`必填缺失/为空：\n${formatMissingEntries(v.missing)}`);
@@ -3313,6 +3337,7 @@ const runBatchImportFromText = (rawText: string, sourceLabel: string) => {
       now: new Date(),
     }), importedGeometry.geometry);
 
+    if(canonicalWorld)featureInfoOut.World=canonicalWorld;
     const itemColor = randomColor();
     const group = L.layerGroup();
 
@@ -3722,8 +3747,7 @@ const handleImportFileSelected = async (e: ChangeEvent<HTMLInputElement>) => {
 const activeDef = FORMAT_REGISTRY[subType];
 const isWorkflowStyleEditing =
   editingLayerId !== null &&
-  editUiMode === 'workflow-style' &&
-  activeEditorView !== null;
+  (editUiMode === 'workflow-style' && activeEditorView !== null || editUiMode==='native-workflow'&&nativeEdit!==null);
 
 const setEditorDraftValue = (path: string, value: unknown) => {
   setEditorDraftValues(prev => ({ ...prev, [path]: value }));
@@ -4410,7 +4434,7 @@ const LEGACY_WORKFLOW_SELECT_OPTIONS: Array<{ key: WorkflowKey; label: string; h
 
 const workflowRegistry: WorkflowRegistry = getConfigDrivenWorkflowRegistry(legacyWorkflowRegistry);
 const WORKFLOW_SELECT_OPTIONS: Array<{ key: WorkflowKey; label: string; hidden?: boolean }> =
-  configRuntime ? configRuntime.workflows.map(workflow => ({ key: workflow.id as WorkflowKey, label: workflow.label.zh })) : getConfigDrivenWorkflowSelectOptions(LEGACY_WORKFLOW_SELECT_OPTIONS);
+  configRuntime ? configRuntime.workflows.filter(isQuickMappingWorkflow).map(workflow => ({ key: workflow.id as WorkflowKey, label: workflow.label.zh })) : getConfigDrivenWorkflowSelectOptions(LEGACY_WORKFLOW_SELECT_OPTIONS);
 
 
 const stopWorkflowToSelector = () => {
@@ -4438,7 +4462,7 @@ const startWorkflow = () => {
   if (configRuntime) {
     const report = validateConfigPackage(configRuntime);
     const workflow = configRuntime.workflows.find(item => item.id === workflowKey);
-    if (!report.valid || !workflow) { window.alert('工作流或当前配置包无效，请在工作台修复。'); return; }
+    if (!report.valid || !workflow||!isQuickMappingWorkflow(workflow)) { window.alert('工作流或当前配置包无效，请在工作台修复。'); return; }
     setNativeWorkflowSnapshot({ config: structuredClone(configRuntime), workflow: structuredClone(workflow) });
   }
 
@@ -5752,7 +5776,7 @@ onChange={(e) => {
     </div>
 
     {/* 内容：编辑专用模式优先；否则按 special 模式切换渲染 */}
-    {isWorkflowStyleEditing && activeEditorView ? (
+    {editUiMode==='native-workflow'&&nativeEdit ? (<fieldset disabled={nativeEditWorldMismatch}>{nativeEditWorldMismatch?<p role="alert">请返回 {nativeEdit.world} 后继续编辑或放弃草稿。</p>:null}<NativeWorkflowEditPanel config={nativeEdit.config} plan={nativeEdit.plan} draft={nativeEdit.draft} records={[...nativeEditRecords,...layers.flatMap(layer=>layer.jsonInfo?.featureInfo?[layer.jsonInfo.featureInfo]:[])]} world={nativeEdit.world} editor={editorIdInput} onEditorChange={setEditorIdInput} onCancel={clearTemporaryForVariantSwitch} onChange={draft=>setNativeEdit(current=>current?{...current,draft}:current)}/></fieldset>) : isWorkflowStyleEditing && activeEditorView ? (
       <WorkflowStyleEditPanel
         view={activeEditorView}
         values={editorDraftValues}
@@ -6067,7 +6091,7 @@ onChange={(e) => {
     </div>
 
     {/* 内容：编辑专用模式优先；否则按 special 模式切换渲染 */}
-    {isWorkflowStyleEditing && activeEditorView ? (
+    {editUiMode==='native-workflow'&&nativeEdit ? (<fieldset disabled={nativeEditWorldMismatch}>{nativeEditWorldMismatch?<p role="alert">请返回 {nativeEdit.world} 后继续编辑或放弃草稿。</p>:null}<NativeWorkflowEditPanel config={nativeEdit.config} plan={nativeEdit.plan} draft={nativeEdit.draft} records={[...nativeEditRecords,...layers.flatMap(layer=>layer.jsonInfo?.featureInfo?[layer.jsonInfo.featureInfo]:[])]} world={nativeEdit.world} editor={editorIdInput} onEditorChange={setEditorIdInput} onCancel={clearTemporaryForVariantSwitch} onChange={draft=>setNativeEdit(current=>current?{...current,draft}:current)}/></fieldset>) : isWorkflowStyleEditing && activeEditorView ? (
       <WorkflowStyleEditPanel
         view={activeEditorView}
         values={editorDraftValues}

@@ -16,6 +16,7 @@ export function migrateConfigToR9(value:ConfigPackageV3):ConfigPackageV3 {
       const errors=fieldImportErrors(original,workflow,item);if(errors.length)throw Error(`工作流 ${workflow.id} 来源无法展开：${errors.join('；')}`);
     }
     const resolved=resolveWorkflowFields(original,workflow);
+    if(resolved.external)resolved.external.purpose='capture';
     for(const step of resolved.steps)for(const control of step.controls??[]) {
       if(control.fieldSource)control.prefillField=control.fieldSource.snapshot.key;
       delete control.fieldSource;
