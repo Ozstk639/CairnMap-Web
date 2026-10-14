@@ -15,6 +15,10 @@ export default defineConfig({
   },
 
   server: {
+    watch: {
+      // Local browser profiles and acceptance outputs are not application sources.
+      ignored: ['**/.cache/**'],
+    },
     proxy: {
       '/api/dynmap': {
         target: 'https://satellite.ria.red',
