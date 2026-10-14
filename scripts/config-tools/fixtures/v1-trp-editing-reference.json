@@ -1,0 +1,1012 @@
+{
+  "schemaVersion": "cairnmap.v1-trp-editor-reference.v1",
+  "sourceHead": "0b82863d4fea3791f98917ba6d13f70e1f27eb15",
+  "source": "untouched frozen V1 schema_TRP/editor parser/actual formatter; canonical and legacy trade",
+  "cases": [
+    {
+      "case": 0,
+      "original": {
+        "ID": "ZTRP_EDIT_0",
+        "Name": "V1 trade 0",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "Interaction": "右键",
+        "Situation": "Enable",
+        "elevation": 0,
+        "tags": {
+          "Land": "LAND_TEST",
+          "UAdm": "ADM_POINT",
+          "UAdmG": "ADM_AREA",
+          "audit": false
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/trp"
+          },
+          "character": {
+            "brief": "TRP original brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        },
+        "CoordP": [
+          [
+            20,
+            0,
+            13
+          ]
+        ],
+        "Type": "Points",
+        "Class": "TRP",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "Trade": [
+          {
+            "TradeNum": 0,
+            "Note": "original note",
+            "OfferItems": [
+              {
+                "Name": "Stone",
+                "Img": "",
+                "Count": 0,
+                "ItemID": "minecraft:stone",
+                "Brief": "offered"
+              }
+            ],
+            "ReceiveItems": [
+              {
+                "Name": "Emerald",
+                "Img": "",
+                "Count": "1",
+                "ItemID": "minecraft:emerald",
+                "Brief": "received"
+              }
+            ]
+          }
+        ],
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        }
+      },
+      "projectedValues": {
+        "ID": "ZTRP_EDIT_0",
+        "__workflowEditorClassification": "NOM||NOM||",
+        "Name": "V1 trade 0",
+        "tags.Land": "LAND_TEST",
+        "tags.UAdm": "ADM_POINT",
+        "tags.UAdmG": "ADM_AREA",
+        "Interaction": "右键",
+        "Situation": "Enable",
+        "Trade": [
+          {
+            "TradeNum": 0,
+            "Note": "original note",
+            "OfferItems": [
+              {
+                "Name": "Stone",
+                "Img": "",
+                "Count": 0,
+                "ItemID": "minecraft:stone",
+                "Brief": "offered"
+              }
+            ],
+            "ReceiveItems": [
+              {
+                "Name": "Emerald",
+                "Img": "",
+                "Count": "1",
+                "ItemID": "minecraft:emerald",
+                "Brief": "received"
+              }
+            ]
+          }
+        ],
+        "elevation": 0,
+        "extensions.link.wiki": "https://example.invalid/trp",
+        "extensions.character.brief": "TRP original brief"
+      },
+      "editedValues": {
+        "ID": "ZTRP_EDIT_0",
+        "__workflowEditorClassification": "NOM||NOM||",
+        "Name": "V1 edited TRP 0",
+        "tags.Land": "LAND_TEST",
+        "tags.UAdm": "ADM_POINT",
+        "tags.UAdmG": "ADM_AREA",
+        "Interaction": "右键",
+        "Situation": "Enable",
+        "Trade": [
+          {
+            "TradeNum": 0,
+            "Note": "original note",
+            "OfferItems": [
+              {
+                "Name": "Stone",
+                "Img": "",
+                "Count": 0,
+                "ItemID": "minecraft:stone",
+                "Brief": "offered"
+              }
+            ],
+            "ReceiveItems": [
+              {
+                "Name": "Emerald",
+                "Img": "",
+                "Count": "1",
+                "ItemID": "minecraft:emerald",
+                "Brief": "received"
+              }
+            ]
+          }
+        ],
+        "elevation": 0,
+        "extensions.link.wiki": "https://example.invalid/trp",
+        "extensions.character.brief": "TRP original brief"
+      },
+      "updated": {
+        "ID": "ZTRP_EDIT_0",
+        "Name": "V1 edited TRP 0",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "Interaction": "右键",
+        "Situation": "Enable",
+        "elevation": 0,
+        "tags": {
+          "Land": "LAND_TEST",
+          "UAdm": "ADM_POINT",
+          "UAdmG": "ADM_AREA",
+          "audit": false
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/trp"
+          },
+          "character": {
+            "brief": "TRP original brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        },
+        "CoordP": [
+          [
+            20,
+            0,
+            13
+          ]
+        ],
+        "Type": "Points",
+        "Class": "TRP",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "ModifityTime": "20261012",
+        "ModifityBy": "editing-user",
+        "Trade": [
+          {
+            "TradeNum": 0,
+            "Note": "original note",
+            "OfferItems": [
+              {
+                "Name": "Stone",
+                "Img": "",
+                "Count": 0,
+                "ItemID": "minecraft:stone",
+                "Brief": "offered"
+              }
+            ],
+            "ReceiveItems": [
+              {
+                "Name": "Emerald",
+                "Img": "",
+                "Count": "1",
+                "ItemID": "minecraft:emerald",
+                "Brief": "received"
+              }
+            ]
+          }
+        ],
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        }
+      },
+      "view": {
+        "schemaKey": "trp_trade",
+        "displayName": "交易点",
+        "scene": "editor",
+        "classification": {
+          "ref": {
+            "mode": "classCatalog",
+            "classCode": "TRP",
+            "geom": "点"
+          },
+          "editScope": "classScope",
+          "label": "交易点类型",
+          "order": 10
+        },
+        "idField": {
+          "key": "ID",
+          "path": "ID",
+          "label": "交易点ID",
+          "control": "text",
+          "order": 0
+        },
+        "auxInputs": [],
+        "fields": [
+          {
+            "key": "Name",
+            "path": "Name",
+            "label": "交易点名",
+            "control": "text",
+            "order": 20
+          },
+          {
+            "key": "Land",
+            "path": "tags.Land",
+            "label": "所属地理单元",
+            "control": "featureSearch",
+            "searchConfigKey": "landUnit",
+            "order": 32
+          },
+          {
+            "key": "UAdm",
+            "path": "tags.UAdm",
+            "label": "所属聚落(地标点)",
+            "control": "featureSearch",
+            "searchConfigKey": "admAny",
+            "order": 34
+          },
+          {
+            "key": "UAdmG",
+            "path": "tags.UAdmG",
+            "label": "所属聚落(区划)",
+            "control": "featureSearch",
+            "searchConfigKey": "admAny",
+            "order": 36
+          },
+          {
+            "key": "Interaction",
+            "path": "Interaction",
+            "label": "交互模式",
+            "control": "text",
+            "order": 40
+          },
+          {
+            "key": "Situation",
+            "path": "Situation",
+            "label": "启用状况",
+            "control": "text",
+            "order": 50
+          },
+          {
+            "key": "Trade",
+            "path": "Trade",
+            "label": "交易列表",
+            "control": "trpTrade",
+            "order": 60
+          },
+          {
+            "key": "elevation",
+            "path": "elevation",
+            "label": "高度(y)",
+            "control": "number",
+            "order": 70
+          },
+          {
+            "key": "wiki",
+            "path": "extensions.link.wiki",
+            "label": "wiki链接",
+            "control": "text",
+            "order": 80
+          },
+          {
+            "key": "brief",
+            "path": "extensions.character.brief",
+            "label": "简介",
+            "control": "textarea",
+            "rows": 4,
+            "order": 90
+          }
+        ],
+        "groups": [],
+        "allowUnparsedBlock": true,
+        "integrations": {
+          "editor": "workflowStyleReady",
+          "workflow": "registryOnly",
+          "infocard": "registryOnly"
+        }
+      }
+    },
+    {
+      "case": 1,
+      "original": {
+        "ID": "ZTRP_EDIT_1",
+        "Name": "V1 trade 1",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "Interaction": "右键",
+        "Situation": "Enable",
+        "elevation": 0,
+        "tags": {
+          "Land": "LAND_TEST",
+          "UAdm": "ADM_POINT",
+          "UAdmG": "ADM_AREA",
+          "audit": false
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/trp"
+          },
+          "character": {
+            "brief": "TRP original brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        },
+        "CoordP": [
+          [
+            20,
+            0,
+            13
+          ]
+        ],
+        "Type": "Points",
+        "Class": "TRP",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "Trade": [
+          {
+            "TradeNum": 0,
+            "Note": "original note",
+            "OfferItems": [
+              {
+                "Name": "Stone",
+                "Img": "",
+                "Count": 0,
+                "ItemID": "minecraft:stone",
+                "Brief": "offered"
+              }
+            ],
+            "ReceiveItems": [
+              {
+                "Name": "Emerald",
+                "Img": "",
+                "Count": "1",
+                "ItemID": "minecraft:emerald",
+                "Brief": "received"
+              }
+            ]
+          }
+        ],
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        }
+      },
+      "projectedValues": {
+        "ID": "ZTRP_EDIT_1",
+        "__workflowEditorClassification": "NOM||NOM||",
+        "Name": "V1 trade 1",
+        "tags.Land": "LAND_TEST",
+        "tags.UAdm": "ADM_POINT",
+        "tags.UAdmG": "ADM_AREA",
+        "Interaction": "右键",
+        "Situation": "Enable",
+        "Trade": [
+          {
+            "TradeNum": 0,
+            "Note": "original note",
+            "OfferItems": [
+              {
+                "Name": "Stone",
+                "Img": "",
+                "Count": 0,
+                "ItemID": "minecraft:stone",
+                "Brief": "offered"
+              }
+            ],
+            "ReceiveItems": [
+              {
+                "Name": "Emerald",
+                "Img": "",
+                "Count": "1",
+                "ItemID": "minecraft:emerald",
+                "Brief": "received"
+              }
+            ]
+          }
+        ],
+        "elevation": 0,
+        "extensions.link.wiki": "https://example.invalid/trp",
+        "extensions.character.brief": "TRP original brief"
+      },
+      "editedValues": {
+        "ID": "ZTRP_EDIT_1",
+        "__workflowEditorClassification": "NOM||NOM||",
+        "Name": "V1 edited TRP 1",
+        "tags.Land": "LAND_TEST",
+        "tags.UAdm": "ADM_POINT",
+        "tags.UAdmG": "ADM_AREA",
+        "Interaction": "右键",
+        "Situation": "Enable",
+        "Trade": [
+          {
+            "TradeNum": 0,
+            "Note": "original note",
+            "OfferItems": [
+              {
+                "Name": "Stone",
+                "Img": "",
+                "Count": "2",
+                "ItemID": "minecraft:stone",
+                "Brief": "offered"
+              }
+            ],
+            "ReceiveItems": [
+              {
+                "Name": "Emerald",
+                "Img": "",
+                "Count": "1",
+                "ItemID": "minecraft:emerald",
+                "Brief": "received"
+              }
+            ]
+          }
+        ],
+        "elevation": 0,
+        "extensions.link.wiki": "https://example.invalid/trp",
+        "extensions.character.brief": "TRP original brief"
+      },
+      "updated": {
+        "ID": "ZTRP_EDIT_1",
+        "Name": "V1 edited TRP 1",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "Interaction": "右键",
+        "Situation": "Enable",
+        "elevation": 0,
+        "tags": {
+          "Land": "LAND_TEST",
+          "UAdm": "ADM_POINT",
+          "UAdmG": "ADM_AREA",
+          "audit": false
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/trp"
+          },
+          "character": {
+            "brief": "TRP original brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        },
+        "CoordP": [
+          [
+            20,
+            0,
+            13
+          ]
+        ],
+        "Type": "Points",
+        "Class": "TRP",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "ModifityTime": "20261012",
+        "ModifityBy": "editing-user",
+        "Trade": [
+          {
+            "TradeNum": 0,
+            "Note": "original note",
+            "OfferItems": [
+              {
+                "Name": "Stone",
+                "Img": "",
+                "Count": "2",
+                "ItemID": "minecraft:stone",
+                "Brief": "offered"
+              }
+            ],
+            "ReceiveItems": [
+              {
+                "Name": "Emerald",
+                "Img": "",
+                "Count": "1",
+                "ItemID": "minecraft:emerald",
+                "Brief": "received"
+              }
+            ]
+          }
+        ],
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        }
+      },
+      "view": {
+        "schemaKey": "trp_trade",
+        "displayName": "交易点",
+        "scene": "editor",
+        "classification": {
+          "ref": {
+            "mode": "classCatalog",
+            "classCode": "TRP",
+            "geom": "点"
+          },
+          "editScope": "classScope",
+          "label": "交易点类型",
+          "order": 10
+        },
+        "idField": {
+          "key": "ID",
+          "path": "ID",
+          "label": "交易点ID",
+          "control": "text",
+          "order": 0
+        },
+        "auxInputs": [],
+        "fields": [
+          {
+            "key": "Name",
+            "path": "Name",
+            "label": "交易点名",
+            "control": "text",
+            "order": 20
+          },
+          {
+            "key": "Land",
+            "path": "tags.Land",
+            "label": "所属地理单元",
+            "control": "featureSearch",
+            "searchConfigKey": "landUnit",
+            "order": 32
+          },
+          {
+            "key": "UAdm",
+            "path": "tags.UAdm",
+            "label": "所属聚落(地标点)",
+            "control": "featureSearch",
+            "searchConfigKey": "admAny",
+            "order": 34
+          },
+          {
+            "key": "UAdmG",
+            "path": "tags.UAdmG",
+            "label": "所属聚落(区划)",
+            "control": "featureSearch",
+            "searchConfigKey": "admAny",
+            "order": 36
+          },
+          {
+            "key": "Interaction",
+            "path": "Interaction",
+            "label": "交互模式",
+            "control": "text",
+            "order": 40
+          },
+          {
+            "key": "Situation",
+            "path": "Situation",
+            "label": "启用状况",
+            "control": "text",
+            "order": 50
+          },
+          {
+            "key": "Trade",
+            "path": "Trade",
+            "label": "交易列表",
+            "control": "trpTrade",
+            "order": 60
+          },
+          {
+            "key": "elevation",
+            "path": "elevation",
+            "label": "高度(y)",
+            "control": "number",
+            "order": 70
+          },
+          {
+            "key": "wiki",
+            "path": "extensions.link.wiki",
+            "label": "wiki链接",
+            "control": "text",
+            "order": 80
+          },
+          {
+            "key": "brief",
+            "path": "extensions.character.brief",
+            "label": "简介",
+            "control": "textarea",
+            "rows": 4,
+            "order": 90
+          }
+        ],
+        "groups": [],
+        "allowUnparsedBlock": true,
+        "integrations": {
+          "editor": "workflowStyleReady",
+          "workflow": "registryOnly",
+          "infocard": "registryOnly"
+        }
+      }
+    },
+    {
+      "case": 2,
+      "original": {
+        "ID": "ZTRP_EDIT_2",
+        "Name": "V1 trade 2",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "Interaction": "右键",
+        "Situation": "Enable",
+        "elevation": 0,
+        "tags": {
+          "Land": "LAND_TEST",
+          "UAdm": "ADM_POINT",
+          "UAdmG": "ADM_AREA",
+          "audit": false
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/trp"
+          },
+          "character": {
+            "brief": "TRP original brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        },
+        "CoordP": [
+          [
+            20,
+            0,
+            13
+          ]
+        ],
+        "Type": "Points",
+        "Class": "TRP",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        },
+        "trade": [
+          {
+            "TradeNum": 0,
+            "Note": "original note",
+            "OfferItems": [
+              {
+                "Name": "Stone",
+                "Img": "",
+                "Count": 0,
+                "ItemID": "minecraft:stone",
+                "Brief": "offered"
+              }
+            ],
+            "ReceiveItems": [
+              {
+                "Name": "Emerald",
+                "Img": "",
+                "Count": "1",
+                "ItemID": "minecraft:emerald",
+                "Brief": "received"
+              }
+            ]
+          }
+        ]
+      },
+      "projectedValues": {
+        "ID": "ZTRP_EDIT_2",
+        "__workflowEditorClassification": "NOM||NOM||",
+        "Name": "V1 trade 2",
+        "tags.Land": "LAND_TEST",
+        "tags.UAdm": "ADM_POINT",
+        "tags.UAdmG": "ADM_AREA",
+        "Interaction": "右键",
+        "Situation": "Enable",
+        "Trade": [
+          {
+            "TradeNum": 0,
+            "Note": "original note",
+            "OfferItems": [
+              {
+                "Name": "Stone",
+                "Img": "",
+                "Count": 0,
+                "ItemID": "minecraft:stone",
+                "Brief": "offered"
+              }
+            ],
+            "ReceiveItems": [
+              {
+                "Name": "Emerald",
+                "Img": "",
+                "Count": "1",
+                "ItemID": "minecraft:emerald",
+                "Brief": "received"
+              }
+            ]
+          }
+        ],
+        "elevation": 0,
+        "extensions.link.wiki": "https://example.invalid/trp",
+        "extensions.character.brief": "TRP original brief"
+      },
+      "editedValues": {
+        "ID": "ZTRP_RENAMED",
+        "__workflowEditorClassification": "SPE||SPE||",
+        "Name": "V1 edited TRP 2",
+        "tags.Land": "LAND_TEST",
+        "tags.UAdm": "ADM_POINT",
+        "tags.UAdmG": "ADM_AREA",
+        "Interaction": "右键",
+        "Situation": "Enable",
+        "Trade": [
+          {
+            "TradeNum": 0,
+            "Note": "original note",
+            "OfferItems": [
+              {
+                "Name": "Stone",
+                "Img": "",
+                "Count": 0,
+                "ItemID": "minecraft:stone",
+                "Brief": "offered"
+              }
+            ],
+            "ReceiveItems": [
+              {
+                "Name": "Emerald",
+                "Img": "",
+                "Count": "1",
+                "ItemID": "minecraft:emerald",
+                "Brief": "received"
+              }
+            ]
+          }
+        ],
+        "elevation": "-2",
+        "extensions.link.wiki": "https://example.invalid/trp",
+        "extensions.character.brief": "TRP original brief"
+      },
+      "updated": {
+        "ID": "ZTRP_RENAMED",
+        "Name": "V1 edited TRP 2",
+        "Kind": "SPE",
+        "SKind": "SPE",
+        "Interaction": "右键",
+        "Situation": "Enable",
+        "elevation": "-2",
+        "tags": {
+          "Land": "LAND_TEST",
+          "UAdm": "ADM_POINT",
+          "UAdmG": "ADM_AREA",
+          "audit": false
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/trp"
+          },
+          "character": {
+            "brief": "TRP original brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        },
+        "CoordP": [
+          [
+            20,
+            0,
+            13
+          ]
+        ],
+        "Type": "Points",
+        "Class": "TRP",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "ModifityTime": "20261012",
+        "ModifityBy": "editing-user",
+        "Trade": [
+          {
+            "TradeNum": 0,
+            "Note": "original note",
+            "OfferItems": [
+              {
+                "Name": "Stone",
+                "Img": "",
+                "Count": 0,
+                "ItemID": "minecraft:stone",
+                "Brief": "offered"
+              }
+            ],
+            "ReceiveItems": [
+              {
+                "Name": "Emerald",
+                "Img": "",
+                "Count": "1",
+                "ItemID": "minecraft:emerald",
+                "Brief": "received"
+              }
+            ]
+          }
+        ],
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        }
+      },
+      "view": {
+        "schemaKey": "trp_trade",
+        "displayName": "交易点",
+        "scene": "editor",
+        "classification": {
+          "ref": {
+            "mode": "classCatalog",
+            "classCode": "TRP",
+            "geom": "点"
+          },
+          "editScope": "classScope",
+          "label": "交易点类型",
+          "order": 10
+        },
+        "idField": {
+          "key": "ID",
+          "path": "ID",
+          "label": "交易点ID",
+          "control": "text",
+          "order": 0
+        },
+        "auxInputs": [],
+        "fields": [
+          {
+            "key": "Name",
+            "path": "Name",
+            "label": "交易点名",
+            "control": "text",
+            "order": 20
+          },
+          {
+            "key": "Land",
+            "path": "tags.Land",
+            "label": "所属地理单元",
+            "control": "featureSearch",
+            "searchConfigKey": "landUnit",
+            "order": 32
+          },
+          {
+            "key": "UAdm",
+            "path": "tags.UAdm",
+            "label": "所属聚落(地标点)",
+            "control": "featureSearch",
+            "searchConfigKey": "admAny",
+            "order": 34
+          },
+          {
+            "key": "UAdmG",
+            "path": "tags.UAdmG",
+            "label": "所属聚落(区划)",
+            "control": "featureSearch",
+            "searchConfigKey": "admAny",
+            "order": 36
+          },
+          {
+            "key": "Interaction",
+            "path": "Interaction",
+            "label": "交互模式",
+            "control": "text",
+            "order": 40
+          },
+          {
+            "key": "Situation",
+            "path": "Situation",
+            "label": "启用状况",
+            "control": "text",
+            "order": 50
+          },
+          {
+            "key": "Trade",
+            "path": "Trade",
+            "label": "交易列表",
+            "control": "trpTrade",
+            "order": 60
+          },
+          {
+            "key": "elevation",
+            "path": "elevation",
+            "label": "高度(y)",
+            "control": "number",
+            "order": 70
+          },
+          {
+            "key": "wiki",
+            "path": "extensions.link.wiki",
+            "label": "wiki链接",
+            "control": "text",
+            "order": 80
+          },
+          {
+            "key": "brief",
+            "path": "extensions.character.brief",
+            "label": "简介",
+            "control": "textarea",
+            "rows": 4,
+            "order": 90
+          }
+        ],
+        "groups": [],
+        "allowUnparsedBlock": true,
+        "integrations": {
+          "editor": "workflowStyleReady",
+          "workflow": "registryOnly",
+          "infocard": "registryOnly"
+        }
+      }
+    }
+  ]
+}

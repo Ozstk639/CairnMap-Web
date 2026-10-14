@@ -1,6 +1,8 @@
+import { placeLabel, labelCandidateShift } from './labelPlacement';
 import * as L from "leaflet";
 import {
   LabelDensityLimiter,
+  DEFAULT_LABEL_DENSITY_REDUCE_ORDER,
   resolveLabelDensityConfig,
   type ResolvedLabelDensityConfig,
   type LabelDensityReduceStep,
@@ -29,6 +31,8 @@ import type {
   DisplayCollisionRole,
   DisplayCollisionTarget,
 } from "./display/displayTypes";
+
+type LabelPlacement = "center" | "near" | "N" | "S" | "E" | "W" | "NE" | "NW" | "SE" | "SW" | "aboveLine" | "belowLine";
 
 /**
  * LabelLayout 引擎（屏幕空间去重/避让）
@@ -155,6 +159,8 @@ export type LabelDeclutterConfig = {
   densityGridSizePx?: number;
   densityMaxLabelsPerGrid?: number;
   densityPreserveRequired?: boolean;
+  densityPreserveSelected?: boolean;
+  placementInvalidateWhen?: string[];
   densityGroupKey?: string;
   densityReduceOrder?: LabelDensityReduceStep[];
 
@@ -210,7 +216,8 @@ export type LabelRequest = {
   id: string;
   /** 对应 Feature uid（便于回写到 bundle.label） */
   featureUid?: string;
-
+  partIndex?: number;
+  collisionOwnerUid?: string;
   /** label anchor（世界坐标） */
   anchorLatLng: L.LatLng;
 
@@ -220,6 +227,9 @@ export type LabelRequest = {
    * - 布局引擎会按顺序依次尝试，找到可放置的位置即停。
    */
   anchorCandidatesLatLng?: L.LatLng[];
+  /** Native polygon anchor containment policy, including holes and parts. */
+  acceptsAnchor?: (screenPoint: L.Point) => boolean;
+  collisionBoundsAdjustment?: { x?: number; y?: number; width?: number; height?: number };
 
   /** label 文本 */
   text: string;
@@ -266,10 +276,23 @@ export type LabelRequest = {
   geoAnchorDebug?: unknown;
 
   /** 复用现有 makeLabelMarker 的 placement（决定 CSS transform 参考点） */
-  placement: "center" | "near";
+  placement: LabelPlacement;
 
-  /** 你现有规则字段：点位 label 垂直偏移（px） */
   offsetY?: number;
+  offsetX?: number;
+  screenOffsets?: boolean;
+  /** A true point may participate in its label's combined collision box. */
+  symbolBounds?: { radius: number; offsetX: number; offsetY: number };
+  candidatePlacement?: 'relativeToPlacement' | 'aroundAnchor';
+  candidateOffsetsPx?: Array<{ name: string; x: number; y: number }>;
+  anchorOffsetPx?: { x: number; y: number };
+  selected?: boolean;
+  worldId?: string;
+  displayMode?: string;
+  geometrySignature?: string;
+  runtimeStability?: import('@/configStudio/types').RenderStabilityExtension;
+  densityImportance?: number;
+  symbolDensityBlocked?: boolean;
 
   /** 是否带中心点（影响 bbox 宽度估计） */
   withDot?: boolean;
@@ -301,6 +324,8 @@ export type LabelHiddenReason =
   | "hiddenByPolicy";
 
 export type PlacedLabel = {
+  /** Ordered density actions actually applied; useful for acceptance diagnostics. */
+  densityActionTrace?: LabelDensityReduceStep[];
   id: string;
   featureUid?: string;
   text: string;
@@ -308,6 +333,10 @@ export type PlacedLabel = {
   dx: number;
   dy: number;
   hidden: boolean;
+  hideSymbol?: boolean;
+  keepGeometry?: boolean;
+  /** Actual expanded collision rectangle, used unchanged by placement reuse. */
+  collisionRect?: Rect;
   /** RB_SLU_6: 调试/审计用隐藏原因；渲染层可忽略。 */
   hiddenReason?: LabelHiddenReason;
 
@@ -403,6 +432,7 @@ export type PlacedLabel = {
 };
 
 export type AvoidRectPx = {
+  alreadyInflated?: boolean;
   x: number;
   y: number;
   w: number;
@@ -555,9 +585,11 @@ function measureText(
 function computeLabelRect(
   anchor: L.Point,
   size: Measured,
-  placement: "center" | "near",
+  placement: LabelPlacement,
   offsetY: number,
   dotAnchorMode?: "inline" | "anchorRight",
+  offsetX = 0,
+  screenOffsets = false,
 ): Rect {
   if (dotAnchorMode === "anchorRight") {
     // dot-anchor-right：anchor 是 dot 中心，文字从 dot 右侧展开。
@@ -568,16 +600,7 @@ function computeLabelRect(
     return { x, y, w: size.w + dotVisualLeftPadPx, h: size.h };
   }
 
-  if (placement === "center") {
-    const x = anchor.x - size.w / 2;
-    const y = anchor.y - size.h / 2;
-    return { x, y, w: size.w, h: size.h };
-  }
-
-  // placement === 'near' => transform: translate(-50%, -120%)，再加 margin-top:-offsetY
-  const x = anchor.x - size.w / 2;
-  const y = anchor.y - size.h * 1.2 - offsetY;
-  return { x, y, w: size.w, h: size.h };
+  return placeLabel(anchor, size, placement, offsetX, offsetY, screenOffsets);
 }
 
 function normalizeCandidates(
@@ -585,7 +608,7 @@ function normalizeCandidates(
   size: Measured,
   params: LabelLayoutParams,
 ): LabelCandidate[] {
-  const raw = req.declutter.candidates;
+  const raw = req.candidateOffsetsPx?.length ? req.candidateOffsetsPx.map(offset => ({ name: offset.name as LabelCandidateName, dx: offset.x, dy: offset.y })) : req.declutter.candidates;
 
   const asCandidate = (
     c: LabelCandidate | LabelCandidateName,
@@ -599,24 +622,25 @@ function normalizeCandidates(
   }
 
   const list = (
-    raw && raw.length ? raw.map(asCandidate) : defaultCandidates(req.placement)
+    raw && raw.length ? raw.map(asCandidate) : defaultCandidates(req.placement, req.screenOffsets)
   ).slice(0, Math.max(1, params.maxCandidatesPerLabel));
 
   // 将 name 转为 dx/dy（若用户未给 dx/dy）
   return list.map((c, idx) => {
-    if (typeof c.dx === "number" && typeof c.dy === "number") return c;
+    if (typeof c.dx === "number" && typeof c.dy === "number") return { ...c, dx: c.dx + (req.anchorOffsetPx?.x ?? 0), dy: c.dy + (req.anchorOffsetPx?.y ?? 0) };
 
-    const { dx, dy } = candidateShift(
+    const { dx, dy } = (req.screenOffsets && req.candidatePlacement !== 'aroundAnchor' ? labelCandidateShift : candidateShift)(
       c.name,
       req.placement,
       size,
       params.gapPx,
     );
-    return { ...c, dx, dy, score: (c.score ?? 0) + (list.length - idx) * 0.01 };
+    return { ...c, dx: dx + (req.anchorOffsetPx?.x ?? 0), dy: dy + (req.anchorOffsetPx?.y ?? 0), score: (c.score ?? 0) + (list.length - idx) * 0.01 };
   });
 }
 
-function defaultCandidates(placement: "center" | "near"): LabelCandidate[] {
+function defaultCandidates(placement: LabelPlacement, screenOffsets = false): LabelCandidate[] {
+  if (screenOffsets) return ['C', 'N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW'].map((name) => ({ name: name as LabelCandidateName }));
   if (placement === "center")
     return [
       { name: "C" },
@@ -625,17 +649,9 @@ function defaultCandidates(placement: "center" | "near"): LabelCandidate[] {
       { name: "E" },
       { name: "W" },
     ];
-  // near：优先在点上方（与你现有 near 样式一致），然后尝试斜上/左右/斜下等
-  return [
-    { name: "N" },
-    { name: "NE" },
-    { name: "NW" },
-    { name: "E" },
-    { name: "W" },
-    { name: "SE" },
-    { name: "SW" },
-    { name: "S" },
-  ];
+  const preferred = placement === 'aboveLine' || placement === 'near' ? 'N' : placement === 'belowLine' ? 'S' : placement as LabelCandidateName;
+  const all: LabelCandidateName[] = ['N', 'NE', 'NW', 'E', 'W', 'SE', 'SW', 'S'];
+  return [preferred, ...all.filter((candidate) => candidate !== preferred)].map((name) => ({ name }));
 }
 
 /**
@@ -644,7 +660,7 @@ function defaultCandidates(placement: "center" | "near"): LabelCandidate[] {
  */
 function candidateShift(
   name: LabelCandidateName,
-  placement: "center" | "near",
+  placement: LabelPlacement,
   size: Measured,
   gap: number,
 ): { dx: number; dy: number } {
@@ -882,6 +898,10 @@ function collisionHiddenReason(blocker: IndexedRect): LabelHiddenReason {
   }
 }
 
+function adjustedCollisionRect(rect: Rect, adjustment: LabelRequest['collisionBoundsAdjustment']): Rect {
+  return adjustment ? { x: rect.x + (adjustment.x ?? 0), y: rect.y + (adjustment.y ?? 0), w: Math.max(1,rect.w + (adjustment.width ?? 0)), h: Math.max(1,rect.h + (adjustment.height ?? 0)) } : rect;
+}
+
 function rectForCandidate(
   item: LayoutItem,
   measured: Measured,
@@ -894,20 +914,32 @@ function rectForCandidate(
   const dx = (candidate.dx ?? 0) + baseDeltaX;
   const dy = (candidate.dy ?? 0) + baseDeltaY;
   const anchor = L.point(item.anchorPx.x + dx, item.anchorPx.y + dy);
-  const rect = computeLabelRect(
+  let rect = computeLabelRect(
     anchor,
     measured,
     baseReq.placement,
     Number(baseReq.offsetY ?? 0),
     baseReq.dotAnchorMode,
+    Number(baseReq.offsetX ?? 0),
+    baseReq.screenOffsets,
   );
+  if (baseReq.symbolBounds) {
+    const symbol = baseReq.symbolBounds;
+    const left = Math.min(rect.x, anchor.x + symbol.offsetX - symbol.radius);
+    const top = Math.min(rect.y, anchor.y + symbol.offsetY - symbol.radius);
+    const right = Math.max(rect.x + rect.w, anchor.x + symbol.offsetX + symbol.radius);
+    const bottom = Math.max(rect.y + rect.h, anchor.y + symbol.offsetY + symbol.radius);
+    rect = { x: left, y: top, w: right - left, h: bottom - top };
+  }
+  const adjustment = baseReq.collisionBoundsAdjustment;
+  rect = adjustedCollisionRect(rect, adjustment);
   return { rect, dx, dy };
 }
 
 function indexedLabelRect(rect: Rect, item: LayoutItem): IndexedRect {
   return {
     ...rect,
-    ownerUid: item.req.featureUid,
+    ownerUid: item.req.collisionOwnerUid ?? item.req.featureUid,
     collisionSource: "label",
     collisionRole: item.collisionRole,
     collisionGroup: item.collisionGroup,
@@ -1080,6 +1112,8 @@ export function layoutLabelsOnMap(
 
     /** 新增：需要避让的屏幕矩形（点图标/其它遮挡物） */
     avoidRectsPx?: AvoidRectPx[];
+    /** Cached visible labels must still consume density and group budgets. */
+    reservedLabels?: Array<{ request: LabelRequest; rect: Rect }>;
 
     /** 新增：对 avoidRects 额外膨胀（px），用于给图标留出更大缓冲区 */
     avoidSpacingPx?: number;
@@ -1131,10 +1165,11 @@ export function layoutLabelsOnMap(
       abbrev: decl.abbrev,
       groupKey: decl.groupKey,
       maxPerScreen: decl.maxPerScreen,
-      density: resolveLabelDensityConfig(decl),
+      density: resolveLabelDensityConfig({ ...decl, selected: req.selected }),
       placementCache: resolveLabelPlacementCacheConfig({
         id: req.id,
         featureUid: req.featureUid,
+        partIndex: req.partIndex,
         text: req.text,
         placement: req.placement,
         zoom: map.getZoom(),
@@ -1146,6 +1181,10 @@ export function layoutLabelsOnMap(
         placementZoomBucketSize: decl.placementZoomBucketSize,
         placementKeepPreviousCandidate: decl.placementKeepPreviousCandidate,
         placementKeepPreviousAnchor: decl.placementKeepPreviousAnchor,
+        placementInvalidateWhen: decl.placementInvalidateWhen,
+        worldId: req.worldId,
+        displayMode: req.displayMode,
+        geometrySignature: req.geometrySignature,
       }),
       collisionRole: normalizeCollisionRole(decl.collisionRole),
       collisionGroup: decl.collisionGroup ?? decl.groupKey,
@@ -1176,6 +1215,7 @@ export function layoutLabelsOnMap(
     const roleDiff =
       collisionRoleOrder(b.collisionRole) - collisionRoleOrder(a.collisionRole);
     if (roleDiff !== 0) return roleDiff;
+    if (a.req.densityImportance !== undefined || b.req.densityImportance !== undefined) { const importance = (b.req.densityImportance ?? 0) - (a.req.densityImportance ?? 0); if (importance) return importance; }
     if (b.priority !== a.priority) return b.priority - a.priority;
     if (opts?.preferNearCenter !== false) {
       if (a.centerDist2 !== b.centerDist2) return a.centerDist2 - b.centerDist2;
@@ -1190,7 +1230,7 @@ export function layoutLabelsOnMap(
   const avoidPadExtra = opts?.avoidSpacingPx ?? 0;
   const avoidRects = opts?.avoidRectsPx ?? [];
   for (const ar of avoidRects) {
-    const pad = (ar.inflatePx ?? 0) + avoidPadExtra + params.minSpacingPx;
+    const pad = ar.alreadyInflated ? 0 : (ar.inflatePx ?? 0) + avoidPadExtra + params.minSpacingPx;
     const inflated = inflateRect({ x: ar.x, y: ar.y, w: ar.w, h: ar.h }, pad);
     index.add({
       ...inflated,
@@ -1205,6 +1245,11 @@ export function layoutLabelsOnMap(
 
   const groupCount = new Map<string, number>();
   const densityLimiter = new LabelDensityLimiter();
+  for (const { request, rect } of opts?.reservedLabels ?? []) {
+    const decl = request.declutter ?? {};
+    if (decl.groupKey) groupCount.set(decl.groupKey, (groupCount.get(decl.groupKey) ?? 0) + 1);
+    densityLimiter.commit(rect, resolveLabelDensityConfig({ ...decl, selected: request.selected }));
+  }
 
   const maybeTextPathMetrics = (
     item: LayoutItem,
@@ -1606,7 +1651,7 @@ export function layoutLabelsOnMap(
           paddingPx: Math.max(6, item.minSpacingPx),
           mode: (anchor.lineTextViewportRectMode ?? "anchorNormalized") as any,
         });
-        const rect = rectAudit.normalizedRect;
+        const rect = adjustedCollisionRect(rectAudit.normalizedRect,baseReq.collisionBoundsAdjustment);
         const attemptAudit = buildViewportAttemptAudit({
           attemptIndex: attempts,
           candidateId: rc.candidateId,
@@ -1656,7 +1701,7 @@ export function layoutLabelsOnMap(
         const hits = index.query(expanded);
         let ok = true;
         for (const h of hits) {
-          if (h.ownerUid && h.ownerUid === baseReq.featureUid) continue;
+          if (h.ownerUid && h.ownerUid === (baseReq.collisionOwnerUid ?? baseReq.featureUid)) continue;
           if (
             h.collisionSource === "geometry" &&
             (anchor.lineTextAvoidLineGeometry ?? false) === false
@@ -1703,6 +1748,7 @@ export function layoutLabelsOnMap(
           dx: px.x - item.anchorPx.x,
           dy: px.y - item.anchorPx.y,
           hidden: false,
+          collisionRect: expanded,
           candidateName: "C",
           anchorCandidateIndex: baseAc.index,
           anchorCandidateId: rc.candidateId,
@@ -1851,6 +1897,7 @@ export function layoutLabelsOnMap(
       resolveLabelPlacementCacheConfig({
         id: baseReq.id,
         featureUid: baseReq.featureUid,
+        partIndex: baseReq.partIndex,
         text,
         placement: baseReq.placement,
         zoom: map.getZoom(),
@@ -1864,6 +1911,10 @@ export function layoutLabelsOnMap(
           baseReq.declutter?.placementKeepPreviousCandidate,
         placementKeepPreviousAnchor:
           baseReq.declutter?.placementKeepPreviousAnchor,
+        placementInvalidateWhen: baseReq.declutter?.placementInvalidateWhen,
+        worldId: baseReq.worldId,
+        displayMode: baseReq.displayMode,
+        geometrySignature: baseReq.geometrySignature,
       }) ?? item.placementCache;
 
     const cachedPlacement = placementCache.get(placementCacheConfig);
@@ -1958,9 +2009,10 @@ export function layoutLabelsOnMap(
         const dx = (c.dx ?? 0) + baseDeltaX;
         const dy = (c.dy ?? 0) + baseDeltaY;
 
+        if (baseReq.acceptsAnchor && !baseReq.acceptsAnchor(anchorPxCand)) continue;
         const trial = rectForCandidate(item, measured, anchorPxCand, c);
         const textPathMetrics = maybeTextPathMetrics(item, text, ac);
-        const rect = textPathMetrics?.metrics?.collisionRect ?? trial.rect;
+        const rect = textPathMetrics?.metrics?.collisionRect ? adjustedCollisionRect(textPathMetrics.metrics.collisionRect,baseReq.collisionBoundsAdjustment) : trial.rect;
         const auditCandidate: PolygonLayoutCandidateAudit | undefined =
           polygonAuditEnabled
             ? {
@@ -1994,7 +2046,7 @@ export function layoutLabelsOnMap(
         let collisionBlockedBy: PolygonLayoutCandidateAudit["collisionBlockedBy"] | undefined;
         for (const h of hits) {
           // 忽略“自己的点图标占用区”，否则 near label 会必然撞到自己
-          if (h.ownerUid && h.ownerUid === baseReq.featureUid) continue;
+          if (h.ownerUid && h.ownerUid === (baseReq.collisionOwnerUid ?? baseReq.featureUid)) continue;
 
           if (rectIntersects(expanded, h) && shouldCollisionBlock(item, h)) {
             ok = false;
@@ -2085,6 +2137,7 @@ export function layoutLabelsOnMap(
           dx,
           dy,
           hidden: false,
+          collisionRect: expanded,
           candidateName: c.name,
           anchorCandidateIndex: ac.index,
           anchorCandidateId: ac.candidateId,
@@ -2213,10 +2266,11 @@ export function layoutLabelsOnMap(
 
     for (const ac of anchorCandidates) {
       for (const c of candidates) {
+        if (baseReq.acceptsAnchor && !baseReq.acceptsAnchor(ac.px)) continue;
         const nextBase = rectForCandidate(item, measured, ac.px, c);
         const textPathMetrics = maybeTextPathMetrics(item, text, ac);
         const nextRect =
-          textPathMetrics?.metrics?.collisionRect ?? nextBase.rect;
+          textPathMetrics?.metrics?.collisionRect ? adjustedCollisionRect(textPathMetrics.metrics.collisionRect,baseReq.collisionBoundsAdjustment) : nextBase.rect;
         const next = { ...nextBase, rect: nextRect };
         const trial = {
           ...next,
@@ -2245,6 +2299,7 @@ export function layoutLabelsOnMap(
         break;
     }
 
+    if (!fallback && baseReq.acceptsAnchor) return { id: baseReq.id, hidden: true, text: baseReq.text, dx: 0, dy: 0, priority: item.priority, hiddenReason: 'collision' };
     if (!fallback) {
       const c = candidates[0] ?? {
         name: "C" as LabelCandidateName,
@@ -2275,6 +2330,7 @@ export function layoutLabelsOnMap(
       dx: fallback.dx,
       dy: fallback.dy,
       hidden: false,
+          collisionRect: expanded,
       hiddenReason: item.lastFailureReason ?? "hiddenByPolicy",
       candidateName: fallback.candidate.name,
       anchorCandidateIndex: fallback.anchorIndex,
@@ -2321,31 +2377,58 @@ export function layoutLabelsOnMap(
     // 先尝试原文
     let p = tryPlace(item, item.req.text);
 
-    // 再尝试缩略
-    if (!p && item.allowAbbrev && item.abbrev) {
+    // Ordinary collision fallback remains separate from ordered density reduction.
+    if (!p && item.lastFailureReason !== 'densityLimit' && item.allowAbbrev && item.abbrev) {
       const short = item.abbrev(item.req.text);
       if (short && short !== item.req.text) {
         p = tryPlace(item, short);
       }
     }
 
-    if (!p && shouldForceShow(item)) {
+    let hideSymbol = false;
+    let keepGeometry = item.hidePolicy === 'geometryOnly';
+    let terminalDensityAction = false;
+    const densityFailed = !p && item.lastFailureReason === 'densityLimit';
+    const densityActionTrace: LabelDensityReduceStep[] = [];
+    if (!p && item.lastFailureReason === 'densityLimit') for (const action of item.density?.reduceOrder ?? DEFAULT_LABEL_DENSITY_REDUCE_ORDER) {
+      if (action === 'abbreviateOptionalLabels') {
+        if (item.collisionRole !== 'optional' || !item.allowAbbrev || !item.abbrev) continue;
+        densityActionTrace.push(action);
+        const short = item.abbrev(item.req.text);
+        if (short && short !== item.req.text) p = tryPlace(item, short);
+        if (p) break;
+      } else if (action === 'hideSoftLabels' && item.collisionRole === 'soft' || action === 'hideOptionalLabels' && item.collisionRole === 'optional') {
+        densityActionTrace.push(action); terminalDensityAction = true; break;
+      } else if (action === 'hideSymbols') {
+        densityActionTrace.push(action); hideSymbol = true;
+      } else if (action === 'geometryOnly') {
+        densityActionTrace.push(action); keepGeometry = true; hideSymbol = false; terminalDensityAction = true; break;
+      }
+    }
+
+    if (!p && !terminalDensityAction && shouldForceShow(item) && item.lastFailureReason !== 'densityLimit') {
       p = forcePlace(item, item.req.text);
     }
 
     if (p) {
+      p.densityActionTrace = densityActionTrace.length ? densityActionTrace : undefined;
+      if (hideSymbol) p.hideSymbol = true;
       placed.push(p);
       continue;
     }
 
     // 放不下
+    getDefaultLabelPlacementCache().noteFailure(item.placementCache, item.lastFailureReason);
     placed.push({
       id: item.req.id,
       featureUid: item.req.featureUid,
       text: item.req.text,
       dx: 0,
       dy: 0,
-      hidden: item.allowHide,
+      hidden: item.allowHide || densityFailed || item.lastFailureReason === 'densityLimit',
+      densityActionTrace: densityActionTrace.length ? densityActionTrace : undefined,
+      hideSymbol,
+      keepGeometry,
       hiddenReason: item.lastFailureReason ?? "notPlaced",
       collisionRole: item.collisionRole,
       collisionGroup: item.collisionGroup,

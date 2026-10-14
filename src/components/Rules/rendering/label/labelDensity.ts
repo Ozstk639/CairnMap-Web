@@ -14,12 +14,15 @@ export type LabelDensityReduceStep =
   | 'hideOptionalLabels'
   | 'hideSymbols'
   | 'geometryOnly';
+export const DEFAULT_LABEL_DENSITY_REDUCE_ORDER: LabelDensityReduceStep[] = ['abbreviateOptionalLabels', 'hideOptionalLabels'];
 
 export type LabelDensityInput = {
   densityEnabled?: boolean;
   densityGridSizePx?: number;
   densityMaxLabelsPerGrid?: number;
   densityPreserveRequired?: boolean;
+  densityPreserveSelected?: boolean;
+  selected?: boolean;
   densityGroupKey?: string;
   densityReduceOrder?: LabelDensityReduceStep[];
 
@@ -40,6 +43,8 @@ export type ResolvedLabelDensityConfig = {
   gridSizePx: number;
   maxLabelsPerGrid: number;
   preserveRequired: boolean;
+  preserveSelected: boolean;
+  selected: boolean;
   groupKey: string;
   collisionRole?: LabelDensityCollisionRole;
   reduceOrder?: LabelDensityReduceStep[];
@@ -74,6 +79,8 @@ export function resolveLabelDensityConfig(input: LabelDensityInput | undefined):
     gridSizePx: finitePositiveInt(input.densityGridSizePx, DEFAULT_DENSITY_GRID_SIZE_PX),
     maxLabelsPerGrid: finitePositiveInt(input.densityMaxLabelsPerGrid, DEFAULT_MAX_LABELS_PER_GRID),
     preserveRequired: input.densityPreserveRequired !== false,
+    preserveSelected: input.densityPreserveSelected !== false,
+    selected: Boolean(input.selected),
     groupKey,
     collisionRole: input.collisionRole,
     reduceOrder: Array.isArray(input.densityReduceOrder) ? input.densityReduceOrder : undefined,
@@ -81,7 +88,7 @@ export function resolveLabelDensityConfig(input: LabelDensityInput | undefined):
 }
 
 function shouldBypassDensityLimit(config: ResolvedLabelDensityConfig): boolean {
-  return !!config.preserveRequired && config.collisionRole === 'required';
+  return config.preserveSelected && config.selected || config.preserveRequired && config.collisionRole === 'required';
 }
 
 function densityCellKey(rect: LabelDensityRect, config: ResolvedLabelDensityConfig): string {

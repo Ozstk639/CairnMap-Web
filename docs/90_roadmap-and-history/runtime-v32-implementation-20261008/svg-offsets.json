@@ -1,0 +1,143 @@
+{
+  "cases": [
+    {
+      "family": "glyphPath",
+      "configured": [
+        80,
+        30
+      ],
+      "actualShift": [
+        80,
+        30
+      ],
+      "before": {
+        "x": 558,
+        "y": 430,
+        "w": 124,
+        "h": 80
+      },
+      "after": {
+        "x": 638,
+        "y": 460,
+        "w": 124,
+        "h": 80
+      }
+    },
+    {
+      "family": "glyphPath",
+      "configured": [
+        -80,
+        -30
+      ],
+      "actualShift": [
+        -80,
+        -30
+      ],
+      "before": {
+        "x": 558,
+        "y": 430,
+        "w": 124,
+        "h": 80
+      },
+      "after": {
+        "x": 478,
+        "y": 400,
+        "w": 124,
+        "h": 80
+      }
+    },
+    {
+      "family": "glyphPath",
+      "configured": [
+        0,
+        0
+      ],
+      "actualShift": [
+        0,
+        0
+      ],
+      "before": {
+        "x": 558,
+        "y": 430,
+        "w": 124,
+        "h": 80
+      },
+      "after": {
+        "x": 558,
+        "y": 430,
+        "w": 124,
+        "h": 80
+      }
+    },
+    {
+      "family": "textPath",
+      "configured": [
+        80,
+        30
+      ],
+      "actualShift": [
+        80,
+        30
+      ],
+      "before": {
+        "x": -29,
+        "y": 448,
+        "w": 1298,
+        "h": 44
+      },
+      "after": {
+        "x": 51,
+        "y": 478,
+        "w": 1298,
+        "h": 44
+      }
+    },
+    {
+      "family": "textPath",
+      "configured": [
+        -80,
+        -30
+      ],
+      "actualShift": [
+        -80,
+        -30
+      ],
+      "before": {
+        "x": -29,
+        "y": 448,
+        "w": 1298,
+        "h": 44
+      },
+      "after": {
+        "x": -109,
+        "y": 418,
+        "w": 1298,
+        "h": 44
+      }
+    },
+    {
+      "family": "textPath",
+      "configured": [
+        0,
+        0
+      ],
+      "actualShift": [
+        0,
+        0
+      ],
+      "before": {
+        "x": -29,
+        "y": 448,
+        "w": 1298,
+        "h": 44
+      },
+      "after": {
+        "x": -29,
+        "y": 448,
+        "w": 1298,
+        "h": 44
+      }
+    }
+  ],
+  "errors": []
+}

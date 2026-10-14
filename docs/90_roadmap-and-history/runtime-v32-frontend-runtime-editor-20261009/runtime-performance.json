@@ -1,0 +1,73 @@
+{
+  "environment": "actual dev App/ConfigLab, same live world and camera, three six-zoom warm batches per mode",
+  "rows": [
+    {
+      "mode": "v1",
+      "data": 463,
+      "layers": 18,
+      "labels": 6,
+      "batches": [
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.219948,
+            "ScriptDuration": 0.090936,
+            "LayoutDuration": 0.002394
+          },
+          "longTasks": []
+        },
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.207789,
+            "ScriptDuration": 0.08702900000000001,
+            "LayoutDuration": 0.002291
+          },
+          "longTasks": []
+        },
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.22365799999999997,
+            "ScriptDuration": 0.09822,
+            "LayoutDuration": 0.002985
+          },
+          "longTasks": []
+        }
+      ],
+      "medianScriptDuration": 0.090936
+    },
+    {
+      "mode": "v3",
+      "data": 463,
+      "layers": 19,
+      "labels": 6,
+      "batches": [
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.28166800000000003,
+            "ScriptDuration": 0.07006500000000004,
+            "LayoutDuration": 0.002533
+          },
+          "longTasks": []
+        },
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.244359,
+            "ScriptDuration": 0.06169200000000008,
+            "LayoutDuration": 0.002149999999999999
+          },
+          "longTasks": []
+        },
+        {
+          "metricsDelta": {
+            "TaskDuration": 0.25044,
+            "ScriptDuration": 0.06639700000000004,
+            "LayoutDuration": 0.0023610000000000003
+          },
+          "longTasks": []
+        }
+      ],
+      "medianScriptDuration": 0.06639700000000004
+    }
+  ],
+  "scriptRatio": 0.7301508753408995,
+  "runtimeErrors": []
+}

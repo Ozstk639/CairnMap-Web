@@ -1,0 +1,22 @@
+{
+  "checks": [
+    "cancel does not add a category",
+    "new category inherits actual parent and validates",
+    "compatible whole parent group copied with sibling-first selector and valid references"
+  ],
+  "groups": [
+    {
+      "name": "同父级平级分类（优先）",
+      "count": 9
+    },
+    {
+      "name": "当前父级",
+      "count": 1
+    },
+    {
+      "name": "其他兼容分类",
+      "count": 14
+    }
+  ],
+  "runtimeErrors": []
+}

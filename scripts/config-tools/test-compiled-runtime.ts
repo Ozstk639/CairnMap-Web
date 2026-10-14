@@ -1,0 +1,78 @@
+import assert from 'node:assert/strict';
+import { createConfigPackageFromCurrentProject } from '../../src/configStudio/legacyProjectAdapter';
+import { prepareConfigForActivation } from '../../src/configStudio/configActivation';
+import { configCompilationStats, isCompiledConfigRuntime, resolveCategoryNodes, resolveEffectiveFields, resolveGeometryProfile, resolveRenderExtensions, resolveCardConfiguration, resolveSelectableFields, resolveZoomRule } from '../../src/configStudio/runtime';
+import { resolveConfigRuntimeRule, resolveConfigRuntimeContextForHost, resolveConfigRuntimeContextForRecord } from '../../src/components/Rules/configRuntime/configPackageAdapter';
+import { FeatureStore } from '../../src/components/Rules/data/featureStore';
+
+const source = createConfigPackageFromCurrentProject();
+const snapshot = prepareConfigForActivation(source);
+assert(isCompiledConfigRuntime(snapshot));
+assert(!isCompiledConfigRuntime(source));
+assert(Object.isFrozen(snapshot) && Object.isFrozen(snapshot.nodes[0]));
+for (const node of source.nodes) {
+  assert.deepEqual(resolveCategoryNodes(snapshot, node.path), resolveCategoryNodes(source, node.path));
+  assert.deepEqual(resolveEffectiveFields(snapshot, node.path), resolveEffectiveFields(source, node.path));
+  assert.deepEqual(resolveSelectableFields(snapshot, node.path), resolveSelectableFields(source, node.path));
+  assert.deepEqual(resolveCardConfiguration(snapshot, node.path), resolveCardConfiguration(source, node.path));
+  for (const geometry of ['Point', 'LineString', 'Polygon'] as const) {
+    assert.deepEqual(resolveGeometryProfile(snapshot, node.path, geometry), resolveGeometryProfile(source, node.path, geometry));
+    const a = resolveGeometryProfile(snapshot, node.path, geometry), b = resolveGeometryProfile(source, node.path, geometry);
+    if (a && b) for (let zoom = 0; zoom <= 8; zoom++) assert.deepEqual(resolveZoomRule(a, zoom), resolveZoomRule(b, zoom));
+    for (const rule of node.geometryProfiles[geometry]?.zoomPriority.rules ?? []) assert.deepEqual(resolveRenderExtensions(snapshot, geometry, rule.extensions), resolveRenderExtensions(source, geometry, rule.extensions));
+  }
+}
+const original = resolveEffectiveFields(snapshot, source.nodes[0].path)[0].labels.zh;
+source.nodes[0].fields[0].labels.zh = 'changed same revision';
+assert.equal(resolveEffectiveFields(snapshot, source.nodes[0].path)[0].labels.zh, original);
+const next = prepareConfigForActivation(source);
+assert.equal(next.revision, snapshot.revision);
+assert.equal(resolveEffectiveFields(next, source.nodes[0].path)[0].labels.zh, 'changed same revision');
+assert.notEqual(configCompilationStats(snapshot)!.epoch, configCompilationStats(next)!.epoch);
+const before = configCompilationStats(snapshot)!.hits;
+for (let i = 0; i < 1000; i++) resolveGeometryProfile(snapshot, source.nodes[0].path, 'Point');
+assert(configCompilationStats(snapshot)!.hits >= before + 1000);
+for (let i = 0; i < 2000; i++) resolveCategoryNodes(snapshot, { class: 'unknown', kind: String(i) });
+assert(configCompilationStats(snapshot)!.cachedPaths <= 1024);
+const colorConfig = createConfigPackageFromCurrentProject();
+for (const rule of colorConfig.nodes.find(n => n.path.class === 'ROD' && !n.path.kind)!.geometryProfiles.LineString!.zoomPriority.rules) if (rule.style) rule.style.stroke = { mode: 'field', field: 'Name' };
+const active = prepareConfigForActivation(colorConfig);
+const record: any = { uid: 'cache-rod', type: 'Polyline', featureInfo: { ID: 'cache-rod', Class: 'ROD', World: 'zth', Name: '#aabbcc' }, meta: { Class: 'ROD', idValue: 'cache-rod', sig: {}, groups: {} }, coords3: [{ x: 0, y: -64, z: 0 }, { x: 100, y: -64, z: 0 }] };
+const ctx: any = { worldId: 'zth', zoomLevel: 6, leafletZoom: 3, dataVersion: 1, inFloorView: false, activeBuildingUid: null, activeFloorSelector: null, activeBuildingFloorRefSet: null };
+const store = new FeatureStore([record]);
+const first = resolveConfigRuntimeRule(active, record, ctx, null, store)!;
+assert(first); assert.strictEqual(resolveConfigRuntimeRule(active, record, ctx, null, store), first);
+record.featureInfo.Name = '#dd3344'; ctx.dataVersion++;
+const changed = resolveConfigRuntimeRule(active, record, ctx, null, store)!;
+assert.notStrictEqual(changed, first);
+assert.equal((changed.display as any).geometry.stroke, '#dd3344');
+const replacement = { ...record, featureInfo: { ...record.featureInfo, Name: '#223344' } };
+assert.notStrictEqual(resolveConfigRuntimeRule(active, replacement, ctx, null, new FeatureStore([replacement])), changed);
+ctx.activeFloorSelector = 'floor2'; assert.notStrictEqual(resolveConfigRuntimeRule(active, record, ctx, null, store), changed);
+const contextSource = createConfigPackageFromCurrentProject();
+const contextActive = prepareConfigForActivation(contextSource);
+const contextRecord = (cls: string, id: string, extra: Record<string, unknown> = {}): any => ({ uid: id, type: 'Polygon', featureInfo: { Class: cls, ID: id, Name: id, ...extra }, meta: { Class: cls, idValue: id, sig: {}, groups: {} } });
+const hosts = Array.from({ length: 100 }, (_, i) => contextRecord('BUD', `host-${i}`));
+const floors = Array.from({ length: 200 }, (_, i) => contextRecord('FLR', `floor-${i}`, { BuildingID: i === 3 ? ['host-1', 'host-0', 'host-0'] : `host-${i % 100}`, NofFloor: String(i) })).reverse();
+const contextStore = new FeatureStore([...hosts, ...floors]);
+for (const host of hosts) assert.deepEqual(resolveConfigRuntimeContextForHost(contextActive, host, contextStore), resolveConfigRuntimeContextForHost(contextSource, host, contextStore));
+for (const floor of floors) assert.deepEqual(resolveConfigRuntimeContextForRecord(contextActive, floor, contextStore), resolveConfigRuntimeContextForRecord(contextSource, floor, contextStore));
+const specialFloor = floors.find(floor => floor.uid === 'floor-3')!;
+assert.equal(resolveConfigRuntimeContextForRecord(contextActive, specialFloor, contextStore)?.host.uid, 'host-0');
+const movedFloor = contextRecord('FLR', 'floor-3', { BuildingID: 'host-2', NofFloor: '3' });
+const replacedStore = new FeatureStore([...hosts, movedFloor]);
+assert.equal(resolveConfigRuntimeContextForRecord(contextActive, movedFloor, replacedStore)?.host.uid, 'host-2');
+assert.equal(resolveConfigRuntimeContextForHost(contextActive, hosts[0], replacedStore), undefined);
+let classificationReads = 0;
+const emptyHosts = Array.from({ length: 2000 }, (_, i) => {
+  const record = contextRecord('BUD', `empty-${i}`);
+  record.featureInfo = new Proxy(record.featureInfo, { get(target, key) { if (typeof key === 'string' && /kind/i.test(key)) classificationReads++; return Reflect.get(target, key); } });
+  return record;
+});
+const emptyStore = new FeatureStore(emptyHosts);
+for (const host of emptyHosts) assert.equal(resolveConfigRuntimeContextForHost(contextActive, host, emptyStore), undefined);
+assert(classificationReads <= emptyHosts.length * 12, `context lookup repeated classification scans: ${classificationReads}`);
+const coldReads = classificationReads;
+for (const host of emptyHosts) resolveConfigRuntimeContextForHost(contextActive, host, emptyStore);
+assert.equal(classificationReads, coldReads);
+console.log('compiled-runtime: independent inheritance/extensions/Zoom/context equality, immutable same-revision activation, bounded paths, hot bindings, linear relation indexing and data/store/context invalidation: OK');

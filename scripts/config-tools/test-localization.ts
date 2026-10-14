@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import { normalizeImportedLocalization, normalizeImportedText } from '../../src/configStudio/localization';
+import { optionLabel } from '../../src/configStudio/runtime';
+import { createConfigPackageFromCurrentProject } from '../../src/configStudio/legacyProjectAdapter';
+assert.deepEqual(normalizeImportedText('道路', ''), { zh: '道路', en: '' });
+assert.deepEqual(normalizeImportedText('道路', '道路'), { zh: '道路', en: '' });
+assert.deepEqual(normalizeImportedText('道路', 'Road'), { zh: '道路', en: 'Road' });
+assert.deepEqual(normalizeImportedText('ID', 'ID'), { zh: 'ID', en: 'ID' });
+assert.equal(optionLabel({ value: '1', label: { zh: '上行', en: '' } }, 'en'), '');
+const config = createConfigPackageFromCurrentProject();
+const field = config.nodes.flatMap((node) => node.fields)[0];
+field.labels = { zh: '旧草稿中文', en: '旧草稿中文' };
+const normalized = normalizeImportedLocalization(config);
+assert.equal(normalized.nodes.flatMap((node) => node.fields)[0].labels.en, '');
+assert.equal(field.labels.en, '旧草稿中文');
+console.log('localization: imported Chinese residue cleared, real English and empty values preserved: OK');

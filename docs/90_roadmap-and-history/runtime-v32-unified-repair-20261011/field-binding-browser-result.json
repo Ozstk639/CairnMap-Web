@@ -1,0 +1,103 @@
+{
+  "checks": [
+    "Studio field-to-control binding and save",
+    "numeric-array defaults in actual Runner",
+    "edited numeric array in production committed record"
+  ],
+  "control": {
+    "id": "control-mv2p0ypx-12wlp",
+    "slot": "I",
+    "kind": "group",
+    "columns": 1,
+    "label": {
+      "zh": "验收数值",
+      "en": ""
+    },
+    "required": false,
+    "defaultValue": [
+      1,
+      2
+    ],
+    "optionValueType": "number",
+    "group": {
+      "storage": "scalar",
+      "optional": true,
+      "addLabel": {
+        "zh": "添加验收数值",
+        "en": ""
+      },
+      "itemFields": [
+        {
+          "key": "",
+          "kind": "number",
+          "label": {
+            "zh": "验收数值",
+            "en": ""
+          },
+          "options": [],
+          "required": true,
+          "optionValueType": "number"
+        }
+      ]
+    },
+    "requiredWhen": [],
+    "fieldSource": {
+      "nodeId": "class-wrp",
+      "fieldId": "acceptance-values",
+      "snapshot": {
+        "key": "tags.acceptanceValues",
+        "type": "number",
+        "cardinality": "multiple",
+        "labels": {
+          "zh": "验收数值",
+          "en": ""
+        },
+        "defaultValue": [
+          1,
+          2
+        ],
+        "required": false,
+        "input": "text"
+      },
+      "overrides": []
+    }
+  },
+  "assignment": {
+    "id": "field-binding-mv2p0z1p-al4rt",
+    "target": "tags.acceptanceValues",
+    "expression": "I"
+  },
+  "record": {
+    "World": "zth",
+    "Class": "WRP",
+    "Kind": "NOM",
+    "SKind": "NOM",
+    "ID": "ZWRPNOMNOM_binding-value",
+    "WRPointI2D": "binding-value",
+    "Name": "binding-value",
+    "hub": "binding-value",
+    "extensions": {
+      "link": {
+        "wiki": "binding-value"
+      }
+    },
+    "tags": {
+      "acceptanceValues": [
+        3,
+        4
+      ]
+    },
+    "elevation": 12,
+    "CreateBy": "binding-user",
+    "CreateTime": "20261011",
+    "Type": "Points",
+    "CoordP": [
+      [
+        20,
+        -64,
+        13
+      ]
+    ]
+  },
+  "errors": []
+}

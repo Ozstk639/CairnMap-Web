@@ -1,0 +1,176 @@
+{
+  "sourceHead": "b975f399bd2a5c55848a7837145ca56e4d8cc230",
+  "contractRevision": 8,
+  "packageRevision": 4,
+  "commands": {
+    "verifyConfigV32": "passed: 30 script groups",
+    "build": "passed"
+  },
+  "renderComparisons": {
+    "deterministicR6R8": 5130,
+    "independentBrowser": 1161,
+    "failures": 0,
+    "reference": "frozen V1 measurements reused after 520-file inventory recheck; current r8 measured anew"
+  },
+  "workflowComparisons": {
+    "native": 17,
+    "nativeCompleteRecords": 34,
+    "externalWorkflows": 3,
+    "externalCompleteRecords": 7,
+    "frozenActualTPP": "passed"
+  },
+  "remoteData": {
+    "repository": "OpenRIAMap/OpenRIAMap-Data",
+    "sha": "a13ffc97e517cb52d84d5fdd49eb0402cb0f14f9",
+    "fullAuditedJsonFiles": 714,
+    "mergedFeatures": 463,
+    "splitFeatures": 463,
+    "headRechecked": "2026-10-11 Asia/Shanghai; unchanged"
+  },
+  "manualUserAcceptance": "pending",
+  "publication": "local only; no push, PR, main or RIA update",
+  "files": [
+    {
+      "name": "CairnMap_V32_FieldReuse_Drawing_r4.config.json",
+      "bytes": 3346868,
+      "sha256": "ffcf77938eb83ea7054ebde4bdbe42980c36cde73c4cad864af5e329a216a2f5"
+    },
+    {
+      "name": "CairnMap_V32_FieldReuse_Drawing_r4.zip",
+      "bytes": 49994,
+      "sha256": "c74015c9d203d88c04fd5d7820216d254282fc4f9e0a6d80c11ba567283c5958"
+    },
+    {
+      "name": "delivery-manifest.json",
+      "bytes": 1067,
+      "sha256": "60206632c406fa162c4923fc23366207c9a3ead1456866ed889b03d2ad3108cf"
+    },
+    {
+      "name": "delivery-validation.json",
+      "bytes": 247,
+      "sha256": "ba16be6c9313e7fe179a25dae8c3e0784e109e05a2cf054d1e9833ed05867123"
+    },
+    {
+      "name": "delivery-import.json",
+      "bytes": 131,
+      "sha256": "402568ccb7cb0a1569a7db27cb89f00d3bfd8f744e868af0c4ae352b77fcfd1c"
+    },
+    {
+      "name": "frozen-reference-recheck.json",
+      "bytes": 829,
+      "sha256": "a972791bd3e5ba4aa27124f9488e05c1fc6ebf392b1a6c18f303bdb7e5150bdb"
+    },
+    {
+      "name": "remote-head-recheck.json",
+      "bytes": 188,
+      "sha256": "07ffaed568a0bd63e7495f20e3c8e3f789d730623cfcaf29857c8af777bdbc51"
+    },
+    {
+      "name": "native-workflow-matrix.json",
+      "bytes": 37580,
+      "sha256": "3952e1b2ddfa6c660730537aa39d407a619f9e1eafa8e48080fad046439cbe51"
+    },
+    {
+      "name": "workflow-capture-parity.json",
+      "bytes": 1137,
+      "sha256": "491247eb166947235c82782d49b43454432a4c8b233050b5a7f6662671c5f3b3"
+    },
+    {
+      "name": "external-lifecycle.json",
+      "bytes": 14106,
+      "sha256": "8daaf7131a63edde5f7c18e4555bee67c62cb074ac21e27fd7cd8068048031eb"
+    },
+    {
+      "name": "r8-workflow-acceptance.json",
+      "bytes": 4382,
+      "sha256": "eab9fa984a63e2bcbb918caed8c3108620354a3a5a409ab933bece223cc7e5fa"
+    },
+    {
+      "name": "r8-studio-acceptance.json",
+      "bytes": 538,
+      "sha256": "12f1a0bbaf06840c97f582687a18f40baa74eb659eb9b246d13ac68cbec35179"
+    },
+    {
+      "name": "field-binding-browser-result.json",
+      "bytes": 2164,
+      "sha256": "70e5a1f09fe26f145d3bc692500d937cc380847cd8b8163867e5095659ff0d85"
+    },
+    {
+      "name": "app-mount-result.json",
+      "bytes": 980,
+      "sha256": "9fc533da8886c34000b5f5f6f05f0c971b25c59c560551803c71b751ba80bec1"
+    },
+    {
+      "name": "module-help-result.json",
+      "bytes": 1510,
+      "sha256": "462d49cae3c1595713be749fd440a68d434b4e4f2828aee0051bd33bcb0bcc49"
+    },
+    {
+      "name": "render-browser-result.json",
+      "bytes": 22202,
+      "sha256": "267dedb64010715b1add0c777ec3917a02d3ac9dc901c8cf10b20a2ed8788a80"
+    },
+    {
+      "name": "interaction-browser-result.json",
+      "bytes": 455,
+      "sha256": "3153b5386531dea98693d7217713dd84fde7e64d4d0b75cd5ebe370e7760fc88"
+    },
+    {
+      "name": "svg-offsets.json",
+      "bytes": 2238,
+      "sha256": "d6d8302b6a33c22f3c6c9bb9cd74869ffa460091e81d7947ca9388fdeaea6d97"
+    },
+    {
+      "name": "independent-matrix.json",
+      "bytes": 670344,
+      "sha256": "6cc187d261ec573cd23edb10c639babb7a6c57f44121d7a00da9779074f9bc23"
+    },
+    {
+      "name": "independent-hierarchy.json",
+      "bytes": 204051,
+      "sha256": "8bb1bbfd4fd250b899a036b763b33b31b861dbb333dd38ea5eed9ca63ab9fac1"
+    },
+    {
+      "name": "studio-layout-browser.json",
+      "bytes": 187,
+      "sha256": "2e685f9cfa136dff777afa6fc6f966235d991208e832df5055214787bca5b879"
+    },
+    {
+      "name": "r8-studio-calculator.png",
+      "bytes": 88769,
+      "sha256": "7dc338f87ae93a08b6682500b146165bbb933dc54f2d5f2244524bd6c6c1a2e3"
+    },
+    {
+      "name": "app-workflow-mounted.png",
+      "bytes": 391880,
+      "sha256": "7e4533ad63a8351100fa6cbb03f318d8aac1e997d39215234640df7e0c3a36ee"
+    },
+    {
+      "name": "diamond-help-narrow.png",
+      "bytes": 49784,
+      "sha256": "5dfcf0f840f2bbe2588ba90a72adb0838097c62e02176d2f35f0f05a071b4a74"
+    },
+    {
+      "name": "delivery-import-studio.png",
+      "bytes": 51136,
+      "sha256": "f449fe0b871b0a64e86aa1fe0cc62ec0b9a54ce1db12392d5b9c4514d93a8608"
+    },
+    {
+      "name": "r8-navigation-acceptance.json",
+      "bytes": 986,
+      "sha256": "46584db86fb02271cba97a1ebe9d4af95c5acc3139bd0c6624dda4ef3325bbba"
+    },
+    {
+      "name": "r8-form-order-acceptance.json",
+      "bytes": 28204,
+      "sha256": "f334dc689e50d7a59dc5fa14fa54f5a9681a556b759e466f97078f7967daa897"
+    },
+    {
+      "name": "r8-navigation.png",
+      "bytes": 116415,
+      "sha256": "d055f286b80a52e0fba530e73ae5e43c8d646a7d24e81197481484db3898775f"
+    }
+  ],
+  "actualNavigation": "native temporary records -> actual route endpoint search -> road route calculation and drawing: passed",
+  "actualFormOrder": "17 actual production form DOM orders: passed"
+}

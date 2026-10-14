@@ -1,0 +1,7504 @@
+{
+  "root": {
+    "ref": "t0"
+  },
+  "definitions": {
+    "t1": {
+      "type": "object",
+      "properties": {
+        "zh": {
+          "type": "string"
+        },
+        "en": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "zh",
+        "en"
+      ]
+    },
+    "t3": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "const": "World"
+        },
+        "assignment": {
+          "const": "activeWorld"
+        },
+        "required": {
+          "const": true
+        }
+      },
+      "required": [
+        "field",
+        "assignment",
+        "required"
+      ]
+    },
+    "t4": {
+      "type": "object",
+      "properties": {
+        "minZoom": {
+          "type": "number"
+        },
+        "activationRadiusPx": {
+          "type": "number"
+        },
+        "retainRadiusPx": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "minZoom",
+        "activationRadiusPx",
+        "retainRadiusPx"
+      ]
+    },
+    "t5": {
+      "type": "object",
+      "properties": {
+        "polygonMinScreenAreaPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "lineMinScreenLengthPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t9": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "const": "circle"
+            },
+            {
+              "const": "pin"
+            }
+          ]
+        },
+        "radius": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "size": {
+          "anyOf": [
+            {
+              "type": "array",
+              "tuple": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "t10": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "type": "string"
+        },
+        "width": {
+          "type": "number"
+        },
+        "opacity": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "color",
+        "width",
+        "opacity"
+      ]
+    },
+    "t12": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "color": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "color"
+      ]
+    },
+    "t11": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "const": "valueMap"
+        },
+        "field": {
+          "type": "string"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "ref": "t12"
+          }
+        },
+        "fallbackColor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode",
+        "field",
+        "entries",
+        "fallbackColor"
+      ]
+    },
+    "t13": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "const": "fixed"
+        },
+        "color": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode",
+        "color"
+      ]
+    },
+    "t14": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "const": "field"
+        },
+        "field": {
+          "type": "string"
+        },
+        "fallbackColor": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "field"
+      ]
+    },
+    "t16": {
+      "type": "object",
+      "properties": {
+        "class": {
+          "type": "string"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "skind": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "skind2": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "class"
+      ]
+    },
+    "t15": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "const": "external"
+        },
+        "target": {
+          "ref": "t16"
+        },
+        "targetIdField": {
+          "type": "string"
+        },
+        "targetColorField": {
+          "type": "string"
+        },
+        "fallbackColor": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "target",
+        "targetIdField",
+        "targetColorField"
+      ]
+    },
+    "t17": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "const": "relatedLine"
+        },
+        "strategy": {
+          "anyOf": [
+            {
+              "const": "featureRelation"
+            },
+            {
+              "const": "platformFirstLine"
+            },
+            {
+              "const": "stationFirstPlatform"
+            }
+          ]
+        },
+        "fallbackColor": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "strategy"
+      ]
+    },
+    "t8": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "strokeColor": {
+          "type": "string"
+        },
+        "strokeWidth": {
+          "type": "number"
+        },
+        "strokeOpacity": {
+          "type": "number"
+        },
+        "fillColor": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "fillOpacity": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "zIndexOffset": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "forceShowLabel": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "labelPriority": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "symbol": {
+          "anyOf": [
+            {
+              "ref": "t9"
+            }
+          ]
+        },
+        "outline": {
+          "anyOf": [
+            {
+              "ref": "t10"
+            }
+          ]
+        },
+        "dashArray": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "strokeColorBinding": {
+          "anyOf": [
+            {
+              "ref": "t11"
+            },
+            {
+              "ref": "t13"
+            },
+            {
+              "ref": "t14"
+            },
+            {
+              "ref": "t15"
+            },
+            {
+              "ref": "t17"
+            }
+          ]
+        }
+      },
+      "required": [
+        "enabled",
+        "strokeColor",
+        "strokeWidth",
+        "strokeOpacity"
+      ]
+    },
+    "t7": {
+      "type": "object",
+      "properties": {
+        "hover": {
+          "ref": "t8"
+        },
+        "selected": {
+          "ref": "t8"
+        },
+        "searchResult": {
+          "ref": "t8"
+        },
+        "editing": {
+          "ref": "t8"
+        },
+        "deletionMarked": {
+          "ref": "t8"
+        },
+        "hitTolerancePx": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "hover",
+        "selected",
+        "searchResult",
+        "editing",
+        "deletionMarked",
+        "hitTolerancePx"
+      ]
+    },
+    "t6": {
+      "type": "object",
+      "properties": {
+        "Point": {
+          "ref": "t7"
+        },
+        "LineString": {
+          "ref": "t7"
+        },
+        "Polygon": {
+          "ref": "t7"
+        }
+      },
+      "required": [
+        "Point",
+        "LineString",
+        "Polygon"
+      ]
+    },
+    "t18": {
+      "type": "object",
+      "properties": {
+        "overlay": {
+          "type": "string"
+        },
+        "overlay-top": {
+          "type": "string"
+        },
+        "point": {
+          "type": "string"
+        },
+        "point-top": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "overlay",
+        "overlay-top",
+        "point",
+        "point-top"
+      ]
+    },
+    "t21": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "anyOf": [
+            {
+              "const": "inherit"
+            },
+            {
+              "const": "override"
+            }
+          ]
+        },
+        "minScreenAreaPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "minScreenLengthPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": [
+        "mode"
+      ]
+    },
+    "t22": {
+      "type": "object",
+      "properties": {
+        "maxChars": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "minChars": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "multiline": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "maxLines": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "suffix": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "abbreviationEnabled": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "emptyBehavior": {
+          "anyOf": [
+            {
+              "const": "hide"
+            },
+            {
+              "const": "showID"
+            },
+            {
+              "const": "showKind"
+            },
+            {
+              "const": "placeholder"
+            }
+          ]
+        },
+        "opacity": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t23": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "anyOf": [
+            {
+              "const": "inherit"
+            },
+            {
+              "const": "standard"
+            },
+            {
+              "const": "network"
+            },
+            {
+              "const": "strict-on-line"
+            }
+          ]
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "const": "free"
+            },
+            {
+              "const": "strictOnLine"
+            }
+          ]
+        },
+        "endpointPaddingRatio": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "endpointPaddingMinPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "maxTurnAngleDeg": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "minLengthPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "textMode": {
+          "anyOf": [
+            {
+              "const": "auto"
+            },
+            {
+              "const": "rotatedLabel"
+            },
+            {
+              "const": "textPath"
+            }
+          ]
+        },
+        "anchorSamples": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "candidateSpacing": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "candidateMinSpacing": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "candidateMax": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "shortThresholdMultiplier": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "longMode": {
+          "anyOf": [
+            {
+              "const": "evenSplit"
+            }
+          ]
+        },
+        "preferPreviousCandidate": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "candidateHysteresisPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "textPathMinLengthPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "textPathPaddingPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "textPathMaxAngleDeltaDeg": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "textPathMaxTotalBendDeg": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "textPathPreferReadableDirection": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "textPathFallback": {
+          "anyOf": [
+            {
+              "const": "hide"
+            },
+            {
+              "const": "rotatedLabel"
+            },
+            {
+              "const": "svgStraightLabel"
+            }
+          ]
+        },
+        "textPathCollisionPaddingPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "textPathLetterSpacingPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "textPathCurvedLetterSpacingPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "textPathCurvedSpacingMinBendDeg": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "orientationPolicy": {
+          "anyOf": [
+            {
+              "const": "autoCjkUpright"
+            },
+            {
+              "const": "alwaysTextPath"
+            },
+            {
+              "const": "alwaysRotated"
+            }
+          ]
+        },
+        "textPathVerticalAngleThresholdDeg": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "textPathVerticalLengthRatio": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "candidateOrdering": {
+          "anyOf": [
+            {
+              "const": "startToEnd"
+            },
+            {
+              "const": "centerOut"
+            }
+          ]
+        },
+        "candidateWeightMode": {
+          "anyOf": [
+            {
+              "const": "none"
+            },
+            {
+              "const": "distanceToCenter"
+            }
+          ]
+        },
+        "candidateSwitchThreshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "candidateReuseBonus": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "candidateViewportPreference": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "candidateEdgePenalty": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "centerWeightMode": {
+          "anyOf": [
+            {
+              "const": "none"
+            },
+            {
+              "const": "distanceToCenter"
+            }
+          ]
+        },
+        "centerSwitchThreshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "centerReuseBonus": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "cjkVerticalRenderMode": {
+          "anyOf": [
+            {
+              "const": "auto"
+            },
+            {
+              "const": "legacyVertical"
+            },
+            {
+              "const": "svgVertical"
+            }
+          ]
+        },
+        "svgVerticalCjkMinLengthPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "svgVerticalCjkLetterSpacingPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "advancedTextEnabled": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "advancedTextBudgetGroup": {
+          "anyOf": [
+            {
+              "const": "network"
+            },
+            {
+              "const": "none"
+            },
+            {
+              "const": "surface"
+            }
+          ]
+        },
+        "advancedTextMaxLabels": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "advancedTextMaxCandidatesPerPass": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "cjkGlyphRotationPolicy": {
+          "anyOf": [
+            {
+              "const": "uprightWhenSteep"
+            },
+            {
+              "const": "followLine"
+            },
+            {
+              "const": "alwaysUpright"
+            }
+          ]
+        },
+        "cjkGlyphUprightAngleThresholdDeg": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "cjkGlyphPathMode": {
+          "anyOf": [
+            {
+              "const": "auto"
+            },
+            {
+              "const": "off"
+            },
+            {
+              "const": "force"
+            }
+          ]
+        },
+        "cjkGlyphSpacingPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "cjkGlyphCollisionPaddingPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "cjkGlyphMinPathLengthPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "cjkGlyphMaxCount": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "cjkGlyphMaxAngleDeltaDeg": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "cjkGlyphMaxTotalBendDeg": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "cjkGlyphPreferReadableDirection": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "cjkGlyphAllowTextPathFallback": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "textPathHalfLengthMultiplier": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "textPathMinHalfLengthWorld": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "textPathMaxHalfLengthWorld": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "textPathMaxHalfLengthRatio": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "textCollisionRectMode": {
+          "anyOf": [
+            {
+              "const": "pathBox"
+            },
+            {
+              "const": "textBox"
+            },
+            {
+              "const": "compactTextBox"
+            }
+          ]
+        },
+        "cjkGlyphCompactMode": {
+          "anyOf": [
+            {
+              "const": "auto"
+            },
+            {
+              "const": "off"
+            }
+          ]
+        },
+        "cjkGlyphMinAdvanceScale": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "cjkGlyphFallbackMode": {
+          "anyOf": [
+            {
+              "const": "hide"
+            },
+            {
+              "const": "rotatedLabel"
+            },
+            {
+              "const": "simpleLineLabel"
+            },
+            {
+              "const": "textPathIfAllowed"
+            }
+          ]
+        },
+        "simpleFallbackEnabled": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "simpleFallbackRotate": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "repositionMode": {
+          "anyOf": [
+            {
+              "const": "off"
+            },
+            {
+              "const": "chainageSearch"
+            }
+          ]
+        },
+        "repositionAttemptsPerDirection": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "repositionStepMode": {
+          "anyOf": [
+            {
+              "const": "labelSpan"
+            },
+            {
+              "const": "fixedWorld"
+            },
+            {
+              "const": "fixedPx"
+            }
+          ]
+        },
+        "repositionFailure": {
+          "anyOf": [
+            {
+              "const": "hide"
+            },
+            {
+              "const": "simpleLineLabel"
+            }
+          ]
+        },
+        "repositionStrictSvg": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "avoidLineGeometry": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "avoidPolygonGeometry": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "avoidPointSymbols": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "repositionCollisionScope": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "const": "lineLabel"
+                  },
+                  {
+                    "const": "surfaceLabel"
+                  },
+                  {
+                    "const": "pointLabel"
+                  },
+                  {
+                    "const": "pointSymbol"
+                  },
+                  {
+                    "const": "requiredLabel"
+                  },
+                  {
+                    "const": "selectedLabel"
+                  },
+                  {
+                    "const": "searchResultLabel"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "viewportRectMode": {
+          "anyOf": [
+            {
+              "const": "auto"
+            },
+            {
+              "const": "rawMetrics"
+            },
+            {
+              "const": "anchorNormalized"
+            }
+          ]
+        },
+        "viewportCandidateMode": {
+          "anyOf": [
+            {
+              "const": "off"
+            },
+            {
+              "const": "stableFirstViewportFallback"
+            }
+          ]
+        },
+        "viewportCandidateBufferPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "viewportCandidateMaxTargets": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "viewportCandidateMinIntervalPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": [
+        "profile"
+      ]
+    },
+    "t25": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ]
+    },
+    "t26": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "x",
+        "y"
+      ]
+    },
+    "t24": {
+      "type": "object",
+      "properties": {
+        "candidatePlacement": {
+          "anyOf": [
+            {
+              "const": "relativeToPlacement"
+            },
+            {
+              "const": "aroundAnchor"
+            }
+          ]
+        },
+        "strategy": {
+          "anyOf": [
+            {
+              "const": "inherit"
+            },
+            {
+              "const": "featureCenter"
+            },
+            {
+              "const": "interior"
+            },
+            {
+              "const": "visibleInterior"
+            },
+            {
+              "const": "lineCenter"
+            },
+            {
+              "const": "lineCandidates"
+            }
+          ]
+        },
+        "candidates": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "const": "C"
+                  },
+                  {
+                    "const": "N"
+                  },
+                  {
+                    "const": "S"
+                  },
+                  {
+                    "const": "E"
+                  },
+                  {
+                    "const": "W"
+                  },
+                  {
+                    "const": "NE"
+                  },
+                  {
+                    "const": "NW"
+                  },
+                  {
+                    "const": "SE"
+                  },
+                  {
+                    "const": "SW"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "offsetPx": {
+          "anyOf": [
+            {
+              "ref": "t25"
+            }
+          ]
+        },
+        "candidateOffsetsPx": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t26"
+              }
+            }
+          ]
+        },
+        "allowOutsideGeometry": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "requireInsideGeometry": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "preferViewportCenter": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t27": {
+      "type": "object",
+      "properties": {
+        "weightMode": {
+          "anyOf": [
+            {
+              "const": "none"
+            },
+            {
+              "const": "distanceToCenter"
+            }
+          ]
+        },
+        "weightedSwitchThreshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "reuseBonus": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "viewportPreference": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "edgePenalty": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "const": "inherit"
+            },
+            {
+              "const": "none"
+            },
+            {
+              "const": "fixedInterior"
+            },
+            {
+              "const": "autoInteriorGrid"
+            },
+            {
+              "const": "largeFeatureGrid"
+            },
+            {
+              "const": "viewportAwareCandidateSet"
+            },
+            {
+              "const": "gridByWorldUnits"
+            }
+          ]
+        },
+        "count": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "gridSize": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "gridMinSize": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "maxCandidates": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "scanMax": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "overflow": {
+          "anyOf": [
+            {
+              "const": "rankedPrune"
+            },
+            {
+              "const": "seededPrune"
+            }
+          ]
+        },
+        "preferPreviousCandidate": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "switchThreshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "allowViewportFallback": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "minScreenAreaPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "preferViewportCenter": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t29": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "y": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "width": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "height": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t28": {
+      "type": "object",
+      "properties": {
+        "boundsAdjustment": {
+          "anyOf": [
+            {
+              "ref": "t29"
+            }
+          ]
+        },
+        "collideWith": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "const": "symbol"
+                  },
+                  {
+                    "const": "requiredLabel"
+                  },
+                  {
+                    "const": "importantLabel"
+                  },
+                  {
+                    "const": "optionalLabel"
+                  },
+                  {
+                    "const": "softLabel"
+                  },
+                  {
+                    "const": "geometry"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "blocks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "const": "optionalLabel"
+                  },
+                  {
+                    "const": "softLabel"
+                  },
+                  {
+                    "const": "poiLabel"
+                  },
+                  {
+                    "const": "structureLabel"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "allowOverlap": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "paddingPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "hidePolicy": {
+          "anyOf": [
+            {
+              "const": "hide"
+            },
+            {
+              "const": "abbreviateThenHide"
+            },
+            {
+              "const": "forceShow"
+            },
+            {
+              "const": "showWithoutBlocking"
+            },
+            {
+              "const": "geometryOnly"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t30": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "cacheKey": {
+          "anyOf": [
+            {
+              "const": "featureID"
+            },
+            {
+              "const": "featureID+zoomBucket"
+            },
+            {
+              "const": "featureID+mode"
+            },
+            {
+              "const": "custom"
+            }
+          ]
+        },
+        "zoomBucketSize": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "freezeDuringPan": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "recomputeOnMoveEnd": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "recomputeOnZoomEnd": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "hysteresisPx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "keepPreviousCandidate": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "keepPreviousAnchor": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "invalidateWhen": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "const": "zoomBucketChanged"
+                  },
+                  {
+                    "const": "featureGeometryChanged"
+                  },
+                  {
+                    "const": "featureTextChanged"
+                  },
+                  {
+                    "const": "modeChanged"
+                  },
+                  {
+                    "const": "worldChanged"
+                  },
+                  {
+                    "const": "labelOutOfViewport"
+                  },
+                  {
+                    "const": "collisionFailedRepeatedly"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t31": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "const": "inherit"
+            },
+            {
+              "const": "override"
+            }
+          ]
+        },
+        "gridSizePx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "maxLabelsPerGrid": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "maxSymbolsPerGrid": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "reduceOrder": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "const": "geometryOnly"
+                  },
+                  {
+                    "const": "hideSoftLabels"
+                  },
+                  {
+                    "const": "abbreviateOptionalLabels"
+                  },
+                  {
+                    "const": "hideOptionalLabels"
+                  },
+                  {
+                    "const": "hideSymbols"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "importanceField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "preserveSelected": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "preserveRequired": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        }
+      },
+      "required": [
+        "mode"
+      ]
+    },
+    "t32": {
+      "type": "object",
+      "properties": {
+        "whenNoLabelText": {
+          "anyOf": [
+            {
+              "const": "showID"
+            },
+            {
+              "const": "placeholder"
+            },
+            {
+              "const": "hideLabel"
+            },
+            {
+              "const": "showClassKind"
+            }
+          ]
+        },
+        "whenCollisionFailed": {
+          "anyOf": [
+            {
+              "const": "forceShow"
+            },
+            {
+              "const": "hideLabel"
+            },
+            {
+              "const": "abbreviate"
+            },
+            {
+              "const": "showGeometryOnly"
+            }
+          ]
+        },
+        "whenRuleMissing": {
+          "anyOf": [
+            {
+              "const": "geometryOnly"
+            },
+            {
+              "const": "hidden"
+            },
+            {
+              "const": "debugDefault"
+            },
+            {
+              "const": "legacyDefault"
+            }
+          ]
+        },
+        "whenGeometryInvalid": {
+          "anyOf": [
+            {
+              "const": "skip"
+            },
+            {
+              "const": "showErrorMarker"
+            },
+            {
+              "const": "debugOnly"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t34": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "ref": "t16"
+        },
+        "sourceField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "targetField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "behavior": {
+          "anyOf": [
+            {
+              "const": "hideIfExists"
+            },
+            {
+              "const": "showIfExists"
+            }
+          ]
+        }
+      },
+      "required": [
+        "target",
+        "behavior"
+      ]
+    },
+    "t35": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "ref": "t16"
+        },
+        "behavior": {
+          "anyOf": [
+            {
+              "const": "hideIfExists"
+            },
+            {
+              "const": "showIfExists"
+            }
+          ]
+        },
+        "targetField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "targetEquals": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "targetNotEquals": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "precision": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": [
+        "target",
+        "behavior"
+      ]
+    },
+    "t36": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "primaryValue": {
+          "type": "string"
+        },
+        "overlayValues": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "switchZoom": {
+          "type": "number"
+        },
+        "precision": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": [
+        "field",
+        "primaryValue",
+        "overlayValues",
+        "switchZoom"
+      ]
+    },
+    "t37": {
+      "type": "object",
+      "properties": {
+        "bindingId": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "requireSelector": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t33": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "anyOf": [
+            {
+              "const": "inherit"
+            },
+            {
+              "const": "always"
+            },
+            {
+              "const": "sameId"
+            },
+            {
+              "const": "coincidentPoint"
+            },
+            {
+              "const": "lineContainmentChoice"
+            },
+            {
+              "const": "activeContextMember"
+            }
+          ]
+        },
+        "sameId": {
+          "anyOf": [
+            {
+              "ref": "t34"
+            }
+          ]
+        },
+        "coincidentPoint": {
+          "anyOf": [
+            {
+              "ref": "t35"
+            }
+          ]
+        },
+        "lineContainmentChoice": {
+          "anyOf": [
+            {
+              "ref": "t36"
+            }
+          ]
+        },
+        "activeContextMember": {
+          "anyOf": [
+            {
+              "ref": "t37"
+            }
+          ]
+        }
+      },
+      "required": [
+        "mode"
+      ]
+    },
+    "t39": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "strokeColor": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "strokeWidth": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "strokeOpacity": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "fillColor": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "fillOpacity": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "zIndexOffset": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "forceShowLabel": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "labelPriority": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "symbol": {
+          "anyOf": [
+            {
+              "ref": "t9"
+            }
+          ]
+        },
+        "outline": {
+          "anyOf": [
+            {
+              "ref": "t10"
+            }
+          ]
+        },
+        "dashArray": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "strokeColorBinding": {
+          "anyOf": [
+            {
+              "ref": "t11"
+            },
+            {
+              "ref": "t13"
+            },
+            {
+              "ref": "t14"
+            },
+            {
+              "ref": "t15"
+            },
+            {
+              "ref": "t17"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t38": {
+      "type": "object",
+      "properties": {
+        "hover": {
+          "anyOf": [
+            {
+              "ref": "t39"
+            }
+          ]
+        },
+        "selected": {
+          "anyOf": [
+            {
+              "ref": "t39"
+            }
+          ]
+        },
+        "searchResult": {
+          "anyOf": [
+            {
+              "ref": "t39"
+            }
+          ]
+        },
+        "editing": {
+          "anyOf": [
+            {
+              "ref": "t39"
+            }
+          ]
+        },
+        "deletionMarked": {
+          "anyOf": [
+            {
+              "ref": "t39"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t20": {
+      "type": "object",
+      "properties": {
+        "screenGate": {
+          "anyOf": [
+            {
+              "ref": "t21"
+            }
+          ]
+        },
+        "pane": {
+          "anyOf": [
+            {
+              "const": "auto"
+            },
+            {
+              "const": "overlay"
+            },
+            {
+              "const": "overlay-top"
+            },
+            {
+              "const": "point"
+            },
+            {
+              "const": "point-top"
+            }
+          ]
+        },
+        "hitTolerancePx": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "labelText": {
+          "anyOf": [
+            {
+              "ref": "t22"
+            }
+          ]
+        },
+        "lineLabel": {
+          "anyOf": [
+            {
+              "ref": "t23"
+            }
+          ]
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "ref": "t24"
+            }
+          ]
+        },
+        "polygonCandidates": {
+          "anyOf": [
+            {
+              "ref": "t27"
+            }
+          ]
+        },
+        "collision": {
+          "anyOf": [
+            {
+              "ref": "t28"
+            }
+          ]
+        },
+        "stability": {
+          "anyOf": [
+            {
+              "ref": "t30"
+            }
+          ]
+        },
+        "density": {
+          "anyOf": [
+            {
+              "ref": "t31"
+            }
+          ]
+        },
+        "fallback": {
+          "anyOf": [
+            {
+              "ref": "t32"
+            }
+          ]
+        },
+        "visibility": {
+          "anyOf": [
+            {
+              "ref": "t33"
+            }
+          ]
+        },
+        "interaction": {
+          "anyOf": [
+            {
+              "ref": "t38"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t19": {
+      "type": "object",
+      "properties": {
+        "Point": {
+          "anyOf": [
+            {
+              "ref": "t20"
+            }
+          ]
+        },
+        "LineString": {
+          "anyOf": [
+            {
+              "ref": "t20"
+            }
+          ]
+        },
+        "Polygon": {
+          "anyOf": [
+            {
+              "ref": "t20"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t2": {
+      "type": "object",
+      "properties": {
+        "world": {
+          "ref": "t3"
+        },
+        "contextView": {
+          "ref": "t4"
+        },
+        "screenGateDefaults": {
+          "ref": "t5"
+        },
+        "interactionBaselines": {
+          "ref": "t6"
+        },
+        "paneDefaults": {
+          "ref": "t18"
+        },
+        "renderDefaults": {
+          "anyOf": [
+            {
+              "ref": "t19"
+            }
+          ]
+        }
+      },
+      "required": [
+        "world",
+        "contextView",
+        "screenGateDefaults",
+        "interactionBaselines",
+        "paneDefaults"
+      ]
+    },
+    "t42": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "label": {
+          "ref": "t1"
+        }
+      },
+      "required": [
+        "value",
+        "label"
+      ]
+    },
+    "t41": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "ref": "t1"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "ref": "t42"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "options"
+      ]
+    },
+    "t44": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "label": {
+          "ref": "t1"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "text"
+            },
+            {
+              "const": "select"
+            }
+          ]
+        },
+        "options": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "key",
+        "label",
+        "type"
+      ]
+    },
+    "t43": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "ref": "t1"
+        },
+        "allowedClasses": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "optionSchema": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t44"
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ]
+    },
+    "t40": {
+      "type": "object",
+      "properties": {
+        "optionSets": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t41"
+              }
+            }
+          ]
+        },
+        "cardLayouts": {
+          "type": "array",
+          "items": {
+            "ref": "t43"
+          }
+        },
+        "cardComponents": {
+          "type": "array",
+          "items": {
+            "ref": "t43"
+          }
+        },
+        "displayProfiles": {
+          "type": "array",
+          "items": {
+            "ref": "t43"
+          }
+        },
+        "specialDisplayLogic": {
+          "type": "array",
+          "items": {
+            "ref": "t43"
+          }
+        },
+        "workflowControls": {
+          "type": "array",
+          "items": {
+            "ref": "t43"
+          }
+        },
+        "workflowBlocks": {
+          "type": "array",
+          "items": {
+            "ref": "t43"
+          }
+        }
+      },
+      "required": [
+        "cardLayouts",
+        "cardComponents",
+        "displayProfiles",
+        "specialDisplayLogic",
+        "workflowControls",
+        "workflowBlocks"
+      ]
+    },
+    "t46": {
+      "type": "object",
+      "properties": {
+        "class": {
+          "anyOf": [
+            {
+              "ref": "t1"
+            }
+          ]
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "ref": "t1"
+            }
+          ]
+        },
+        "skind": {
+          "anyOf": [
+            {
+              "ref": "t1"
+            }
+          ]
+        },
+        "skind2": {
+          "anyOf": [
+            {
+              "ref": "t1"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t47": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "type": "boolean"
+        },
+        "display": {
+          "type": "boolean"
+        },
+        "card": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "fields",
+        "display",
+        "card"
+      ]
+    },
+    "t48": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "geometry": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "display": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "card": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t49": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "anyOf": [
+            {
+              "const": "sealed"
+            },
+            {
+              "const": "overridable"
+            },
+            {
+              "const": "localOnly"
+            }
+          ]
+        },
+        "display": {
+          "anyOf": [
+            {
+              "const": "sealed"
+            },
+            {
+              "const": "overridable"
+            },
+            {
+              "const": "localOnly"
+            }
+          ]
+        },
+        "card": {
+          "anyOf": [
+            {
+              "const": "sealed"
+            },
+            {
+              "const": "overridable"
+            },
+            {
+              "const": "localOnly"
+            }
+          ]
+        },
+        "workflow": {
+          "anyOf": [
+            {
+              "const": "sealed"
+            },
+            {
+              "const": "overridable"
+            },
+            {
+              "const": "localOnly"
+            }
+          ]
+        }
+      },
+      "required": [
+        "fields",
+        "display",
+        "card"
+      ]
+    },
+    "t51": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "always"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "t52": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "zoomRange"
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "t53": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "bboxArea"
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "const": "part"
+            },
+            {
+              "const": "feature"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "scope"
+      ]
+    },
+    "t54": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "fieldEquals"
+        },
+        "field": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "field",
+        "value"
+      ]
+    },
+    "t55": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "fieldIn"
+        },
+        "field": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "field",
+        "values"
+      ]
+    },
+    "t56": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "fieldPresent"
+        },
+        "field": {
+          "type": "string"
+        },
+        "present": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "field",
+        "present"
+      ]
+    },
+    "t57": {
+      "type": "object",
+      "properties": {
+        "registryKey": {
+          "type": "string"
+        },
+        "runtimeField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "registryKey"
+      ]
+    },
+    "t58": {
+      "type": "object",
+      "properties": {
+        "workflow": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "editor": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "infocard": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "search": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t59": {
+      "type": "object",
+      "properties": {
+        "classCode": {
+          "type": "string"
+        },
+        "matchField": {
+          "type": "string"
+        },
+        "displayField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "classCode",
+        "matchField"
+      ]
+    },
+    "t50": {
+      "type": "object",
+      "properties": {
+        "fieldId": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "const": "root"
+            },
+            {
+              "const": "tags"
+            },
+            {
+              "const": "extensions"
+            }
+          ]
+        },
+        "type": {
+          "anyOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "enum"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "reference"
+            }
+          ]
+        },
+        "cardinality": {
+          "anyOf": [
+            {
+              "const": "single"
+            },
+            {
+              "const": "multiple"
+            }
+          ]
+        },
+        "input": {
+          "anyOf": [
+            {
+              "const": "text"
+            },
+            {
+              "const": "select"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "textarea"
+            },
+            {
+              "const": "toggle"
+            },
+            {
+              "const": "featureSearch"
+            }
+          ]
+        },
+        "required": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "validateExistingData": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "requiredWhen": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "ref": "t51"
+                  },
+                  {
+                    "ref": "t52"
+                  },
+                  {
+                    "ref": "t53"
+                  },
+                  {
+                    "ref": "t54"
+                  },
+                  {
+                    "ref": "t55"
+                  },
+                  {
+                    "ref": "t56"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "labels": {
+          "ref": "t1"
+        },
+        "description": {
+          "ref": "t1"
+        },
+        "options": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t42"
+              }
+            }
+          ]
+        },
+        "optionValueType": {
+          "anyOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            }
+          ]
+        },
+        "format": {
+          "anyOf": [
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "plain"
+            },
+            {
+              "const": "externalLink"
+            },
+            {
+              "const": "date"
+            }
+          ]
+        },
+        "coordinateFormat": {
+          "anyOf": [
+            {
+              "const": "coordP"
+            },
+            {
+              "const": "pointObject"
+            },
+            {
+              "const": "coordL"
+            },
+            {
+              "const": "coordG"
+            }
+          ]
+        },
+        "optionSource": {
+          "anyOf": [
+            {
+              "ref": "t57"
+            }
+          ]
+        },
+        "placeholder": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "defaultValue": {},
+        "emptyValue": {
+          "anyOf": [
+            {
+              "const": "omit"
+            },
+            {
+              "const": "preserve"
+            }
+          ]
+        },
+        "sourceRuntimeField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "scenes": {
+          "anyOf": [
+            {
+              "ref": "t58"
+            }
+          ]
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "ref": "t59"
+            }
+          ]
+        },
+        "overrideOf": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "inheritance": {
+          "anyOf": [
+            {
+              "const": "sealed"
+            },
+            {
+              "const": "overridable"
+            },
+            {
+              "const": "localOnly"
+            }
+          ]
+        }
+      },
+      "required": [
+        "fieldId",
+        "key",
+        "type",
+        "cardinality",
+        "input",
+        "labels",
+        "description"
+      ]
+    },
+    "t62": {
+      "type": "object",
+      "properties": {
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "fillOpacity": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "opacity": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "dashArray": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t63": {
+      "type": "object",
+      "properties": {
+        "zLevel": {
+          "type": "number"
+        },
+        "pane": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "zIndexOffset": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": [
+        "zLevel"
+      ]
+    },
+    "t66": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "const": "field"
+            },
+            {
+              "const": "area"
+            },
+            {
+              "const": "length"
+            },
+            {
+              "const": "partCount"
+            }
+          ]
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "multiplier": {
+          "type": "number"
+        },
+        "divisor": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "rounding": {
+          "anyOf": [
+            {
+              "const": "none"
+            },
+            {
+              "const": "floor"
+            },
+            {
+              "const": "round"
+            },
+            {
+              "const": "ceil"
+            }
+          ]
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "multiplier",
+        "rounding"
+      ]
+    },
+    "t65": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "anyOf": [
+            {
+              "const": "ignore"
+            },
+            {
+              "const": "soft"
+            },
+            {
+              "const": "optional"
+            },
+            {
+              "const": "important"
+            },
+            {
+              "const": "required"
+            }
+          ]
+        },
+        "basePriority": {
+          "type": "number"
+        },
+        "collisionGroup": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "hideWhenColliding": {
+          "type": "boolean"
+        },
+        "densityLimit": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "metric": {
+          "anyOf": [
+            {
+              "ref": "t66"
+            }
+          ]
+        },
+        "compatibility": {
+          "anyOf": [
+            {
+              "const": "r5DisplayPriority"
+            }
+          ]
+        }
+      },
+      "required": [
+        "role",
+        "basePriority",
+        "hideWhenColliding"
+      ]
+    },
+    "t64": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "type": "boolean"
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "const": "perPart"
+            },
+            {
+              "const": "featureBbox"
+            }
+          ]
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "ref": "t51"
+              },
+              {
+                "ref": "t52"
+              },
+              {
+                "ref": "t53"
+              },
+              {
+                "ref": "t54"
+              },
+              {
+                "ref": "t55"
+              },
+              {
+                "ref": "t56"
+              }
+            ]
+          }
+        },
+        "collision": {
+          "ref": "t65"
+        }
+      },
+      "required": [
+        "visible",
+        "anchor",
+        "conditions",
+        "collision"
+      ]
+    },
+    "t70": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ]
+    },
+    "t72": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "fieldCompare"
+        },
+        "field": {
+          "type": "string"
+        },
+        "operator": {
+          "anyOf": [
+            {
+              "const": "eq"
+            },
+            {
+              "const": "ne"
+            },
+            {
+              "const": "in"
+            },
+            {
+              "const": "notIn"
+            },
+            {
+              "const": "present"
+            },
+            {
+              "const": "empty"
+            },
+            {
+              "const": "gt"
+            },
+            {
+              "const": "ge"
+            },
+            {
+              "const": "lt"
+            },
+            {
+              "const": "le"
+            }
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "values": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "const": false
+                  },
+                  {
+                    "const": true
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "field",
+        "operator"
+      ]
+    },
+    "t74": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "relation": {
+          "anyOf": [
+            {
+              "const": "AND"
+            },
+            {
+              "const": "OR"
+            },
+            {
+              "const": "NOT"
+            }
+          ]
+        },
+        "condition": {
+          "anyOf": [
+            {
+              "ref": "t54"
+            },
+            {
+              "ref": "t55"
+            },
+            {
+              "ref": "t56"
+            },
+            {
+              "ref": "t72"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "relation",
+        "condition"
+      ]
+    },
+    "t75": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "expression": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "expression"
+      ]
+    },
+    "t73": {
+      "type": "object",
+      "properties": {
+        "expression": {
+          "type": "string"
+        },
+        "manual": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "terms": {
+          "type": "array",
+          "items": {
+            "ref": "t74"
+          }
+        },
+        "groups": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t75"
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "expression",
+        "terms"
+      ]
+    },
+    "t71": {
+      "type": "object",
+      "properties": {
+        "op": {
+          "anyOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "any"
+            },
+            {
+              "const": "not"
+            }
+          ]
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "ref": "t54"
+              },
+              {
+                "ref": "t55"
+              },
+              {
+                "ref": "t56"
+              },
+              {
+                "ref": "t71"
+              },
+              {
+                "ref": "t72"
+              }
+            ]
+          }
+        },
+        "formula": {
+          "anyOf": [
+            {
+              "ref": "t73"
+            }
+          ]
+        }
+      },
+      "required": [
+        "op",
+        "items"
+      ]
+    },
+    "t69": {
+      "type": "object",
+      "properties": {
+        "zoom": {
+          "ref": "t70"
+        },
+        "fields": {
+          "anyOf": [
+            {
+              "ref": "t71"
+            }
+          ]
+        }
+      },
+      "required": [
+        "zoom"
+      ]
+    },
+    "t77": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ]
+    },
+    "t78": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "size": {
+          "type": "array",
+          "tuple": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "anchor": {
+          "type": "array",
+          "tuple": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "fallback": {
+          "anyOf": [
+            {
+              "const": "circle"
+            },
+            {
+              "const": "hide"
+            }
+          ]
+        }
+      },
+      "required": [
+        "source",
+        "size",
+        "anchor",
+        "fallback"
+      ]
+    },
+    "t76": {
+      "type": "object",
+      "properties": {
+        "symbolOffsetPx": {
+          "anyOf": [
+            {
+              "ref": "t77"
+            }
+          ]
+        },
+        "symbolVisibility": {
+          "anyOf": [
+            {
+              "const": "independent"
+            },
+            {
+              "const": "withLabel"
+            }
+          ]
+        },
+        "symbolAnchor": {
+          "anyOf": [
+            {
+              "const": "geometry"
+            },
+            {
+              "const": "label"
+            }
+          ]
+        },
+        "pointShape": {
+          "anyOf": [
+            {
+              "const": "circle"
+            },
+            {
+              "const": "square"
+            },
+            {
+              "const": "triangle"
+            },
+            {
+              "const": "regular4"
+            },
+            {
+              "const": "regular5"
+            },
+            {
+              "const": "regular6"
+            }
+          ]
+        },
+        "icon": {
+          "anyOf": [
+            {
+              "ref": "t78"
+            }
+          ]
+        },
+        "size": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "stroke": {
+          "anyOf": [
+            {
+              "ref": "t11"
+            },
+            {
+              "ref": "t13"
+            },
+            {
+              "ref": "t14"
+            },
+            {
+              "ref": "t15"
+            },
+            {
+              "ref": "t17"
+            }
+          ]
+        },
+        "fill": {
+          "anyOf": [
+            {
+              "ref": "t11"
+            },
+            {
+              "ref": "t13"
+            },
+            {
+              "ref": "t14"
+            },
+            {
+              "ref": "t15"
+            },
+            {
+              "ref": "t17"
+            }
+          ]
+        },
+        "strokeOpacity": {
+          "type": "number"
+        },
+        "fillOpacity": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "dashPreset": {
+          "anyOf": [
+            {
+              "const": "solid"
+            },
+            {
+              "const": "dash"
+            },
+            {
+              "const": "dotDash"
+            },
+            {
+              "const": "dotDotDash"
+            }
+          ]
+        },
+        "lineCap": {
+          "anyOf": [
+            {
+              "const": "round"
+            },
+            {
+              "const": "square"
+            },
+            {
+              "const": "butt"
+            }
+          ]
+        },
+        "lineJoin": {
+          "anyOf": [
+            {
+              "const": "round"
+            },
+            {
+              "const": "miter"
+            },
+            {
+              "const": "bevel"
+            }
+          ]
+        }
+      },
+      "required": [
+        "stroke",
+        "strokeOpacity"
+      ]
+    },
+    "t81": {
+      "type": "object",
+      "properties": {
+        "italic": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "underline": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "bold": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t80": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "anyOf": [
+            {
+              "const": "gm-bw"
+            },
+            {
+              "const": "gm-outline"
+            },
+            {
+              "const": "gm-wtb"
+            },
+            {
+              "const": "structure-label"
+            },
+            {
+              "const": "bubble-dark"
+            },
+            {
+              "const": "rle-line-color"
+            },
+            {
+              "const": "rle-pill-color"
+            }
+          ]
+        },
+        "size": {
+          "type": "number"
+        },
+        "modifiers": {
+          "anyOf": [
+            {
+              "ref": "t81"
+            }
+          ]
+        },
+        "color": {
+          "anyOf": [
+            {
+              "ref": "t11"
+            },
+            {
+              "ref": "t13"
+            },
+            {
+              "ref": "t14"
+            },
+            {
+              "ref": "t15"
+            },
+            {
+              "ref": "t17"
+            }
+          ]
+        }
+      },
+      "required": [
+        "family",
+        "size"
+      ]
+    },
+    "t82": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "const": "plain"
+          },
+          {
+            "const": "floorLabel"
+          }
+        ]
+      }
+    },
+    "t79": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "type": "boolean"
+        },
+        "style": {
+          "anyOf": [
+            {
+              "ref": "t80"
+            }
+          ]
+        },
+        "font": {
+          "anyOf": [
+            {
+              "const": "whiteBlackOutline"
+            },
+            {
+              "const": "blue"
+            },
+            {
+              "const": "capsule"
+            }
+          ]
+        },
+        "size": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "italic": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "underline": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "fallbackSources": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "valueFormat": {
+          "anyOf": [
+            {
+              "const": "plain"
+            },
+            {
+              "const": "floorLabel"
+            }
+          ]
+        },
+        "fallbackValueFormats": {
+          "anyOf": [
+            {
+              "ref": "t82"
+            }
+          ]
+        },
+        "placement": {
+          "anyOf": [
+            {
+              "const": "N"
+            },
+            {
+              "const": "S"
+            },
+            {
+              "const": "E"
+            },
+            {
+              "const": "W"
+            },
+            {
+              "const": "NE"
+            },
+            {
+              "const": "NW"
+            },
+            {
+              "const": "SE"
+            },
+            {
+              "const": "SW"
+            },
+            {
+              "const": "center"
+            },
+            {
+              "const": "aboveLine"
+            },
+            {
+              "const": "belowLine"
+            },
+            {
+              "const": "near"
+            }
+          ]
+        },
+        "offsetY": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "offsetX": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "withDot": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "dotAnchorMode": {
+          "anyOf": [
+            {
+              "const": "anchorRight"
+            },
+            {
+              "const": "inline"
+            }
+          ]
+        },
+        "collision": {
+          "ref": "t65"
+        }
+      },
+      "required": [
+        "visible",
+        "collision"
+      ]
+    },
+    "t84": {
+      "type": "object",
+      "properties": {
+        "point": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "line": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "boundary": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "interior": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "label": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t83": {
+      "type": "object",
+      "properties": {
+        "triggers": {
+          "ref": "t84"
+        }
+      },
+      "required": [
+        "triggers"
+      ]
+    },
+    "t86": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "anyOf": [
+            {
+              "const": "add"
+            },
+            {
+              "const": "replace"
+            }
+          ]
+        },
+        "base": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "metric": {
+          "anyOf": [
+            {
+              "ref": "t66"
+            }
+          ]
+        }
+      },
+      "required": [
+        "mode"
+      ]
+    },
+    "t85": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "when": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "ref": "t51"
+              },
+              {
+                "ref": "t52"
+              },
+              {
+                "ref": "t53"
+              },
+              {
+                "ref": "t54"
+              },
+              {
+                "ref": "t55"
+              },
+              {
+                "ref": "t56"
+              }
+            ]
+          }
+        },
+        "representation": {
+          "anyOf": [
+            {
+              "const": "point"
+            },
+            {
+              "const": "geometry"
+            },
+            {
+              "const": "hidden"
+            },
+            {
+              "const": "labelOnly"
+            }
+          ]
+        },
+        "style": {
+          "anyOf": [
+            {
+              "ref": "t76"
+            }
+          ]
+        },
+        "label": {
+          "anyOf": [
+            {
+              "ref": "t79"
+            }
+          ]
+        },
+        "geometryStack": {
+          "anyOf": [
+            {
+              "ref": "t63"
+            }
+          ]
+        },
+        "priority": {
+          "anyOf": [
+            {
+              "ref": "t86"
+            }
+          ]
+        },
+        "extensions": {
+          "anyOf": [
+            {
+              "ref": "t20"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "when"
+      ]
+    },
+    "t88": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": {}
+    },
+    "t89": {
+      "type": "object",
+      "properties": {
+        "preserveFallback": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "sourceRuleName": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t87": {
+      "type": "object",
+      "properties": {
+        "predicates": {
+          "anyOf": [
+            {
+              "ref": "t88"
+            }
+          ]
+        },
+        "visibility": {
+          "anyOf": [
+            {
+              "ref": "t88"
+            }
+          ]
+        },
+        "geometry": {
+          "anyOf": [
+            {
+              "ref": "t88"
+            }
+          ]
+        },
+        "symbol": {
+          "anyOf": [
+            {
+              "ref": "t88"
+            }
+          ]
+        },
+        "label": {
+          "anyOf": [
+            {
+              "ref": "t88"
+            }
+          ]
+        },
+        "collision": {
+          "anyOf": [
+            {
+              "ref": "t88"
+            }
+          ]
+        },
+        "selection": {
+          "anyOf": [
+            {
+              "ref": "t88"
+            }
+          ]
+        },
+        "specialLogic": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "legacyRuntime": {
+          "anyOf": [
+            {
+              "ref": "t89"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t68": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "when": {
+          "anyOf": [
+            {
+              "ref": "t69"
+            }
+          ]
+        },
+        "minZoom": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "maxZoom": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "representation": {
+          "anyOf": [
+            {
+              "const": "point"
+            },
+            {
+              "const": "geometry"
+            },
+            {
+              "const": "hidden"
+            },
+            {
+              "const": "labelOnly"
+            }
+          ]
+        },
+        "style": {
+          "anyOf": [
+            {
+              "ref": "t76"
+            }
+          ]
+        },
+        "label": {
+          "anyOf": [
+            {
+              "ref": "t79"
+            }
+          ]
+        },
+        "interaction": {
+          "anyOf": [
+            {
+              "ref": "t83"
+            }
+          ]
+        },
+        "geometryStack": {
+          "anyOf": [
+            {
+              "ref": "t63"
+            }
+          ]
+        },
+        "extensions": {
+          "anyOf": [
+            {
+              "ref": "t20"
+            }
+          ]
+        },
+        "conditionalOverrides": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t85"
+              }
+            }
+          ]
+        },
+        "advanced": {
+          "anyOf": [
+            {
+              "ref": "t87"
+            }
+          ]
+        },
+        "minExclusive": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "maxExclusive": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "labelRole": {
+          "anyOf": [
+            {
+              "const": "ignore"
+            },
+            {
+              "const": "soft"
+            },
+            {
+              "const": "optional"
+            },
+            {
+              "const": "important"
+            },
+            {
+              "const": "required"
+            }
+          ]
+        },
+        "priority": {
+          "anyOf": [
+            {
+              "ref": "t86"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "t67": {
+      "type": "object",
+      "properties": {
+        "rules": {
+          "type": "array",
+          "items": {
+            "ref": "t68"
+          }
+        }
+      },
+      "required": [
+        "rules"
+      ]
+    },
+    "t90": {
+      "type": "object",
+      "properties": {
+        "triggers": {
+          "ref": "t84"
+        }
+      },
+      "required": [
+        "triggers"
+      ]
+    },
+    "t91": {
+      "type": "object",
+      "properties": {
+        "ruleIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "profileIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "specialLogicKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "ruleIds",
+        "profileIds",
+        "specialLogicKeys"
+      ]
+    },
+    "t61": {
+      "type": "object",
+      "properties": {
+        "renderState": {
+          "anyOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "unconfigured"
+            }
+          ]
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "allowMultipleParts": {
+          "type": "boolean"
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "const": "perPart"
+            },
+            {
+              "const": "featureBbox"
+            }
+          ]
+        },
+        "color": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "style": {
+          "anyOf": [
+            {
+              "ref": "t62"
+            }
+          ]
+        },
+        "geometryStack": {
+          "anyOf": [
+            {
+              "ref": "t63"
+            }
+          ]
+        },
+        "label": {
+          "anyOf": [
+            {
+              "ref": "t64"
+            }
+          ]
+        },
+        "zoomPriority": {
+          "ref": "t67"
+        },
+        "interaction": {
+          "anyOf": [
+            {
+              "ref": "t90"
+            }
+          ]
+        },
+        "legacyDisplay": {
+          "anyOf": [
+            {
+              "ref": "t91"
+            }
+          ]
+        }
+      },
+      "required": [
+        "enabled",
+        "allowMultipleParts",
+        "zoomPriority"
+      ]
+    },
+    "t60": {
+      "type": "object",
+      "properties": {
+        "Point": {
+          "anyOf": [
+            {
+              "ref": "t61"
+            }
+          ]
+        },
+        "LineString": {
+          "anyOf": [
+            {
+              "ref": "t61"
+            }
+          ]
+        },
+        "Polygon": {
+          "anyOf": [
+            {
+              "ref": "t61"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t92": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "const": "parent"
+            },
+            {
+              "const": "child"
+            }
+          ]
+        },
+        "parentReferenceField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "viewProfileKey": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "t95": {
+      "type": "object",
+      "properties": {
+        "colorSource": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "nameSource": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "fallbackColor": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "tagColor": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "mediaSource": {
+          "anyOf": [
+            {
+              "const": "picture-index"
+            },
+            {
+              "const": "external-url"
+            }
+          ]
+        },
+        "lineChipSource": {
+          "anyOf": [
+            {
+              "const": "platform"
+            },
+            {
+              "const": "station"
+            },
+            {
+              "const": "stationBuilding"
+            }
+          ]
+        },
+        "format": {
+          "anyOf": [
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "enum"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "plain"
+            },
+            {
+              "const": "externalLink"
+            },
+            {
+              "const": "date"
+            },
+            {
+              "const": "classification"
+            },
+            {
+              "const": "world"
+            }
+          ]
+        },
+        "linkText": {
+          "anyOf": [
+            {
+              "const": "raw"
+            },
+            {
+              "const": "href"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t96": {
+      "type": "object",
+      "properties": {
+        "targetClassification": {
+          "anyOf": [
+            {
+              "ref": "t16"
+            }
+          ]
+        },
+        "targetMatchField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "targetDisplayField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "clickable": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "multiple": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "sourceValuePath": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "fallbackDisplay": {
+          "anyOf": [
+            {
+              "const": "raw"
+            },
+            {
+              "const": "unknown"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t94": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "fallbackSources": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "afterRemaining": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "visible": {
+          "type": "boolean"
+        },
+        "renderer": {
+          "anyOf": [
+            {
+              "const": "text"
+            },
+            {
+              "const": "tag"
+            },
+            {
+              "const": "colorCapsule"
+            },
+            {
+              "const": "nameColorCapsule"
+            },
+            {
+              "const": "relationLink"
+            },
+            {
+              "const": "lineChips"
+            },
+            {
+              "const": "media"
+            }
+          ]
+        },
+        "section": {
+          "anyOf": [
+            {
+              "const": "main"
+            },
+            {
+              "const": "other"
+            }
+          ]
+        },
+        "hideWhenEmpty": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "label": {
+          "anyOf": [
+            {
+              "ref": "t1"
+            }
+          ]
+        },
+        "labelMode": {
+          "anyOf": [
+            {
+              "const": "field"
+            },
+            {
+              "const": "override"
+            }
+          ]
+        },
+        "valueMode": {
+          "anyOf": [
+            {
+              "const": "field"
+            },
+            {
+              "const": "override"
+            }
+          ]
+        },
+        "valueOptions": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t42"
+              }
+            }
+          ]
+        },
+        "options": {
+          "anyOf": [
+            {
+              "ref": "t95"
+            }
+          ]
+        },
+        "relation": {
+          "anyOf": [
+            {
+              "ref": "t96"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "source",
+        "visible",
+        "renderer"
+      ]
+    },
+    "t97": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "const": "main"
+            },
+            {
+              "const": "other"
+            }
+          ]
+        },
+        "includeSystem": {
+          "type": "boolean"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "hideWhenEmpty": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "order": {
+          "anyOf": [
+            {
+              "const": "record"
+            },
+            {
+              "const": "alphabetical"
+            }
+          ]
+        },
+        "maxDepth": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "maxArrayLength": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": [
+        "enabled",
+        "section",
+        "includeSystem"
+      ]
+    },
+    "t93": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "const": "fields"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "ref": "t94"
+          }
+        },
+        "remaining": {
+          "anyOf": [
+            {
+              "ref": "t97"
+            }
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "items"
+      ]
+    },
+    "t98": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "const": "layout"
+        },
+        "layoutId": {
+          "type": "string"
+        },
+        "options": {
+          "anyOf": [
+            {
+              "ref": "t88"
+            }
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "layoutId"
+      ]
+    },
+    "t99": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "const": "component"
+        },
+        "componentKey": {
+          "type": "string"
+        },
+        "options": {
+          "anyOf": [
+            {
+              "ref": "t88"
+            }
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "componentKey"
+      ]
+    },
+    "t100": {
+      "type": "object",
+      "properties": {
+        "classCode": {
+          "type": "string"
+        },
+        "displayRuleIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cardLayoutId": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "specialCardKey": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "source": {
+          "anyOf": [
+            {
+              "ref": "t88"
+            }
+          ]
+        }
+      },
+      "required": [
+        "classCode",
+        "displayRuleIds"
+      ]
+    },
+    "t45": {
+      "type": "object",
+      "properties": {
+        "nodeId": {
+          "type": "string"
+        },
+        "path": {
+          "ref": "t16"
+        },
+        "classificationLabels": {
+          "anyOf": [
+            {
+              "ref": "t46"
+            }
+          ]
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "inheritDown": {
+          "anyOf": [
+            {
+              "ref": "t47"
+            }
+          ]
+        },
+        "receiveFromParent": {
+          "anyOf": [
+            {
+              "ref": "t48"
+            }
+          ]
+        },
+        "policies": {
+          "anyOf": [
+            {
+              "ref": "t49"
+            }
+          ]
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "ref": "t50"
+          }
+        },
+        "geometryType": {
+          "anyOf": [
+            {
+              "const": "Point"
+            },
+            {
+              "const": "LineString"
+            },
+            {
+              "const": "Polygon"
+            }
+          ]
+        },
+        "geometryProfiles": {
+          "ref": "t60"
+        },
+        "containment": {
+          "anyOf": [
+            {
+              "ref": "t92"
+            }
+          ]
+        },
+        "card": {
+          "anyOf": [
+            {
+              "ref": "t93"
+            },
+            {
+              "ref": "t98"
+            },
+            {
+              "ref": "t99"
+            }
+          ]
+        },
+        "legacy": {
+          "anyOf": [
+            {
+              "ref": "t100"
+            }
+          ]
+        }
+      },
+      "required": [
+        "nodeId",
+        "path",
+        "children",
+        "fields",
+        "geometryProfiles"
+      ]
+    },
+    "t102": {
+      "type": "object",
+      "properties": {
+        "classification": {
+          "ref": "t16"
+        },
+        "referenceField": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "classification",
+        "referenceField"
+      ]
+    },
+    "t101": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "ref": "t1"
+        },
+        "host": {
+          "ref": "t102"
+        },
+        "member": {
+          "ref": "t102"
+        },
+        "memberSelectorField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "const": "default"
+            },
+            {
+              "const": "keep-host-context"
+            },
+            {
+              "const": "show-active-member-only"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "host",
+        "member",
+        "enabled",
+        "profile"
+      ]
+    },
+    "t105": {
+      "type": "object",
+      "properties": {
+        "slot": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "slot",
+        "target"
+      ]
+    },
+    "t104": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "dedicated": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "ref": "t16"
+            }
+          ]
+        },
+        "backfill": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t105"
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "t106": {
+      "type": "object",
+      "properties": {
+        "required": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "required"
+      ]
+    },
+    "t110": {
+      "type": "object",
+      "properties": {
+        "placeholder": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "ref": "t59"
+            }
+          ]
+        },
+        "required": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "enum"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "reference"
+            }
+          ]
+        },
+        "cardinality": {
+          "anyOf": [
+            {
+              "const": "single"
+            },
+            {
+              "const": "multiple"
+            }
+          ]
+        },
+        "labels": {
+          "ref": "t1"
+        },
+        "options": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t42"
+              }
+            }
+          ]
+        },
+        "optionValueType": {
+          "anyOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            }
+          ]
+        },
+        "format": {
+          "anyOf": [
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "plain"
+            },
+            {
+              "const": "externalLink"
+            },
+            {
+              "const": "date"
+            }
+          ]
+        },
+        "defaultValue": {},
+        "requiredWhen": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "ref": "t51"
+                  },
+                  {
+                    "ref": "t52"
+                  },
+                  {
+                    "ref": "t53"
+                  },
+                  {
+                    "ref": "t54"
+                  },
+                  {
+                    "ref": "t55"
+                  },
+                  {
+                    "ref": "t56"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "input": {
+          "anyOf": [
+            {
+              "const": "text"
+            },
+            {
+              "const": "select"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "textarea"
+            },
+            {
+              "const": "toggle"
+            },
+            {
+              "const": "featureSearch"
+            }
+          ]
+        }
+      },
+      "required": [
+        "key",
+        "type",
+        "cardinality",
+        "labels",
+        "input"
+      ]
+    },
+    "t109": {
+      "type": "object",
+      "properties": {
+        "nodeId": {
+          "type": "string"
+        },
+        "fieldId": {
+          "type": "string"
+        },
+        "snapshot": {
+          "ref": "t110"
+        },
+        "overrides": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "nodeId",
+        "fieldId",
+        "snapshot",
+        "overrides"
+      ]
+    },
+    "t111": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "operator": {
+          "anyOf": [
+            {
+              "const": "in"
+            },
+            {
+              "const": "present"
+            },
+            {
+              "const": "empty"
+            },
+            {
+              "const": "equals"
+            }
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "values": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "const": false
+                  },
+                  {
+                    "const": true
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "all": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t111"
+              }
+            }
+          ]
+        },
+        "any": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t111"
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "token",
+        "operator"
+      ]
+    },
+    "t112": {
+      "type": "object",
+      "properties": {
+        "registryKey": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "registryKey"
+      ]
+    },
+    "t114": {
+      "type": "object",
+      "properties": {
+        "matcher": {
+          "anyOf": [
+            {
+              "const": "contains"
+            },
+            {
+              "const": "prefix"
+            },
+            {
+              "const": "token"
+            },
+            {
+              "const": "fuzzy"
+            }
+          ]
+        },
+        "minQueryLength": {
+          "type": "number"
+        },
+        "maxResults": {
+          "type": "number"
+        },
+        "debounceMs": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": [
+        "matcher",
+        "minQueryLength",
+        "maxResults"
+      ]
+    },
+    "t113": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "ref": "t16"
+        },
+        "queryFields": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "displayTemplate": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "returnField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "matcher": {
+          "anyOf": [
+            {
+              "const": "contains"
+            },
+            {
+              "const": "prefix"
+            },
+            {
+              "const": "token"
+            },
+            {
+              "const": "fuzzy"
+            }
+          ]
+        },
+        "minQueryLength": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "maxResults": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "debounceMs": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "cacheScope": {
+          "anyOf": [
+            {
+              "const": "world"
+            },
+            {
+              "const": "loadedWorlds"
+            }
+          ]
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "const": "feature"
+            },
+            {
+              "const": "coarse"
+            }
+          ]
+        },
+        "searchFields": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "displayFields": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "returnFields": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "coarse": {
+          "anyOf": [
+            {
+              "ref": "t114"
+            }
+          ]
+        }
+      },
+      "required": [
+        "target",
+        "cacheScope"
+      ]
+    },
+    "t116": {
+      "type": "object",
+      "properties": {
+        "prefillField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "label": {
+          "ref": "t1"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "const": "number"
+            },
+            {
+              "const": "text"
+            },
+            {
+              "const": "select"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "textarea"
+            },
+            {
+              "const": "toggle"
+            },
+            {
+              "const": "featureSearch"
+            },
+            {
+              "const": "coarseSearch"
+            }
+          ]
+        },
+        "required": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "options": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t42"
+              }
+            }
+          ]
+        },
+        "placeholder": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "defaultValue": {},
+        "rows": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "search": {
+          "anyOf": [
+            {
+              "ref": "t113"
+            }
+          ]
+        },
+        "optionValueType": {
+          "anyOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            }
+          ]
+        },
+        "fieldFormat": {
+          "anyOf": [
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "plain"
+            },
+            {
+              "const": "externalLink"
+            },
+            {
+              "const": "date"
+            }
+          ]
+        },
+        "fieldSource": {
+          "anyOf": [
+            {
+              "ref": "t109"
+            }
+          ]
+        },
+        "requiredWhen": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t111"
+              }
+            }
+          ]
+        },
+        "valueNormalization": {
+          "anyOf": [
+            {
+              "const": "number"
+            },
+            {
+              "const": "none"
+            },
+            {
+              "const": "trim"
+            },
+            {
+              "const": "abbr"
+            }
+          ]
+        }
+      },
+      "required": [
+        "key",
+        "label",
+        "kind"
+      ]
+    },
+    "t115": {
+      "type": "object",
+      "properties": {
+        "itemFields": {
+          "type": "array",
+          "items": {
+            "ref": "t116"
+          }
+        },
+        "storage": {
+          "anyOf": [
+            {
+              "const": "object"
+            },
+            {
+              "const": "scalar"
+            }
+          ]
+        },
+        "optional": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "minItems": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "addLabel": {
+          "anyOf": [
+            {
+              "ref": "t1"
+            }
+          ]
+        }
+      },
+      "required": [
+        "itemFields"
+      ]
+    },
+    "t117": {
+      "type": "object",
+      "properties": {
+        "tagsEnabled": {
+          "type": "boolean"
+        },
+        "extensionsEnabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "tagsEnabled",
+        "extensionsEnabled"
+      ]
+    },
+    "t108": {
+      "type": "object",
+      "properties": {
+        "prefillField": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "slot": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "valueNormalization": {
+          "anyOf": [
+            {
+              "const": "number"
+            },
+            {
+              "const": "none"
+            },
+            {
+              "const": "trim"
+            },
+            {
+              "const": "abbr"
+            }
+          ]
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "const": "number"
+            },
+            {
+              "const": "text"
+            },
+            {
+              "const": "select"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "textarea"
+            },
+            {
+              "const": "toggle"
+            },
+            {
+              "const": "featureSearch"
+            },
+            {
+              "const": "component"
+            },
+            {
+              "const": "tagsExtensions"
+            },
+            {
+              "const": "classificationPicker"
+            },
+            {
+              "const": "coarseSearch"
+            },
+            {
+              "const": "group"
+            },
+            {
+              "const": "notice"
+            },
+            {
+              "const": "runtimeValue"
+            }
+          ]
+        },
+        "columns": {
+          "anyOf": [
+            {
+              "const": 3
+            },
+            {
+              "const": 2
+            },
+            {
+              "const": 1
+            }
+          ]
+        },
+        "label": {
+          "ref": "t1"
+        },
+        "fieldSource": {
+          "anyOf": [
+            {
+              "ref": "t109"
+            }
+          ]
+        },
+        "fieldFormat": {
+          "anyOf": [
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "json"
+            },
+            {
+              "const": "plain"
+            },
+            {
+              "const": "externalLink"
+            },
+            {
+              "const": "date"
+            }
+          ]
+        },
+        "optionValueType": {
+          "anyOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            }
+          ]
+        },
+        "requiredWhen": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t111"
+              }
+            }
+          ]
+        },
+        "options": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t42"
+              }
+            }
+          ]
+        },
+        "optionSource": {
+          "anyOf": [
+            {
+              "ref": "t112"
+            }
+          ]
+        },
+        "placeholder": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "defaultValue": {},
+        "rows": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "search": {
+          "anyOf": [
+            {
+              "ref": "t113"
+            }
+          ]
+        },
+        "classificationScope": {
+          "anyOf": [
+            {
+              "ref": "t16"
+            }
+          ]
+        },
+        "outputId": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "required": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "when": {
+          "anyOf": [
+            {
+              "ref": "t111"
+            }
+          ]
+        },
+        "systemManaged": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "group": {
+          "anyOf": [
+            {
+              "ref": "t115"
+            }
+          ]
+        },
+        "tagsExtensions": {
+          "anyOf": [
+            {
+              "ref": "t117"
+            }
+          ]
+        },
+        "componentKey": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "legacyBlock": {
+          "anyOf": [
+            {
+              "ref": "t88"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "columns",
+        "label"
+      ]
+    },
+    "t118": {
+      "type": "object",
+      "properties": {
+        "tagsEnabled": {
+          "type": "boolean"
+        },
+        "extensionsEnabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "tagsEnabled",
+        "extensionsEnabled"
+      ]
+    },
+    "t120": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "slot": {
+          "type": "string"
+        },
+        "label": {
+          "ref": "t1"
+        },
+        "required": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "when": {
+          "anyOf": [
+            {
+              "ref": "t111"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "slot",
+        "label"
+      ]
+    },
+    "t121": {
+      "type": "object",
+      "properties": {
+        "outputId": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "const": "geometry"
+            },
+            {
+              "const": "height"
+            }
+          ]
+        }
+      },
+      "required": [
+        "outputId",
+        "target",
+        "value"
+      ]
+    },
+    "t119": {
+      "type": "object",
+      "properties": {
+        "enabledFromThisPage": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "drawMode": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "allowBack": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "keepDrawingWhenBack": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "pointSlot": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "auxiliaryPoints": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t120"
+              }
+            }
+          ]
+        },
+        "captureSlot": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "returnFormat": {
+          "anyOf": [
+            {
+              "const": "coordP"
+            },
+            {
+              "const": "pointObject"
+            },
+            {
+              "const": "coordL"
+            },
+            {
+              "const": "coordG"
+            }
+          ]
+        },
+        "multiple": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "heightSlot": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "bindings": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t121"
+              }
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t107": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "const": "geometry"
+            },
+            {
+              "const": "actor"
+            },
+            {
+              "const": "form"
+            },
+            {
+              "const": "tagsExtensions"
+            },
+            {
+              "const": "special"
+            }
+          ]
+        },
+        "label": {
+          "ref": "t1"
+        },
+        "subtitle": {
+          "anyOf": [
+            {
+              "ref": "t1"
+            }
+          ]
+        },
+        "controls": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t108"
+              }
+            }
+          ]
+        },
+        "geometry": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "const": "Point"
+                  },
+                  {
+                    "const": "LineString"
+                  },
+                  {
+                    "const": "Polygon"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "outputId": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "geometryRole": {
+          "anyOf": [
+            {
+              "const": "output"
+            },
+            {
+              "const": "auxiliary"
+            }
+          ]
+        },
+        "when": {
+          "anyOf": [
+            {
+              "ref": "t111"
+            }
+          ]
+        },
+        "specialKey": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "tagsExtensions": {
+          "anyOf": [
+            {
+              "ref": "t118"
+            }
+          ]
+        },
+        "drawing": {
+          "anyOf": [
+            {
+              "ref": "t119"
+            }
+          ]
+        },
+        "legacyPage": {
+          "anyOf": [
+            {
+              "ref": "t88"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "label"
+      ]
+    },
+    "t123": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "expression": {
+          "type": "string"
+        },
+        "when": {
+          "anyOf": [
+            {
+              "ref": "t111"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "target",
+        "expression"
+      ]
+    },
+    "t124": {
+      "type": "object",
+      "properties": {
+        "selected": {
+          "anyOf": [
+            {
+              "const": "Point"
+            },
+            {
+              "const": "LineString"
+            },
+            {
+              "const": "Polygon"
+            }
+          ]
+        },
+        "allowed": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "const": "Point"
+                  },
+                  {
+                    "const": "LineString"
+                  },
+                  {
+                    "const": "Polygon"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "selected"
+      ]
+    },
+    "t122": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "classification": {
+          "ref": "t16"
+        },
+        "assignments": {
+          "type": "array",
+          "items": {
+            "ref": "t123"
+          }
+        },
+        "when": {
+          "anyOf": [
+            {
+              "ref": "t111"
+            }
+          ]
+        },
+        "geometry": {
+          "ref": "t124"
+        }
+      },
+      "required": [
+        "id",
+        "classification",
+        "assignments",
+        "geometry"
+      ]
+    },
+    "t125": {
+      "type": "object",
+      "properties": {
+        "componentKey": {
+          "type": "string"
+        },
+        "purpose": {
+          "anyOf": [
+            {
+              "const": "capture"
+            },
+            {
+              "const": "edit"
+            }
+          ]
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "const": "railway-integrated"
+            },
+            {
+              "const": "station-integrated"
+            },
+            {
+              "const": "trp-integrated"
+            }
+          ]
+        },
+        "coveredClassifications": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t16"
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "componentKey",
+        "reason"
+      ]
+    },
+    "t126": {
+      "type": "object",
+      "properties": {
+        "runtimeMode": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "componentKey": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "output": {
+          "anyOf": [
+            {
+              "ref": "t88"
+            }
+          ]
+        },
+        "source": {
+          "anyOf": [
+            {
+              "ref": "t88"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "t103": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "ref": "t1"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "const": "external"
+            },
+            {
+              "const": "composed"
+            }
+          ]
+        },
+        "quickMapping": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "editor": {
+          "anyOf": [
+            {
+              "ref": "t104"
+            }
+          ]
+        },
+        "actor": {
+          "anyOf": [
+            {
+              "ref": "t106"
+            }
+          ]
+        },
+        "target": {
+          "anyOf": [
+            {
+              "ref": "t16"
+            }
+          ]
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "ref": "t107"
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "ref": "t122"
+          }
+        },
+        "assignments": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t123"
+              }
+            }
+          ]
+        },
+        "external": {
+          "anyOf": [
+            {
+              "ref": "t125"
+            }
+          ]
+        },
+        "legacy": {
+          "anyOf": [
+            {
+              "ref": "t126"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "mode",
+        "steps",
+        "outputs"
+      ]
+    },
+    "t128": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "const": "class"
+            },
+            {
+              "const": "workflow"
+            },
+            {
+              "const": "shared"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "const": "resolved"
+            },
+            {
+              "const": "registryReference"
+            },
+            {
+              "const": "unsupported"
+            }
+          ]
+        },
+        "details": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "source",
+        "status"
+      ]
+    },
+    "t127": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "cairnmap.v1-parity-report.v2"
+        },
+        "sourceManifestSha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "ref": "t128"
+          }
+        },
+        "generatedAt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "entries",
+        "generatedAt"
+      ]
+    },
+    "t0": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "cairnmap.config-package.v3"
+        },
+        "contractRevision": {
+          "anyOf": [
+            {
+              "const": 3
+            },
+            {
+              "const": 4
+            },
+            {
+              "const": 5
+            },
+            {
+              "const": 6
+            },
+            {
+              "const": 7
+            },
+            {
+              "const": 8
+            },
+            {
+              "const": 9
+            }
+          ]
+        },
+        "packageId": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "number"
+        },
+        "displayName": {
+          "ref": "t1"
+        },
+        "sourceManifestSha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "engine": {
+          "anyOf": [
+            {
+              "ref": "t2"
+            }
+          ]
+        },
+        "registries": {
+          "ref": "t40"
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "ref": "t45"
+          }
+        },
+        "contextBindings": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "ref": "t101"
+              }
+            }
+          ]
+        },
+        "workflows": {
+          "type": "array",
+          "items": {
+            "ref": "t103"
+          }
+        },
+        "parity": {
+          "anyOf": [
+            {
+              "ref": "t127"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "contractRevision",
+        "packageId",
+        "projectId",
+        "revision",
+        "displayName",
+        "registries",
+        "nodes",
+        "workflows"
+      ]
+    }
+  }
+}

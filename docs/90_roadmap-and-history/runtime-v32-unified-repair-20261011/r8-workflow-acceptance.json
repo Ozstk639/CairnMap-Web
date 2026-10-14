@@ -1,0 +1,210 @@
+{
+  "checks": [
+    "first information page has one movable fixed module and at least one row per namespace",
+    "invalid two-point polygon retains editable draft; adoption followed by another point and undo/redo saves the latest four points",
+    "typed custom rows and automatic nomenclator equal the complete frozen V1 formatter record",
+    "automatic/custom duplicate path blocks different values and accepts identical values without silently replacing inputs",
+    "TPP single-point object rejects multiple points, permits undo and preserves zero/negative heights",
+    "returning to F after target adoption skips the target page and excludes old coordinate/height residues",
+    "numeric condition 0 enables main and auxiliary line; next-page and final snapshots use the same typed slots"
+  ],
+  "polygon": {
+    "World": "zth",
+    "Class": "ISG",
+    "Kind": "NGF",
+    "SKind": "WTB",
+    "SKind2": "LKE",
+    "ID": "ZNGFWTBLKE_R8_LAKE",
+    "Name": "R8 lake",
+    "tags": {
+      "nomenclator": "automatic author",
+      "auditText": "  preserve spaces  "
+    },
+    "extensions": {
+      "audit": {
+        "zero": 0,
+        "flag": false,
+        "none": null
+      }
+    },
+    "CreateBy": "r8-ui-author",
+    "CreateTime": "20261007",
+    "Type": "Polygon",
+    "CoordG": [
+      [
+        [
+          [
+            20,
+            -64,
+            13
+          ],
+          [
+            70,
+            -64,
+            13
+          ],
+          [
+            70,
+            -64,
+            38
+          ],
+          [
+            20,
+            -64,
+            38
+          ]
+        ]
+      ]
+    ]
+  },
+  "frozenPolygon": {
+    "ID": "ZNGFWTBLKE_R8_LAKE",
+    "Name": "R8 lake",
+    "Kind": "NGF",
+    "SKind": "WTB",
+    "SKind2": "LKE",
+    "tags": {
+      "nomenclator": "automatic author",
+      "auditText": "  preserve spaces  "
+    },
+    "extensions": {
+      "audit": {
+        "zero": 0,
+        "flag": false,
+        "none": null
+      }
+    },
+    "CoordG": [
+      [
+        [
+          [
+            20,
+            -64,
+            13
+          ],
+          [
+            70,
+            -64,
+            13
+          ],
+          [
+            70,
+            -64,
+            38
+          ],
+          [
+            20,
+            -64,
+            38
+          ]
+        ]
+      ]
+    ],
+    "Type": "Polygon",
+    "Class": "ISG",
+    "World": "zth",
+    "CreateTime": "20261007",
+    "CreateBy": "r8-ui-author"
+  },
+  "tpp": {
+    "World": "zth",
+    "Class": "TPP",
+    "Kind": "NOM",
+    "SKind": "NOM",
+    "ID": "ZTPPNOMNOM_R8_TPP",
+    "Name": "R8 teleport",
+    "hub": "",
+    "elevation": 0,
+    "TGTcoordinate": {
+      "x": 70,
+      "y": -2,
+      "z": 38
+    },
+    "TGTelevation": -2,
+    "CreateBy": "r8-ui-author",
+    "CreateTime": "20261007",
+    "Type": "Points",
+    "CoordP": [
+      [
+        20,
+        -64,
+        13
+      ]
+    ]
+  },
+  "warpAfterTarget": {
+    "World": "zth",
+    "Class": "TPP",
+    "Kind": "NOM",
+    "SKind": "NOM",
+    "ID": "ZTPPNOMNOM_R8_TPP",
+    "Name": "R8 teleport",
+    "hub": "",
+    "TGTWarp": "WARP_TEST",
+    "CreateBy": "r8-ui-author",
+    "CreateTime": "20261007",
+    "Type": "Points",
+    "CoordP": [
+      [
+        20,
+        -64,
+        13
+      ]
+    ]
+  },
+  "numericCondition": {
+    "World": "zth",
+    "Class": "ISG",
+    "Kind": "NGF",
+    "SKind": "WTB",
+    "SKind2": "LKE",
+    "ID": "ZNGFWTBLKE_R8_LAKE",
+    "Name": "R8 lake",
+    "tags": {
+      "nomenclator": "automatic author"
+    },
+    "extensions": {
+      "audit": {
+        "coords": [
+          [
+            [
+              80,
+              -64,
+              38
+            ],
+            [
+              100,
+              -64,
+              48
+            ]
+          ]
+        ]
+      }
+    },
+    "CreateBy": "r8-ui-author",
+    "CreateTime": "20261007",
+    "Type": "Polygon",
+    "CoordG": [
+      [
+        [
+          [
+            20,
+            -64,
+            13
+          ],
+          [
+            70,
+            -64,
+            13
+          ],
+          [
+            70,
+            -64,
+            38
+          ]
+        ]
+      ]
+    ]
+  },
+  "runtimeErrors": []
+}

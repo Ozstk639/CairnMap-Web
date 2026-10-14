@@ -1,0 +1,79 @@
+{
+  "checks": [
+    {
+      "mode": "v3",
+      "narrow": false,
+      "tool": "测绘",
+      "coldDialogSingle": true,
+      "cancelKeepsDisabled": true,
+      "activationLoaded": true,
+      "dialogBounds": {
+        "x": 496,
+        "y": 377,
+        "right": 944,
+        "bottom": 623,
+        "w": 1440,
+        "h": 1000
+      }
+    },
+    {
+      "mode": "v3",
+      "narrow": true,
+      "tool": "测量工具",
+      "coldDialogSingle": true,
+      "cancelKeepsDisabled": true,
+      "activationLoaded": true,
+      "dialogBounds": {
+        "x": 16,
+        "y": 287,
+        "right": 374,
+        "bottom": 557,
+        "w": 390,
+        "h": 844
+      }
+    },
+    {
+      "mode": "v3",
+      "narrow": true,
+      "tool": "测绘",
+      "coldDialogSingle": true,
+      "cancelKeepsDisabled": true,
+      "activationLoaded": true,
+      "dialogBounds": {
+        "x": 16,
+        "y": 287,
+        "right": 374,
+        "bottom": 557,
+        "w": 390,
+        "h": 844
+      }
+    },
+    {
+      "mode": "v1",
+      "narrow": false,
+      "tool": "测量工具",
+      "coldDialogSingle": true,
+      "cancelKeepsDisabled": true,
+      "activationLoaded": true,
+      "dialogBounds": {
+        "x": 496,
+        "y": 377,
+        "right": 944,
+        "bottom": 623,
+        "w": 1440,
+        "h": 1000
+      }
+    },
+    {
+      "mode": "v3",
+      "warmActivationWithoutDialog": true
+    },
+    {
+      "mode": "v3",
+      "versionMismatchInvalidatesLoadedMarker": true,
+      "userActivationRetained": true,
+      "reloadUsesCurrentVersion": true
+    }
+  ],
+  "runtimeErrors": []
+}

@@ -1,3 +1,4 @@
+import { TILE_ZOOM_BOUNDS } from './mapZoom';
 /**
  * 手绘素描风格瓦片图层
  * 基于 DynmapTileLayer，使用 Canvas 实时应用 Sobel 边缘检测滤镜
@@ -381,9 +382,9 @@ export function createSketchTileLayer(
     prefix: mapName,
     imageFormat: 'jpg',
     extraZoomLevels: 2,
-    maxZoom: 5,
-    maxNativeZoom: 3,
-    minZoom: 0,
+    ...TILE_ZOOM_BOUNDS,
+
+
     nightAndDay: false,
     isNight: true,
     attribution: '&copy; <a href="https://satellite.ria.red">RIA Satellite</a> | 素描风格'
@@ -583,9 +584,9 @@ export function createWatercolorTileLayer(
     prefix: mapName,
     imageFormat: 'jpg',
     extraZoomLevels: 2,
-    maxZoom: 5,
-    maxNativeZoom: 3,
-    minZoom: 0,
+    ...TILE_ZOOM_BOUNDS,
+
+
     nightAndDay: false,
     isNight: true,
     attribution: '&copy; <a href="https://satellite.ria.red">RIA Satellite</a> | 淡彩风格'

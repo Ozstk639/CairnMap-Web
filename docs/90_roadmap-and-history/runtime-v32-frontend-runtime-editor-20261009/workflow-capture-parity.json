@@ -1,0 +1,59 @@
+{
+  "sourceSha": "0b82863d4fea3791f98917ba6d13f70e1f27eb15",
+  "frozenV1Component": true,
+  "nativeProductionHost": true,
+  "missingTargetBlocksCommit": true,
+  "v1": {
+    "ID": "ZTPPNOMNOM_CAPTURE",
+    "Name": "Captured teleport",
+    "Kind": "NOM",
+    "SKind": "NOM",
+    "hub": "",
+    "elevation": 0,
+    "TGTelevation": 32,
+    "CoordP": [
+      [
+        20,
+        -64,
+        13
+      ]
+    ],
+    "Type": "Points",
+    "Class": "TPP",
+    "World": "zth",
+    "CreateTime": "20261007",
+    "CreateBy": "capture-author",
+    "TGTcoordinate": {
+      "x": 70,
+      "y": 32,
+      "z": 38
+    }
+  },
+  "v3": {
+    "World": "zth",
+    "Class": "TPP",
+    "Kind": "NOM",
+    "SKind": "NOM",
+    "ID": "ZTPPNOMNOM_CAPTURE",
+    "Name": "Captured teleport",
+    "hub": "",
+    "elevation": 0,
+    "TGTcoordinate": {
+      "y": 32,
+      "x": 70,
+      "z": 38
+    },
+    "TGTelevation": 32,
+    "CreateBy": "capture-author",
+    "CreateTime": "20261007",
+    "Type": "Points",
+    "CoordP": [
+      [
+        20,
+        -64,
+        13
+      ]
+    ]
+  },
+  "errors": []
+}

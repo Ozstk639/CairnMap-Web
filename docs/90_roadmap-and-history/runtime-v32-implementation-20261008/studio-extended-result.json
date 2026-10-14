@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "unsafe target blocks save",
+    "unknown token blocks save",
+    "assignment constant preview reflects saved expression",
+    "assignment add/copy/delete preserve row count",
+    "grip-only row reorder",
+    "actual workflow export/import/save roundtrip",
+    "field rows and permanent groups at viewport 1440",
+    "field rows and permanent groups at viewport 1100",
+    "empty English inputs stay empty in DOM"
+  ],
+  "runtimeErrors": []
+}

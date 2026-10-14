@@ -30,6 +30,8 @@ type MarkerOptions = {
   rotateDeg?: number;
   onClick?: () => void;
   cacheKeyHint?: string;
+  offsetX?: number;
+  offsetY?: number;
 };
 
 export function makeTextPathLabelMarkerResult(
@@ -58,7 +60,7 @@ export function makeTextPathLabelMarkerResult(
   }
 
   const markerLatLng = options.map.containerPointToLatLng(
-    plan.markerContainerPoint,
+    L.point(plan.markerContainerPoint.x + (options.offsetX ?? 0), plan.markerContainerPoint.y + (options.offsetY ?? 0)),
   );
   const pathId = `ria-textpath-${Math.random().toString(36).slice(2)}`;
   const safeStroke = escapeHtml(style.stroke);

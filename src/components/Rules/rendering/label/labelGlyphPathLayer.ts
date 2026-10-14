@@ -30,6 +30,8 @@ type MarkerOptions = {
   rotateDeg?: number;
   onClick?: () => void;
   cacheKeyHint?: string;
+  offsetX?: number;
+  offsetY?: number;
 };
 
 export function makeCjkGlyphPathLabelMarkerResult(
@@ -57,7 +59,7 @@ export function makeCjkGlyphPathLabelMarkerResult(
   }
 
   const markerLatLng = options.map.containerPointToLatLng(
-    plan.markerContainerPoint,
+    L.point(plan.markerContainerPoint.x + (options.offsetX ?? 0), plan.markerContainerPoint.y + (options.offsetY ?? 0)),
   );
   const safeStroke = escapeHtml(style.stroke);
   const safeFill = escapeHtml(style.fill);

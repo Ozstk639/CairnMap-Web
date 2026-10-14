@@ -48,3 +48,5 @@
 ## 路线与历史
 
 - `90_roadmap-and-history/FrameworkExtractionRoadmap.md`：CairnMap 配置抽出路线与阶段记录。
+- `90_roadmap-and-history/RuntimeV32_Migration_Handoff_2026-10-07.md`：Runtime-v32 下一轮迁移、修复与验收交接。
+- `90_roadmap-and-history/RuntimeV32_NextChat_Starter_2026-10-07.md`：可直接粘贴到新对话的启动提示。

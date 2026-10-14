@@ -1,4 +1,18 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type ChangeEvent } from 'react';
+import {ExternalFeatureEditHost} from '../Workflow/ExternalFeatureEditHost';
+import {createTrpExternalEditSession,prepareTrpExternalEdit,type TrpExternalEditSession} from '@/configStudio/trpExternalEditing';
+import {prepareNativeFeatureImport} from '@/configStudio/nativeFeatureImport';
+import {NativeWorkflowEditPanel} from '../Workflow/NativeWorkflowEditPanel';
+import {compileWorkflowEditPlan,reverseWorkflowEditEndpoints,hydrateWorkflowEdit,findEditingWorkflow,isQuickMappingWorkflow,type WorkflowEditPlan,type WorkflowEditDraft} from '@/configStudio/workflowEditing';
+import {prepareNativeWorkflowEdit} from '@/configStudio/workflowEditCommit';
+import {normalizeV3WorldId} from '@/configStudio/V3WorkflowRunner';
+import {useRuleDataStore} from '@/store/ruleDataStore';
+import { NativeWorkflowHost } from '../Workflow/NativeWorkflowHost';
+import { prepareNativeWorkflowCommit } from '@/configStudio/nativeWorkflowCommit';
+import { validateConfigPackage } from '@/configStudio/runtime';
+import { getClassConfigByCode } from '@/core/project/classMetadata';
+import type { ConfigPackageV3, WorkflowDefinition } from '@/configStudio/types';
+import type { V3WorkflowRunResult } from '@/configStudio/V3WorkflowRunner';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { createPortal } from 'react-dom';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -146,6 +160,7 @@ import {
  * 这属于 React 组件间通过 props 传值的常规做法。:contentReference[oaicite:1]{index=1}
  */
 type MeasuringModuleProps = {
+  configRuntime?: ConfigPackageV3;
   mapReady: boolean;
   leafletMapRef: React.MutableRefObject<L.Map | null>;
   projectionRef: React.MutableRefObject<DynmapProjection | null>;
@@ -166,6 +181,8 @@ type MeasuringModuleProps = {
 
   // 可选：将启动按钮插入到外部工具栏
   launcherSlot?: (launcher: React.ReactNode) => React.ReactNode;
+  /** Config Lab keeps package export but intentionally hides package upload. */
+  disablePackageUpload?: boolean;
 };
 
 
@@ -180,6 +197,8 @@ function sanitizeFilenamePart(value: string): string {
 }
 
 export type MeasuringModuleHandle = {
+  /** Read-only integration surface, preserving complete native records. */
+  getCommittedFeatures: () => Record<string, unknown>[];
   /**
    * 在切换世界等场景下使用：若用户取消确认，则返回 false 并阻止上层继续执行。
    * 内部会负责：先关闭“临时挂载”，再清除测绘图层并退出测绘。
@@ -188,7 +207,7 @@ export type MeasuringModuleHandle = {
 };
 
 const MeasuringModule = forwardRef<MeasuringModuleHandle, MeasuringModuleProps>((props, ref) => {
-  const { mapReady, leafletMapRef, projectionRef, currentWorldId, closeSignal, openSignal, onBecameActive, launcherSlot } = props;
+  const { mapReady, leafletMapRef, projectionRef, currentWorldId, closeSignal, openSignal, onBecameActive, launcherSlot, disablePackageUpload = false, configRuntime } = props;
 
 
 // ---------- 测绘 & 图层管理状态 ------------
@@ -224,6 +243,9 @@ const [measuringVariant, setMeasuringVariant] = useState<'full'|'workflow'>('ful
 // 工作流选择与运行态（快捷模式使用）
 const [workflowKey, setWorkflowKey] = useState<WorkflowKey>('railway');
 const [workflowRunning, setWorkflowRunning] = useState(false);
+const [nativeWorkflowSnapshot, setNativeWorkflowSnapshot] = useState<{config: ConfigPackageV3; workflow: WorkflowDefinition} | null>(null);
+const [nativeHostElement] = useState(() => document.createElement('div'));
+useEffect(() => { if (configRuntime && !workflowRunning && !configRuntime.workflows.some(workflow => workflow.id === workflowKey&&isQuickMappingWorkflow(workflow))) setWorkflowKey((configRuntime.workflows.find(isQuickMappingWorkflow)?.id ?? '') as WorkflowKey); }, [configRuntime, workflowRunning, workflowKey]);
 
 
 // 当前临时点集合（临时绘制的坐标）
@@ -705,12 +727,23 @@ const [featureInfo, setFeatureInfo] = useState<any>({});
 const [groupInfo, setGroupInfo] = useState<Record<string, any[]>>({});
 
 // 图层管理编辑专用中间态：命中 workflowEditorRegistry 时使用 workflow-style editor。
-const [editUiMode, setEditUiMode] = useState<'full-fallback' | 'workflow-style'>('full-fallback');
+const [editUiMode, setEditUiMode] = useState<'full-fallback' | 'workflow-style' | 'native-workflow' | 'external-workflow'>('full-fallback');
 const [activeEditorView, setActiveEditorView] = useState<ProjectedRegistryScene | null>(null);
 const [editorDraftValues, setEditorDraftValues] = useState<WorkflowEditorDraftValues>({});
 const [editorDraftUnparsed, setEditorDraftUnparsed] = useState<WorkflowEditorUnparsedEntry[]>([]);
 
+const [nativeEdit,setNativeEdit]=useState<{config:ConfigPackageV3;plan:WorkflowEditPlan;draft:WorkflowEditDraft;original:Record<string,unknown>;world:string}|null>(null);
+const [externalEdit,setExternalEdit]=useState<{config:ConfigPackageV3;workflow:WorkflowDefinition;session:TrpExternalEditSession;world:string}|null>(null);
+const nativeEditDatasets=useRuleDataStore(state=>state.datasets);
+const nativeEditRecords=useMemo(()=>Object.values(nativeEditDatasets).flatMap(dataset=>dataset.features).map(raw=>(raw.featureInfo&&typeof raw.featureInfo==='object'?raw.featureInfo:raw) as Record<string,unknown>),[nativeEditDatasets]);
+const nativeEditSearchRecords=useMemo(()=>[...nativeEditRecords,...layers.flatMap(layer=>layer.jsonInfo?.featureInfo?[layer.jsonInfo.featureInfo]:[])],[nativeEditRecords,layers]);
+const nativeEditWorldMismatch=Boolean(nativeEdit&&nativeEdit.world!==normalizeV3WorldId(currentWorldId));
+const activeEditWorld=nativeEdit?.world??externalEdit?.world;
+const externalEditWorldMismatch=Boolean(externalEdit&&externalEdit.world!==normalizeV3WorldId(currentWorldId));
+useEffect(()=>{if(!activeEditWorld)return;if(activeEditWorld!==normalizeV3WorldId(currentWorldId)){setDrawing(false);clearDraftOverlays();}else {setDrawing(true);drawDraftGeometry(tempPoints,drawMode,drawColor);}},[currentWorldId,activeEditWorld]);
 const resetWorkflowStyleEditorState = () => {
+  setNativeEdit(null);
+  setExternalEdit(null);
   setEditUiMode('full-fallback');
   setActiveEditorView(null);
   setEditorDraftValues({});
@@ -1243,6 +1276,7 @@ const confirmExitAndClear = (actionLabel: string) => {
 };
 
 useImperativeHandle(ref, () => ({
+  getCommittedFeatures: () => layersRef.current.flatMap(layer => layer.jsonInfo?.featureInfo ? [structuredClone(layer.jsonInfo.featureInfo)] : []),
   requestCloseAndClear: (actionLabel?: string) => {
     const label = (actionLabel ?? '关闭测绘').trim() || '关闭测绘';
 
@@ -1299,6 +1333,7 @@ const clearTemporaryForVariantSwitch = () => {
   // 编辑/绘制态复位
   setTempPoints([]);
   setRedoStack([]);
+  if(editingLayerId!==null)syncFixedRoot(layersRef.current,null);
   setEditingLayerId(null);
   setDrawing(false);
   setDrawMode('none');
@@ -2156,7 +2191,13 @@ const finishLayer = () => {
     editUiMode === 'workflow-style' &&
     activeEditorView !== null;
 
-  if (useWorkflowStyleEditor && activeEditorView) {
+  if(externalEdit&&editUiMode==='external-workflow') {
+    try {finalFeatureInfo=prepareTrpExternalEdit(externalEdit.config,externalEdit.workflow,externalEdit.session,finalGeometry,currentWorldId,editorIdInput,[...nativeEditRecords,...layersRef.current.filter(layer=>layer.id!==editingLayerId).flatMap(layer=>layer.jsonInfo?.featureInfo?[layer.jsonInfo.featureInfo]:[])]);}
+    catch(error){alert(error instanceof Error?error.message:'外部编辑保存失败。');return;}
+  } else if(nativeEdit&&editUiMode==='native-workflow') {
+    try { finalFeatureInfo=prepareNativeWorkflowEdit(nativeEdit.config,nativeEdit.plan.workflow,nativeEdit.original,nativeEdit.draft,finalGeometry,currentWorldId,editorIdInput,[...nativeEditRecords,...layersRef.current.filter(layer=>layer.id!==editingLayerId).flatMap(layer=>layer.jsonInfo?.featureInfo?[layer.jsonInfo.featureInfo]:[])]); }
+    catch(error){alert(error instanceof Error?error.message:'编辑保存失败。');return;}
+  } else if (useWorkflowStyleEditor && activeEditorView) {
     const mergedDraftFeatureInfo = mergeEditorDraftIntoFeatureInfo({
       originalFeatureInfo: prevFeatureInfo ?? {},
       view: activeEditorView,
@@ -3069,6 +3110,13 @@ const editLayer = (id: number) => {
   if (guardTempMountReadonly()) return;
   const layer = layers.find(l => l.id === id);
   if (!layer) return;
+  let nativeContext:typeof nativeEdit=null;
+  let externalContext:typeof externalEdit=null;
+  if(configRuntime&&layer.jsonInfo?.featureInfo)try {
+    const workflow=findEditingWorkflow(configRuntime,layer.jsonInfo.featureInfo);
+    if(workflow?.mode==='composed'){const config=structuredClone(configRuntime),plan=compileWorkflowEditPlan(workflow,config),original=structuredClone(layer.jsonInfo.featureInfo);nativeContext={config,plan,original,draft:hydrateWorkflowEdit(plan,original),world:normalizeV3WorldId(String(original.World??currentWorldId))};}
+    else if(workflow?.mode==='external'&&workflow.external?.purpose==='edit'){const config=structuredClone(configRuntime),session=createTrpExternalEditSession(config,workflow,layer.jsonInfo.featureInfo);externalContext={config,workflow:structuredClone(workflow),session,world:normalizeV3WorldId(String(session.original.World??currentWorldId))};}
+  }catch(error){alert(error instanceof Error?error.message:'工作流编辑回填失败。');return;}
 
   // 从固定容器移除（用 removeLayer 更稳）
   fixedRootRef.current?.removeLayer(layer.leafletGroup);
@@ -3140,7 +3188,8 @@ const editLayer = (id: number) => {
     const hydrated = FORMAT_REGISTRY['默认'].hydrate({});
     setFeatureInfo(hydrated.values ?? {});
     setGroupInfo(hydrated.groups ?? {});
-  }
+  }  if(nativeContext){setNativeEdit(nativeContext);setEditUiMode('native-workflow');}
+  if(externalContext){setExternalEdit(externalContext);setEditUiMode('external-workflow');}
 };
 
 
@@ -3262,13 +3311,15 @@ const runBatchImportFromText = (rawText: string, sourceLabel: string) => {
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    const def = detectImportItemDefinition(item);
+    let nativeImport:ReturnType<typeof prepareNativeFeatureImport>|undefined;
+    if(configRuntime)try{nativeImport=prepareNativeFeatureImport(configRuntime,item,currentWorldId);}catch(error){errors.push(`${sourceLabel} 第 ${i+1} 条：${error instanceof Error?error.message:'原生记录无效。'}`);continue;}
+    const def = detectImportItemDefinition(item)??(nativeImport?FORMAT_REGISTRY['默认']:undefined);
     if (!def) {
       errors.push(`${sourceLabel} 第 ${i + 1} 条导入失败：无法识别条目类型（缺少 Type/Class/必要字段）。`);
       continue;
     }
 
-    const v = validateImportItemDetailed(def, item, { worldId: currentWorldId, strictSystemFields: true });
+    const v = nativeImport?{ok:true,mode:nativeImport.mode,coords:nativeImport.coords,hydrated:{values:{},groups:{}},missing:[],structuralErrors:[]}:validateImportItemDetailed(def,item,{worldId:currentWorldId,strictSystemFields:true});
     if (!v.ok) {
       const parts: string[] = [];
       if (v.missing.length > 0) parts.push(`必填缺失/为空：\n${formatMissingEntries(v.missing)}`);
@@ -3287,7 +3338,7 @@ const runBatchImportFromText = (rawText: string, sourceLabel: string) => {
     const hydrated = v.hydrated ?? def.hydrate(item);
     const normGroups = normalizeGroupInfoByDef(def, (hydrated.groups ?? {}) as any);
 
-    const featureInfoOut = withCanonicalMultipartGeometry(def.buildFeatureInfo({
+    const featureInfoOut = nativeImport?.record??withCanonicalMultipartGeometry(def.buildFeatureInfo({
       op: 'import',
       mode,
       coords,
@@ -3707,8 +3758,7 @@ const handleImportFileSelected = async (e: ChangeEvent<HTMLInputElement>) => {
 const activeDef = FORMAT_REGISTRY[subType];
 const isWorkflowStyleEditing =
   editingLayerId !== null &&
-  editUiMode === 'workflow-style' &&
-  activeEditorView !== null;
+  (editUiMode === 'workflow-style' && activeEditorView !== null || editUiMode==='native-workflow'&&nativeEdit!==null||editUiMode==='external-workflow'&&externalEdit!==null);
 
 const setEditorDraftValue = (path: string, value: unknown) => {
   setEditorDraftValues(prev => ({ ...prev, [path]: value }));
@@ -4395,12 +4445,13 @@ const LEGACY_WORKFLOW_SELECT_OPTIONS: Array<{ key: WorkflowKey; label: string; h
 
 const workflowRegistry: WorkflowRegistry = getConfigDrivenWorkflowRegistry(legacyWorkflowRegistry);
 const WORKFLOW_SELECT_OPTIONS: Array<{ key: WorkflowKey; label: string; hidden?: boolean }> =
-  getConfigDrivenWorkflowSelectOptions(LEGACY_WORKFLOW_SELECT_OPTIONS);
+  configRuntime ? configRuntime.workflows.filter(isQuickMappingWorkflow).map(workflow => ({ key: workflow.id as WorkflowKey, label: workflow.label.zh })) : getConfigDrivenWorkflowSelectOptions(LEGACY_WORKFLOW_SELECT_OPTIONS);
 
 
 const stopWorkflowToSelector = () => {
   // 回到“工作流初始选择页面”（不退出测绘）
   setWorkflowRunning(false);
+  setNativeWorkflowSnapshot(null);
 
   // 清空草稿与预览（保留 fixed 图层不动）
   workflowRootRef.current?.clearLayers();
@@ -4419,6 +4470,12 @@ const stopWorkflowToSelector = () => {
 const startWorkflow = () => {
   if (guardTempMountReadonly()) return;
   if (workflowRunning) return;
+  if (configRuntime) {
+    const report = validateConfigPackage(configRuntime);
+    const workflow = configRuntime.workflows.find(item => item.id === workflowKey);
+    if (!report.valid || !workflow||!isQuickMappingWorkflow(workflow)) { window.alert('工作流或当前配置包无效，请在工作台修复。'); return; }
+    setNativeWorkflowSnapshot({ config: structuredClone(configRuntime), workflow: structuredClone(workflow) });
+  }
 
   try {
     void describeWorkflowRuntimeSelection(workflowKey);
@@ -4467,7 +4524,8 @@ const upsertWorkflowPreview = (
   key: string,
   kind: WorkflowPreviewKind,
   points: WorldPoint[],
-  style?: WorkflowPreviewStyle
+  style?: WorkflowPreviewStyle,
+  geometry?: import('@/core/geometry/multipartGeometry').MultipartGeometry
 ) => {
   const proj = projectionRef.current;
   const root = workflowRootRef.current;
@@ -4484,7 +4542,10 @@ const upsertWorkflowPreview = (
   const latlngs = (points ?? []).map(p => proj.locationToLatLng(p.x, 64, p.z));
 
   let layer: L.Layer;
-  if (kind === 'point') {
+  if(geometry) {
+    const project=(point:{x:number;z:number})=>proj.locationToLatLng(point.x,64,point.z);
+    layer=L.layerGroup(geometry.type==='Point'?geometry.parts.map(point=>L.circleMarker(project(point),{color,fillColor:color,radius:6})):geometry.type==='LineString'?geometry.parts.map(part=>L.polyline(part.map(project),{color,weight,dashArray})):geometry.parts.map(part=>L.polygon(part.map(ring=>ring.map(project)),{color,weight,dashArray})));
+  } else if (kind === 'point') {
     if (latlngs.length === 0) return;
     layer = L.circleMarker(latlngs[0], { color, fillColor: color, radius: 6 });
   } else if (kind === 'polygon') {
@@ -4578,6 +4639,23 @@ const commitFeatureFromWorkflow = (args: WorkflowCommitArgs) => {
   });
 
   return { ok: true as const, layerId: id };
+};
+
+const commitNativeWorkflow = (config: ConfigPackageV3, workflow: WorkflowDefinition, outputs: V3WorkflowRunResult) => {
+  if (!leafletMapRef.current || !projectionRef.current) throw new Error('地图未就绪。');
+  const prepared = prepareNativeWorkflowCommit(config, workflow, outputs, currentWorldId);
+  const existing = new Set(layers.map(layer => String(layer.jsonInfo?.featureInfo?.ID ?? '')));
+  if (prepared.some(item => existing.has(String(item.record.ID)))) throw new Error('输出 ID 已存在于当前测绘图层。');
+  const firstId = nextLayerId.current;
+  const batch: LayerType[] = prepared.map((item, index) => {
+    const color = typeof item.record.color === 'string' ? item.record.color : drawColor;
+    return { id: firstId + index, mode: item.mode, color, coords: item.coords, visible: true,
+      leafletGroup: makeLeafletGroupForCoords(item.mode, item.coords, color),
+      jsonInfo: { subType: (getClassConfigByCode(String(item.record.Class))?.sourceFeatureKey ?? String(item.record.Class)) as FeatureKey, featureInfo: item.record },
+    };
+  });
+  nextLayerId.current += batch.length;
+  setLayers(previous => { const next = [...previous, ...batch]; syncFixedRoot(next, null); return next; });
 };
 
 const workflowBridge: WorkflowBridge = {
@@ -4726,7 +4804,7 @@ const workflowBridge: WorkflowBridge = {
       )}
 
       {/* 导入数据：仅开始测绘后显示 */}
-      {measuringActive && (
+      {measuringActive && !disablePackageUpload && (
         <AppButton
           onClick={() => setImportPanelOpen(true)}
           className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 transition-colors text-gray-700"
@@ -4777,12 +4855,6 @@ const workflowBridge: WorkflowBridge = {
         className="h-11 w-11"
       />
 
-      {/* 移动端仍使用局部定位；桌面端通过桌面窗口 root portal 接入统一层级栈。 */}
-      {!measureDropdownDesktop ? (
-        <div className="absolute right-0 z-50 max-md:bottom-full max-md:mb-2 max-md:origin-bottom-right">
-          {measureDropdownMenu}
-        </div>
-      ) : null}
       {measureDropdownPortal}
     </div>
   );
@@ -5221,6 +5293,7 @@ const layerManagerDesktopNode = measuringActive ? (
 const rightDockNode = (
   <>
     {launcherNode}
+    {!measureDropdownDesktop && measureDropdownOpen ? <div className="sm:hidden fixed right-4 top-[40%] z-[2600] max-h-[55vh] overflow-y-auto">{measureDropdownMenu}</div> : null}
     {layerManagerDesktopNode}
   </>
 );
@@ -5274,6 +5347,7 @@ const measuringWindowActions = (
 
   return (
     <>
+      {nativeWorkflowSnapshot ? createPortal(<NativeWorkflowHost key={nativeWorkflowSnapshot.workflow.id} config={nativeWorkflowSnapshot.config} workflow={nativeWorkflowSnapshot.workflow} bridge={workflowBridge} registry={legacyWorkflowRegistry} onCommit={commitNativeWorkflow} onExit={stopWorkflowToSelector} />, nativeHostElement) : null}
       {rightDockNode}
 
       {/* =========================
@@ -5414,7 +5488,7 @@ onChange={(e) => {
       重做
     </AppButton>
 
-    {measuringVariant === 'full' && (
+    {measuringVariant === 'full' && !externalEdit && (
       <AppButton
         className={`px-3 py-1 rounded-lg flex-1 ${
           isTempMountReadonly ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-green-500 text-white'
@@ -5588,12 +5662,12 @@ onChange={(e) => {
   onPointerDownCapture={(e) => e.stopPropagation()}
   onTouchStartCapture={(e) => e.stopPropagation()}
 >
-  <WorkflowHost
+  {nativeWorkflowSnapshot ? (measureDropdownDesktop ? <div ref={node => { if (node && nativeHostElement.parentElement !== node) node.appendChild(nativeHostElement); }} /> : null) : <WorkflowHost
     workflowKey={workflowKey}
     bridge={workflowBridge}
     registry={workflowRegistry}
     onExit={stopWorkflowToSelector}
-  />
+  />}
 </div>
 
   ) : null
@@ -5676,6 +5750,7 @@ onChange={(e) => {
               setTempPoints(reversed);
               drawDraftGeometry(reversed, 'polyline', drawColor);
 
+              setNativeEdit(current=>current?{...current,draft:reverseWorkflowEditEndpoints(current.plan,current.draft)}:current);
               // 调转起止站台字段（若存在）
               setFeatureInfo((prev: any) => {
                 const start = prev?.startplf;
@@ -5713,7 +5788,7 @@ onChange={(e) => {
     </div>
 
     {/* 内容：编辑专用模式优先；否则按 special 模式切换渲染 */}
-    {isWorkflowStyleEditing && activeEditorView ? (
+    {editUiMode==='external-workflow'&&externalEdit ? (<div>{externalEditWorldMismatch?<p role="alert">请返回 {externalEdit.world} 后继续编辑。<button type="button" className="ml-2 rounded border px-2 py-1" onClick={clearTemporaryForVariantSwitch}>放弃此编辑</button></p>:null}<fieldset disabled={externalEditWorldMismatch}><ExternalFeatureEditHost config={externalEdit.config} workflow={externalEdit.workflow} session={externalEdit.session} bridge={workflowBridge} context={{initialRecord:externalEdit.session.original,featureIdentity:{layerId:editingLayerId!,originalId:String(externalEdit.session.original.ID)},activeWorld:externalEdit.world,originalGeometry:externalEdit.session.originalGeometry,currentGeometry:multipartDraftRef.current??undefined,editor:editorIdInput,onEditorChange:setEditorIdInput,onUpdate:finishLayer,onCancel:clearTemporaryForVariantSwitch}} onDraftChange={session=>setExternalEdit(current=>current?{...current,session}:current)}/></fieldset></div>) : editUiMode==='native-workflow'&&nativeEdit ? (<fieldset disabled={nativeEditWorldMismatch}>{nativeEditWorldMismatch?<p role="alert">请返回 {nativeEdit.world} 后继续编辑或放弃草稿。</p>:null}<NativeWorkflowEditPanel config={nativeEdit.config} plan={nativeEdit.plan} draft={nativeEdit.draft} records={nativeEditSearchRecords} world={nativeEdit.world} editor={editorIdInput} onEditorChange={setEditorIdInput} onCancel={clearTemporaryForVariantSwitch} onChange={draft=>setNativeEdit(current=>current?{...current,draft}:current)}/></fieldset>) : isWorkflowStyleEditing && activeEditorView ? (
       <WorkflowStyleEditPanel
         view={activeEditorView}
         values={editorDraftValues}
@@ -5833,7 +5908,7 @@ onChange={(e) => {
       重做
     </AppButton>
 
-    {measuringVariant === 'full' && (
+    {measuringVariant === 'full' && !externalEdit && (
       <AppButton
         className={`px-3 py-1 rounded-lg flex-1 ${
           isTempMountReadonly ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-green-500 text-white'
@@ -5904,12 +5979,12 @@ onChange={(e) => {
   onPointerDownCapture={(e) => e.stopPropagation()}
   onTouchStartCapture={(e) => e.stopPropagation()}
 >
-  <WorkflowHost
+  {nativeWorkflowSnapshot ? (!measureDropdownDesktop ? <div ref={node => { if (node && nativeHostElement.parentElement !== node) node.appendChild(nativeHostElement); }} /> : null) : <WorkflowHost
     workflowKey={workflowKey}
     bridge={workflowBridge}
     registry={workflowRegistry}
     onExit={stopWorkflowToSelector}
-  />
+  />}
 </div>
 
   ) : null
@@ -5991,6 +6066,7 @@ onChange={(e) => {
               setTempPoints(reversed);
               drawDraftGeometry(reversed, 'polyline', drawColor);
 
+              setNativeEdit(current=>current?{...current,draft:reverseWorkflowEditEndpoints(current.plan,current.draft)}:current);
               // 调转起止站台字段（若存在）
               setFeatureInfo((prev: any) => {
                 const start = prev?.startplf;
@@ -6028,7 +6104,7 @@ onChange={(e) => {
     </div>
 
     {/* 内容：编辑专用模式优先；否则按 special 模式切换渲染 */}
-    {isWorkflowStyleEditing && activeEditorView ? (
+    {editUiMode==='external-workflow'&&externalEdit ? (<div>{externalEditWorldMismatch?<p role="alert">请返回 {externalEdit.world} 后继续编辑。<button type="button" className="ml-2 rounded border px-2 py-1" onClick={clearTemporaryForVariantSwitch}>放弃此编辑</button></p>:null}<fieldset disabled={externalEditWorldMismatch}><ExternalFeatureEditHost config={externalEdit.config} workflow={externalEdit.workflow} session={externalEdit.session} bridge={workflowBridge} context={{initialRecord:externalEdit.session.original,featureIdentity:{layerId:editingLayerId!,originalId:String(externalEdit.session.original.ID)},activeWorld:externalEdit.world,originalGeometry:externalEdit.session.originalGeometry,currentGeometry:multipartDraftRef.current??undefined,editor:editorIdInput,onEditorChange:setEditorIdInput,onUpdate:finishLayer,onCancel:clearTemporaryForVariantSwitch}} onDraftChange={session=>setExternalEdit(current=>current?{...current,session}:current)}/></fieldset></div>) : editUiMode==='native-workflow'&&nativeEdit ? (<fieldset disabled={nativeEditWorldMismatch}>{nativeEditWorldMismatch?<p role="alert">请返回 {nativeEdit.world} 后继续编辑或放弃草稿。</p>:null}<NativeWorkflowEditPanel config={nativeEdit.config} plan={nativeEdit.plan} draft={nativeEdit.draft} records={nativeEditSearchRecords} world={nativeEdit.world} editor={editorIdInput} onEditorChange={setEditorIdInput} onCancel={clearTemporaryForVariantSwitch} onChange={draft=>setNativeEdit(current=>current?{...current,draft}:current)}/></fieldset>) : isWorkflowStyleEditing && activeEditorView ? (
       <WorkflowStyleEditPanel
         view={activeEditorView}
         values={editorDraftValues}

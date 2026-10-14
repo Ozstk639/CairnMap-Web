@@ -1,0 +1,342 @@
+{
+  "schemaVersion": "cairnmap.v32-runtime-editor-acceptance.v1",
+  "generatedAt": "2026-10-09T22:50:11.683578+08:00",
+  "status": "local_implementation_auto_acceptance_passed_manual_pending",
+  "candidateSourceHead": "a64c04c51a6ad9ace730f3eb279f5d1b2650880f",
+  "branch": "codex/cm-config-runtime-v32-migration-20261007",
+  "frozenV1": "0b82863d4fea3791f98917ba6d13f70e1f27eb15",
+  "sourceHashFilesChecked": 520,
+  "deterministicTestCommands": [
+    "test:native-contract-schema",
+    "test:v1-render-baseline",
+    "test:config-studio-v3",
+    "test:v3-semantic-parity",
+    "test:workflow-output-editor",
+    "test:v1-workflow-output-parity",
+    "test:label-placement",
+    "test:map-zoom",
+    "test:multipart-labels",
+    "test:localization",
+    "test:package-roundtrip",
+    "test:external-workflow-output-parity",
+    "test:native-contract",
+    "test:workflow-practical",
+    "test:native-workflow-commit",
+    "test:display-parity",
+    "test:density-stability",
+    "test:card-parity",
+    "test:workflow-capture",
+    "test:config-activation",
+    "test:workflow-field-controls",
+    "test:compiled-runtime",
+    "test:render-r7",
+    "test:render-templates",
+    "test:category-templates"
+  ],
+  "buildPassed": true,
+  "render": {
+    "independentCases": 1161,
+    "denseScenarios": 6,
+    "failed": 0,
+    "r6r7SemanticComparisons": 5130,
+    "referenceScope": "V1 freshly captured this implementation turn; reused only for final retest after frozen 520 hashes checked",
+    "nineDirectionsAndOffsets": 45,
+    "wholeImagePixelEqualityClaimed": false
+  },
+  "workflows": {
+    "composed": 17,
+    "nativeUISubmissions": 34,
+    "externalWorkflows": 3,
+    "externalRecords": 7,
+    "fullRecordEquality": true,
+    "externalScope": "frozen source components/formatters capture bridge, not full frozen host replay"
+  },
+  "actualApp": {
+    "coldAndWarmTools": "passed",
+    "moduleFaultRetry": "explicit page reload restores measuring or measurement request",
+    "mountLifecycle": "actual creation, submission, mount, enable/disable, label/card pointer, delete recovery, world UI",
+    "fieldGeometryReplacement": "supplementary production storage/event protocol; full edit UI combinations manual"
+  },
+  "performance": {
+    "productionScriptRatio": 0.8135410756630156,
+    "V3CardP95Ms": 28.699999928474426,
+    "batchesPerMode": 5,
+    "sixZoomsPerBatch": 6,
+    "cardScope": "30 repeated real pointer opens of one visible feature per mode, next visible frame",
+    "disabledHoverLayerChanges": 0,
+    "expanded": [
+      {
+        "records": 1000,
+        "polygonParts": 2000,
+        "firstDataVisibleSeconds": 0.30087960010860115,
+        "sixZoomScriptSeconds": 1.8230069999999998,
+        "visibleLabels": 162,
+        "configStats": {
+          "epoch": 2,
+          "nodes": 95,
+          "classes": 16,
+          "cachedPaths": 95,
+          "hits": 110554
+        },
+        "gcHeapBeforeBytes": 129127155,
+        "gcHeapAfterBytes": 157256331
+      },
+      {
+        "records": 5000,
+        "polygonParts": 10000,
+        "firstDataVisibleSeconds": 0.40927279996685684,
+        "sixZoomScriptSeconds": 6.0865659999999995,
+        "visibleLabels": 162,
+        "configStats": {
+          "epoch": 2,
+          "nodes": 95,
+          "classes": 16,
+          "cachedPaths": 95,
+          "hits": 534554
+        },
+        "gcHeapBeforeBytes": 157198003,
+        "gcHeapAfterBytes": 220454523
+      }
+    ],
+    "expandedSmoothnessClaimed": false,
+    "memoryScope": "browser GC observations and renderer record release; retained application world source caches are not claimed to disappear"
+  },
+  "package": {
+    "contractRevision": 7,
+    "revision": 3,
+    "diskZIPActualStudioImport": true,
+    "roundTrip": true
+  },
+  "parameters": {
+    "count": 680,
+    "counts": {
+      "editable_with_family_evidence": 532,
+      "system_managed": 22,
+      "compatibility_metadata": 64,
+      "editable_guarded_values": 2,
+      "explicit_external_exception": 4,
+      "controlled_registry_metadata": 9,
+      "generated_provenance": 10,
+      "diagnostic_or_import_shape": 37
+    },
+    "allValuesEndToEndClaimed": false
+  },
+  "manualAcceptance": {
+    "agentBrowserAndRepresentativeVisual": "passed",
+    "user": "not_executed",
+    "promotionApproved": false
+  },
+  "remoteActions": {
+    "push": false,
+    "PR": false,
+    "mainChanged": false,
+    "RIASync": false
+  },
+  "evidenceDirectory": "G:\\RIAWebGIS\\NewPRES\\CairnMap_Codex\\migration-audits\\runtime-v32-frontend-runtime-editor-20261009",
+  "evidenceFiles": [
+    {
+      "file": "independent-matrix.json",
+      "sha256": "6cc187d261ec573cd23edb10c639babb7a6c57f44121d7a00da9779074f9bc23",
+      "bytes": 670344,
+      "modifiedAt": "2026-10-09T22:39:20.050300+08:00"
+    },
+    {
+      "file": "independent-hierarchy.json",
+      "sha256": "8bb1bbfd4fd250b899a036b763b33b31b861dbb333dd38ea5eed9ca63ab9fac1",
+      "bytes": 204051,
+      "modifiedAt": "2026-10-09T22:40:18.291656+08:00"
+    },
+    {
+      "file": "independent-dense.json",
+      "sha256": "eae6360344a741ce4c738d5b76fcf927aab26cb3489bf8bc54ea07cb003abe2d",
+      "bytes": 71466,
+      "modifiedAt": "2026-10-09T22:40:27.500096+08:00"
+    },
+    {
+      "file": "native-workflow-matrix.json",
+      "sha256": "b639bfff1fbf6d1b66b90f7bfdfe98e9f105d7c7164b7f609ff61298367bc102",
+      "bytes": 37547,
+      "modifiedAt": "2026-10-09T22:01:36.604856+08:00"
+    },
+    {
+      "file": "external-lifecycle.json",
+      "sha256": "8daaf7131a63edde5f7c18e4555bee67c62cb074ac21e27fd7cd8068048031eb",
+      "bytes": 14106,
+      "modifiedAt": "2026-10-09T22:02:03.556599+08:00"
+    },
+    {
+      "file": "workflow-capture-parity.json",
+      "sha256": "4fbbfc5aefd106e9914e5816942d4abbe0e9c7e7ff0e91588a3d135ff59b2ab6",
+      "bytes": 1137,
+      "modifiedAt": "2026-10-09T22:01:42.138701+08:00"
+    },
+    {
+      "file": "interaction-states.json",
+      "sha256": "2552a1e338ec32fbc08499f91481c643625da9c1f21c2bd59ac420b91866bcf8",
+      "bytes": 2889,
+      "modifiedAt": "2026-10-09T21:59:43.132700+08:00"
+    },
+    {
+      "file": "interaction-parity.json",
+      "sha256": "bc11551f89855d451b0562676e073fcf1e0e5c1be0f593371dc661cc2a1fc6dc",
+      "bytes": 6506,
+      "modifiedAt": "2026-10-09T21:59:32.890820+08:00"
+    },
+    {
+      "file": "interaction-browser-result.json",
+      "sha256": "3153b5386531dea98693d7217713dd84fde7e64d4d0b75cd5ebe370e7760fc88",
+      "bytes": 455,
+      "modifiedAt": "2026-10-09T22:40:36.747207+08:00"
+    },
+    {
+      "file": "render-browser-result.json",
+      "sha256": "3024456e1d6ba266922bb5d695267ae36e52c2787d71bdd8e92ad7268bc84b1f",
+      "bytes": 22202,
+      "modifiedAt": "2026-10-09T22:05:00.165928+08:00"
+    },
+    {
+      "file": "svg-offsets.json",
+      "sha256": "d6d8302b6a33c22f3c6c9bb9cd74869ffa460091e81d7947ca9388fdeaea6d97",
+      "bytes": 2238,
+      "modifiedAt": "2026-10-09T21:59:26.534924+08:00"
+    },
+    {
+      "file": "bud-parity-browser.json",
+      "sha256": "b2212d4307ac7003214f0c7439fcfc81aa6ad709dc8cf10c9bf0f1938398dbd5",
+      "bytes": 2563,
+      "modifiedAt": "2026-10-09T21:59:21.601717+08:00"
+    },
+    {
+      "file": "lifecycle-browser-result.json",
+      "sha256": "a7429f5777464af096a7698b47eb2de236dba867ed563109f7893a1a9dbb0f66",
+      "bytes": 576,
+      "modifiedAt": "2026-10-09T22:03:32.826202+08:00"
+    },
+    {
+      "file": "studio-browser-result.json",
+      "sha256": "3942a34f3746415bc2d67cdfb961972072ee81d0c6fe4441dd4dda90c3e3b8c3",
+      "bytes": 292,
+      "modifiedAt": "2026-10-09T22:03:44.393900+08:00"
+    },
+    {
+      "file": "studio-extended-result.json",
+      "sha256": "b8c81fa67607b7b33566812f83cc60b48f3a29589a5863c5a0c8d6a4e90f900d",
+      "bytes": 475,
+      "modifiedAt": "2026-10-09T22:03:53.995767+08:00"
+    },
+    {
+      "file": "field-binding-browser-result.json",
+      "sha256": "1cbf1d2e0deed6587443473ea549975514c1b2edd7a357f35a34da6aa349be0a",
+      "bytes": 1610,
+      "modifiedAt": "2026-10-09T22:03:39.454396+08:00"
+    },
+    {
+      "file": "delivery-import.json",
+      "sha256": "0d6b8ae2023bc9f252fe6114f35b4fa3439ae8038926975497327715ddc66e9e",
+      "bytes": 131,
+      "modifiedAt": "2026-10-09T22:50:11.097285+08:00"
+    },
+    {
+      "file": "delivery-manifest.json",
+      "sha256": "a360f8d3c07a1fbc1e79b5256284ce9d8ed1fe11b3445b72cc8151d016aa105e",
+      "bytes": 1057,
+      "modifiedAt": "2026-10-09T22:50:08.105537+08:00"
+    },
+    {
+      "file": "delivery-validation.json",
+      "sha256": "6d6641010117b7bebc955d477bae16a4efd71da9313a46b2541fd3577e95af4b",
+      "bytes": 247,
+      "modifiedAt": "2026-10-09T22:50:08.049568+08:00"
+    },
+    {
+      "file": "render-migration-sources.json",
+      "sha256": "3c100e657beeda6711643966e58230e8685b764b7565f03f1e22e32efa611f42",
+      "bytes": 31139,
+      "modifiedAt": "2026-10-09T22:50:08.050557+08:00"
+    },
+    {
+      "file": "module-entry-result.json",
+      "sha256": "e39588fd022c34dfcfd8ca0de5eecb71c437ffea62e9d0ea60f5db0d23d3bd34",
+      "bytes": 1680,
+      "modifiedAt": "2026-10-09T22:43:17.940135+08:00"
+    },
+    {
+      "file": "module-retry-result.json",
+      "sha256": "b7ac9fd0be46174e51a497ae59241cb4441732a17c2a1faea607e36e5fffc347",
+      "bytes": 1116,
+      "modifiedAt": "2026-10-09T22:43:27.774104+08:00"
+    },
+    {
+      "file": "module-retry-measurement-result.json",
+      "sha256": "0e4a1068ffc3164fe5cbdc697d2d92507d48e22de64c3acb84b2a6727dced17b",
+      "bytes": 1122,
+      "modifiedAt": "2026-10-09T22:43:53.968568+08:00"
+    },
+    {
+      "file": "app-mount-result.json",
+      "sha256": "6a7fee6225d895f381e323ed87c5974c1ef2ce6f53ff9ce594cd7812d9808144",
+      "bytes": 980,
+      "modifiedAt": "2026-10-09T22:20:32.335922+08:00"
+    },
+    {
+      "file": "runtime-data-result.json",
+      "sha256": "2ce16cba48437d296625f1eb80f01481dc3ab7da99fa14c48be0bdbbdf6bbd94",
+      "bytes": 1994,
+      "modifiedAt": "2026-10-09T22:33:26.210608+08:00"
+    },
+    {
+      "file": "production-performance.json",
+      "sha256": "5120af1d1d4010704d32e9f590f98412cf69b51eb92d25bf0c89b27620cac0a2",
+      "bytes": 5856,
+      "modifiedAt": "2026-10-09T22:48:20.272762+08:00"
+    },
+    {
+      "file": "runtime-performance.json",
+      "sha256": "daad9c1cd9d6dbd4d9653384645813f96c42aa3e0dfacebea9d9545a4b7031ec",
+      "bytes": 1905,
+      "modifiedAt": "2026-10-09T19:29:00.663824+08:00"
+    },
+    {
+      "file": "r7-editor-result.json",
+      "sha256": "9dd77883bcd2ab396eca559ea397cce8c25ed75e7b5c2a7a790c9e1e35047b8e",
+      "bytes": 261,
+      "modifiedAt": "2026-10-09T22:43:31.756788+08:00"
+    },
+    {
+      "file": "category-editor-result.json",
+      "sha256": "6d8d196e85ca5f528366256b335e02a8a7a119a1ed7ac96d7c1b9dc32500b8c4",
+      "bytes": 478,
+      "modifiedAt": "2026-10-09T22:43:39.167895+08:00"
+    },
+    {
+      "file": "density-order-result.json",
+      "sha256": "2528b59376e0092c4a9e50ad271b0ae9e813c51f79aa454cba65e2ddd44b0605",
+      "bytes": 766,
+      "modifiedAt": "2026-10-09T22:43:43.085377+08:00"
+    },
+    {
+      "file": "extensions-grouping-result.json",
+      "sha256": "354f511626c4e4aa27d5f4b9b0767a55e9217d1b90538aee54a916c9b8b395ad",
+      "bytes": 100,
+      "modifiedAt": "2026-10-09T20:21:25.823644+08:00"
+    },
+    {
+      "file": "module-help-result.json",
+      "sha256": "6a73e2de73aec7c84ed8fb6c6e561e44e452dc30c9c37f72ea5538d4d3fb513a",
+      "bytes": 1510,
+      "modifiedAt": "2026-10-09T22:43:46.697881+08:00"
+    },
+    {
+      "file": "verify-final.log",
+      "sha256": "3a24379d1e55e97ddb4ff03a52b388d0467afe0496f686a6ae4a5d87aac6fa25",
+      "bytes": 7187,
+      "modifiedAt": "2026-10-09T22:36:12.000774+08:00"
+    },
+    {
+      "file": "build-final.log",
+      "sha256": "c372455154c4e7616cf49c2d4da8825e61652a704c763a50ce8f41abbac5e7d7",
+      "bytes": 8896,
+      "modifiedAt": "2026-10-09T22:37:07.608932+08:00"
+    }
+  ]
+}

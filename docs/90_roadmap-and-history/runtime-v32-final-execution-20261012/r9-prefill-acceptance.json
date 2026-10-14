@@ -1,0 +1,8 @@
+{
+  "checks": [
+    "real control prefill injects numeric options and empty English; modal isolates background; save stores no live relation",
+    "source changes do not update imported controls; r9 fields and cards omit legacy input defaults and override panels",
+    "actual card prefill injects its source/title/format/dictionary once and saves without follow or override state"
+  ],
+  "runtimeErrors": []
+}

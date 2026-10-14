@@ -23,13 +23,13 @@ export default function FeatureModuleLoadDialog() {
   return (
     <div className="fixed inset-0 z-[12000] flex items-center justify-center bg-gray-950/45 px-4 py-6 backdrop-blur-[1px]">
       <div className="absolute inset-0" onClick={() => !dialog.loading && dismissDialog()} />
-      <AppCard className="relative w-full max-w-md rounded-3xl border border-white/70 bg-white p-6 shadow-[0_24px_64px_rgba(15,23,42,0.22)]">
+      <AppCard role="dialog" aria-modal="true" aria-labelledby="feature-module-dialog-title" className="relative max-h-full w-full max-w-md overflow-y-auto rounded-3xl border border-white/70 bg-white p-6 shadow-[0_24px_64px_rgba(15,23,42,0.22)]">
         <div className="flex items-start gap-4">
           <div className="mt-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
             {dialog.loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <PackageOpen className="h-5 w-5" />}
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-lg font-semibold text-slate-900">{dialog.title}</h2>
+            <h2 id="feature-module-dialog-title" className="text-lg font-semibold text-slate-900">{dialog.title}</h2>
             <p className="mt-1 text-sm leading-6 text-slate-600">{dialog.description}</p>
           </div>
         </div>
@@ -57,7 +57,7 @@ export default function FeatureModuleLoadDialog() {
             disabled={dialog.loading}
           >
             {dialog.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            <span>{dialog.loading ? '加载中' : '下载并启用'}</span>
+            <span>{dialog.loading ? '加载中' : dialog.error ? '重新加载并重试' : '下载并启用'}</span>
           </AppButton>
         </div>
       </AppCard>

@@ -1,0 +1,69 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "visibleFields": [
+        {
+          "selector": "input[aria-label=\"绘制输入槽位\"]",
+          "border": 1,
+          "style": "solid",
+          "height": 32,
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "selector": "input[aria-label=\"输出绘制标题\"]",
+          "border": 1,
+          "style": "solid",
+          "height": 34,
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "selector": "input[aria-label=\"额外绘制标题\"]",
+          "border": 1,
+          "style": "solid",
+          "height": 34,
+          "background": "rgb(255, 255, 255)"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "visibleFields": [
+        {
+          "selector": "input[aria-label=\"绘制输入槽位\"]",
+          "border": 1,
+          "style": "solid",
+          "height": 32,
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "selector": "input[aria-label=\"输出绘制标题\"]",
+          "border": 1,
+          "style": "solid",
+          "height": 34,
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "selector": "input[aria-label=\"额外绘制标题\"]",
+          "border": 1,
+          "style": "solid",
+          "height": 48,
+          "background": "rgb(255, 255, 255)"
+        }
+      ]
+    }
+  ],
+  "normalizationOwners": [
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0
+  ],
+  "runtimeErrors": []
+}

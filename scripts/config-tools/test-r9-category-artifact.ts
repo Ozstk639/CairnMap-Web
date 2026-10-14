@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import { createEditableConfigPackageFromCurrentProject } from '../../src/configStudio/renderRuleTemplates';
+import { migrateConfigToR9 } from '../../src/configStudio/r9Migration';
+import { initializeCategory } from '../../src/configStudio/categoryInitialization';
+import { categoryArtifactBlob,createCategoryArtifact,prepareCategoryImport,prepareClassTreeCommit,readCategoryArtifact } from '../../src/configStudio/categoryArtifact';
+import { resolveEffectiveFields,validateConfigPackage } from '../../src/configStudio/runtime';
+const base=migrateConfigToR9(createEditableConfigPackageFromCurrentProject());
+const request={code:'ARTIFACT_TEST',labels:{zh:'文件测试',en:''},mode:'blank' as const,sync:{fields:false,geometry:false,display:false,card:false},geometry:'Point' as const,multiple:false,anchor:'featureBbox' as const};
+const root=initializeCategory(base,request);root.node.fields.push({fieldId:'fixed-definition',key:'tags.fixed',type:'string',cardinality:'single',input:'text',labels:{zh:'固定',en:''},description:{zh:'',en:''},inheritance:'sealed'});
+const first=initializeCategory(root.config,{...request,parentId:root.node.nodeId,code:'FIRST'}),second=initializeCategory(first.config,{...request,parentId:root.node.nodeId,code:'SECOND'});
+const config=second.config,original=JSON.stringify(config);
+for(const kind of ['node','classTree'] as const){const artifact=await createCategoryArtifact(config,first.node.nodeId,kind);for(const zip of [false,true])assert.deepEqual(await readCategoryArtifact(new File([await categoryArtifactBlob(artifact,zip)],zip?'category.zip':'category.json')),JSON.parse(JSON.stringify(artifact)));}
+const single=await createCategoryArtifact(config,first.node.nodeId,'node');assert.throws(()=>prepareCategoryImport(base,single),/不存在上级Class/);
+const rootOnly=await createCategoryArtifact(config,root.node.nodeId,'node'),rootImport=prepareCategoryImport(config,rootOnly);assert.deepEqual(rootImport.config.nodes.find(n=>n.nodeId===root.node.nodeId)!.children,config.nodes.find(n=>n.nodeId===root.node.nodeId)!.children);
+const staged=structuredClone(config);staged.nodes=staged.nodes.filter(n=>n.nodeId!==second.node.nodeId);staged.nodes.find(n=>n.nodeId===root.node.nodeId)!.children=staged.nodes.find(n=>n.nodeId===root.node.nodeId)!.children.filter(id=>id!==second.node.nodeId);
+const tree=await createCategoryArtifact(staged,root.node.nodeId,'classTree'),imported=prepareCategoryImport(config,tree);
+assert(!imported.config.nodes.some(n=>n.nodeId===second.node.nodeId));assert(imported.changes.some(change=>change.startsWith('删除')));assert(imported.report.valid);
+const committed=prepareClassTreeCommit(config,config,imported.config,'ARTIFACT_TEST');assert(!committed.nodes.some(n=>n.nodeId===second.node.nodeId));assert.deepEqual(committed.nodes.filter(n=>n.path.class!=='ARTIFACT_TEST'),config.nodes.filter(n=>n.path.class!=='ARTIFACT_TEST'));assert.deepEqual(committed.engine,config.engine);assert.deepEqual(committed.workflows,config.workflows);
+const stale=structuredClone(config);stale.nodes.find(n=>n.nodeId===root.node.nodeId)!.classificationLabels!.class={zh:'更新的主树',en:''};assert.throws(()=>prepareClassTreeCommit(stale,config,imported.config,'ARTIFACT_TEST'),/已发生变化/);
+const outside=structuredClone(imported.config);outside.displayName.zh='范围外修改';assert.throws(()=>prepareClassTreeCommit(config,config,outside,'ARTIFACT_TEST'),/范围外内容/);
+const differentParent=structuredClone(config);differentParent.nodes.find(n=>n.nodeId===root.node.nodeId)!.fields=[];differentParent.nodes.find(n=>n.nodeId===first.node.nodeId)!.fields.push({fieldId:'local-file-field',key:'tags.fixed',type:'string',cardinality:'single',input:'text',labels:{zh:'不同的定义',en:''},description:{zh:'',en:''}});
+const conflicting=await createCategoryArtifact(differentParent,first.node.nodeId,'node'),preview=prepareCategoryImport(config,conflicting);assert(preview.conflicts.some(conflict=>conflict.includes('固定继承')));assert(!preview.report.valid);
+const fixed=prepareCategoryImport(config,conflicting,true);assert(fixed.report.valid);assert.equal(resolveEffectiveFields(fixed.config,first.node.path).find(field=>field.key==='tags.fixed')!.labels.zh,'固定');assert.deepEqual(fixed.config.nodes.find(n=>n.nodeId===root.node.nodeId),config.nodes.find(n=>n.nodeId===root.node.nodeId));
+const tampered=structuredClone(tree);tampered.payload.nodes[0].classificationLabels!.class!.zh='篡改';await assert.rejects(()=>readCategoryArtifact(new File([JSON.stringify(tampered)],'changed.json')),/摘要不一致/);
+const broken=structuredClone(tree);broken.payload.nodes[0].children.push('missing-child');await assert.rejects(()=>categoryArtifactBlob(broken),/悬空/);
+assert.equal(JSON.stringify(config),original);assert(validateConfigPackage(committed).valid);
+console.log('r9-category-artifact: two export formats/scopes, ancestors, fixed conflict repair, exact Class replacement, external preservation, stale guards and tamper rejection: OK');

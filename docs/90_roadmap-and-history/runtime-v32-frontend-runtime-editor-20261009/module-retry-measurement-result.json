@@ -1,0 +1,29 @@
+{
+  "tool": "测量工具",
+  "networkFaultInjected": "blocked cold measuringEntry request; then unblocked",
+  "failureDisplayed": true,
+  "overlayRemoved": true,
+  "explicitReloadRetryLoaded": true,
+  "originalToolOpened": true,
+  "expectedFaultState": {
+    "module": {
+      "status": "error",
+      "enabledByUser": true,
+      "lastLoadedVersion": null,
+      "error": "Failed to fetch dynamically imported module: http://127.0.0.1:5188/src/entrypoints/measuringEntry.ts"
+    },
+    "dialog": {
+      "isOpen": true,
+      "moduleKey": "measuring",
+      "title": "需要启用测绘扩展模块",
+      "description": "该功能属于按需加载的扩展模块。本次确认仅用于启用该模块；在当前浏览器缓存条件和版本匹配的情况下，后续点击此入口将自动加载并进入功能，无需再次确认。",
+      "loading": false,
+      "error": "Failed to fetch dynamically imported module: http://127.0.0.1:5188/src/entrypoints/measuringEntry.ts"
+    },
+    "overlay": {
+      "isOpen": false,
+      "moduleKey": null
+    }
+  },
+  "runtimeErrors": []
+}

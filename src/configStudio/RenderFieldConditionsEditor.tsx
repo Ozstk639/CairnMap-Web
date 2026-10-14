@@ -1,0 +1,31 @@
+import type { ConfigPackageV3, ClassificationPath, FieldDefinition, RenderFieldCondition, RenderFieldGroup } from './types';
+import { resolveEffectiveFields, resolveSelectableFields } from './runtime';
+import { RenderFormulaEditor } from './RenderFormulaEditor';
+import { isClassificationConditionField, validateRenderFields } from './renderRuleConditions';
+
+const inputClass = 'rounded border px-2 py-1 text-xs';
+const leaf = (fields: FieldDefinition[]): RenderFieldCondition => ({ kind: 'fieldEquals', field: fields[0]?.key ?? 'Name', value: fields[0]?.options?.[0]?.value ?? '' });
+function Group({ value, fields, onChange, depth = 0 }: { value: RenderFieldGroup; fields: FieldDefinition[]; onChange: (value: RenderFieldGroup) => void; depth?: number }) {
+  const replace = (index: number, next: RenderFieldCondition | RenderFieldGroup) => onChange({ ...value, items: value.items.map((item, i) => i === index ? next : item) });
+  return <fieldset className="space-y-2 rounded border bg-white p-2"><legend className="px-1 text-xs">组合 {depth + 1}</legend>
+    <select aria-label={`条件组合方式 ${depth}`} className={inputClass} value={value.op} onChange={e => { const op = e.target.value as RenderFieldGroup['op']; onChange(op === 'not' ? { op, items: [value] } : { ...value, op }); }}><option value="all">全部满足 AND</option><option value="any">任一满足 OR</option><option value="not">否定 NOT</option></select>
+    {value.items.map((item, index) => <div className="rounded border p-2" key={index}>
+      {'op' in item ? <Group value={item} fields={fields} depth={depth + 1} onChange={next => replace(index, next)} /> : item.kind==='fieldCompare'?<p>请在 r9 公式编辑器修改此条件。</p>:<div className="flex flex-wrap items-center gap-2">
+        <select aria-label="条件字段" className={inputClass} value={item.field} onChange={e => { const field = fields.find(field => field.key === e.target.value); replace(index, item.kind === 'fieldPresent' ? { ...item, field: e.target.value } : item.kind === 'fieldIn' ? { ...item, field: e.target.value, values: field?.options?.[0] ? [field.options[0].value] : [] } : { ...item, field: e.target.value, value: field?.options?.[0]?.value ?? '' }); }}>{!fields.some(field => field.key === item.field) ? <option value={item.field}>待核验路径：{item.field}</option> : null}{fields.map(field => <option key={field.key} value={field.key}>{field.labels.zh || field.key}（{field.key}）</option>)}</select>
+        <select aria-label="字段条件操作" className={inputClass} value={item.kind} onChange={e => replace(index, e.target.value === 'fieldPresent' ? { kind: 'fieldPresent', field: item.field, present: true } : e.target.value === 'fieldIn' ? { kind: 'fieldIn', field: item.field, values: [] } : { kind: 'fieldEquals', field: item.field, value: '' })}><option value="fieldEquals">等于保存值</option><option value="fieldIn">属于保存值列表</option><option value="fieldPresent">有值 / 无值</option></select>
+        {item.kind === 'fieldPresent' ? <select aria-label="字段存在条件" className={inputClass} value={String(item.present)} onChange={e => replace(index, { ...item, present: e.target.value === 'true' })}><option value="true">有非空值</option><option value="false">无值 / 空值</option></select>
+          : fields.find(field => field.key === item.field)?.options?.length ? <select aria-label="字段条件保存值" multiple={item.kind === 'fieldIn'} className={inputClass} value={item.kind === 'fieldIn' ? item.values : item.value} onChange={e => replace(index, item.kind === 'fieldIn' ? { ...item, values: [...e.target.selectedOptions].map(option => option.value) } : { ...item, value: e.target.value })}>{fields.find(field => field.key === item.field)!.options!.map(option => <option key={option.value} value={option.value}>{option.label.zh || option.value}（{option.value}）</option>)}</select>
+          : <input aria-label="字段条件保存值" className={inputClass} value={item.kind === 'fieldIn' ? item.values.join(', ') : item.value} placeholder={item.kind === 'fieldIn' ? '保存值，以逗号分隔' : '保存值，可为空'} onChange={e => replace(index, item.kind === 'fieldIn' ? { ...item, values: e.target.value.split(',').map(value => value.trim()).filter(Boolean) } : { ...item, value: e.target.value })} />}
+      </div>}
+      <button type="button" className="mt-1 text-xs text-rose-700" onClick={() => onChange({ ...value, items: value.items.filter((_, i) => i !== index) })}>删除条件</button>
+    </div>)}
+    {value.op !== 'not' ? <div className="flex gap-2 text-xs"><button type="button" className="rounded border px-2 py-1" onClick={() => onChange({ ...value, items: [...value.items, leaf(fields)] })}>添加字段条件</button>{depth < 3 ? <button type="button" className="rounded border px-2 py-1" onClick={() => onChange({ ...value, items: [...value.items, { op: 'all', items: [leaf(fields)] }] })}>添加组合</button> : null}</div> : null}
+  </fieldset>;
+}
+export function RenderFieldConditionsEditor({ config, path, value, onChange }: { config: ConfigPackageV3; path: ClassificationPath; value?: RenderFieldGroup; onChange: (value: RenderFieldGroup | undefined) => void }) {
+  const definitions = resolveEffectiveFields(config, path);
+  const all = resolveSelectableFields(config, path);
+  const fields = all.filter(field => !isClassificationConditionField(field.key, definitions));
+  const errors = validateRenderFields(value, all, all.map(field => field.key));
+  return <section className="space-y-2 rounded border border-violet-200 bg-violet-50/40 p-2" aria-label="字段组合条件"><label className="text-sm"><input type="checkbox" checked={Boolean(value)} onChange={e => onChange(e.target.checked ? config.contractRevision>=9?{op:'all',items:[],formula:{expression:'C1',manual:false,terms:[{id:'C1',relation:'AND',condition:{kind:'fieldCompare',field:fields[0]?.key??'Name',operator:'present'}}]}}:{ op: 'all', items: [leaf(fields)] } : undefined)} /> 启用字段组合条件（仅非分类字段）</label><p className="text-xs text-slate-600">分类由当前分类树匹配；字段组与必填 Zoom 同时成立才命中。选项显示文本与保存值分开，末项命中的完整规则生效。</p>{value ? config.contractRevision>=9?<RenderFormulaEditor value={value} fields={fields} onChange={onChange}/>:<Group value={value} fields={fields} onChange={onChange} /> : null}{errors.length ? <ul role="alert" className="list-disc pl-5 text-xs text-rose-700">{errors.map(message => <li key={message}>{message}</li>)}</ul> : null}</section>;
+}

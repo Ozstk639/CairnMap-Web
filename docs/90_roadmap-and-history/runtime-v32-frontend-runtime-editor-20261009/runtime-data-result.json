@@ -1,0 +1,69 @@
+{
+  "checks": [
+    "same-ID field and geometry replacement changes r7 condition, color, per-part labels and indexed record without recompiling config",
+    "disable/enable and removing override restore the existing fixed-source masking semantics and original record",
+    "1000/5000 two-part polygons use bounded static metadata and unchanged compile epoch; unloading clears renderer records"
+  ],
+  "initial": {
+    "stats": {
+      "epoch": 2,
+      "nodes": 95,
+      "classes": 16,
+      "cachedPaths": 95,
+      "hits": 498
+    },
+    "records": [
+      {
+        "id": "BP10_BASE",
+        "name": "正式"
+      }
+    ],
+    "labels": [
+      "正式"
+    ],
+    "paths": [
+      {
+        "stroke": "#111827",
+        "fill": "#f97316"
+      }
+    ]
+  },
+  "expanded": [
+    {
+      "records": 1000,
+      "polygonParts": 2000,
+      "firstDataVisibleSeconds": 0.30087960010860115,
+      "sixZoomScriptSeconds": 1.8230069999999998,
+      "visibleLabels": 162,
+      "configStats": {
+        "epoch": 2,
+        "nodes": 95,
+        "classes": 16,
+        "cachedPaths": 95,
+        "hits": 110554
+      },
+      "gcHeapBeforeBytes": 129127155,
+      "gcHeapAfterBytes": 157256331
+    },
+    {
+      "records": 5000,
+      "polygonParts": 10000,
+      "firstDataVisibleSeconds": 0.40927279996685684,
+      "sixZoomScriptSeconds": 6.0865659999999995,
+      "visibleLabels": 162,
+      "configStats": {
+        "epoch": 2,
+        "nodes": 95,
+        "classes": 16,
+        "cachedPaths": 95,
+        "hits": 534554
+      },
+      "gcHeapBeforeBytes": 157198003,
+      "gcHeapAfterBytes": 220454523
+    }
+  ],
+  "heapAfterUnloadBytes": 162823427,
+  "memoryScope": "browser GC observations and renderer record release; retained application world source caches are not claimed to disappear",
+  "protocolScope": "storage/events using production protocol, supplement to actual App/tool UI evidence",
+  "runtimeErrors": []
+}

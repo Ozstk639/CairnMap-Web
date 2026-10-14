@@ -1,4 +1,5 @@
 import type { FeatureRecord } from '@/components/Rules/rendering/renderRules';
+import { normalizeRuleSourceWorldId } from '@/components/Rules/data/ruleDataSources';
 
 /**
  * 规则搜索池（供 SearchBar 使用）
@@ -16,7 +17,7 @@ type RuleSearchSnapshot = {
 const POOL_BY_WORLD = new Map<string, RuleSearchSnapshot>();
 
 export function setRuleSearchPool(worldId: string, records: FeatureRecord[]) {
-  const key = String(worldId ?? '').trim();
+  const key = normalizeRuleSourceWorldId(worldId);
   if (!key) return;
   POOL_BY_WORLD.set(key, {
     records: Array.isArray(records) ? records : [],
@@ -25,13 +26,13 @@ export function setRuleSearchPool(worldId: string, records: FeatureRecord[]) {
 }
 
 export function getRuleSearchPool(worldId: string): FeatureRecord[] {
-  const key = String(worldId ?? '').trim();
+  const key = normalizeRuleSourceWorldId(worldId);
   if (!key) return [];
   return POOL_BY_WORLD.get(key)?.records ?? [];
 }
 
 export function getRuleSearchPoolUpdatedAt(worldId: string): number {
-  const key = String(worldId ?? '').trim();
+  const key = normalizeRuleSourceWorldId(worldId);
   if (!key) return 0;
   return POOL_BY_WORLD.get(key)?.updatedAt ?? 0;
 }

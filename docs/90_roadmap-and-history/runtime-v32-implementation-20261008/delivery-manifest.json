@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "cairnmap.v32-local-delivery.v1",
+  "candidateSourceHead": "834a048fe492c2bd57777ca519cdcf47443e6317",
+  "branch": "codex/cm-config-runtime-v32-migration-20261007",
+  "frozenV1": "0b82863d4fea3791f98917ba6d13f70e1f27eb15",
+  "verifiedFrozenSourceFiles": 520,
+  "frozenInventorySha256": "cffbedc185785af90ce4fef1936d6aaab59021d2e653a05db8090e90de3f4347",
+  "packageId": "cairnmap-config-v32-semantic",
+  "contractRevision": 6,
+  "packageRevision": 2,
+  "nodes": 95,
+  "composedWorkflows": 17,
+  "externalWorkflows": 3,
+  "jsonZipRoundTrip": true,
+  "validationErrors": 0,
+  "files": [
+    {
+      "path": "CairnMap_V32_V1Parity_r2.config.json",
+      "sha256": "f539fb47caa69ba0a8d73fd73c691fc97bc54478f1a63f27eda146147e843030",
+      "bytes": 3269017
+    },
+    {
+      "path": "CairnMap_V32_V1Parity_r2.zip",
+      "sha256": "9c114aabca36b02452300d55b03b643a2cccd29b0f23b4219e5e469185dcd7b3",
+      "bytes": 48222
+    }
+  ],
+  "promotion": "local implementation; user manual acceptance pending; no push/PR/main/RIA update"
+}

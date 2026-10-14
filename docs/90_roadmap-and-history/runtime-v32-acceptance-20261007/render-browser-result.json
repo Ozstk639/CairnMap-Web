@@ -1,0 +1,1365 @@
+{
+  "styleFamilies": [
+    {
+      "family": "structure-label",
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "family": "gm-outline",
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "family": "gm-bw",
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "family": "gm-wtb",
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "family": "bubble-dark",
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "family": "rle-line-color",
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "family": "rle-pill-color",
+      "error": [
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "positions": [
+    {
+      "placement": "center",
+      "offset": [
+        0,
+        0
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "center",
+      "offset": [
+        18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "center",
+      "offset": [
+        -18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "center",
+      "offset": [
+        18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "center",
+      "offset": [
+        -18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "N",
+      "offset": [
+        0,
+        0
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "N",
+      "offset": [
+        18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "N",
+      "offset": [
+        -18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "N",
+      "offset": [
+        18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "N",
+      "offset": [
+        -18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "S",
+      "offset": [
+        0,
+        0
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "S",
+      "offset": [
+        18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "S",
+      "offset": [
+        -18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "S",
+      "offset": [
+        18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "S",
+      "offset": [
+        -18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "E",
+      "offset": [
+        0,
+        0
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "E",
+      "offset": [
+        18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "E",
+      "offset": [
+        -18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "E",
+      "offset": [
+        18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "E",
+      "offset": [
+        -18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "W",
+      "offset": [
+        0,
+        0
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "W",
+      "offset": [
+        18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "W",
+      "offset": [
+        -18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "W",
+      "offset": [
+        18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "W",
+      "offset": [
+        -18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "NE",
+      "offset": [
+        0,
+        0
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "NE",
+      "offset": [
+        18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "NE",
+      "offset": [
+        -18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "NE",
+      "offset": [
+        18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "NE",
+      "offset": [
+        -18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "NW",
+      "offset": [
+        0,
+        0
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "NW",
+      "offset": [
+        18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "NW",
+      "offset": [
+        -18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "NW",
+      "offset": [
+        18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "NW",
+      "offset": [
+        -18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "SE",
+      "offset": [
+        0,
+        0
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "SE",
+      "offset": [
+        18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "SE",
+      "offset": [
+        -18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "SE",
+      "offset": [
+        18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "SE",
+      "offset": [
+        -18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "SW",
+      "offset": [
+        0,
+        0
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "SW",
+      "offset": [
+        18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "SW",
+      "offset": [
+        -18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "SW",
+      "offset": [
+        18,
+        -12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "placement": "SW",
+      "offset": [
+        -18,
+        12
+      ],
+      "error": [
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "multiSmallPolygon": {
+    "zoom": 3,
+    "size": [
+      1200,
+      900
+    ],
+    "layers": [
+      {
+        "kind": "NewClass",
+        "label": true,
+        "text": "BUD\n          BUD",
+        "x": 374.8203125,
+        "y": 407.703125,
+        "w": 26.359375,
+        "h": 12.59375,
+        "ax": 388,
+        "ay": 414,
+        "opacity": 1
+      },
+      {
+        "kind": "NewClass",
+        "label": true,
+        "text": "BUD\n          BUD",
+        "x": 633.8203125,
+        "y": 441.703125,
+        "w": 26.359375,
+        "h": 12.59375,
+        "ax": 647,
+        "ay": 448,
+        "opacity": 1
+      },
+      {
+        "kind": "NewClass",
+        "label": true,
+        "text": "BUD\n          BUD",
+        "x": 820.8203125,
+        "y": 375.703125,
+        "w": 26.359375,
+        "h": 12.59375,
+        "ax": 834,
+        "ay": 382,
+        "opacity": 1
+      }
+    ],
+    "tiles": 80,
+    "tileErrors": 0,
+    "paths": 5
+  },
+  "multiSmallPolygonWhole": {
+    "zoom": 3,
+    "size": [
+      1200,
+      900
+    ],
+    "layers": [
+      {
+        "kind": "NewClass",
+        "label": true,
+        "text": "BUD\n          BUD",
+        "x": 686.8203125,
+        "y": 410.703125,
+        "w": 26.359375,
+        "h": 12.59375,
+        "ax": 700,
+        "ay": 417,
+        "opacity": 1
+      }
+    ],
+    "tiles": 80,
+    "tileErrors": 0,
+    "paths": 5
+  },
+  "multiPoint": {
+    "zoom": 3,
+    "size": [
+      1200,
+      900
+    ],
+    "layers": [
+      {
+        "kind": "NewClass",
+        "label": false,
+        "text": "",
+        "x": 484,
+        "y": 390,
+        "w": 8,
+        "h": 8,
+        "ax": 488,
+        "ay": 394,
+        "radius": 4,
+        "opacity": 0.28
+      },
+      {
+        "kind": "NewClass",
+        "label": false,
+        "text": "",
+        "x": 596,
+        "y": 446,
+        "w": 8,
+        "h": 8,
+        "ax": 600,
+        "ay": 450,
+        "radius": 4,
+        "opacity": 0.28
+      },
+      {
+        "kind": "NewClass",
+        "label": false,
+        "text": "",
+        "x": 708,
+        "y": 502,
+        "w": 8,
+        "h": 8,
+        "ax": 712,
+        "ay": 506,
+        "radius": 4,
+        "opacity": 0.28
+      },
+      {
+        "kind": "NewClass",
+        "label": true,
+        "text": "BUD\n          BUD",
+        "x": 474.8203125,
+        "y": 387.703125,
+        "w": 26.359375,
+        "h": 12.59375,
+        "ax": 488,
+        "ay": 394,
+        "opacity": 1
+      },
+      {
+        "kind": "NewClass",
+        "label": true,
+        "text": "BUD\n          BUD",
+        "x": 586.8203125,
+        "y": 443.703125,
+        "w": 26.359375,
+        "h": 12.59375,
+        "ax": 600,
+        "ay": 450,
+        "opacity": 1
+      },
+      {
+        "kind": "NewClass",
+        "label": true,
+        "text": "BUD\n          BUD",
+        "x": 698.8203125,
+        "y": 499.703125,
+        "w": 26.359375,
+        "h": 12.59375,
+        "ax": 712,
+        "ay": 506,
+        "opacity": 1
+      }
+    ],
+    "tiles": 80,
+    "tileErrors": 0,
+    "paths": 6
+  },
+  "multiPointWhole": {
+    "zoom": 3,
+    "size": [
+      1200,
+      900
+    ],
+    "layers": [
+      {
+        "kind": "NewClass",
+        "label": false,
+        "text": "",
+        "x": 484,
+        "y": 390,
+        "w": 8,
+        "h": 8,
+        "ax": 488,
+        "ay": 394,
+        "radius": 4,
+        "opacity": 0.28
+      },
+      {
+        "kind": "NewClass",
+        "label": false,
+        "text": "",
+        "x": 596,
+        "y": 446,
+        "w": 8,
+        "h": 8,
+        "ax": 600,
+        "ay": 450,
+        "radius": 4,
+        "opacity": 0.28
+      },
+      {
+        "kind": "NewClass",
+        "label": false,
+        "text": "",
+        "x": 708,
+        "y": 502,
+        "w": 8,
+        "h": 8,
+        "ax": 712,
+        "ay": 506,
+        "radius": 4,
+        "opacity": 0.28
+      },
+      {
+        "kind": "NewClass",
+        "label": true,
+        "text": "BUD\n          BUD",
+        "x": 586.8203125,
+        "y": 443.703125,
+        "w": 26.359375,
+        "h": 12.59375,
+        "ax": 600,
+        "ay": 450,
+        "opacity": 1
+      }
+    ],
+    "tiles": 80,
+    "tileErrors": 0,
+    "paths": 6
+  },
+  "multiLine": {
+    "zoom": 3,
+    "size": [
+      1200,
+      900
+    ],
+    "layers": [
+      {
+        "kind": "NewClass",
+        "label": true,
+        "text": "BUD\n          BUD",
+        "x": 534.8203125,
+        "y": 398.703125,
+        "w": 26.359375,
+        "h": 12.59375,
+        "ax": 548,
+        "ay": 405,
+        "opacity": 1
+      },
+      {
+        "kind": "NewClass",
+        "label": true,
+        "text": "BUD\n          BUD",
+        "x": 618.8203125,
+        "y": 488.703125,
+        "w": 26.359375,
+        "h": 12.59375,
+        "ax": 632,
+        "ay": 495,
+        "opacity": 1
+      }
+    ],
+    "tiles": 80,
+    "tileErrors": 0,
+    "paths": 4
+  },
+  "multiLineWhole": {
+    "zoom": 3,
+    "size": [
+      1200,
+      900
+    ],
+    "layers": [
+      {
+        "kind": "NewClass",
+        "label": true,
+        "text": "BUD\n          BUD",
+        "x": 586.8203125,
+        "y": 422.703125,
+        "w": 26.359375,
+        "h": 12.59375,
+        "ax": 600,
+        "ay": 429,
+        "opacity": 1
+      }
+    ],
+    "tiles": 80,
+    "tileErrors": 0,
+    "paths": 4
+  },
+  "BUD-v1": [
+    {
+      "logicalZoom": 0,
+      "zoom": -3,
+      "size": [
+        1200,
+        900
+      ],
+      "layers": [],
+      "tiles": 320,
+      "tileErrors": 0,
+      "paths": 4
+    },
+    {
+      "logicalZoom": 2,
+      "zoom": -1,
+      "size": [
+        1200,
+        900
+      ],
+      "layers": [],
+      "tiles": 80,
+      "tileErrors": 0,
+      "paths": 4
+    },
+    {
+      "logicalZoom": 3,
+      "zoom": 0,
+      "size": [
+        1200,
+        900
+      ],
+      "layers": [
+        {
+          "kind": "NewClass",
+          "label": true,
+          "text": "BUD\n          BUD",
+          "x": 600,
+          "y": 446.40625,
+          "w": 37.359375,
+          "h": 12.59375,
+          "ax": 600,
+          "ay": 449,
+          "opacity": 1
+        }
+      ],
+      "tiles": 80,
+      "tileErrors": 0,
+      "paths": 4
+    },
+    {
+      "logicalZoom": 5,
+      "zoom": 2,
+      "size": [
+        1200,
+        900
+      ],
+      "layers": [
+        {
+          "kind": "NewClass",
+          "label": true,
+          "text": "BUD\n          BUD",
+          "x": 598,
+          "y": 443.40625,
+          "w": 37.359375,
+          "h": 12.59375,
+          "ax": 598,
+          "ay": 446,
+          "opacity": 1
+        }
+      ],
+      "tiles": 80,
+      "tileErrors": 0,
+      "paths": 4
+    },
+    {
+      "logicalZoom": 6,
+      "zoom": 3,
+      "size": [
+        1200,
+        900
+      ],
+      "layers": [
+        {
+          "kind": "NewClass",
+          "label": true,
+          "text": "BUD\n          BUD",
+          "x": 582.8203125,
+          "y": 438.703125,
+          "w": 26.359375,
+          "h": 12.59375,
+          "ax": 596,
+          "ay": 442,
+          "opacity": 1
+        }
+      ],
+      "tiles": 80,
+      "tileErrors": 0,
+      "paths": 4
+    },
+    {
+      "logicalZoom": 8,
+      "zoom": 5,
+      "size": [
+        1200,
+        900
+      ],
+      "layers": [
+        {
+          "kind": "NewClass",
+          "label": true,
+          "text": "BUD\n          BUD",
+          "x": 570.8203125,
+          "y": 413.703125,
+          "w": 26.359375,
+          "h": 12.59375,
+          "ax": 584,
+          "ay": 417,
+          "opacity": 1
+        }
+      ],
+      "tiles": 8,
+      "tileErrors": 0,
+      "paths": 4
+    }
+  ],
+  "BUD-main": [
+    {
+      "logicalZoom": 0,
+      "zoom": -3,
+      "size": [
+        1200,
+        900
+      ],
+      "layers": [],
+      "tiles": 320,
+      "tileErrors": 0,
+      "paths": 3
+    },
+    {
+      "logicalZoom": 2,
+      "zoom": -1,
+      "size": [
+        1200,
+        900
+      ],
+      "layers": [],
+      "tiles": 80,
+      "tileErrors": 0,
+      "paths": 3
+    },
+    {
+      "logicalZoom": 3,
+      "zoom": 0,
+      "size": [
+        1200,
+        900
+      ],
+      "layers": [
+        {
+          "kind": "NewClass",
+          "label": false,
+          "text": "",
+          "x": 594,
+          "y": 444,
+          "w": 12,
+          "h": 12,
+          "ax": 600,
+          "ay": 450,
+          "radius": 6,
+          "opacity": 0.9
+        },
+        {
+          "kind": "NewClass",
+          "label": false,
+          "text": "",
+          "x": 588,
+          "y": 438,
+          "w": 24,
+          "h": 24,
+          "ax": 600,
+          "ay": 450,
+          "radius": 12,
+          "opacity": 0.001
+        },
+        {
+          "kind": "NewClass",
+          "label": true,
+          "text": "BUD\n          BUD",
+          "x": 586.8203125,
+          "y": 437.40625,
+          "w": 26.359375,
+          "h": 12.59375,
+          "ax": 600,
+          "ay": 450,
+          "opacity": 1
+        }
+      ],
+      "tiles": 80,
+      "tileErrors": 0,
+      "paths": 5
+    },
+    {
+      "logicalZoom": 5,
+      "zoom": 2,
+      "size": [
+        1200,
+        900
+      ],
+      "layers": [
+        {
+          "kind": "NewClass",
+          "label": false,
+          "text": "",
+          "x": 594,
+          "y": 444,
+          "w": 12,
+          "h": 12,
+          "ax": 600,
+          "ay": 450,
+          "radius": 6,
+          "opacity": 0.9
+        },
+        {
+          "kind": "NewClass",
+          "label": false,
+          "text": "",
+          "x": 588,
+          "y": 438,
+          "w": 24,
+          "h": 24,
+          "ax": 600,
+          "ay": 450,
+          "radius": 12,
+          "opacity": 0.001
+        },
+        {
+          "kind": "NewClass",
+          "label": true,
+          "text": "BUD\n          BUD",
+          "x": 586.8203125,
+          "y": 437.40625,
+          "w": 26.359375,
+          "h": 12.59375,
+          "ax": 600,
+          "ay": 450,
+          "opacity": 1
+        }
+      ],
+      "tiles": 80,
+      "tileErrors": 0,
+      "paths": 5
+    },
+    {
+      "logicalZoom": 6,
+      "zoom": 3,
+      "size": [
+        1200,
+        900
+      ],
+      "layers": [
+        {
+          "kind": "NewClass",
+          "label": true,
+          "text": "BUD\n          BUD",
+          "x": 582.8203125,
+          "y": 435.703125,
+          "w": 26.359375,
+          "h": 12.59375,
+          "ax": 596,
+          "ay": 442,
+          "opacity": 1
+        }
+      ],
+      "tiles": 80,
+      "tileErrors": 0,
+      "paths": 5
+    },
+    {
+      "logicalZoom": 8,
+      "zoom": 5,
+      "size": [
+        1200,
+        900
+      ],
+      "layers": [
+        {
+          "kind": "NewClass",
+          "label": true,
+          "text": "BUD\n          BUD",
+          "x": 570.8203125,
+          "y": 410.703125,
+          "w": 26.359375,
+          "h": 12.59375,
+          "ax": 584,
+          "ay": 417,
+          "opacity": 1
+        }
+      ],
+      "tiles": 8,
+      "tileErrors": 0,
+      "paths": 5
+    }
+  ],
+  "BUD-preview": [
+    {
+      "logicalZoom": 0,
+      "zoom": -3,
+      "size": [
+        1198,
+        898
+      ],
+      "layers": [],
+      "tiles": 320,
+      "tileErrors": 0,
+      "paths": 3
+    },
+    {
+      "logicalZoom": 2,
+      "zoom": -1,
+      "size": [
+        1198,
+        898
+      ],
+      "layers": [],
+      "tiles": 80,
+      "tileErrors": 0,
+      "paths": 3
+    },
+    {
+      "logicalZoom": 3,
+      "zoom": 0,
+      "size": [
+        1198,
+        898
+      ],
+      "layers": [
+        {
+          "kind": "NewClass",
+          "label": false,
+          "text": "",
+          "x": 593,
+          "y": 443,
+          "w": 12,
+          "h": 12,
+          "ax": 599,
+          "ay": 449,
+          "radius": 6,
+          "opacity": 0.9
+        },
+        {
+          "kind": "NewClass",
+          "label": false,
+          "text": "",
+          "x": 587,
+          "y": 437,
+          "w": 24,
+          "h": 24,
+          "ax": 599,
+          "ay": 449,
+          "radius": 12,
+          "opacity": 0.001
+        },
+        {
+          "kind": "NewClass",
+          "label": true,
+          "text": "BUD\n          BUD",
+          "x": 585.8203125,
+          "y": 436.40625,
+          "w": 26.359375,
+          "h": 12.59375,
+          "ax": 599,
+          "ay": 449,
+          "opacity": 1
+        }
+      ],
+      "tiles": 80,
+      "tileErrors": 0,
+      "paths": 5
+    },
+    {
+      "logicalZoom": 5,
+      "zoom": 2,
+      "size": [
+        1198,
+        898
+      ],
+      "layers": [
+        {
+          "kind": "NewClass",
+          "label": false,
+          "text": "",
+          "x": 593,
+          "y": 443,
+          "w": 12,
+          "h": 12,
+          "ax": 599,
+          "ay": 449,
+          "radius": 6,
+          "opacity": 0.9
+        },
+        {
+          "kind": "NewClass",
+          "label": false,
+          "text": "",
+          "x": 587,
+          "y": 437,
+          "w": 24,
+          "h": 24,
+          "ax": 599,
+          "ay": 449,
+          "radius": 12,
+          "opacity": 0.001
+        },
+        {
+          "kind": "NewClass",
+          "label": true,
+          "text": "BUD\n          BUD",
+          "x": 585.8203125,
+          "y": 436.40625,
+          "w": 26.359375,
+          "h": 12.59375,
+          "ax": 599,
+          "ay": 449,
+          "opacity": 1
+        }
+      ],
+      "tiles": 80,
+      "tileErrors": 0,
+      "paths": 5
+    },
+    {
+      "logicalZoom": 6,
+      "zoom": 3,
+      "size": [
+        1198,
+        898
+      ],
+      "layers": [
+        {
+          "kind": "NewClass",
+          "label": true,
+          "text": "BUD\n          BUD",
+          "x": 581.8203125,
+          "y": 434.703125,
+          "w": 26.359375,
+          "h": 12.59375,
+          "ax": 595,
+          "ay": 441,
+          "opacity": 1
+        }
+      ],
+      "tiles": 80,
+      "tileErrors": 0,
+      "paths": 5
+    },
+    {
+      "logicalZoom": 8,
+      "zoom": 5,
+      "size": [
+        1198,
+        898
+      ],
+      "layers": [
+        {
+          "kind": "NewClass",
+          "label": true,
+          "text": "BUD\n          BUD",
+          "x": 569.8203125,
+          "y": 409.703125,
+          "w": 26.359375,
+          "h": 12.59375,
+          "ax": 583,
+          "ay": 416,
+          "opacity": 1
+        }
+      ],
+      "tiles": 8,
+      "tileErrors": 0,
+      "paths": 5
+    }
+  ],
+  "mainPreviewParityZooms": [
+    0,
+    2,
+    3,
+    5,
+    6,
+    8
+  ],
+  "lowZoomTiles": [
+    {
+      "logicalZoom": 0,
+      "zoom": -3,
+      "size": [
+        1198,
+        898
+      ],
+      "layers": [],
+      "tiles": 320,
+      "tileErrors": 0,
+      "paths": 3
+    },
+    {
+      "logicalZoom": 1,
+      "zoom": -2,
+      "size": [
+        1198,
+        898
+      ],
+      "layers": [],
+      "tiles": 80,
+      "tileErrors": 0,
+      "paths": 3
+    },
+    {
+      "logicalZoom": 2,
+      "zoom": -1,
+      "size": [
+        1198,
+        898
+      ],
+      "layers": [],
+      "tiles": 80,
+      "tileErrors": 0,
+      "paths": 3
+    }
+  ],
+  "roundTrip": {
+    "same": true,
+    "revision": 5
+  },
+  "runtimeErrors": []
+}

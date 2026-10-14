@@ -1,0 +1,1586 @@
+{
+  "schemaVersion": "cairnmap.v1-editor-reference.v1",
+  "sourceHead": "0b82863d4fea3791f98917ba6d13f70e1f27eb15",
+  "source": "untouched frozen V1 editor scene, parser and actual formatter/buildFeatureInfo",
+  "cases": [
+    {
+      "classCode": "RLE",
+      "subType": "铁路",
+      "mode": "polyline",
+      "view": {
+        "schemaKey": "rail_line",
+        "displayName": "铁路",
+        "scene": "editor",
+        "idField": {
+          "key": "ID",
+          "path": "ID",
+          "label": "线路ID",
+          "control": "text",
+          "order": 0
+        },
+        "auxInputs": [],
+        "fields": [
+          {
+            "key": "Name",
+            "path": "Name",
+            "label": "线路名",
+            "control": "text",
+            "order": 20
+          },
+          {
+            "key": "bureau",
+            "path": "bureau",
+            "label": "路局代码",
+            "control": "text",
+            "order": 30
+          },
+          {
+            "key": "line",
+            "path": "line",
+            "label": "线路编号",
+            "control": "text",
+            "order": 40
+          },
+          {
+            "key": "color",
+            "path": "color",
+            "label": "标准色号",
+            "control": "text",
+            "order": 50
+          },
+          {
+            "key": "direction",
+            "path": "direction",
+            "label": "方向",
+            "control": "select",
+            "order": 60
+          },
+          {
+            "key": "startplf",
+            "path": "startplf",
+            "label": "起点站台名",
+            "control": "text",
+            "order": 70
+          },
+          {
+            "key": "endplf",
+            "path": "endplf",
+            "label": "终点站台名",
+            "control": "text",
+            "order": 80
+          }
+        ],
+        "groups": [],
+        "allowUnparsedBlock": true,
+        "integrations": {
+          "editor": "workflowStyleReady",
+          "workflow": "custom",
+          "infocard": "overlayHeavy"
+        }
+      },
+      "coords": [
+        {
+          "x": 20,
+          "y": -64,
+          "z": 13
+        },
+        {
+          "x": 70,
+          "y": -64,
+          "z": 38
+        }
+      ],
+      "original": {
+        "ID": "ZRLE_EDIT",
+        "Name": "V1 railway",
+        "bureau": "RIA",
+        "line": "01",
+        "color": "#123456",
+        "direction": 0,
+        "startplf": "ZPLF_A",
+        "endplf": "ZPLF_B",
+        "CoordL": [
+          [
+            [
+              20,
+              -64,
+              13
+            ],
+            [
+              70,
+              -64,
+              38
+            ]
+          ]
+        ],
+        "Type": "Polyline",
+        "Class": "RLE",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        },
+        "tags": {
+          "audit": "keep"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/v1"
+          },
+          "character": {
+            "brief": "V1 brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        }
+      },
+      "projectedValues": {
+        "ID": "ZRLE_EDIT",
+        "Name": "V1 railway",
+        "bureau": "RIA",
+        "line": "01",
+        "color": "#123456",
+        "direction": 0,
+        "startplf": "ZPLF_A",
+        "endplf": "ZPLF_B"
+      },
+      "updated": {
+        "ID": "ZRLE_EDIT",
+        "Name": "V1 edited RLE",
+        "bureau": "RIA",
+        "line": "01",
+        "color": "#123456",
+        "direction": 0,
+        "startplf": "ZPLF_A",
+        "endplf": "ZPLF_B",
+        "tags": {
+          "audit": "keep"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/v1"
+          },
+          "character": {
+            "brief": "V1 brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        },
+        "CoordL": [
+          [
+            [
+              20,
+              -64,
+              13
+            ],
+            [
+              70,
+              -64,
+              38
+            ]
+          ]
+        ],
+        "Type": "Polyline",
+        "Class": "RLE",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "ModifityTime": "20261012",
+        "ModifityBy": "editing-user",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        }
+      }
+    },
+    {
+      "classCode": "STA",
+      "subType": "车站",
+      "mode": "point",
+      "view": {
+        "schemaKey": "rail_station",
+        "displayName": "车站",
+        "scene": "editor",
+        "idField": {
+          "key": "ID",
+          "path": "ID",
+          "label": "车站ID",
+          "control": "text",
+          "order": 0
+        },
+        "auxInputs": [],
+        "fields": [
+          {
+            "key": "Name",
+            "path": "Name",
+            "label": "车站名",
+            "control": "text",
+            "order": 20
+          },
+          {
+            "key": "STBuilding",
+            "path": "STBuilding",
+            "label": "所属车站建体",
+            "control": "text",
+            "order": 30
+          },
+          {
+            "key": "elevation",
+            "path": "elevation",
+            "label": "高度(y)",
+            "control": "number",
+            "order": 40
+          }
+        ],
+        "groups": [
+          {
+            "key": "platforms",
+            "path": "platforms",
+            "label": "包含站台",
+            "order": 100,
+            "optional": false,
+            "minItems": 1,
+            "fields": [
+              {
+                "key": "ID",
+                "labels": {
+                  "default": "站台ID"
+                },
+                "control": "text"
+              }
+            ]
+          }
+        ],
+        "allowUnparsedBlock": true,
+        "integrations": {
+          "editor": "workflowStyleReady",
+          "workflow": "custom",
+          "infocard": "overlayHeavy"
+        }
+      },
+      "coords": [
+        {
+          "x": 20,
+          "y": 0,
+          "z": 13
+        }
+      ],
+      "original": {
+        "ID": "ZSTA_EDIT",
+        "Name": "V1 station",
+        "STBuilding": "ZSTB_A",
+        "elevation": 0,
+        "platforms": [
+          {
+            "ID": "ZPLF_A"
+          },
+          {
+            "ID": "ZPLF_B"
+          }
+        ],
+        "CoordP": [
+          [
+            20,
+            0,
+            13
+          ]
+        ],
+        "Type": "Points",
+        "Class": "STA",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        },
+        "tags": {
+          "audit": "keep"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/v1"
+          },
+          "character": {
+            "brief": "V1 brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        }
+      },
+      "projectedValues": {
+        "ID": "ZSTA_EDIT",
+        "Name": "V1 station",
+        "STBuilding": "ZSTB_A",
+        "elevation": 0,
+        "platforms": [
+          {
+            "ID": "ZPLF_A"
+          },
+          {
+            "ID": "ZPLF_B"
+          }
+        ]
+      },
+      "updated": {
+        "ID": "ZSTA_EDIT",
+        "Name": "V1 edited STA",
+        "STBuilding": "ZSTB_A",
+        "elevation": 0,
+        "platforms": [
+          {
+            "ID": "ZPLF_A"
+          },
+          {
+            "ID": "ZPLF_B"
+          }
+        ],
+        "tags": {
+          "audit": "keep"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/v1"
+          },
+          "character": {
+            "brief": "V1 brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        },
+        "CoordP": [
+          [
+            20,
+            0,
+            13
+          ]
+        ],
+        "Type": "Points",
+        "Class": "STA",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "ModifityTime": "20261012",
+        "ModifityBy": "editing-user",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        }
+      }
+    },
+    {
+      "classCode": "PLF",
+      "subType": "站台",
+      "mode": "point",
+      "view": {
+        "schemaKey": "rail_platform",
+        "displayName": "站台",
+        "scene": "editor",
+        "idField": {
+          "key": "ID",
+          "path": "ID",
+          "label": "站台ID",
+          "control": "text",
+          "order": 0
+        },
+        "auxInputs": [],
+        "fields": [
+          {
+            "key": "Name",
+            "path": "Name",
+            "label": "站台名称",
+            "control": "text",
+            "order": 20
+          },
+          {
+            "key": "elevation",
+            "path": "elevation",
+            "label": "高度(y)",
+            "control": "number",
+            "order": 40
+          },
+          {
+            "key": "Situation",
+            "path": "Situation",
+            "label": "站台是否启用",
+            "control": "bool",
+            "order": 50
+          },
+          {
+            "key": "Connect",
+            "path": "Connect",
+            "label": "外部连接功能",
+            "control": "bool",
+            "order": 60
+          }
+        ],
+        "groups": [
+          {
+            "key": "lines",
+            "path": "lines",
+            "label": "经行线路",
+            "order": 100,
+            "optional": false,
+            "minItems": 1,
+            "fields": [
+              {
+                "key": "ID",
+                "labels": {
+                  "default": "线路ID"
+                },
+                "control": "text"
+              },
+              {
+                "key": "stationCode",
+                "labels": {
+                  "default": "站台编号"
+                },
+                "control": "number",
+                "optional": true
+              },
+              {
+                "key": "stationDistance",
+                "labels": {
+                  "default": "线路距离"
+                },
+                "control": "number",
+                "optional": true
+              },
+              {
+                "key": "Avaliable",
+                "labels": {
+                  "default": "可使用性"
+                },
+                "control": "bool"
+              },
+              {
+                "key": "Overtaking",
+                "labels": {
+                  "default": "越行"
+                },
+                "control": "bool"
+              },
+              {
+                "key": "getin",
+                "labels": {
+                  "default": "可上车"
+                },
+                "control": "bool"
+              },
+              {
+                "key": "getout",
+                "labels": {
+                  "default": "可下车"
+                },
+                "control": "bool"
+              },
+              {
+                "key": "NextOT",
+                "labels": {
+                  "default": "下一站越行"
+                },
+                "control": "bool"
+              }
+            ]
+          }
+        ],
+        "allowUnparsedBlock": true,
+        "integrations": {
+          "editor": "workflowStyleReady",
+          "workflow": "custom",
+          "infocard": "overlayHeavy"
+        }
+      },
+      "coords": [
+        {
+          "x": 20,
+          "y": 0,
+          "z": 13
+        }
+      ],
+      "original": {
+        "ID": "ZPLF_EDIT",
+        "Name": "V1 platform",
+        "elevation": 0,
+        "Situation": false,
+        "Connect": false,
+        "lines": [
+          {
+            "ID": "ZRLE_A",
+            "stationCode": 0,
+            "stationDistance": 0,
+            "Avaliable": false,
+            "Overtaking": false,
+            "getin": false,
+            "getout": false,
+            "NextOT": false
+          }
+        ],
+        "CoordP": [
+          [
+            20,
+            0,
+            13
+          ]
+        ],
+        "Type": "Points",
+        "Class": "PLF",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        },
+        "tags": {
+          "audit": "keep"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/v1"
+          },
+          "character": {
+            "brief": "V1 brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        }
+      },
+      "projectedValues": {
+        "ID": "ZPLF_EDIT",
+        "Name": "V1 platform",
+        "elevation": 0,
+        "Situation": false,
+        "Connect": false,
+        "lines": [
+          {
+            "ID": "ZRLE_A",
+            "stationCode": 0,
+            "stationDistance": 0,
+            "Avaliable": false,
+            "Overtaking": false,
+            "getin": false,
+            "getout": false,
+            "NextOT": false
+          }
+        ]
+      },
+      "updated": {
+        "ID": "ZPLF_EDIT",
+        "Name": "V1 edited PLF",
+        "elevation": 0,
+        "Situation": false,
+        "Connect": false,
+        "lines": [
+          {
+            "ID": "ZRLE_A",
+            "stationCode": 0,
+            "stationDistance": 0,
+            "Avaliable": false,
+            "Overtaking": false,
+            "getin": false,
+            "getout": false,
+            "NextOT": false
+          }
+        ],
+        "tags": {
+          "audit": "keep"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/v1"
+          },
+          "character": {
+            "brief": "V1 brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        },
+        "CoordP": [
+          [
+            20,
+            0,
+            13
+          ]
+        ],
+        "Type": "Points",
+        "Class": "PLF",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "ModifityTime": "20261012",
+        "ModifityBy": "editing-user",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        }
+      }
+    },
+    {
+      "classCode": "PFB",
+      "subType": "站台轮廓",
+      "mode": "polygon",
+      "view": {
+        "schemaKey": "rail_platform_boundary",
+        "displayName": "站台轮廓",
+        "scene": "editor",
+        "idField": {
+          "key": "ID",
+          "path": "ID",
+          "label": "站台轮廓ID",
+          "control": "text",
+          "order": 0
+        },
+        "auxInputs": [],
+        "fields": [
+          {
+            "key": "Name",
+            "path": "Name",
+            "label": "站台轮廓名",
+            "control": "text",
+            "order": 20
+          },
+          {
+            "key": "LineID",
+            "path": "LineID",
+            "label": "线路ID",
+            "control": "text",
+            "order": 30
+          },
+          {
+            "key": "elevation",
+            "path": "elevation",
+            "label": "高度(y)",
+            "control": "number",
+            "order": 40
+          },
+          {
+            "key": "height",
+            "path": "height",
+            "label": "高度/层高(height)",
+            "control": "number",
+            "order": 50
+          }
+        ],
+        "groups": [],
+        "allowUnparsedBlock": true,
+        "integrations": {
+          "editor": "workflowStyleReady",
+          "workflow": "custom",
+          "infocard": "overlayHeavy"
+        }
+      },
+      "coords": [
+        {
+          "x": 20,
+          "y": -64,
+          "z": 13
+        },
+        {
+          "x": 70,
+          "y": -64,
+          "z": 13
+        },
+        {
+          "x": 70,
+          "y": -64,
+          "z": 38
+        },
+        {
+          "x": 20,
+          "y": -64,
+          "z": 38
+        }
+      ],
+      "original": {
+        "ID": "ZPFB_EDIT",
+        "Name": "V1 boundary",
+        "LineID": "ZRLE_A",
+        "elevation": 0,
+        "height": 0,
+        "CoordG": [
+          [
+            [
+              [
+                20,
+                -64,
+                13
+              ],
+              [
+                70,
+                -64,
+                13
+              ],
+              [
+                70,
+                -64,
+                38
+              ],
+              [
+                20,
+                -64,
+                38
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "PFB",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        },
+        "tags": {
+          "audit": "keep"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/v1"
+          },
+          "character": {
+            "brief": "V1 brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        }
+      },
+      "projectedValues": {
+        "ID": "ZPFB_EDIT",
+        "Name": "V1 boundary",
+        "LineID": "ZRLE_A",
+        "elevation": 0,
+        "height": 0
+      },
+      "updated": {
+        "ID": "ZPFB_EDIT",
+        "Name": "V1 edited PFB",
+        "LineID": "ZRLE_A",
+        "elevation": 0,
+        "height": 0,
+        "tags": {
+          "audit": "keep"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/v1"
+          },
+          "character": {
+            "brief": "V1 brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                20,
+                -64,
+                13
+              ],
+              [
+                70,
+                -64,
+                13
+              ],
+              [
+                70,
+                -64,
+                38
+              ],
+              [
+                20,
+                -64,
+                38
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "PFB",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "ModifityTime": "20261012",
+        "ModifityBy": "editing-user",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        }
+      }
+    },
+    {
+      "classCode": "STB",
+      "subType": "车站建筑",
+      "mode": "polygon",
+      "view": {
+        "schemaKey": "rail_station_building",
+        "displayName": "车站建筑",
+        "scene": "editor",
+        "idField": {
+          "key": "ID",
+          "path": "ID",
+          "label": "车站建筑ID",
+          "control": "text",
+          "order": 0
+        },
+        "auxInputs": [],
+        "fields": [
+          {
+            "key": "Name",
+            "path": "Name",
+            "label": "车站建筑名",
+            "control": "text",
+            "order": 20
+          },
+          {
+            "key": "elevation",
+            "path": "elevation",
+            "label": "高度(y)",
+            "control": "number",
+            "order": 30
+          },
+          {
+            "key": "height",
+            "path": "height",
+            "label": "高度/层高(height)",
+            "control": "number",
+            "order": 40
+          }
+        ],
+        "groups": [
+          {
+            "key": "Floors",
+            "path": "Floors",
+            "label": "包含楼层",
+            "order": 100,
+            "optional": true,
+            "fields": [
+              {
+                "key": "ID",
+                "labels": {
+                  "default": "楼层ID"
+                },
+                "control": "text",
+                "optional": true
+              },
+              {
+                "key": "Group",
+                "labels": {
+                  "default": "分组"
+                },
+                "control": "text",
+                "optional": true
+              }
+            ]
+          }
+        ],
+        "allowUnparsedBlock": true,
+        "integrations": {
+          "editor": "workflowStyleReady",
+          "workflow": "custom",
+          "infocard": "overlayHeavy"
+        }
+      },
+      "coords": [
+        {
+          "x": 20,
+          "y": -64,
+          "z": 13
+        },
+        {
+          "x": 70,
+          "y": -64,
+          "z": 13
+        },
+        {
+          "x": 70,
+          "y": -64,
+          "z": 38
+        },
+        {
+          "x": 20,
+          "y": -64,
+          "z": 38
+        }
+      ],
+      "original": {
+        "ID": "ZSTB_EDIT",
+        "Name": "V1 building",
+        "elevation": 0,
+        "height": 0,
+        "Floors": [
+          {
+            "ID": "ZSTF_A",
+            "Group": "0"
+          }
+        ],
+        "CoordG": [
+          [
+            [
+              [
+                20,
+                -64,
+                13
+              ],
+              [
+                70,
+                -64,
+                13
+              ],
+              [
+                70,
+                -64,
+                38
+              ],
+              [
+                20,
+                -64,
+                38
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "STB",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        },
+        "tags": {
+          "audit": "keep"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/v1"
+          },
+          "character": {
+            "brief": "V1 brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        }
+      },
+      "projectedValues": {
+        "ID": "ZSTB_EDIT",
+        "Name": "V1 building",
+        "elevation": 0,
+        "height": 0,
+        "Floors": [
+          {
+            "ID": "ZSTF_A",
+            "Group": "0"
+          }
+        ]
+      },
+      "updated": {
+        "ID": "ZSTB_EDIT",
+        "Name": "V1 edited STB",
+        "elevation": 0,
+        "height": 0,
+        "Floors": [
+          {
+            "ID": "ZSTF_A",
+            "Group": "0"
+          }
+        ],
+        "tags": {
+          "audit": "keep"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/v1"
+          },
+          "character": {
+            "brief": "V1 brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                20,
+                -64,
+                13
+              ],
+              [
+                70,
+                -64,
+                13
+              ],
+              [
+                70,
+                -64,
+                38
+              ],
+              [
+                20,
+                -64,
+                38
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "STB",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "ModifityTime": "20261012",
+        "ModifityBy": "editing-user",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        }
+      }
+    },
+    {
+      "classCode": "SBP",
+      "subType": "车站建筑点",
+      "mode": "point",
+      "view": {
+        "schemaKey": "rail_station_building_point",
+        "displayName": "车站建筑点",
+        "scene": "editor",
+        "idField": {
+          "key": "ID",
+          "path": "ID",
+          "label": "车站建筑点ID",
+          "control": "text",
+          "order": 0
+        },
+        "auxInputs": [],
+        "fields": [
+          {
+            "key": "Name",
+            "path": "Name",
+            "label": "车站建筑名",
+            "control": "text",
+            "order": 20
+          },
+          {
+            "key": "elevation",
+            "path": "elevation",
+            "label": "高度(y)",
+            "control": "number",
+            "order": 30
+          }
+        ],
+        "groups": [
+          {
+            "key": "Floors",
+            "path": "Floors",
+            "label": "包含楼层",
+            "order": 100,
+            "optional": true,
+            "fields": [
+              {
+                "key": "ID",
+                "labels": {
+                  "default": "楼层ID"
+                },
+                "control": "text",
+                "optional": true
+              },
+              {
+                "key": "Group",
+                "labels": {
+                  "default": "分组"
+                },
+                "control": "text",
+                "optional": true
+              }
+            ]
+          },
+          {
+            "key": "stations",
+            "path": "stations",
+            "label": "包含车站",
+            "order": 110,
+            "optional": false,
+            "minItems": 1,
+            "fields": [
+              {
+                "key": "ID",
+                "labels": {
+                  "default": "车站ID"
+                },
+                "control": "text"
+              }
+            ]
+          }
+        ],
+        "allowUnparsedBlock": true,
+        "integrations": {
+          "editor": "workflowStyleReady",
+          "workflow": "custom",
+          "infocard": "overlayHeavy"
+        }
+      },
+      "coords": [
+        {
+          "x": 20,
+          "y": 0,
+          "z": 13
+        }
+      ],
+      "original": {
+        "ID": "ZSBP_EDIT",
+        "Name": "V1 building point",
+        "elevation": 0,
+        "stations": [
+          {
+            "ID": "ZSTA_A"
+          }
+        ],
+        "CoordP": [
+          [
+            20,
+            0,
+            13
+          ]
+        ],
+        "Type": "Points",
+        "Class": "SBP",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        },
+        "tags": {
+          "audit": "keep"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/v1"
+          },
+          "character": {
+            "brief": "V1 brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        }
+      },
+      "projectedValues": {
+        "ID": "ZSBP_EDIT",
+        "Name": "V1 building point",
+        "elevation": 0,
+        "Floors": [],
+        "stations": [
+          {
+            "ID": "ZSTA_A"
+          }
+        ]
+      },
+      "updated": {
+        "ID": "ZSBP_EDIT",
+        "Name": "V1 edited SBP",
+        "elevation": 0,
+        "stations": [
+          {
+            "ID": "ZSTA_A"
+          }
+        ],
+        "tags": {
+          "audit": "keep"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/v1"
+          },
+          "character": {
+            "brief": "V1 brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        },
+        "CoordP": [
+          [
+            20,
+            0,
+            13
+          ]
+        ],
+        "Type": "Points",
+        "Class": "SBP",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "ModifityTime": "20261012",
+        "ModifityBy": "editing-user",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        }
+      }
+    },
+    {
+      "classCode": "STF",
+      "subType": "车站建筑楼层",
+      "mode": "polygon",
+      "view": {
+        "schemaKey": "rail_station_building_floor",
+        "displayName": "车站建筑楼层",
+        "scene": "editor",
+        "idField": {
+          "key": "ID",
+          "path": "ID",
+          "label": "楼层ID",
+          "control": "text",
+          "order": 0
+        },
+        "auxInputs": [],
+        "fields": [
+          {
+            "key": "Name",
+            "path": "Name",
+            "label": "楼层名",
+            "control": "text",
+            "order": 20
+          },
+          {
+            "key": "NofFloor",
+            "path": "NofFloor",
+            "label": "楼层名/楼层号",
+            "control": "text",
+            "order": 30
+          },
+          {
+            "key": "staBuildingID",
+            "path": "staBuildingID",
+            "label": "所属车站建筑",
+            "control": "text",
+            "order": 40
+          },
+          {
+            "key": "Situation",
+            "path": "Situation",
+            "label": "状态",
+            "control": "text",
+            "order": 50
+          },
+          {
+            "key": "elevation",
+            "path": "elevation",
+            "label": "高度(y)",
+            "control": "number",
+            "order": 60
+          },
+          {
+            "key": "height",
+            "path": "height",
+            "label": "高度/层高(height)",
+            "control": "number",
+            "order": 70
+          }
+        ],
+        "groups": [],
+        "allowUnparsedBlock": true,
+        "integrations": {
+          "editor": "workflowStyleReady",
+          "workflow": "custom",
+          "infocard": "overlayHeavy"
+        }
+      },
+      "coords": [
+        {
+          "x": 20,
+          "y": -64,
+          "z": 13
+        },
+        {
+          "x": 70,
+          "y": -64,
+          "z": 13
+        },
+        {
+          "x": 70,
+          "y": -64,
+          "z": 38
+        },
+        {
+          "x": 20,
+          "y": -64,
+          "z": 38
+        }
+      ],
+      "original": {
+        "ID": "ZSTF_EDIT",
+        "Name": "V1 floor",
+        "NofFloor": "0",
+        "staBuildingID": "ZSTB_A",
+        "Situation": "Enable",
+        "elevation": 0,
+        "height": 0,
+        "CoordG": [
+          [
+            [
+              [
+                20,
+                -64,
+                13
+              ],
+              [
+                70,
+                -64,
+                13
+              ],
+              [
+                70,
+                -64,
+                38
+              ],
+              [
+                20,
+                -64,
+                38
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "STF",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        },
+        "tags": {
+          "audit": "keep"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/v1"
+          },
+          "character": {
+            "brief": "V1 brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        }
+      },
+      "projectedValues": {
+        "ID": "ZSTF_EDIT",
+        "Name": "V1 floor",
+        "NofFloor": "0",
+        "staBuildingID": "ZSTB_A",
+        "Situation": "Enable",
+        "elevation": 0,
+        "height": 0
+      },
+      "updated": {
+        "ID": "ZSTF_EDIT",
+        "Name": "V1 edited STF",
+        "NofFloor": "0",
+        "staBuildingID": "ZSTB_A",
+        "Situation": "Enable",
+        "elevation": 0,
+        "height": 0,
+        "tags": {
+          "audit": "keep"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "https://example.invalid/v1"
+          },
+          "character": {
+            "brief": "V1 brief"
+          },
+          "foreign": {
+            "zero": 0,
+            "no": false,
+            "list": [
+              {
+                "a": 0,
+                "b": false
+              }
+            ]
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                20,
+                -64,
+                13
+              ],
+              [
+                70,
+                -64,
+                13
+              ],
+              [
+                70,
+                -64,
+                38
+              ],
+              [
+                20,
+                -64,
+                38
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "STF",
+        "World": 0,
+        "CreateTime": "20261007",
+        "CreateBy": "original-creator",
+        "ModifityTime": "20261012",
+        "ModifityBy": "editing-user",
+        "opaque": {
+          "zero": 0,
+          "no": false,
+          "empty": [],
+          "nothing": null
+        }
+      }
+    }
+  ]
+}

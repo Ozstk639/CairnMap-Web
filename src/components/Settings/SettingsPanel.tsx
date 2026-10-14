@@ -36,6 +36,7 @@ import {
 interface SettingsPanelProps {
   onClose: () => void;
   onOpenConfigStudio?: () => void;
+  onOpenConfigLab?: () => void;
   /** Optional application-owned identity provider; generic settings remain unchanged when absent. */
   reviewAuth?: ReviewAuthPort;
   reviewAuthTitle?: string;
@@ -61,7 +62,7 @@ const RULE_WORLDS: Array<{ id: string; name: string }> = [
   { id: 'laputa', name: '拉普塔' },
 ];
 
-export function SettingsPanel({ onClose, onOpenConfigStudio, reviewAuth, reviewAuthTitle, reviewAuthLoginLabel }: SettingsPanelProps) {
+export function SettingsPanel({ onClose, onOpenConfigStudio, onOpenConfigLab, reviewAuth, reviewAuthTitle, reviewAuthLoginLabel }: SettingsPanelProps) {
   const { cacheInfo, clearCache, forceRefresh, updateCacheInfo } = useDataStore();
   const { startLoading, updateStage, isLoading, activeFlowId, activeRuleWorldId } = useLoadingStore();
   const datasets = useRuleDataStore((s) => s.datasets);
@@ -625,8 +626,8 @@ export function SettingsPanel({ onClose, onOpenConfigStudio, reviewAuth, reviewA
               <span>配置文件工作台</span>
             </div>
             <div className="bg-blue-50 rounded-lg p-3 space-y-2 text-sm text-blue-900">
-              <p>本地可视化编辑分类、字段、显示层级、信息卡与工作流配置。</p>
-              <p className="text-xs">保存前执行完整校验；仅下载本地 Config Package，不直接更新线上配置。</p>
+              <p>本地可视化编辑分类、字段、渲染规则、交互基线与通用包含关系。</p>
+              <p className="text-xs">当前为 V3.2 原生渲染阶段；V1 信息卡和工作流的语义迁移将在下一阶段进行。保存前执行完整校验；仅下载本地 Config Package，不直接更新线上配置。</p>
             </div>
             <AppButton
               onClick={onOpenConfigStudio}
@@ -635,6 +636,13 @@ export function SettingsPanel({ onClose, onOpenConfigStudio, reviewAuth, reviewA
               <SlidersHorizontal className="w-4 h-4" />
               <span>打开配置文件工作台</span>
             </AppButton>
+            {onOpenConfigLab ? <AppButton
+              onClick={onOpenConfigLab}
+              className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-700 hover:bg-slate-800 text-white text-sm rounded-lg transition-colors"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              <span>打开配置运行实验室</span>
+            </AppButton> : null}
           </div>
         ) : null}
 

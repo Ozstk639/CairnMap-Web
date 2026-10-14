@@ -1,0 +1,11 @@
+{
+  "checks": [
+    "clean browser loads the shipped r8/r4 seed without upload",
+    "previous default r2 is archived and refresh consistently selects r4",
+    "custom old content is preserved exactly and can be explicitly restored",
+    "uploaded/selected version survives refresh and is shared by Studio and Lab",
+    "actual workflow Save increments the package and persists edited content across reload",
+    "restore default returns to r4 while saved user versions remain in history"
+  ],
+  "runtimeErrors": []
+}

@@ -8,7 +8,7 @@ import type {
 import { calculateReviewPackageDigest } from './digest';
 
 function nowSegment(clock: () => Date): string {
-  return clock().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14);
+  return clock().toISOString().replace(/\D/g, '').slice(0, 14);
 }
 
 function randomSegment(): string {

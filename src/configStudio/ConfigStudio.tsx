@@ -1,368 +1,664 @@
+import {ColorBindingEditor} from './ColorBindingEditor';
+import { CategoryFileControls } from './CategoryFileControls';
+import { ConfigDialog } from './ConfigDialog';
+import { prepareCategoryImport, prepareClassTreeCommit, readCategoryArtifact, type CategoryImportResult, type CategoryArtifact } from './categoryArtifact';
+import { saveStudioEditingSession } from './configLabStorage';
+import type { ClassTreeSession, StudioEditingSession } from './studioSession';
+import { migrateConfigToR9 } from './r9Migration';
+import { getActiveConfigSnapshot, getStudioSessionSnapshot, readDurableActiveConfig, persistActiveConfig, restoreApplicationDefault } from './defaultConfigProvider';
+import { ValueOptionsEditor } from './ValueOptionsEditor';
+import { ModuleHelp } from './ModuleHelp';
+import { GripOrderControls } from './GripOrderControls';
+import { UnifiedRuleExtensions } from './UnifiedRuleExtensions';
+import { CategoryPathPicker } from './CategoryPathPicker';
+import { CategoryCreationPanel } from './CategoryCreationPanel';
+import { NewRenderRulePanel } from './NewRenderRulePanel';
+import { RenderFieldConditionsEditor } from './RenderFieldConditionsEditor';
+import { renderRuleRange } from './renderRuleConditions';
+import { createEditableConfigPackageFromCurrentProject as createConfigPackageFromCurrentProject, editableGeometryProfile } from './renderRuleTemplates';
+import { FieldAdvancedSettings } from './FieldAdvancedSettings';
+import { ExtraRuleSettings } from './ExtraRuleSettings';
+import { InteractionShapeSettings, RuleInteractionSettings } from './InteractionShapeSettings';
+import { CollisionMetricEditor } from './CollisionMetricEditor';
+import { LabelPlacementSettings } from './LabelPlacementSettings';
+import { NativeSymbolSettings } from './NativeSymbolSettings';
+import { prepareConfigForActivation } from './configActivation';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CircleMarker, MapContainer as LeafletMap, Marker, Polygon, Polyline, useMap, useMapEvents } from 'react-leaflet';
-import { ChevronDown, ChevronRight, Download, FileUp, Maximize2, Minimize2, Plus, SlidersHorizontal, Trash2, X } from 'lucide-react';
-import 'leaflet/dist/leaflet.css';
-import { createDynmapCRS, ZTH_FLAT_CONFIG } from '@/lib/DynmapProjection';
-import { createDynmapTileLayer } from '@/lib/DynmapTileLayer';
+import { ChevronDown, ChevronRight, Download, FileUp, Maximize2, Minimize2, Plus, Save, SlidersHorizontal, X } from 'lucide-react';
 import { buildConfigPackageArchive, downloadConfigPackage, readConfigPackage } from './package';
-import {
-  classificationPathKey,
-  hasDescendants,
-  resolveEffectiveFields,
-  resolveGeometryProfile,
-  resolveSelectableFields,
-  resolveZoomRule,
-  validateConfigPackage,
-} from './runtime';
-import { createConfigPackageFromCurrentProject } from './legacyProjectAdapter';
-import { makeLabelDivIcon } from '@/components/Rules/rendering/labelStyles';
+import { classificationPathKey, fieldScope, fieldShortKey, resolveEffectiveFields, resolveGeometryProfile, resolveRenderExtensions, validateConfigPackage } from './runtime';
+import { ConfigRuntimePreview, PREVIEW_SCENARIOS, previewScenarioCompatible } from './ConfigRuntimePreview';
+import { RenderRuleExtensionsEditor } from './RenderRuleExtensionsEditor';
+import { createV32EngineDefaults, defaultRenderRule } from './v32Defaults';
+import { V3CardEditor } from './V3CardEditor';
+import { WorkflowWorkbench } from './WorkflowWorkbench';
+import { canSwitchStudioTab, type StudioTab } from './studioSession';
 import type {
-  CardConfiguration,
-  CardItem,
   CategoryNode,
   ClassificationPath,
+  Condition,
+  ConfigEngineSettings,
   ConfigPackageV3,
+  ContextBinding,
+  FieldDefinition,
   GeometryInteractionTriggers,
   GeometryKind,
   GeometryProfile,
+  InteractionState,
   MountedFeatureRecord,
-  SearchProfile,
-  WorkflowAssignment,
-  WorkflowControl,
-  WorkflowDefinition,
-  WorkflowStep,
+  PreviewScenario,
+  RenderLabelVisualStyle,
+  RenderRuleConditionalOverride,
+  RenderStyle,
   ZoomPriorityRule,
 } from './types';
 
-type StudioMode = 'feature' | 'workflow';
-
-const geometryLabels: Record<GeometryKind, string> = { Point: '点', LineString: '线', Polygon: '面' };
-const geometryValues: GeometryKind[] = ['Point', 'LineString', 'Polygon'];
-const systemTokens = ['World', 'Class', 'Kind', 'Skind', 'Skind2'];
-
-function readSessionRecords(): MountedFeatureRecord[] {
-  try {
-    const value = sessionStorage.getItem('cairnmap-config-studio-mounted-records');
-    return value ? JSON.parse(value) as MountedFeatureRecord[] : [];
-  } catch {
-    return [];
-  }
+const geometries: GeometryKind[] = ['Point', 'LineString', 'Polygon'];
+const geometryLabel: Record<GeometryKind, string> = { Point: '点', LineString: '线', Polygon: '面' };
+const labelFamilies: Array<{ value: RenderLabelVisualStyle['family']; label: string }> = [
+  { value: 'gm-bw', label: 'gm-bw · 白填充黑描边' },
+  { value: 'gm-outline', label: 'gm-outline · 黑填色白描边' },
+  { value: 'gm-wtb', label: 'gm-wtb · 水域蓝描边' },
+  { value: 'structure-label', label: 'structure-label · 黑字白光晕' },
+  { value: 'bubble-dark', label: 'bubble-dark · 深色气泡' },
+  { value: 'rle-line-color', label: 'rle-line-color · 线路色文字' },
+  { value: 'rle-pill-color', label: 'rle-pill-color · 线路色胶囊' },
+];
+const textOnlyFamilies = new Set<RenderLabelVisualStyle['family']>(['gm-bw', 'gm-outline', 'gm-wtb', 'structure-label']);
+const interactionStates: InteractionState[] = ['hover', 'selected', 'searchResult', 'editing', 'deletionMarked'];
+const interactionStateLabel: Record<InteractionState, string> = {
+  hover: '悬停', selected: '选中', searchResult: '搜索结果', editing: '编辑态', deletionMarked: '删除态',
+};
+function clone<T>(value: T): T { return JSON.parse(JSON.stringify(value)) as T; }
+function uid(prefix: string): string { return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`; }
+function nodeLabel(node: CategoryNode): string {
+  return (['class', 'kind', 'skind', 'skind2'] as const).filter((level) => Boolean(node.path[level])).map((level) => {
+    const code = node.path[level] as string;
+    const name = node.classificationLabels?.[level]?.zh;
+    return name && name !== code ? `${code}（${name}）` : code;
+  }).join(' / ');
 }
-
+function samePath(a: ClassificationPath, b: ClassificationPath): boolean { return classificationPathKey(a) === classificationPathKey(b); }
+function readMountedRecords(): MountedFeatureRecord[] {
+  try { return JSON.parse(sessionStorage.getItem('cairnmap-config-studio-mounted-records') ?? '[]') as MountedFeatureRecord[]; }
+  catch { return []; }
+}
+function readLocalConfig(): ConfigPackageV3 { return getActiveConfigSnapshot(); }
 function updateNode(config: ConfigPackageV3, nodeId: string, updater: (node: CategoryNode) => CategoryNode): ConfigPackageV3 {
   return { ...config, nodes: config.nodes.map((node) => node.nodeId === nodeId ? updater(node) : node) };
 }
+function allFieldKeys(config: ConfigPackageV3, path: ClassificationPath): string[] {
+  return [...new Set(['ID', 'Name', 'World', 'Class', 'Kind', 'Skind', 'Skind2', ...resolveEffectiveFields(config, path).map((field) => field.key)])];
+}
 
-function defaultProfile(geometry: GeometryKind): GeometryProfile {
-  const zLevel = geometry === 'Point' ? 420 : geometry === 'LineString' ? 320 : 360;
-  const color = geometry === 'Point' ? '#e04747' : geometry === 'LineString' ? '#2563eb' : '#334155';
-  return {
-    enabled: false,
-    allowMultipleParts: false,
-    color,
-    geometryStack: { zLevel },
-    label: { visible: true, anchor: 'featureBbox', conditions: [{ kind: 'always' }], collision: { role: 'optional', basePriority: zLevel, hideWhenColliding: true } },
-    zoomPriority: { rules: [{ id: 'default', minExclusive: 0, representation: 'geometry', priority: { mode: 'replace', base: zLevel } }] },
-    interaction: { triggers: geometry === 'Point' ? { point: true, label: true } : geometry === 'LineString' ? { line: true, label: true } : { boundary: true, interior: true, label: true } },
+function defaultLabel(geometry: GeometryKind) {
+  return clone(defaultRenderRule(geometry).label!);
+}
+function defaultStyle(geometry: GeometryKind) {
+  return clone(defaultRenderRule(geometry).style!);
+}
+
+function NumberField({ label, value, onChange, min, max, step = 1, disabled = false }: {
+  label: string; value: number | undefined; onChange: (value: number | undefined) => void; min?: number; max?: number; step?: number; disabled?: boolean;
+}) {
+  return <label className="text-xs">{label}<input disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" type="number" min={min} max={max} step={step} value={value ?? ''} onChange={(event) => onChange(event.target.value === '' ? undefined : Number(event.target.value))} /></label>;
+}
+
+/** Keeps the requested numeric entry and visible 0–1 slider in one source of truth. */
+function OpacityField({ label, value, onChange }: { label: string; value: number | undefined; onChange: (value: number) => void }) {
+  const resolved = Math.min(1, Math.max(0, Number.isFinite(value) ? Number(value) : 1));
+  return <label className="min-w-0 text-xs">{label}<span className="mt-1 grid min-w-0 grid-cols-1 min-[1600px]:grid-cols-[minmax(0,1fr)_4rem] items-center gap-2"><input className="w-full min-w-0" type="range" min="0" max="1" step="0.05" value={resolved} onChange={(event) => onChange(Number(event.target.value))} /><input className="w-full rounded border px-2 py-1" type="number" min="0" max="1" step="0.05" value={resolved} onChange={(event) => onChange(Math.min(1, Math.max(0, Number(event.target.value))))} /></span></label>;
+}
+
+/** Field-conditioned branches are still inside one inclusive Zoom rule.  This
+ * is deliberately a small, typed editor because V1 only uses them for a few
+ * real branches (for example RLE direction and PLF connection state), not a
+ * second parallel time line. */
+function ConditionalOverridesEditor({ config, path, geometry, rule, onChange }: {
+  config: ConfigPackageV3; path: ClassificationPath; geometry: GeometryKind; rule: ZoomPriorityRule; onChange: (next: ZoomPriorityRule) => void;
+}) {
+  const fields = allFieldKeys(config, path);
+  const overrides = rule.conditionalOverrides ?? [];
+  const representations = geometry === 'Polygon'
+    ? [['hidden', '隐藏'], ['point', '面内中点'], ['geometry', '显示面'], ['labelOnly', '仅标签']]
+    : geometry === 'LineString' ? [['hidden', '隐藏'], ['geometry', '显示线'], ['labelOnly', '仅标签']]
+      : [['hidden', '隐藏'], ['geometry', '显示点'], ['labelOnly', '仅标签']];
+  const patch = (index: number, next: RenderRuleConditionalOverride) => onChange({ ...rule, conditionalOverrides: overrides.map((item, current) => current === index ? next : item) });
+  const add = () => {
+    const baseLabel = rule.label ? clone(rule.label) : defaultLabel(geometry);
+    const next: RenderRuleConditionalOverride = {
+      id: uid('field-branch'),
+      when: [{ kind: 'fieldEquals', field: fields[0] ?? 'Name', value: '' }],
+      representation: rule.representation,
+      label: { ...baseLabel, visible: false },
+    };
+    onChange({ ...rule, conditionalOverrides: [...overrides, next] });
   };
-}
-
-function CategoryPathPicker({ config, selected, onSelect }: { config: ConfigPackageV3; selected: CategoryNode; onSelect: (nodeId: string) => void }) {
-  const path = selected.path;
-  const values = (items: Array<string | undefined>) => [...new Set(items.filter((item): item is string => Boolean(item)))].sort();
-  const classes = values(config.nodes.map((node) => node.path.class));
-  const kinds = values(config.nodes.filter((node) => node.path.class === path.class).map((node) => node.path.kind));
-  const skinds = values(config.nodes.filter((node) => node.path.class === path.class && node.path.kind === path.kind).map((node) => node.path.skind));
-  const skind2s = values(config.nodes.filter((node) => node.path.class === path.class && node.path.kind === path.kind && node.path.skind === path.skind).map((node) => node.path.skind2));
-  const choose = (next: ClassificationPath) => {
-    const match = config.nodes.find((node) => classificationPathKey(node.path) === classificationPathKey(next))
-      ?? config.nodes.find((node) => node.path.class === next.class && !node.path.kind);
-    if (match) onSelect(match.nodeId);
+  const conditionFor = (kind: 'fieldEquals' | 'fieldIn' | 'fieldPresent', field: string, value = '', present = true): Condition => {
+    if (kind === 'fieldIn') return { kind, field, values: value.split(',').map((item) => item.trim()).filter(Boolean) };
+    if (kind === 'fieldPresent') return { kind, field, present };
+    return { kind, field, value };
   };
-  return <section className="rounded border bg-slate-50 p-3"><div className="mb-2 text-sm font-medium">编辑分类</div><div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-    <label className="text-xs">一级 Class<select className="mt-1 w-full rounded border bg-white px-2 py-1.5" value={path.class} onChange={(event) => choose({ class: event.target.value })}>{classes.map((value) => <option key={value}>{value}</option>)}</select></label>
-    <label className="text-xs">二级 Kind<select className="mt-1 w-full rounded border bg-white px-2 py-1.5" value={path.kind ?? ''} onChange={(event) => choose({ class: path.class, ...(event.target.value ? { kind: event.target.value } : {}) })}><option value="">（继承 Class）</option>{kinds.map((value) => <option key={value}>{value}</option>)}</select></label>
-    <label className="text-xs">三级 Skind<select className="mt-1 w-full rounded border bg-white px-2 py-1.5" value={path.skind ?? ''} disabled={!path.kind} onChange={(event) => choose({ class: path.class, kind: path.kind, ...(event.target.value ? { skind: event.target.value } : {}) })}><option value="">（继承 Kind）</option>{skinds.map((value) => <option key={value}>{value}</option>)}</select></label>
-    <label className="text-xs">四级 Skind2<select className="mt-1 w-full rounded border bg-white px-2 py-1.5" value={path.skind2 ?? ''} disabled={!path.skind} onChange={(event) => choose({ class: path.class, kind: path.kind, skind: path.skind, ...(event.target.value ? { skind2: event.target.value } : {}) })}><option value="">（继承 Skind）</option>{skind2s.map((value) => <option key={value}>{value}</option>)}</select></label>
-  </div></section>;
+  return <details className="rounded border border-amber-200 bg-amber-50/40 p-2"><summary className="cursor-pointer text-sm font-medium">字段条件分支（同一 Zoom 规则内）</summary><p className="mt-1 text-xs text-slate-600">用于真实 V1 的方向、关联状态等字段分支。分支不会新增 Zoom 区间；顺序从上至下覆盖，后一个命中的分支优先。</p>
+    <div className="mt-2 space-y-2">{overrides.map((override, index) => {
+      const source = override.when[0] ?? { kind: 'fieldEquals' as const, field: fields[0] ?? 'Name', value: '' };
+      const conditionKind = source.kind === 'fieldIn' || source.kind === 'fieldPresent' ? source.kind : 'fieldEquals';
+      const sourceField = source.kind === 'always' || source.kind === 'zoomRange' || source.kind === 'bboxArea' ? fields[0] ?? 'Name' : source.field;
+      const sourceValue = source.kind === 'fieldIn' ? source.values.join(', ') : source.kind === 'fieldEquals' ? source.value : '';
+      const baseStyle = override.style;
+      const branchLabel = override.label;
+      const updateCondition = (kind: 'fieldEquals' | 'fieldIn' | 'fieldPresent' = conditionKind, field = sourceField, value = sourceValue, present = source.kind === 'fieldPresent' ? source.present : true) => patch(index, { ...override, when: [conditionFor(kind, field, value, present)] });
+      return <article key={override.id} className="rounded border bg-white p-2"><div className="grid gap-2 md:grid-cols-[10rem_1fr_1fr_auto]"><label className="text-xs">条件<select className="mt-1 w-full rounded border px-2 py-1" value={conditionKind} onChange={(event) => updateCondition(event.target.value as typeof conditionKind)}><option value="fieldEquals">字段等于</option><option value="fieldIn">字段属于（多值）</option><option value="fieldPresent">字段存在/为空</option></select></label><label className="text-xs">字段<select className="mt-1 w-full rounded border px-2 py-1" value={sourceField} onChange={(event) => updateCondition(conditionKind, event.target.value)}>{fields.map((field) => <option key={field}>{field}</option>)}</select></label>{conditionKind === 'fieldPresent' ? <label className="inline-flex items-center gap-1 pt-5 text-xs"><input type="checkbox" checked={source.kind === 'fieldPresent' ? source.present : true} onChange={(event) => updateCondition(conditionKind, sourceField, '', event.target.checked)} />字段存在时命中</label> : <label className="text-xs">{conditionKind === 'fieldIn' ? '匹配值（逗号分隔）' : '匹配值'}<input className="mt-1 w-full rounded border px-2 py-1" value={sourceValue} onChange={(event) => updateCondition(conditionKind, sourceField, event.target.value)} /></label>}<button type="button" className="mt-5 text-xs text-rose-700" onClick={() => onChange({ ...rule, conditionalOverrides: overrides.filter((_, current) => current !== index) })}>删除分支</button></div>
+        <div className="mt-2 grid gap-2 md:grid-cols-3"><label className="text-xs">该分支显示种类<select className="mt-1 w-full rounded border px-2 py-1" value={override.representation ?? rule.representation ?? 'geometry'} onChange={(event) => patch(index, { ...override, representation: event.target.value as RenderRuleConditionalOverride['representation'] })}>{representations.map(([value, name]) => <option key={value} value={value}>{name}</option>)}</select></label><label className="inline-flex items-center gap-1 pt-5 text-xs"><input type="checkbox" checked={Boolean(baseStyle)} onChange={(event) => patch(index, { ...override, style: event.target.checked ? clone(rule.style ?? defaultStyle(geometry)) : undefined })} />覆盖显示效果</label><label className="inline-flex items-center gap-1 pt-5 text-xs"><input type="checkbox" checked={Boolean(branchLabel)} onChange={(event) => patch(index, { ...override, label: event.target.checked ? clone(rule.label ?? defaultLabel(geometry)) : undefined })} />覆盖 Label 效果</label></div>
+        {baseStyle ? <div className="mt-2 rounded border border-slate-200 p-2"><div className="grid gap-2 md:grid-cols-4"><NumberField label="点大小" value={baseStyle.size} min={1} onChange={(value) => patch(index, { ...override, style: { ...baseStyle, size: value } })} /><NumberField label="描边粗细" value={baseStyle.weight} min={0} step={0.5} onChange={(value) => patch(index, { ...override, style: { ...baseStyle, weight: value } })} /><OpacityField label="描边透明度" value={baseStyle.strokeOpacity} onChange={(value) => patch(index, { ...override, style: { ...baseStyle, strokeOpacity: value } })} /><OpacityField label="填色透明度" value={baseStyle.fillOpacity ?? 0.88} onChange={(value) => patch(index, { ...override, style: { ...baseStyle, fillOpacity: value } })} /></div><div className="mt-2 grid gap-2 md:grid-cols-2"><ColorBindingEditor config={config} sourcePath={path} fields={fields} label="条件描边" value={baseStyle.stroke} onChange={(stroke) => patch(index, { ...override, style: { ...baseStyle, stroke } })} /><ColorBindingEditor config={config} sourcePath={path} fields={fields} label="条件填色" value={baseStyle.fill ?? { mode: 'fixed', color: '#334155' }} onChange={(fill) => patch(index, { ...override, style: { ...baseStyle, fill } })} /></div></div> : null}
+        {branchLabel ? <div className="mt-2 grid gap-2 rounded border border-slate-200 p-2 md:grid-cols-4"><label className="inline-flex items-center gap-1 pt-5 text-xs"><input type="checkbox" checked={branchLabel.visible} onChange={(event) => patch(index, { ...override, label: { ...branchLabel, visible: event.target.checked } })} />显示 Label</label><label className="text-xs">样式<select className="mt-1 w-full rounded border px-2 py-1" value={branchLabel.style?.family ?? 'gm-outline'} onChange={(event) => patch(index, { ...override, label: { ...branchLabel, style: { ...(branchLabel.style ?? { size: 14 }), family: event.target.value as RenderLabelVisualStyle['family'] } } })}>{labelFamilies.map((family) => <option key={family.value} value={family.value}>{family.label}</option>)}</select></label><NumberField label="Label 大小" value={branchLabel.style?.size ?? 14} min={6} max={72} onChange={(value) => patch(index, { ...override, label: { ...branchLabel, style: { ...(branchLabel.style ?? { family: 'gm-outline' }), size: value ?? 14 } } })} /><label className="text-xs">来源<select className="mt-1 w-full rounded border px-2 py-1" value={branchLabel.source ?? 'Name'} onChange={(event) => patch(index, { ...override, label: { ...branchLabel, source: event.target.value } })}>{fields.map((field) => <option key={field}>{field}</option>)}</select></label></div> : null}
+        <details className="mt-2 rounded border p-2"><summary className="text-xs">条件分支高级设置</summary>{(() => {
+          const branch: ZoomPriorityRule = { ...rule, ...override, when: rule.when, conditionalOverrides: undefined, extensions: override.extensions ?? {}, style: override.style ?? rule.style, label: override.label ?? rule.label };
+          const update = (next: ZoomPriorityRule) => patch(index, { ...override, style: next.style, label: next.label, priority: next.priority, geometryStack: next.geometryStack, extensions: next.extensions });
+          return <><NativeSymbolSettings rule={branch} onChange={update} allowOffsets={geometry === 'Point' || branch.representation === 'point'} /><LabelPlacementSettings rule={branch} onChange={update} allowDecoration={geometry === 'Point' && branch.style?.symbolVisibility !== 'withLabel'} /><CollisionMetricEditor rule={branch} onChange={update} fields={fields} /><UnifiedRuleExtensions config={config} path={path} fields={fields} geometry={geometry} rule={branch} onChange={update} /></>;
+        })()}</details>
+      </article>;
+    })}</div><button type="button" className="mt-2 inline-flex items-center gap-1 rounded border px-2 py-1 text-xs" onClick={add}><Plus className="h-3 w-3" />添加字段条件分支</button>
+  </details>;
 }
 
-/** Controlled four-level selector used by relation links and searches. */
-function PathSelector({ config, value, onChange, label = '目标分类', editableClass = false }: { config: ConfigPackageV3; value: ClassificationPath; onChange: (value: ClassificationPath) => void; label?: string; editableClass?: boolean }) {
-  const values = (items: Array<string | undefined>) => [...new Set(items.filter((item): item is string => Boolean(item)))].sort();
-  const classes = values(config.nodes.map((node) => node.path.class));
-  const kinds = values(config.nodes.filter((node) => node.path.class === value.class).map((node) => node.path.kind));
-  const skinds = values(config.nodes.filter((node) => node.path.class === value.class && node.path.kind === value.kind).map((node) => node.path.skind));
-  const skind2s = values(config.nodes.filter((node) => node.path.class === value.class && node.path.kind === value.kind && node.path.skind === value.skind).map((node) => node.path.skind2));
-  return <fieldset className="grid gap-2 rounded border border-slate-200 p-2 sm:grid-cols-2 xl:grid-cols-4"><legend className="px-1 text-xs text-slate-500">{label}</legend>
-    <label className="text-xs">Class{editableClass ? <><input className="mt-1 w-full rounded border px-2 py-1" list="config-studio-class-options" value={value.class} placeholder="输入或选择 Class" onChange={(event) => onChange({ class: event.target.value })} /><datalist id="config-studio-class-options">{classes.map((item) => <option key={item} value={item} />)}</datalist></> : <select className="mt-1 w-full rounded border px-2 py-1" value={value.class} onChange={(event) => onChange({ class: event.target.value })}><option value="">选择 Class</option>{classes.map((item) => <option key={item}>{item}</option>)}</select>}</label>
-    <label className="text-xs">Kind<select className="mt-1 w-full rounded border px-2 py-1" disabled={!value.class} value={value.kind ?? ''} onChange={(event) => onChange({ class: value.class, ...(event.target.value ? { kind: event.target.value } : {}) })}><option value="">全部 Kind</option>{kinds.map((item) => <option key={item}>{item}</option>)}</select></label>
-    <label className="text-xs">Skind<select className="mt-1 w-full rounded border px-2 py-1" disabled={!value.kind} value={value.skind ?? ''} onChange={(event) => onChange({ class: value.class, kind: value.kind, ...(event.target.value ? { skind: event.target.value } : {}) })}><option value="">全部 Skind</option>{skinds.map((item) => <option key={item}>{item}</option>)}</select></label>
-    <label className="text-xs">Skind2<select className="mt-1 w-full rounded border px-2 py-1" disabled={!value.skind} value={value.skind2 ?? ''} onChange={(event) => onChange({ class: value.class, kind: value.kind, skind: value.skind, ...(event.target.value ? { skind2: event.target.value } : {}) })}><option value="">全部 Skind2</option>{skind2s.map((item) => <option key={item}>{item}</option>)}</select></label>
-  </fieldset>;
+function RuleExtensionsEditor({ geometry, rule, onChange }: { geometry: GeometryKind; rule: ZoomPriorityRule; onChange: (rule: ZoomPriorityRule) => void }) {
+  const ext = rule.extensions ?? {};
+  const screen = ext.screenGate ?? { mode: 'inherit' as const };
+  const labelText = ext.labelText ?? {};
+  const density = ext.density ?? { mode: 'inherit' as const };
+  const lineLabel = ext.lineLabel ?? { profile: 'inherit' as const };
+  const anchorOptions = geometry === 'Point'
+    ? [['inherit', '继承'], ['featureCenter', '完整中心']]
+    : geometry === 'LineString'
+      ? [['inherit', '继承'], ['featureCenter', '完整中心'], ['lineCenter', '线中点'], ['lineCandidates', '线候选点']]
+      : [['inherit', '继承'], ['featureCenter', '完整中心'], ['interior', '面内固定'], ['visibleInterior', '可见面内']];
+  const anchorCandidates = ['C', 'N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW'] as const;
+  const patch = (next: typeof ext) => onChange({ ...rule, extensions: next });
+  return <details className="rounded border border-indigo-200 bg-indigo-50/40 p-2"><summary className="cursor-pointer text-sm font-medium">扩展规则（引擎默认值，可按规则覆盖）</summary>
+    <p className="mt-1 text-xs text-slate-600">Pane、点击容差、屏幕面积/长度、文字截断、候选锚点、密度预算和线标签算法均为类型化字段；没有 JSON 回退和 V1 成品规则开关。</p>
+    <div className="mt-2 grid gap-2 md:grid-cols-4"><label className="text-xs">屏幕阈值<select className="mt-1 w-full rounded border px-2 py-1" value={screen.mode} onChange={(event) => patch({ ...ext, screenGate: { ...screen, mode: event.target.value as 'inherit' | 'override' } })}><option value="inherit">继承全局</option><option value="override">本规则覆盖</option></select></label>
+      {geometry === 'Polygon' ? <NumberField label="最小屏幕面积 px²" value={screen.minScreenAreaPx} min={0} disabled={screen.mode !== 'override'} onChange={(value) => patch({ ...ext, screenGate: { ...screen, minScreenAreaPx: value } })} /> : null}
+      {geometry === 'LineString' ? <NumberField label="最小屏幕长度 px" value={screen.minScreenLengthPx} min={0} disabled={screen.mode !== 'override'} onChange={(value) => patch({ ...ext, screenGate: { ...screen, minScreenLengthPx: value } })} /> : null}
+      <label className="text-xs">Pane 覆盖<select className="mt-1 w-full rounded border px-2 py-1" value={ext.pane ?? 'auto'} onChange={(event) => patch({ ...ext, pane: event.target.value as NonNullable<typeof ext.pane> })}><option value="auto">自动（引擎默认）</option><option value="overlay">普通线/面</option><option value="overlay-top">顶层线/面</option><option value="point">普通点</option><option value="point-top">顶层点</option></select></label>
+      <NumberField label="点击容差 px" value={ext.hitTolerancePx} min={0} max={80} onChange={(value) => patch({ ...ext, hitTolerancePx: value })} />
+    </div>
+    <div className="mt-2 grid gap-2 md:grid-cols-4"><NumberField label="Label 最大字符数" value={labelText.maxChars} min={1} onChange={(value) => patch({ ...ext, labelText: { ...labelText, maxChars: value } })} />
+      <label className="text-xs">多行 Label<input className="ml-2" type="checkbox" checked={Boolean(labelText.multiline)} onChange={(event) => patch({ ...ext, labelText: { ...labelText, multiline: event.target.checked } })} /></label>
+      <NumberField label="最大行数" value={labelText.maxLines} min={1} disabled={!labelText.multiline} onChange={(value) => patch({ ...ext, labelText: { ...labelText, maxLines: value } })} />
+      <label className="text-xs">截断后缀<input className="mt-1 w-full rounded border px-2 py-1" value={labelText.suffix ?? '…'} onChange={(event) => patch({ ...ext, labelText: { ...labelText, suffix: event.target.value } })} /></label>
+    </div>
+    <div className="mt-2 rounded border border-indigo-100 bg-white p-2"><div className="grid gap-2 md:grid-cols-3"><label className="text-xs">候选锚点策略<select className="mt-1 w-full rounded border px-2 py-1" value={ext.anchor?.strategy ?? 'inherit'} onChange={(event) => patch({ ...ext, anchor: { ...ext.anchor, strategy: event.target.value as NonNullable<typeof ext.anchor>['strategy'] } })}>{anchorOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+      <label className="inline-flex items-center gap-1 pt-5 text-xs"><input type="checkbox" checked={Boolean(ext.anchor?.preferViewportCenter)} onChange={(event) => patch({ ...ext, anchor: { ...ext.anchor, preferViewportCenter: event.target.checked } })} />大要素优先视窗中心</label>
+      <label className="text-xs">密度预算<select className="mt-1 w-full rounded border px-2 py-1" value={density.mode} onChange={(event) => patch({ ...ext, density: { ...density, mode: event.target.value as 'inherit' | 'override' } })}><option value="inherit">继承</option><option value="override">本规则覆盖</option></select></label></div>
+      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs"><span>候选方向：</span>{anchorCandidates.map((candidate) => <label key={candidate}><input type="checkbox" checked={Boolean(ext.anchor?.candidates?.includes(candidate))} onChange={(event) => { const next = new Set(ext.anchor?.candidates ?? []); if (event.target.checked) next.add(candidate); else next.delete(candidate); patch({ ...ext, anchor: { ...ext.anchor, candidates: [...next] } }); }} /> {candidate}</label>)}</div>
+      <div className="mt-2 grid gap-2 md:grid-cols-3"><NumberField label="密度网格 px" value={density.gridSizePx} min={1} disabled={density.mode !== 'override'} onChange={(value) => patch({ ...ext, density: { ...density, gridSizePx: value } })} /><NumberField label="每格最多 Label" value={density.maxLabelsPerGrid} min={1} disabled={density.mode !== 'override'} onChange={(value) => patch({ ...ext, density: { ...density, maxLabelsPerGrid: value } })} /><NumberField label="每格最多符号" value={density.maxSymbolsPerGrid} min={1} disabled={density.mode !== 'override'} onChange={(value) => patch({ ...ext, density: { ...density, maxSymbolsPerGrid: value } })} /></div>
+    </div>
+    {geometry === 'LineString' ? <div className="mt-2 rounded border border-indigo-100 bg-white p-2"><div className="grid gap-2 md:grid-cols-3"><label className="text-xs">线标签算法<select className="mt-1 w-full rounded border px-2 py-1" value={lineLabel.profile} onChange={(event) => patch({ ...ext, lineLabel: { ...lineLabel, profile: event.target.value as NonNullable<typeof ext.lineLabel>['profile'] } })}><option value="inherit">继承</option><option value="standard">标准</option><option value="network">网络</option><option value="strict-on-line">严格沿线</option></select></label><label className="text-xs">线文字模式<select className="mt-1 w-full rounded border px-2 py-1" value={lineLabel.textMode ?? 'auto'} onChange={(event) => patch({ ...ext, lineLabel: { ...lineLabel, textMode: event.target.value as NonNullable<typeof lineLabel.textMode> } })}><option value="auto">自动</option><option value="rotatedLabel">旋转文字</option><option value="textPath">沿线字形</option></select></label><NumberField label="端点留白比例" value={lineLabel.endpointPaddingRatio} min={0} step={0.01} onChange={(value) => patch({ ...ext, lineLabel: { ...lineLabel, endpointPaddingRatio: value } })} /></div><div className="mt-2 grid gap-2 md:grid-cols-3"><NumberField label="端点最小留白 px" value={lineLabel.endpointPaddingMinPx} min={0} onChange={(value) => patch({ ...ext, lineLabel: { ...lineLabel, endpointPaddingMinPx: value } })} /><NumberField label="最大转角" value={lineLabel.maxTurnAngleDeg} min={0} max={180} onChange={(value) => patch({ ...ext, lineLabel: { ...lineLabel, maxTurnAngleDeg: value } })} /><NumberField label="最小线长 px" value={lineLabel.minLengthPx} min={0} onChange={(value) => patch({ ...ext, lineLabel: { ...lineLabel, minLengthPx: value } })} /></div></div> : null}
+  </details>;
+}
+// Kept as a read-only compatibility reference while the complete editor lives
+// in RenderRuleExtensionsEditor.  It helps old saved JSX snapshots remain
+// explainable without becoming a second editable contract.
+void RuleExtensionsEditor;
+
+function LegacyRenderRuleEditor({ config, path, geometry, profile, onChange }: { config: ConfigPackageV3; path: ClassificationPath; geometry: GeometryKind; profile: GeometryProfile; onChange: (value: GeometryProfile) => void }) {
+  const rules = profile.zoomPriority.rules;
+  const fields = allFieldKeys(config, path);
+  const update = (ruleId: string, patch: Partial<ZoomPriorityRule>) => onChange({ ...profile, zoomPriority: { rules: rules.map((rule) => rule.id === ruleId ? { ...rule, ...patch } : rule) } });
+  const updateRule = (next: ZoomPriorityRule) => update(next.id, next);
+  const append = () => {
+    const last = rules[rules.length - 1] ?? defaultRenderRule(geometry);
+    const min = Math.max(0, Number(last.minZoom ?? 0));
+    const max = Math.min(8, Number(last.maxZoom ?? 8));
+    // The intervals are inclusive.  Copying a 0–8 rule verbatim would make
+    // the freshly added rule invalid until the author manually repairs both
+    // ends, which is a particularly easy way to lose a draft after pressing
+    // “添加渲染规则”. Split the previous final interval into two adjacent,
+    // non-overlapping intervals instead. The copied visual settings remain
+    // editable on the new half.
+    if (!Number.isFinite(min) || !Number.isFinite(max) || min >= max) return;
+    const split = Math.floor((min + max) / 2);
+    const next = clone(last);
+    next.id = uid('render');
+    next.minZoom = split + 1;
+    next.maxZoom = max;
+    onChange({
+      ...profile,
+      zoomPriority: {
+        rules: rules.map((rule) => rule.id === last.id ? { ...rule, maxZoom: split } : rule).concat(next),
+      },
+    });
+  };
+  const representationOptions = geometry === 'Polygon'
+    ? [['hidden', '隐藏'], ['point', '面内中点'], ['geometry', '显示面'], ['labelOnly', '仅标签']]
+    : geometry === 'LineString'
+      ? [['hidden', '隐藏'], ['geometry', '显示线'], ['labelOnly', '仅标签']]
+      : [['hidden', '隐藏'], ['geometry', '显示点'], ['labelOnly', '仅标签']];
+  return <section className="space-y-3"><div><h4 className="font-semibold">渲染规则</h4><p className="mt-1 text-xs text-slate-500">规则 Zoom 区间是唯一的渲染规则对象（沿用 V1 的 round(Leaflet Zoom + 3)、0–8 映射）。每条规则独立拥有样式、Label、层级、优先级及扩展覆盖；渲染规则 1 不可删除。</p></div>
+    {rules.map((rule, index) => {
+      const style = rule.style ?? defaultStyle(geometry);
+      const label = rule.label ?? defaultLabel(geometry);
+      const visual = label.style ?? defaultLabel(geometry).style!;
+      const pointLike = geometry === 'Point' || rule.representation === 'point';
+      const supportsFill = geometry !== 'LineString' || pointLike;
+      const updateStyle = (patch: Partial<RenderStyle>) => update(rule.id, { style: { ...style, ...patch } });
+      const updateLabel = (patch: Partial<typeof label>) => update(rule.id, { label: { ...label, ...patch } });
+      const updateVisual = (patch: Partial<RenderLabelVisualStyle>) => updateLabel({ style: { ...visual, ...patch } });
+      const metricKinds = geometry === 'Point' ? ['partCount', 'field'] : geometry === 'LineString' ? ['length', 'partCount', 'field'] : ['area', 'partCount', 'field'];
+      return <details key={rule.id} open={index === 0} className="rounded border bg-slate-50 p-3"><summary className="cursor-pointer font-medium">渲染规则 {index + 1} · {rule.minZoom ?? 0} ≤ Zoom ≤ {rule.maxZoom ?? 8}</summary><div className="mt-3 space-y-3">
+        <div className="grid gap-2 md:grid-cols-[1fr_auto_1fr_1fr_auto]"><NumberField label="下界" value={rule.minZoom} min={0} max={8} onChange={(value) => update(rule.id, { minZoom: value })} /><span className="pt-6 text-sm">≤ Zoom ≤</span><NumberField label="上界" value={rule.maxZoom} min={0} max={8} onChange={(value) => update(rule.id, { maxZoom: value })} /><label className="text-xs">显示种类<select className="mt-1 w-full rounded border px-2 py-1" value={rule.representation ?? 'geometry'} onChange={(event) => update(rule.id, { representation: event.target.value as ZoomPriorityRule['representation'] })}>{representationOptions.map(([value, name]) => <option key={value} value={value}>{name}</option>)}</select></label>{rules.length > 1 ? <button type="button" className="mt-5 text-xs text-rose-700" onClick={() => onChange({ ...profile, zoomPriority: { rules: rules.filter((item) => item.id !== rule.id) } })}>删除</button> : <span />}</div>
+        {rule.representation !== 'hidden' ? <section className="rounded border bg-white p-2"><h5 className="font-medium">显示效果</h5><div className="mt-2 grid gap-2 md:grid-cols-4"><label className="text-xs">显示效果<select className="mt-1 w-full rounded border px-2 py-1" value={pointLike ? style.pointShape ?? 'circle' : style.dashPreset ?? 'solid'} onChange={(event) => updateStyle(pointLike ? { pointShape: event.target.value as RenderStyle['pointShape'] } : { dashPreset: event.target.value as RenderStyle['dashPreset'] })}>{pointLike ? [['circle', '圆圈'], ['square', '方块'], ['triangle', '三角'], ['regular4', '正方形'], ['regular5', '五边形'], ['regular6', '六边形']].map(([value, name]) => <option key={value} value={value}>{name}</option>) : [['solid', '实线'], ['dash', '虚线'], ['dotDash', '点-短线虚线'], ['dotDotDash', '点-点-短线虚线']].map(([value, name]) => <option key={value} value={value}>{name}</option>)}</select></label>{pointLike ? <NumberField label="大小" value={style.size} min={1} onChange={(value) => updateStyle({ size: value })} /> : null}<NumberField label="描边粗细" value={style.weight} min={0} step={0.5} onChange={(value) => updateStyle({ weight: value })} />{geometry !== 'Point' ? <><label className="text-xs">线端<select className="mt-1 w-full rounded border px-2 py-1" value={style.lineCap ?? 'round'} onChange={(event) => updateStyle({ lineCap: event.target.value as RenderStyle['lineCap'] })}><option value="round">圆</option><option value="butt">平</option><option value="square">方</option></select></label><label className="text-xs">转角<select className="mt-1 w-full rounded border px-2 py-1" value={style.lineJoin ?? 'round'} onChange={(event) => updateStyle({ lineJoin: event.target.value as RenderStyle['lineJoin'] })}><option value="round">圆</option><option value="miter">尖</option><option value="bevel">斜</option></select></label></> : null}</div><div className={`mt-2 grid gap-2 ${supportsFill ? 'lg:grid-cols-2' : ''}`}><ColorBindingEditor config={config} sourcePath={path} fields={fields} label="描边" value={style.stroke} onChange={(stroke) => updateStyle({ stroke })} />{supportsFill ? <ColorBindingEditor config={config} sourcePath={path} fields={fields} label="填色" value={style.fill ?? { mode: 'fixed', color: '#334155' }} onChange={(fill) => updateStyle({ fill })} /> : null}</div><div className="mt-2 grid gap-2 sm:grid-cols-2"><OpacityField label="描边透明度" value={style.strokeOpacity} onChange={(value) => updateStyle({ strokeOpacity: value })} />{supportsFill ? <OpacityField label="填色透明度" value={style.fillOpacity ?? (geometry === 'Polygon' ? 0.24 : 0.88)} onChange={(value) => updateStyle({ fillOpacity: value })} /> : null}</div>{pointLike ? <details className="mt-2 rounded border border-slate-200 bg-slate-50 p-2"><summary className="cursor-pointer text-xs font-medium">图标覆盖（本 Zoom 规则）</summary><div className="mt-2 grid gap-2 md:grid-cols-5"><label className="inline-flex items-center gap-1 pt-5 text-xs"><input type="checkbox" checked={Boolean(style.icon)} onChange={(event) => updateStyle({ icon: event.target.checked ? { source: fields.find((field) => /icon|image|picture/i.test(field)) ?? fields[0] ?? 'iconUrl', size: [32, 32], anchor: [16, 16], fallback: 'circle' } : undefined })} />使用外部图标字段</label>{style.icon ? <><label className="text-xs">图标 URL 字段<select className="mt-1 w-full rounded border px-2 py-1" value={style.icon.source} onChange={(event) => updateStyle({ icon: { ...style.icon!, source: event.target.value } })}>{fields.map((field) => <option key={field}>{field}</option>)}</select></label><NumberField label="宽度 px" value={style.icon.size[0]} min={1} onChange={(value) => updateStyle({ icon: { ...style.icon!, size: [value ?? 32, style.icon!.size[1]] } })} /><NumberField label="高度 px" value={style.icon.size[1]} min={1} onChange={(value) => updateStyle({ icon: { ...style.icon!, size: [style.icon!.size[0], value ?? 32] } })} /><label className="text-xs">URL 缺失时<select className="mt-1 w-full rounded border px-2 py-1" value={style.icon.fallback} onChange={(event) => updateStyle({ icon: { ...style.icon!, fallback: event.target.value as typeof style.icon.fallback } })}><option value="circle">使用本规则点样式</option><option value="hide">隐藏</option></select></label></> : null}</div>{style.icon ? <div className="mt-2 grid gap-2 md:grid-cols-2"><NumberField label="锚点 X px" value={style.icon.anchor[0]} onChange={(value) => updateStyle({ icon: { ...style.icon!, anchor: [value ?? 16, style.icon!.anchor[1]] } })} /><NumberField label="锚点 Y px" value={style.icon.anchor[1]} onChange={(value) => updateStyle({ icon: { ...style.icon!, anchor: [style.icon!.anchor[0], value ?? 16] } })} /></div> : null}</details> : null}</section> : null}
+        <section className="rounded border bg-white p-2"><h5 className="font-medium">Label 效果</h5><div className="mt-2 grid gap-2 md:grid-cols-5"><label className="inline-flex items-center gap-1 text-sm"><input type="checkbox" checked={label.visible} onChange={(event) => updateLabel({ visible: event.target.checked })} />显示 Label</label><label className="text-xs">样式<select className="mt-1 w-full rounded border px-2 py-1" value={visual.family} onChange={(event) => updateVisual({ family: event.target.value as RenderLabelVisualStyle['family'], ...(textOnlyFamilies.has(event.target.value as RenderLabelVisualStyle['family']) ? {} : { modifiers: {} }) })}>{labelFamilies.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label><NumberField label="大小" value={visual.size} min={6} max={72} onChange={(value) => updateVisual({ size: value ?? 14 })} /><label className="text-xs">来源<select className="mt-1 w-full rounded border px-2 py-1" value={label.source ?? 'Name'} onChange={(event) => updateLabel({ source: event.target.value })}>{fields.map((field) => <option key={field}>{field}</option>)}</select></label>{textOnlyFamilies.has(visual.family) ? <span className="flex flex-col gap-1 pt-1 text-xs"><label><input type="checkbox" checked={Boolean(visual.modifiers?.italic)} onChange={(event) => updateVisual({ modifiers: { ...visual.modifiers, italic: event.target.checked } })} /> 斜体</label><label><input type="checkbox" checked={Boolean(visual.modifiers?.underline)} onChange={(event) => updateVisual({ modifiers: { ...visual.modifiers, underline: event.target.checked } })} /> 下划线</label></span> : <span className="pt-5 text-xs text-slate-400">该样式不支持斜体/下划线</span>}</div><div className="mt-2 grid gap-2 md:grid-cols-6"><label className="text-xs md:col-span-2">回退来源（逗号分隔，按顺序）<input className="mt-1 w-full rounded border px-2 py-1" value={(label.fallbackSources ?? []).join(', ')} placeholder="例如 ID, NofFloor" onChange={(event) => updateLabel({ fallbackSources: event.target.value.split(',').map((value) => value.trim()).filter(Boolean) })} /></label><label className="text-xs">主来源格式<select className="mt-1 w-full rounded border px-2 py-1" value={label.valueFormat ?? 'plain'} onChange={(event) => updateLabel({ valueFormat: event.target.value as NonNullable<typeof label.valueFormat> })}><option value="plain">原文</option><option value="floorLabel">楼层号格式</option></select></label><label className="text-xs">标签位置<select className="mt-1 w-full rounded border px-2 py-1" value={label.placement ?? 'center'} onChange={(event) => updateLabel({ placement: event.target.value as NonNullable<typeof label.placement> })}>{labelPlacementOptions.map(([value, text]) => <option key={value} value={value}>{text}</option>)}</select></label><NumberField label="X 偏移 px" value={label.offsetX} onChange={(value) => updateLabel({ offsetX: value })} /><NumberField label="Y 偏移 px" value={label.offsetY} onChange={(value) => updateLabel({ offsetY: value })} /></div><div className="mt-2 grid gap-2 md:grid-cols-4"><label className="text-xs">首个回退格式<select className="mt-1 w-full rounded border px-2 py-1" value={label.fallbackValueFormats?.[(label.fallbackSources ?? [])[0] ?? ''] ?? 'plain'} disabled={!(label.fallbackSources ?? []).length} onChange={(event) => { const source = (label.fallbackSources ?? [])[0]; if (!source) return; updateLabel({ fallbackValueFormats: { ...label.fallbackValueFormats, [source]: event.target.value as 'plain' | 'floorLabel' } }); }}><option value="plain">原文</option><option value="floorLabel">楼层号格式</option></select></label><label className="inline-flex items-center gap-1 pt-5 text-xs"><input type="checkbox" checked={Boolean(label.withDot)} onChange={(event) => updateLabel({ withDot: event.target.checked })} />显示锚点圆点</label><label className="text-xs">圆点位置<select className="mt-1 w-full rounded border px-2 py-1" value={label.dotAnchorMode ?? 'anchorRight'} onChange={(event) => updateLabel({ dotAnchorMode: event.target.value as NonNullable<typeof label.dotAnchorMode> })}><option value="anchorRight">标签右侧</option><option value="inline">文字前</option></select></label><p className="pt-5 text-xs text-slate-500">格式、回退、位置与圆点均属于当前 Zoom 渲染规则，不会写入全局默认。</p></div>{visual.family === 'rle-line-color' || visual.family === 'rle-pill-color' ? <div className="mt-2"><ColorBindingEditor config={config} sourcePath={path} fields={fields} label={visual.family === 'rle-line-color' ? '线路文字颜色' : '胶囊背景颜色'} value={visual.color ?? { mode: 'fixed', color: '#2563eb' }} onChange={(color) => updateVisual({ color })} /></div> : null}</section>
+        <section className="rounded border bg-white p-2"><h5 className="font-medium">权重和层数</h5><p className="mt-1 text-xs text-slate-500">几何 zLevel 决定跨类覆盖顺序；Label 角色和显示权重分别独立参与碰撞与同层排序，互不混用。</p><div className="mt-2 grid gap-2 md:grid-cols-4"><NumberField label="整体几何 zLevel" value={rule.geometryStack?.zLevel} min={0} max={9999} onChange={(value) => update(rule.id, { geometryStack: { ...rule.geometryStack, zLevel: value ?? 300 } })} /><label className="text-xs">Label 角色<select className="mt-1 w-full rounded border px-2 py-1" value={label.collision.role} onChange={(event) => updateLabel({ collision: { ...label.collision, role: event.target.value as typeof label.collision.role } })}>{['ignore', 'soft', 'optional', 'important', 'required'].map((role) => <option key={role}>{role}</option>)}</select></label><NumberField label="Label 优先级" value={label.collision.basePriority} onChange={(value) => updateLabel({ collision: { ...label.collision, basePriority: value ?? 0 } })} /><NumberField label="基础显示权重" value={rule.priority?.base} onChange={(value) => update(rule.id, { priority: { ...(rule.priority ?? { mode: 'replace' }), base: value } })} /></div><div className="mt-2 grid gap-2 md:grid-cols-4"><label className="text-xs">动态指标<select className="mt-1 w-full rounded border px-2 py-1" value={rule.priority?.metric?.kind ?? ''} onChange={(event) => { const kind = event.target.value; update(rule.id, { priority: { ...(rule.priority ?? { mode: 'replace' }), metric: kind ? { kind: kind as NonNullable<NonNullable<ZoomPriorityRule['priority']>['metric']>['kind'], multiplier: 1, rounding: 'floor' } : undefined } }); }}>{<option value="">不启用</option>}{metricKinds.map((kind) => <option key={kind} value={kind}>{kind === 'area' ? '面积' : kind === 'length' ? '长度' : kind === 'partCount' ? '部件数量' : '字段数值'}</option>)}</select></label>{rule.priority?.metric ? <><label className="text-xs">权重合成<select className="mt-1 w-full rounded border px-2 py-1" value={rule.priority?.mode ?? 'replace'} onChange={(event) => updateRule({ ...rule, priority: { ...rule.priority!, mode: event.target.value as NonNullable<ZoomPriorityRule['priority']>['mode'] } })}><option value="replace">指标替代基础权重</option><option value="add">基础权重 + 指标</option></select></label><NumberField label="倍率" value={rule.priority.metric.multiplier} onChange={(value) => updateRule({ ...rule, priority: { ...rule.priority!, metric: { ...rule.priority!.metric!, multiplier: value ?? 1 } } })} /><NumberField label="除数" value={rule.priority.metric.divisor} min={0.0001} onChange={(value) => updateRule({ ...rule, priority: { ...rule.priority!, metric: { ...rule.priority!.metric!, divisor: value } } })} />{rule.priority.metric.kind === 'field' ? <label className="text-xs">指标字段<select className="mt-1 w-full rounded border px-2 py-1" value={rule.priority.metric.field ?? ''} onChange={(event) => updateRule({ ...rule, priority: { ...rule.priority!, metric: { ...rule.priority!.metric!, field: event.target.value } } })}>{fields.map((field) => <option key={field}>{field}</option>)}</select></label> : null}</> : null}</div>{rule.priority?.metric ? <div className="mt-2 grid gap-2 md:grid-cols-4"><NumberField label="指标下限（可空）" value={rule.priority.metric.min} onChange={(value) => updateRule({ ...rule, priority: { ...rule.priority!, metric: { ...rule.priority!.metric!, min: value } } })} /><NumberField label="指标上限（可空）" value={rule.priority.metric.max} onChange={(value) => updateRule({ ...rule, priority: { ...rule.priority!, metric: { ...rule.priority!.metric!, max: value } } })} /><label className="text-xs">取整方式<select className="mt-1 w-full rounded border px-2 py-1" value={rule.priority.metric.rounding} onChange={(event) => updateRule({ ...rule, priority: { ...rule.priority!, metric: { ...rule.priority!.metric!, rounding: event.target.value as NonNullable<NonNullable<ZoomPriorityRule['priority']>['metric']>['rounding'] } } })}><option value="none">不取整</option><option value="floor">向下取整</option><option value="round">四舍五入</option><option value="ceil">向上取整</option></select></label></div> : null}</section>
+        {pointLike ? <NativeSymbolSettings rule={rule} onChange={updateRule} /> : null}<LabelPlacementSettings rule={rule} onChange={updateRule} allowDecoration={geometry === 'Point' && style.symbolVisibility !== 'withLabel' && rule.representation !== 'labelOnly'} /><ConditionalOverridesEditor config={config} path={path} geometry={geometry} rule={rule} onChange={updateRule} />
+        <RenderRuleExtensionsEditor geometry={geometry} rule={rule} onChange={updateRule} config={config} sourcePath={path} fields={fields} /><CollisionMetricEditor rule={rule} onChange={updateRule} fields={fields} /><ExtraRuleSettings rule={rule} onChange={updateRule}  config={config} geometry={geometry} /><RuleInteractionSettings rule={rule} baseline={(config.engine ?? createV32EngineDefaults()).interactionBaselines[geometry]} onChange={updateRule} />
+      </div></details>;
+    })}
+    <button type="button" className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm" onClick={append}><Plus className="h-4 w-4" />添加渲染规则（复制上一条）</button>
+  </section>;
 }
 
-function FieldChecklist({ fields, value, onChange, label }: { fields: string[]; value: string[]; onChange: (value: string[]) => void; label: string }) {
-  return <fieldset className="rounded border p-2"><legend className="px-1 text-xs text-slate-500">{label}</legend><div className="flex max-h-24 flex-wrap gap-x-3 gap-y-1 overflow-auto text-xs">{fields.length ? fields.map((field) => <label key={field} className="inline-flex items-center gap-1"><input type="checkbox" checked={value.includes(field)} onChange={(event) => onChange(event.target.checked ? [...value, field] : value.filter((item) => item !== field))} />{field}</label>) : <span className="text-slate-400">请先选择存在的目标分类。</span>}</div></fieldset>;
+// The former component is retained only as a migration reference.  The
+// author-facing editor below is deliberately structured around one inclusive
+// Zoom rule at a time, so no global geometry/style values can silently leak
+// between low- and high-zoom BUD/ROD/ISG states.
+void LegacyRenderRuleEditor;
+
+const labelPlacementOptions: Array<[string, string]> = [
+  ['center', '中心'], ['N', '上方'], ['S', '下方'], ['E', '右侧'], ['W', '左侧'],
+  ['NE', '右上'], ['NW', '左上'], ['SE', '右下'], ['SW', '左下'],
+  ['aboveLine', '线条上方'], ['belowLine', '线条下方'], ['near', '近锚点（兼容旧包）'],
+];
+
+/** Native r5 rule authoring surface.  Every visual value lives in exactly one
+ * inclusive logical Zoom interval.  Geometry interaction triggers stay on
+ * the GeometryProfile, and common hover/selected/edit/delete styling stays
+ * in the engine baseline, as agreed in the V3.2 contract. */
+function RenderRuleEditor({ config, path, geometry, profile, onChange }: { config: ConfigPackageV3; path: ClassificationPath; geometry: GeometryKind; profile: GeometryProfile; onChange: (value: GeometryProfile) => void }) {
+  const rules = profile.zoomPriority.rules;
+  const fields = allFieldKeys(config, path);
+  const representations: Array<[ZoomPriorityRule['representation'], string]> = geometry === 'Polygon'
+    ? [['hidden', '隐藏'], ['point', '面内中点'], ['geometry', '显示面'], ['labelOnly', '仅标签']]
+    : geometry === 'LineString'
+      ? [['hidden', '隐藏'], ['geometry', '显示线'], ['labelOnly', '仅标签']]
+      : [['hidden', '隐藏'], ['geometry', '显示点'], ['labelOnly', '仅标签']];
+  const updateRule = (id: string, patch: Partial<ZoomPriorityRule>) => onChange({
+    ...profile,
+    zoomPriority: { rules: rules.map((rule) => {
+      if (rule.id !== id) return rule;
+      const merged = { ...rule, ...patch };
+      if (config.contractRevision < 7) return merged;
+      const { minZoom: _min, maxZoom: _max, minExclusive: _mi, maxExclusive: _ma, conditionalOverrides: _branches, ...body } = merged;
+      const range = renderRuleRange(merged);
+      return { ...body, when: { ...merged.when, zoom: { min: Object.prototype.hasOwnProperty.call(patch, 'minZoom') ? patch.minZoom! : range.min, max: Object.prototype.hasOwnProperty.call(patch, 'maxZoom') ? patch.maxZoom! : range.max } } };
+    }) },
+  });
+  const replaceRule = (next: ZoomPriorityRule) => updateRule(next.id, next);
+  const append = () => {
+    const last = rules[rules.length - 1] ?? defaultRenderRule(geometry);
+    const min = Math.max(0, Math.trunc(last.minZoom ?? 0));
+    const max = Math.min(8, Math.trunc(last.maxZoom ?? 8));
+    if (min >= max) return;
+    const split = Math.floor((min + max) / 2);
+    const copy = clone(last);
+    copy.id = uid('render'); copy.minZoom = split + 1; copy.maxZoom = max;
+    onChange({ ...profile, zoomPriority: { rules: rules.map((rule) => rule.id === last.id ? { ...rule, maxZoom: split } : rule).concat(copy) } });
+  };
+  return <section className="space-y-3"><div><h4 className="font-semibold">渲染规则</h4><p className="mt-1 text-xs text-slate-500">必填逻辑 Zoom（0–8）与选填非分类字段组合共同匹配；允许重叠，末项命中的完整规则生效。</p></div>
+    {rules.map((storedRule, index) => {
+      const range = renderRuleRange(storedRule);
+      const rule = config.contractRevision >= 7 ? { ...storedRule, minZoom: range.min, maxZoom: range.max } : storedRule;
+      const style = rule.style ?? defaultStyle(geometry);
+      const label = rule.label ?? defaultLabel(geometry);
+      const visual = label.style ?? { family: 'gm-outline' as const, size: 14 };
+      const pointLike = geometry === 'Point' || rule.representation === 'point';
+      const supportsFill = pointLike || geometry === 'Polygon';
+      const setStyle = (patch: Partial<RenderStyle>) => updateRule(rule.id, { style: { ...style, ...patch } });
+      const setLabel = (patch: Partial<typeof label>) => updateRule(rule.id, { label: { ...label, ...patch } });
+      const setVisual = (patch: Partial<RenderLabelVisualStyle>) => setLabel({ style: { ...visual, ...patch } });
+      return <details key={rule.id} open={index === 0} className="rounded border bg-slate-50 p-3"><summary className="cursor-pointer font-medium">渲染规则 {index + 1} · {rule.minZoom ?? 0} ≤ Zoom ≤ {rule.maxZoom ?? 8}</summary><div className="mt-3 space-y-3">
+        <section aria-label="规则适用范围" className="rounded border bg-white p-2"><h5 className="text-sm font-medium">规则适用范围</h5><div className="grid gap-2 lg:grid-cols-[minmax(8rem,1fr)_auto_minmax(8rem,1fr)_minmax(10rem,1fr)_auto]"><NumberField label="下界" value={rule.minZoom} min={0} max={8} onChange={(value) => updateRule(rule.id, { minZoom: value })} /><span className="pt-6 text-sm">≤ Zoom ≤</span><NumberField label="上界" value={rule.maxZoom} min={0} max={8} onChange={(value) => updateRule(rule.id, { maxZoom: value })} /><label className="text-xs">显示种类<select className="mt-1 w-full rounded border px-2 py-1" value={rule.representation ?? 'geometry'} onChange={(event) => updateRule(rule.id, { representation: event.target.value as ZoomPriorityRule['representation'] })}>{representations.map(([value, text]) => <option key={value} value={value}>{text}</option>)}</select></label>{rules.length > 1 ? <button type="button" className="mt-5 text-xs text-rose-700" onClick={() => onChange({ ...profile, zoomPriority: { rules: rules.filter((item) => item.id !== rule.id) } })}>删除</button> : <span />}</div>{config.contractRevision >= 7 ? <RenderFieldConditionsEditor config={config} path={path} value={rule.when?.fields} onChange={fields => replaceRule({ ...rule, when: { zoom: renderRuleRange(rule), ...(fields ? { fields } : {}) } })} /> : <ConditionalOverridesEditor config={config} path={path} geometry={geometry} rule={rule} onChange={replaceRule} />}</section>
+        {rule.representation !== 'hidden' ? <section className="rounded border bg-white p-2"><h5 className="font-medium">显示效果</h5><div className="mt-2 grid gap-2 md:grid-cols-4"><label className="text-xs">显示效果<select className="mt-1 w-full rounded border px-2 py-1" value={pointLike ? style.pointShape ?? 'circle' : style.dashPreset ?? 'solid'} onChange={(event) => setStyle(pointLike ? { pointShape: event.target.value as RenderStyle['pointShape'] } : { dashPreset: event.target.value as RenderStyle['dashPreset'] })}>{pointLike ? <><option value="circle">圆圈</option><option value="square">方块</option><option value="triangle">三角</option><option value="regular4">正方形</option><option value="regular5">五边形</option><option value="regular6">六边形</option></> : <><option value="solid">实线描边</option><option value="dash">虚线描边</option><option value="dotDash">点-短线虚线</option><option value="dotDotDash">点-点-短线虚线</option></>}</select></label>{pointLike ? <NumberField label="大小 px" value={style.size} min={1} onChange={(value) => setStyle({ size: value })} /> : null}<NumberField label="描边粗细" value={style.weight} min={0} step={0.5} onChange={(value) => setStyle({ weight: value })} />{geometry !== 'Point' ? <><label className="text-xs">线端<select className="mt-1 w-full rounded border px-2 py-1" value={style.lineCap ?? 'round'} onChange={(event) => setStyle({ lineCap: event.target.value as RenderStyle['lineCap'] })}><option value="round">圆</option><option value="butt">平</option><option value="square">方</option></select></label><label className="text-xs">转角<select className="mt-1 w-full rounded border px-2 py-1" value={style.lineJoin ?? 'round'} onChange={(event) => setStyle({ lineJoin: event.target.value as RenderStyle['lineJoin'] })}><option value="round">圆</option><option value="miter">尖</option><option value="bevel">斜</option></select></label></> : null}</div><div className={`mt-2 grid gap-2 ${supportsFill ? 'lg:grid-cols-2' : ''}`}><ColorBindingEditor config={config} sourcePath={path} fields={fields} label="描边" value={style.stroke} onChange={(stroke) => setStyle({ stroke })} />{supportsFill ? <ColorBindingEditor config={config} sourcePath={path} fields={fields} label="填色" value={style.fill ?? { mode: 'fixed', color: '#334155' }} onChange={(fill) => setStyle({ fill })} /> : null}</div><div className="mt-2 grid gap-2 md:grid-cols-2"><OpacityField label="描边透明度" value={style.strokeOpacity} onChange={(value) => setStyle({ strokeOpacity: value })} />{supportsFill ? <OpacityField label="填色透明度" value={style.fillOpacity ?? (geometry === 'Polygon' ? 0.24 : 0.88)} onChange={(value) => setStyle({ fillOpacity: value })} /> : null}</div>{pointLike ? <details className="mt-2 rounded border border-slate-200 bg-slate-50 p-2"><summary className="cursor-pointer text-xs font-medium">图标覆盖（本 Zoom 规则）</summary><div className="mt-2 grid gap-2 md:grid-cols-4"><label className="inline-flex items-center gap-1 pt-5 text-xs"><input type="checkbox" checked={Boolean(style.icon)} onChange={(event) => setStyle({ icon: event.target.checked ? { source: fields.find((field) => /icon|image|picture/i.test(field)) ?? fields[0] ?? 'iconUrl', size: [32, 32], anchor: [16, 16], fallback: 'circle' } : undefined })} />使用图标字段</label>{style.icon ? <><label className="text-xs">图标 URL 字段<select className="mt-1 w-full rounded border px-2 py-1" value={style.icon.source} onChange={(event) => setStyle({ icon: { ...style.icon!, source: event.target.value } })}>{fields.map((field) => <option key={field}>{field}</option>)}</select></label><NumberField label="图标宽 px" value={style.icon.size[0]} min={1} onChange={(value) => setStyle({ icon: { ...style.icon!, size: [value ?? 32, style.icon!.size[1]] } })} /><NumberField label="图标高 px" value={style.icon.size[1]} min={1} onChange={(value) => setStyle({ icon: { ...style.icon!, size: [style.icon!.size[0], value ?? 32] } })} /></> : null}</div></details> : null}</section> : null}
+        <section className="rounded border bg-white p-2"><h5 className="font-medium">Label 效果</h5><div className="mt-2 grid gap-2 lg:grid-cols-5"><label className="inline-flex items-center gap-1 pt-5 text-sm"><input type="checkbox" checked={label.visible} onChange={(event) => setLabel({ visible: event.target.checked })} />显示 Label</label><label className="text-xs">样式<select className="mt-1 w-full rounded border px-2 py-1" value={visual.family} onChange={(event) => setVisual({ family: event.target.value as RenderLabelVisualStyle['family'], ...(textOnlyFamilies.has(event.target.value as RenderLabelVisualStyle['family']) ? {} : { modifiers: {} }) })}>{labelFamilies.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label><NumberField label="大小" value={visual.size} min={6} max={72} onChange={(value) => setVisual({ size: value ?? 14 })} /><label className="text-xs">主来源<select className="mt-1 w-full rounded border px-2 py-1" value={label.source ?? ''} onChange={(event) => setLabel({ source: event.target.value || undefined })}><option value="">不绑定来源（显示 Null）</option>{fields.map((field) => <option key={field}>{field}</option>)}</select></label>{textOnlyFamilies.has(visual.family) ? <span className="grid gap-1 pt-1 text-xs"><label><input type="checkbox" checked={Boolean(visual.modifiers?.italic)} onChange={(event) => setVisual({ modifiers: { ...visual.modifiers, italic: event.target.checked } })} /> 斜体</label><label><input type="checkbox" checked={Boolean(visual.modifiers?.underline)} onChange={(event) => setVisual({ modifiers: { ...visual.modifiers, underline: event.target.checked } })} /> 下划线</label></span> : <span className="pt-5 text-xs text-slate-400">该样式不支持斜体/下划线</span>}</div><div className="mt-2 grid gap-2 lg:grid-cols-6"><label className="text-xs lg:col-span-2">回退来源（逗号分隔，按顺序）<input className="mt-1 w-full rounded border px-2 py-1" value={(label.fallbackSources ?? []).join(', ')} placeholder="例如 ID, NofFloor" onChange={(event) => setLabel({ fallbackSources: event.target.value.split(',').map((value) => value.trim()).filter(Boolean) })} /></label><label className="text-xs">主来源格式<select className="mt-1 w-full rounded border px-2 py-1" value={label.valueFormat ?? 'plain'} onChange={(event) => setLabel({ valueFormat: event.target.value as NonNullable<typeof label.valueFormat> })}><option value="plain">原文</option><option value="floorLabel">楼层号格式</option></select></label><label className="text-xs">标签位置<select className="mt-1 w-full rounded border px-2 py-1" value={label.placement ?? (geometry === 'LineString' ? 'aboveLine' : 'center')} onChange={(event) => setLabel({ placement: event.target.value as NonNullable<typeof label.placement> })}>{labelPlacementOptions.map(([value, text]) => <option key={value} value={value}>{text}</option>)}</select></label><NumberField label="X 偏移 px" value={label.offsetX} onChange={(value) => setLabel({ offsetX: value })} /><NumberField label="Y 偏移 px" value={label.offsetY} onChange={(value) => setLabel({ offsetY: value })} /></div>{visual.family === 'rle-line-color' || visual.family === 'rle-pill-color' ? <div className="mt-2"><ColorBindingEditor config={config} sourcePath={path} fields={fields} label={visual.family === 'rle-line-color' ? '线路文字颜色' : '胶囊背景颜色'} value={visual.color ?? { mode: 'fixed', color: '#2563eb' }} onChange={(color) => setVisual({ color })} /></div> : null}<p className="mt-2 text-xs text-slate-500">标签位置使用当前渲染锚点的方向；圆点是该规则的真实点/面中点显示效果，不再使用 BUD 式“标签装饰圆点”兼容逻辑。</p></section>
+        <section className="rounded border bg-white p-2"><h5 className="font-medium">权重和层数</h5><p className="mt-1 text-xs text-slate-500">A 几何层级、B Label 碰撞与 C 显示权重独立；高级指标放在扩展规则。</p><div className="mt-2 grid gap-2 md:grid-cols-4"><NumberField label="几何 zLevel" value={rule.geometryStack?.zLevel} min={0} max={9999} onChange={value => updateRule(rule.id, { geometryStack: { ...rule.geometryStack!, zLevel: value ?? 300 } })} /><label className="text-xs">Label 角色<select className="mt-1 w-full rounded border px-2 py-1" value={label.collision.role} onChange={e => setLabel({ collision: { ...label.collision, role: e.target.value as typeof label.collision.role } })}>{['ignore','soft','optional','important','required'].map(role => <option key={role}>{role}</option>)}</select></label><NumberField label="Label 基础碰撞优先级" value={label.collision.basePriority} onChange={value => setLabel({ collision: { ...label.collision, basePriority: value ?? 0 } })} /><NumberField label="基础显示权重" value={rule.priority?.base} onChange={value => updateRule(rule.id, { priority: { mode: 'add', ...rule.priority, base: value } })} /></div></section>
+        <NativeSymbolSettings rule={rule} onChange={replaceRule} allowOffsets={pointLike} /><LabelPlacementSettings rule={rule} onChange={replaceRule} allowDecoration={geometry === 'Point' && style.symbolVisibility !== 'withLabel' && rule.representation !== 'labelOnly'} /><CollisionMetricEditor rule={rule} onChange={replaceRule} fields={fields} />
+        
+        {config.contractRevision >= 7 ? <GripOrderControls scope={`${classificationPathKey(path)}:${geometry}:rules`} index={index} count={rules.length} label="规则" onMove={(from, to) => { const next = [...rules]; const [item] = next.splice(from, 1); next.splice(to, 0, item); onChange({ ...profile, zoomPriority: { rules: next } }); }} /> : null}
+        <UnifiedRuleExtensions config={config} path={path} fields={fields} geometry={geometry} rule={rule} onChange={replaceRule} /><details className="mt-2 rounded border p-2"><summary className="text-xs">有效扩展值与来源<ModuleHelp title="有效扩展值与来源" /></summary><p className="mt-1 text-xs">全局几何默认 → 当前完整规则的本地覆盖；此处为静态合成检查，实际命中取决于 Zoom、字段条件及交互态。</p><pre className="mt-2 max-h-48 overflow-auto text-xs">{JSON.stringify({ global: config.engine?.renderDefaults?.[geometry] ?? {}, local: rule.extensions ?? {}, effective: resolveRenderExtensions(config, geometry, rule.extensions) },null,2)}</pre></details>
+      </div></details>;
+    })}
+    {config.contractRevision >= 7 ? <NewRenderRulePanel config={config} path={path} geometry={geometry} profile={profile} onAdd={rule => onChange({ ...profile, renderState:config.contractRevision>=9?'enabled':profile.renderState, zoomPriority: { rules: [...rules, rule] } })} /> : <button type="button" className="inline-flex items-center gap-1 rounded border bg-white px-3 py-1.5 text-sm" onClick={append}><Plus className="h-4 w-4" />添加渲染规则</button>}
+  </section>;
 }
 
-function SearchEditor({ config, control, onChange }: { config: ConfigPackageV3; control: WorkflowControl; onChange: (value: WorkflowControl) => void }) {
-  const defaultTarget = { class: config.nodes[0]?.path.class ?? '' };
-  const search: SearchProfile = control.search ?? { mode: control.kind === 'coarseSearch' ? 'coarse' : 'feature', target: defaultTarget, searchFields: [], displayFields: [], returnFields: [], cacheScope: 'loadedWorlds', ...(control.kind === 'coarseSearch' ? { coarse: { matcher: 'contains', minQueryLength: 1, maxResults: 30 } } : {}) };
-  const fields = resolveSelectableFields(config, search.target).map((field) => field.key);
-  const update = (patch: Partial<SearchProfile>) => onChange({ ...control, search: { ...search, ...patch } });
-  return <div className="mt-2 space-y-2 rounded bg-slate-50 p-2"><PathSelector config={config} label="搜索目标范围" value={search.target} onChange={(target) => update({ target, searchFields: [], displayFields: [], returnFields: [] })} /><div className="grid gap-2 md:grid-cols-3"><FieldChecklist label="搜索字段" fields={fields} value={search.searchFields} onChange={(searchFields) => update({ searchFields })} /><FieldChecklist label="展示字段" fields={fields} value={search.displayFields} onChange={(displayFields) => update({ displayFields })} /><FieldChecklist label="返回字段" fields={fields} value={search.returnFields} onChange={(returnFields) => update({ returnFields })} /></div>{control.kind === 'coarseSearch' ? <div className="grid gap-2 sm:grid-cols-4"><label className="text-xs">匹配方式<select className="mt-1 w-full rounded border px-2 py-1" value={search.coarse?.matcher ?? 'contains'} onChange={(event) => update({ coarse: { ...(search.coarse ?? { minQueryLength: 1, maxResults: 30 }), matcher: event.target.value as NonNullable<SearchProfile['coarse']>['matcher'] } })}>{['contains', 'prefix', 'token', 'fuzzy'].map((item) => <option key={item}>{item}</option>)}</select></label><label className="text-xs">最短输入<input className="mt-1 w-full rounded border px-2 py-1" type="number" value={search.coarse?.minQueryLength ?? 1} onChange={(event) => update({ coarse: { ...(search.coarse ?? { matcher: 'contains', maxResults: 30 }), minQueryLength: Number(event.target.value) } })} /></label><label className="text-xs">结果上限<input className="mt-1 w-full rounded border px-2 py-1" type="number" value={search.coarse?.maxResults ?? 30} onChange={(event) => update({ coarse: { ...(search.coarse ?? { matcher: 'contains', minQueryLength: 1 }), maxResults: Number(event.target.value) } })} /></label><label className="text-xs">缓存范围<select className="mt-1 w-full rounded border px-2 py-1" value={search.cacheScope} onChange={(event) => update({ cacheScope: event.target.value as SearchProfile['cacheScope'] })}><option value="loadedWorlds">当前已加载世界</option><option value="world">当前世界</option></select></label></div> : null}</div>;
-}
-
-function ZoomPriorityEditor({ profile, onChange }: { profile: GeometryProfile; onChange: (profile: GeometryProfile) => void }) {
-  const rows = profile.zoomPriority.rules;
-  const update = (id: string, patch: Partial<ZoomPriorityRule>) => onChange({ ...profile, zoomPriority: { rules: rows.map((row) => row.id === id ? { ...row, ...patch } : row) } });
-  const updateMetric = (row: ZoomPriorityRule, patch: Partial<NonNullable<NonNullable<ZoomPriorityRule['priority']>['metric']>>) => update(row.id, { priority: { ...(row.priority ?? { mode: 'replace' }), metric: { ...(row.priority?.metric ?? { kind: 'area', multiplier: 1, rounding: 'floor' }), ...patch } } });
-  return <section className="mt-3 rounded border border-indigo-100 bg-indigo-50/40 p-2"><h5 className="text-sm font-medium text-indigo-950">三区块 C：Zoom 与动态优先级</h5><p className="mt-1 text-xs text-slate-600">每一行均为 n &lt; zoom &lt; n；该数值仅影响 Label 选择/显示，不改变几何 zLevel。</p>{rows.map((row) => <div key={row.id} className="mt-2 rounded border bg-white p-2"><div className="grid gap-2 md:grid-cols-5"><label className="text-xs">下界 n<input className="mt-1 w-full rounded border px-2 py-1" type="number" value={row.minExclusive ?? ''} onChange={(event) => update(row.id, { minExclusive: event.target.value === '' ? undefined : Number(event.target.value) })} /></label><label className="text-xs">上界 n<input className="mt-1 w-full rounded border px-2 py-1" type="number" value={row.maxExclusive ?? ''} onChange={(event) => update(row.id, { maxExclusive: event.target.value === '' ? undefined : Number(event.target.value) })} /></label><label className="text-xs">显示形态<select className="mt-1 w-full rounded border px-2 py-1" value={row.representation} onChange={(event) => update(row.id, { representation: event.target.value as ZoomPriorityRule['representation'] })}><option value="hidden">隐藏</option><option value="point">中心点/低缩放</option><option value="geometry">完整几何</option></select></label><label className="text-xs">优先级方式<select className="mt-1 w-full rounded border px-2 py-1" value={row.priority?.mode ?? 'replace'} onChange={(event) => update(row.id, { priority: { ...(row.priority ?? {}), mode: event.target.value as 'add' | 'replace' } })}><option value="replace">覆盖基础值</option><option value="add">叠加基础值</option></select></label><div className="flex items-end"><button type="button" className="inline-flex items-center gap-1 rounded border px-2 py-1 text-xs" onClick={() => onChange({ ...profile, zoomPriority: { rules: rows.filter((item) => item.id !== row.id) } })}><Trash2 className="h-3 w-3" />删除</button></div></div><div className="mt-2 grid gap-2 md:grid-cols-5"><label className="text-xs">规则基础优先级<input className="mt-1 w-full rounded border px-2 py-1" type="number" value={row.priority?.base ?? ''} onChange={(event) => update(row.id, { priority: { ...(row.priority ?? { mode: 'replace' }), base: event.target.value === '' ? undefined : Number(event.target.value) } })} /></label><label className="text-xs">动态指标<select className="mt-1 w-full rounded border px-2 py-1" value={row.priority?.metric?.kind ?? ''} onChange={(event) => event.target.value ? updateMetric(row, { kind: event.target.value as NonNullable<NonNullable<ZoomPriorityRule['priority']>['metric']>['kind'] }) : update(row.id, { priority: { ...(row.priority ?? { mode: 'replace' }), metric: undefined } })}><option value="">不启用</option>{['area', 'length', 'partCount', 'field'].map((item) => <option key={item}>{item}</option>)}</select></label>{row.priority?.metric ? <><label className="text-xs">倍率<input className="mt-1 w-full rounded border px-2 py-1" type="number" value={row.priority.metric.multiplier} onChange={(event) => updateMetric(row, { multiplier: Number(event.target.value) })} /></label><label className="text-xs">除数<input className="mt-1 w-full rounded border px-2 py-1" type="number" value={row.priority.metric.divisor ?? ''} onChange={(event) => updateMetric(row, { divisor: event.target.value === '' ? undefined : Number(event.target.value) })} /></label><label className="text-xs">封顶<input className="mt-1 w-full rounded border px-2 py-1" type="number" value={row.priority.metric.max ?? ''} onChange={(event) => updateMetric(row, { max: event.target.value === '' ? undefined : Number(event.target.value) })} /></label></> : <span className="md:col-span-3" />}</div></div>)}<button type="button" className="mt-2 inline-flex items-center gap-1 rounded border px-2 py-1 text-xs" onClick={() => onChange({ ...profile, zoomPriority: { rules: [...rows, { id: `zoom-${Date.now()}`, minExclusive: 0, representation: 'geometry', priority: { mode: 'replace', base: profile.label.collision.basePriority } }] } })}><Plus className="h-3 w-3" />添加区间</button></section>;
-}
-
-function GeometryEditor({ geometry, profile, onChange }: { geometry: GeometryKind; profile: GeometryProfile; onChange: (profile: GeometryProfile) => void }) {
+function GeometryEditor({ config, path, geometry, profile, onChange }: { config: ConfigPackageV3; path: ClassificationPath; geometry: GeometryKind; profile: GeometryProfile; onChange: (profile: GeometryProfile) => void }) {
   const [expanded, setExpanded] = useState(profile.enabled);
-  const triggerKeys = geometry === 'Point' ? [['point', '点击点'], ['label', '点击 Label']] : geometry === 'LineString' ? [['line', '点击线'], ['label', '点击 Label']] : [['boundary', '点击边框'], ['interior', '点击面内'], ['label', '点击 Label']];
-  const setTrigger = (key: keyof GeometryInteractionTriggers, enabled: boolean) => onChange({ ...profile, interaction: { triggers: { ...profile.interaction.triggers, [key]: enabled } } });
-  return <article className="rounded-lg border bg-white"><header className="flex items-center gap-2 p-3"><button type="button" className="flex min-w-0 flex-1 items-center gap-2 text-left" onClick={() => setExpanded((value) => !value)}>{expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}<strong>{geometryLabels[geometry]}</strong><span className="text-xs text-slate-500">{expanded ? '展开设置' : '仅显示启用状态'}</span></button><label className="shrink-0 text-sm"><input type="checkbox" checked={profile.enabled} onChange={(event) => onChange({ ...profile, enabled: event.target.checked })} /> 启用</label></header>{expanded ? <div className="space-y-3 border-t p-3"><section className="rounded border border-slate-200 p-2"><h5 className="text-sm font-medium">三区块 A：几何层级与样式</h5><div className="mt-2 grid gap-2 sm:grid-cols-3"><label className="text-xs">颜色<input className="mt-1 h-8 w-full rounded border px-1" type="color" value={profile.color} onChange={(event) => onChange({ ...profile, color: event.target.value })} /></label><label className="text-xs">几何 zLevel<input className="mt-1 w-full rounded border px-2 py-1" type="number" value={profile.geometryStack.zLevel} onChange={(event) => onChange({ ...profile, geometryStack: { ...profile.geometryStack, zLevel: Number(event.target.value) } })} /></label><label className="text-xs">边框粗细<input className="mt-1 w-full rounded border px-2 py-1" type="number" value={profile.style?.weight ?? 2} onChange={(event) => onChange({ ...profile, style: { ...profile.style, weight: Number(event.target.value) } })} /></label></div></section><section className="rounded border border-slate-200 p-2"><h5 className="text-sm font-medium">多部件与交互触发</h5><div className="mt-2 grid gap-2 sm:grid-cols-2"><label className="text-sm"><input type="checkbox" checked={profile.allowMultipleParts} onChange={(event) => onChange({ ...profile, allowMultipleParts: event.target.checked, label: { ...profile.label, anchor: event.target.checked ? profile.label.anchor : 'featureBbox' } })} /> 允许多部件</label><label className="text-xs">Label 锚点<select className="mt-1 w-full rounded border px-2 py-1" disabled={!profile.allowMultipleParts} value={profile.label.anchor} onChange={(event) => onChange({ ...profile, label: { ...profile.label, anchor: event.target.value as GeometryProfile['label']['anchor'] } })}><option value="perPart">各部件位置</option><option value="featureBbox">完整 bbox</option></select></label></div><div className="mt-2 flex flex-wrap gap-3 text-xs">{triggerKeys.map(([key, label]) => <label key={key}><input type="checkbox" checked={Boolean(profile.interaction.triggers[key as keyof GeometryInteractionTriggers])} onChange={(event) => setTrigger(key as keyof GeometryInteractionTriggers, event.target.checked)} /> {label}</label>)}</div></section><section className="rounded border border-emerald-100 bg-emerald-50/40 p-2"><h5 className="text-sm font-medium text-emerald-950">三区块 B：Label 碰撞策略</h5><div className="mt-2 grid gap-2 sm:grid-cols-4"><label className="text-xs">角色<select className="mt-1 w-full rounded border px-2 py-1" value={profile.label.collision.role} onChange={(event) => onChange({ ...profile, label: { ...profile.label, collision: { ...profile.label.collision, role: event.target.value as GeometryProfile['label']['collision']['role'] } } })}>{['ignore', 'soft', 'optional', 'important', 'required'].map((item) => <option key={item}>{item}</option>)}</select></label><label className="text-xs">基础优先级<input className="mt-1 w-full rounded border px-2 py-1" type="number" value={profile.label.collision.basePriority} onChange={(event) => onChange({ ...profile, label: { ...profile.label, collision: { ...profile.label.collision, basePriority: Number(event.target.value) } } })} /></label><label className="text-xs">碰撞组<input className="mt-1 w-full rounded border px-2 py-1" value={profile.label.collision.collisionGroup ?? ''} onChange={(event) => onChange({ ...profile, label: { ...profile.label, collision: { ...profile.label.collision, collisionGroup: event.target.value || undefined } } })} /></label><label className="text-sm pt-5"><input type="checkbox" checked={profile.label.collision.hideWhenColliding} onChange={(event) => onChange({ ...profile, label: { ...profile.label, collision: { ...profile.label.collision, hideWhenColliding: event.target.checked } } })} /> 冲突时隐藏</label></div></section><ZoomPriorityEditor profile={profile} onChange={onChange} /></div> : null}</article>;
+  const triggers = profile.interaction?.triggers ?? {};
+  const triggerLabels: Array<[keyof GeometryInteractionTriggers, string]> = geometry === 'Point'
+    ? [['point', '点击点'], ['label', '点击 Label']]
+    : geometry === 'LineString' ? [['line', '点击线'], ['label', '点击 Label']]
+      : [['boundary', '点击边框'], ['interior', '点击面内'], ['label', '点击 Label']];
+  const toggle = (key: keyof GeometryInteractionTriggers, value: boolean) => onChange({ ...profile, interaction: { triggers: { ...triggers, [key]: value } } });
+  return <article className="rounded-lg border bg-white"><header className="flex items-center gap-3 p-3"><button type="button" className="flex min-w-0 flex-1 items-center gap-2 text-left" onClick={() => setExpanded((value) => !value)}>{expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}<strong>{geometryLabel[geometry]}</strong><span className="text-xs text-slate-500">{profile.renderState==='unconfigured'?'尚未配置显示 · ':''}{expanded ? '渲染规则已展开' : '仅显示启用状态'}</span></button><label className="shrink-0 text-sm"><input type="checkbox" checked={profile.enabled} onChange={(event) => { onChange({ ...profile, enabled: event.target.checked }); if (event.target.checked) setExpanded(true); }} /> 启用</label></header>{expanded ? <div className="space-y-3 border-t p-3"><section className="rounded border bg-slate-50 p-2"><h4 className="font-medium">多部件与交互触发</h4><div className="mt-2 grid gap-2 md:grid-cols-3"><label className="inline-flex items-center gap-1 text-sm"><input type="checkbox" checked={profile.allowMultipleParts} onChange={(event) => onChange({ ...profile, allowMultipleParts: event.target.checked })} />允许多部件</label><label className="text-xs">锚点<select disabled={!profile.allowMultipleParts} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={profile.anchor ?? 'featureBbox'} onChange={(event) => onChange({ ...profile, anchor: event.target.value as GeometryProfile['anchor'] })}><option value="featureBbox">完整要素 bbox 中心</option><option value="perPart">各部件中心</option></select></label><div className="flex flex-wrap gap-3 pt-5 text-xs">{triggerLabels.map(([key, text]) => <label key={key}><input type="checkbox" checked={Boolean(triggers[key])} onChange={(event) => toggle(key, event.target.checked)} /> {text}</label>)}</div></div></section><RenderRuleEditor config={config} path={path} geometry={geometry} profile={profile} onChange={onChange} /></div> : null}</article>;
 }
 
-function ContainmentEditor({ node, fields, onChange }: { node: CategoryNode; fields: string[]; onChange: (node: CategoryNode) => void }) {
-  const binding = node.containment ?? { enabled: false };
-  return <section className="rounded border bg-violet-50/40 p-3"><h3 className="font-semibold">包含关系绑定</h3><p className="mt-1 text-xs text-slate-600">独立于点击触发；用于建筑/附属结构的正常加载与楼层视图关系。</p><label className="mt-2 block text-sm"><input type="checkbox" checked={binding.enabled} onChange={(event) => onChange({ ...node, containment: event.target.checked ? { enabled: true, role: binding.role ?? 'parent' } : { enabled: false } })} /> 启用包含关系绑定</label>{binding.enabled ? <div className="mt-2 grid gap-2 sm:grid-cols-2"><label className="text-xs">关系角色<select className="mt-1 w-full rounded border px-2 py-1" value={binding.role ?? ''} onChange={(event) => onChange({ ...node, containment: { ...binding, role: event.target.value as 'parent' | 'child', ...(event.target.value === 'parent' ? { parentReferenceField: undefined } : {}) } })}><option value="parent">主结构（建筑）</option><option value="child">附属结构（楼层）</option></select></label>{binding.role === 'child' ? <label className="text-xs">主结构引用字段<select className="mt-1 w-full rounded border px-2 py-1" value={binding.parentReferenceField ?? ''} onChange={(event) => onChange({ ...node, containment: { ...binding, parentReferenceField: event.target.value || undefined } })}><option value="">选择字段</option>{fields.map((field) => <option key={field}>{field}</option>)}</select></label> : <span />}</div> : null}</section>;
+export function LegacyFieldEditor({ config, node, onChange }: { config: ConfigPackageV3; node: CategoryNode; onChange: (node: CategoryNode) => void }) {
+  const effective = resolveEffectiveFields(config, node.path);
+  const local = new Set(node.fields.map((field) => field.overrideOf || field.key));
+  const add = () => onChange({ ...node, fields: [...node.fields, { fieldId: uid('field'), key: 'NewField', type: 'string', cardinality: 'single', input: 'text', labels: { zh: '新字段', en: 'New field' }, description: { zh: '', en: '' } }] });
+  const update = (fieldId: string, patch: Partial<FieldDefinition>) => onChange({ ...node, fields: node.fields.map((field) => field.fieldId === fieldId ? { ...field, ...patch } : field) });
+  const addOverride = (field: FieldDefinition) => onChange({ ...node, fields: [...node.fields, { ...clone(field), fieldId: uid('field-override'), overrideOf: field.key }] });
+  return <section><div className="mb-2 flex items-center justify-between"><div><h3 className="font-semibold">字段设置</h3><p className="text-xs text-slate-500">World 是引擎自动分配的必填系统字段；子分类可新增特有字段，也可对继承字段建立本地覆盖。字段名称、数据类型、单/多值和中英文定义均在此保存。</p></div><button type="button" className="inline-flex items-center gap-1 rounded border px-2 py-1 text-sm" onClick={add}><Plus className="h-4 w-4" />添加字段</button></div><div className="space-y-2">{effective.map((field) => {
+    const isLocal = local.has(field.key);
+    const disabled = !isLocal;
+    return <article key={field.fieldId} className="rounded border bg-white p-2"><div className="grid gap-2 md:grid-cols-[minmax(9rem,1fr)_9rem_8rem_9rem_auto_auto]"><label className="text-xs">字段名<input disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.key} onChange={(event) => update(field.fieldId, { key: event.target.value })} /></label><label className="text-xs">数据类型<select disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.type} onChange={(event) => update(field.fieldId, { type: event.target.value as FieldDefinition['type'] })}>{['string', 'number', 'boolean', 'enum', 'json', 'reference'].map((type) => <option key={type}>{type}</option>)}</select></label><label className="text-xs">值数量<select disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.cardinality} onChange={(event) => update(field.fieldId, { cardinality: event.target.value as FieldDefinition['cardinality'] })}><option value="single">单值</option><option value="multiple">允许多值</option></select></label><label className="text-xs">输入控件<select disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.input} onChange={(event) => update(field.fieldId, { input: event.target.value as FieldDefinition['input'] })}>{['text', 'textarea', 'select', 'toggle', 'json', 'featureSearch'].map((input) => <option key={input}>{input}</option>)}</select></label><label className="pt-5 text-sm"><input disabled={disabled} type="checkbox" checked={Boolean(field.required)} onChange={(event) => update(field.fieldId, { required: event.target.checked })} /> 必填</label>{isLocal ? <button type="button" className="mt-5 text-xs text-rose-700" onClick={() => onChange({ ...node, fields: node.fields.filter((item) => item.fieldId !== field.fieldId) })}>删除</button> : <button type="button" className="mt-5 text-xs text-blue-700" onClick={() => addOverride(field)}>建立覆盖</button>}</div><div className="mt-2 grid gap-2 md:grid-cols-2"><label className="text-xs">名称（zh）<input disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.labels.zh} onChange={(event) => update(field.fieldId, { labels: { ...field.labels, zh: event.target.value } })} /></label><label className="text-xs">名称（en）<input disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.labels.en} onChange={(event) => update(field.fieldId, { labels: { ...field.labels, en: event.target.value } })} /></label><label className="text-xs">定义（zh）<textarea disabled={disabled} className="mt-1 min-h-16 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.description.zh} onChange={(event) => update(field.fieldId, { description: { ...field.description, zh: event.target.value } })} /></label><label className="text-xs">定义（en）<textarea disabled={disabled} className="mt-1 min-h-16 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.description.en} onChange={(event) => update(field.fieldId, { description: { ...field.description, en: event.target.value } })} /></label></div>{field.type === 'enum' ? <label className="mt-2 block text-xs">枚举选项（用逗号分隔）<input disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={(field.options ?? []).map((option) => option.value).join(', ')} onChange={(event) => update(field.fieldId, { options: event.target.value.split(',').map((item) => item.trim()).filter(Boolean).map((value) => ({ value, label: { zh: value, en: '' } })) })} /></label> : null}</article>;
+  })}</div></section>;
 }
 
-function RegistryOptions({ schema, value, onChange }: { schema: ConfigPackageV3['registries']['cardLayouts'][number]['optionSchema']; value: Record<string, unknown>; onChange: (value: Record<string, unknown>) => void }) {
-  if (!schema?.length) return <p className="mt-2 text-xs text-slate-500">该受控注册项没有额外公开配置；运行时细节由注册表维护。</p>;
-  return <div className="mt-2 grid gap-2 sm:grid-cols-2">{schema.map((option) => <label key={option.key} className="text-xs">{option.label.zh}{option.type === 'boolean' ? <input className="ml-2" type="checkbox" checked={Boolean(value[option.key])} onChange={(event) => onChange({ ...value, [option.key]: event.target.checked })} /> : option.type === 'select' ? <select className="mt-1 w-full rounded border px-2 py-1" value={String(value[option.key] ?? '')} onChange={(event) => onChange({ ...value, [option.key]: event.target.value })}>{option.options?.map((item) => <option key={item}>{item}</option>)}</select> : <input className="mt-1 w-full rounded border px-2 py-1" type={option.type === 'number' ? 'number' : 'text'} value={String(value[option.key] ?? '')} onChange={(event) => onChange({ ...value, [option.key]: option.type === 'number' ? Number(event.target.value) : event.target.value })} />}</label>)}</div>;
-}
+function FieldOptionRows({value,disabled,onChange}:{value?:FieldDefinition['options'];disabled:boolean;onChange:(value:NonNullable<FieldDefinition['options']>)=>void}) {return <ValueOptionsEditor value={value} disabled={disabled} onChange={onChange}/>;}
 
-function CardEditor({ config, node, fields, onChange }: { config: ConfigPackageV3; node: CategoryNode; fields: string[]; onChange: (node: CategoryNode) => void }) {
-  const card = node.card;
-  const setCard = (next: CardConfiguration) => onChange({ ...node, card: next });
-  const updateItem = (id: string, patch: Partial<CardItem>) => card.mode === 'fields' && setCard({ ...card, items: card.items.map((item) => item.id === id ? { ...item, ...patch } : item) });
-  const sources = [...fields, 'tags.custom', 'extensions.custom'];
-  const switchMode = (mode: CardConfiguration['mode']) => {
-    if (mode === 'fields') setCard({ mode, items: card.mode === 'fields' ? card.items : [] });
-    if (mode === 'layout') setCard({ mode, layoutId: config.registries.cardLayouts[0]?.id ?? '' });
-    if (mode === 'component') setCard({ mode, componentKey: config.registries.cardComponents.find((item) => !item.allowedClasses?.length || item.allowedClasses.includes(node.path.class))?.id ?? '' });
-  };
-  return <section><h3 className="mb-2 font-semibold">信息卡设置</h3><div className="mb-3 flex flex-wrap gap-3 rounded border bg-slate-50 p-2 text-sm"><strong>卡片模式</strong>{(['fields', 'layout', 'component'] as CardConfiguration['mode'][]).map((mode) => <label key={mode}><input type="radio" checked={card.mode === mode} onChange={() => switchMode(mode)} /> {mode === 'fields' ? '字段布局' : mode === 'layout' ? '受控布局' : '专用组件'}</label>)}</div>{card.mode === 'layout' ? <div className="rounded border p-3"><label className="text-sm">声明式布局<select className="mt-1 w-full rounded border px-2 py-1" value={card.layoutId} onChange={(event) => setCard({ ...card, layoutId: event.target.value, options: {} })}>{config.registries.cardLayouts.filter((item) => !item.allowedClasses?.length || item.allowedClasses.includes(node.path.class)).map((item) => <option key={item.id} value={item.id}>{item.label.zh}</option>)}</select></label><RegistryOptions schema={config.registries.cardLayouts.find((item) => item.id === card.layoutId)?.optionSchema} value={card.options ?? {}} onChange={(options) => setCard({ ...card, options })} /></div> : null}{card.mode === 'component' ? <div className="rounded border p-3"><label className="text-sm">代码型专用卡片组件<select className="mt-1 w-full rounded border px-2 py-1" value={card.componentKey} onChange={(event) => setCard({ ...card, componentKey: event.target.value, options: {} })}><option value="">选择组件</option>{config.registries.cardComponents.filter((item) => !item.allowedClasses?.length || item.allowedClasses.includes(node.path.class)).map((item) => <option key={item.id} value={item.id}>{item.label.zh}</option>)}</select></label><RegistryOptions schema={config.registries.cardComponents.find((item) => item.id === card.componentKey)?.optionSchema} value={card.options ?? {}} onChange={(options) => setCard({ ...card, options })} /></div> : null}{card.mode === 'fields' ? <div className="space-y-2">{card.items.map((item) => <article key={item.id} className="rounded border p-3"><div className="grid gap-2 md:grid-cols-4"><label className="text-xs">来源<select className="mt-1 w-full rounded border px-2 py-1" value={item.source} onChange={(event) => updateItem(item.id, { source: event.target.value })}>{sources.map((source) => <option key={source}>{source}</option>)}</select></label><label className="text-xs">显示器<select className="mt-1 w-full rounded border px-2 py-1" value={item.renderer} onChange={(event) => updateItem(item.id, { renderer: event.target.value as CardItem['renderer'], ...(event.target.value === 'relationLink' ? { relation: item.relation ?? { targetClassification: { class: config.nodes[0]?.path.class ?? '' } } } : {}) })}>{['text', 'tag', 'colorCapsule', 'nameColorCapsule', 'relationLink', 'media'].map((renderer) => <option key={renderer}>{renderer}</option>)}</select></label><label className="text-xs">中文标签<input className="mt-1 w-full rounded border px-2 py-1" value={item.label?.zh ?? item.source} onChange={(event) => updateItem(item.id, { label: { zh: event.target.value, en: item.label?.en ?? event.target.value } })} /></label><label className="pt-5 text-sm"><input type="checkbox" checked={item.visible} onChange={(event) => updateItem(item.id, { visible: event.target.checked })} /> 显示</label></div>{item.renderer === 'colorCapsule' || item.renderer === 'nameColorCapsule' ? <div className="mt-2 grid gap-2 sm:grid-cols-2"><label className="text-xs">颜色字段<select className="mt-1 w-full rounded border px-2 py-1" value={item.options?.colorSource ?? ''} onChange={(event) => updateItem(item.id, { options: { ...item.options, colorSource: event.target.value } })}><option value="">选择颜色字段</option>{fields.map((field) => <option key={field}>{field}</option>)}</select></label>{item.renderer === 'nameColorCapsule' ? <label className="text-xs">名称字段<select className="mt-1 w-full rounded border px-2 py-1" value={item.options?.nameSource ?? ''} onChange={(event) => updateItem(item.id, { options: { ...item.options, nameSource: event.target.value } })}><option value="">选择名称字段</option>{fields.map((field) => <option key={field}>{field}</option>)}</select></label> : null}</div> : null}{item.renderer === 'relationLink' ? <RelationLinkEditor config={config} item={item} onChange={(relation) => updateItem(item.id, { relation })} /> : null}{item.renderer === 'media' ? <label className="mt-2 block text-xs">媒体来源<select className="mt-1 w-full rounded border px-2 py-1" value={item.options?.mediaSource ?? 'picture-index'} onChange={(event) => updateItem(item.id, { options: { ...item.options, mediaSource: event.target.value as 'picture-index' | 'external-url' } })}><option value="picture-index">图片索引</option><option value="external-url">外部链接</option></select></label> : null}<button type="button" className="mt-2 inline-flex items-center gap-1 text-xs text-rose-700" onClick={() => setCard({ ...card, items: card.items.filter((entry) => entry.id !== item.id) })}><Trash2 className="h-3 w-3" />删除项目</button></article>)}<button type="button" className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm" onClick={() => setCard({ ...card, items: [...card.items, { id: `card-${Date.now()}`, source: fields[0] ?? 'tags.custom', visible: true, renderer: 'text', label: { zh: '新字段', en: 'New field' } }] })}><Plus className="h-4 w-4" />添加字段/模块</button></div> : null}</section>;
-}
-
-function RelationLinkEditor({ config, item, onChange }: { config: ConfigPackageV3; item: CardItem; onChange: (relation: NonNullable<CardItem['relation']>) => void }) {
-  const relation = item.relation ?? { targetClassification: { class: config.nodes[0]?.path.class ?? '' }, clickable: true };
-  const target = relation.targetClassification ?? { class: config.nodes[0]?.path.class ?? '' };
-  const targetFields = resolveSelectableFields(config, target).map((field) => field.key);
-  return <div className="mt-2 rounded border border-blue-100 bg-blue-50/40 p-2"><div className="mb-1 text-xs font-medium text-blue-950">关系跳转：Class / Kind / Skind / Skind2 / 匹配字段 / 展示字段</div><PathSelector config={config} editableClass label="目标分类范围" value={target} onChange={(targetClassification) => onChange({ ...relation, targetClassification, targetMatchField: undefined, targetDisplayField: undefined })} /><div className="mt-2 grid gap-2 sm:grid-cols-2"><label className="text-xs">目标匹配字段<select className="mt-1 w-full rounded border px-2 py-1" value={relation.targetMatchField ?? ''} onChange={(event) => onChange({ ...relation, targetMatchField: event.target.value || undefined })}><option value="">重新选择</option>{targetFields.map((field) => <option key={field}>{field}</option>)}</select></label><label className="text-xs">目标展示字段<select className="mt-1 w-full rounded border px-2 py-1" value={relation.targetDisplayField ?? ''} onChange={(event) => onChange({ ...relation, targetDisplayField: event.target.value || undefined })}><option value="">重新选择</option>{targetFields.map((field) => <option key={field}>{field}</option>)}</select></label></div></div>;
+function FieldCard({ field, local, onUpdate, onDelete, onOverride, contractRevision=8 }: { field: FieldDefinition; local: boolean; contractRevision?:number; onUpdate: (patch: Partial<FieldDefinition>) => void; onDelete: () => void; onOverride: () => void }) {
+  const disabled = !local;
+  const scope = fieldScope(field);
+  const shortKey = fieldShortKey(field);
+  const setShortKey = (next: string) => onUpdate({ key: scope === 'root' ? next : `${scope}.${next}`, scope });
+  return <article aria-label={`字段 ${field.key}`} className="min-w-0 rounded border bg-white p-2">
+    <div className="grid min-w-0 gap-2 grid-cols-2 xl:grid-cols-4">
+      <label className="min-w-0 text-xs">字段名<input disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={shortKey} onChange={(event) => setShortKey(event.target.value)} /></label>
+      <label className="min-w-0 text-xs">数据类型<select disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.type} onChange={(event) => onUpdate({ type: event.target.value as FieldDefinition['type'] })}>{['string', 'number', 'boolean', 'enum', 'json', 'reference'].map((type) => <option key={type} value={type}>{type}</option>)}</select></label>
+      <label className="min-w-0 text-xs">值数量<select disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.cardinality} onChange={(event) => onUpdate({ cardinality: event.target.value as FieldDefinition['cardinality'] })}><option value="single">单值</option><option value="multiple">允许多值</option></select></label>
+      <label className="min-w-0 text-xs">输入控件<select disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.input} onChange={(event) => onUpdate({ input: event.target.value as FieldDefinition['input'] })}>{['text', 'textarea', 'select', 'toggle', 'json', 'featureSearch'].map((input) => <option key={input} value={input}>{input}</option>)}</select></label>
+    </div>
+    <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 rounded border border-slate-100 bg-slate-50 px-2 py-1.5 text-sm">
+      <label className="inline-flex items-center gap-1"><input disabled={disabled} type="checkbox" checked={Boolean(field.required)} onChange={(event) => onUpdate({ required: event.target.checked })} />必填</label>
+      {local ? <button type="button" className="ml-auto text-xs text-rose-700" onClick={onDelete}>删除</button> : <button type="button" disabled={field.inheritance==='sealed'} className="ml-auto text-xs text-blue-700 disabled:text-slate-400" onClick={onOverride}>{field.inheritance==='sealed'?'固定继承':'建立覆盖'}</button>}
+    </div>
+    <div className="mt-2 grid min-w-0 gap-2 md:grid-cols-2"><label className="min-w-0 text-xs">名称（zh）<input disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.labels.zh} onChange={(event) => onUpdate({ labels: { ...field.labels, zh: event.target.value } })} /></label><label className="min-w-0 text-xs">名称（en）<input disabled={disabled} className="mt-1 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.labels.en} onChange={(event) => onUpdate({ labels: { ...field.labels, en: event.target.value } })} /></label><label className="min-w-0 text-xs">定义（zh）<textarea disabled={disabled} className="mt-1 min-h-16 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.description.zh} onChange={(event) => onUpdate({ description: { ...field.description, zh: event.target.value } })} /></label><label className="min-w-0 text-xs">定义（en）<textarea disabled={disabled} className="mt-1 min-h-16 w-full rounded border px-2 py-1 disabled:bg-slate-100" value={field.description.en} onChange={(event) => onUpdate({ description: { ...field.description, en: event.target.value } })} /></label></div><FieldOptionRows value={field.options} disabled={disabled} onChange={(options) => onUpdate({ options })} /><FieldAdvancedSettings contractRevision={contractRevision} field={field} disabled={disabled} onChange={onUpdate} /></article>;
 }
 
 function FieldEditor({ config, node, onChange }: { config: ConfigPackageV3; node: CategoryNode; onChange: (node: CategoryNode) => void }) {
   const effective = resolveEffectiveFields(config, node.path);
-  const local = new Set(node.fields.map((field) => field.fieldId));
-  const editable = node.policies.fields !== 'sealed';
-  const updateLocal = (fieldId: string, patch: Partial<CategoryNode['fields'][number]>) => onChange({ ...node, fields: node.fields.map((field) => field.fieldId === fieldId ? { ...field, ...patch } : field) });
-  return <section><h3 className="mb-2 font-semibold">字段设置</h3><p className="mb-2 text-xs text-slate-500">上级固定字段会显示为继承状态；只有当前节点允许覆写时可以编辑或新增本地字段。</p>{effective.map((field) => <div key={field.fieldId} className="mb-2 grid gap-2 rounded border p-2 md:grid-cols-5"><input className="rounded border px-2 py-1 disabled:bg-slate-100" disabled={!local.has(field.fieldId) || !editable} value={field.key} onChange={(event) => updateLocal(field.fieldId, { key: event.target.value })} /><select className="rounded border px-2 py-1 disabled:bg-slate-100" disabled={!local.has(field.fieldId) || !editable} value={field.type} onChange={(event) => updateLocal(field.fieldId, { type: event.target.value as typeof field.type })}>{['string', 'number', 'boolean', 'enum', 'json', 'reference'].map((type) => <option key={type}>{type}</option>)}</select><input className="rounded border px-2 py-1 disabled:bg-slate-100" disabled={!local.has(field.fieldId) || !editable} value={field.labels.zh} onChange={(event) => updateLocal(field.fieldId, { labels: { ...field.labels, zh: event.target.value } })} /><label className="text-sm"><input type="checkbox" disabled={!local.has(field.fieldId) || !editable} checked={Boolean(field.required)} onChange={(event) => updateLocal(field.fieldId, { required: event.target.checked })} /> 必填</label><span className="text-xs text-slate-500">{local.has(field.fieldId) ? '本地定义' : '继承/固定'}</span></div>)}{editable ? <button type="button" className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm" onClick={() => onChange({ ...node, fields: [...node.fields, { fieldId: `field-${Date.now()}`, key: 'NewField', type: 'string', cardinality: 'single', input: 'text', labels: { zh: '新字段', en: 'New field' }, description: { zh: '', en: '' } }] })}><Plus className="h-4 w-4" />添加字段</button> : null}</section>;
-}
-
-function ensureClassificationControl(config: ConfigPackageV3, workflow: WorkflowDefinition): WorkflowDefinition {
-  const required = hasDescendants(config, workflow.target);
-  const firstFormIndex = workflow.steps.findIndex((step) => step.kind === 'form');
-  if (firstFormIndex < 0) return workflow;
-  return {
-    ...workflow,
-    steps: workflow.steps.map((step, index) => {
-      if (index !== firstFormIndex) return step;
-      const controls = step.controls ?? [];
-      const withoutManaged = controls.filter((control) => !(control.kind === 'classificationPicker' && control.systemManaged));
-      return required ? { ...step, controls: [{ id: 'system-classification', kind: 'classificationPicker', columns: 1, label: { zh: '分类', en: 'Classification' }, classificationScope: workflow.target, systemManaged: true }, ...withoutManaged] } : { ...step, controls: withoutManaged };
-    }),
+  const local = new Set(node.fields.map((field) => field.overrideOf || field.key));
+  const levels: Array<keyof ClassificationPath> = ['class', 'kind', 'skind', 'skind2'];
+  const update = (fieldId: string, patch: Partial<FieldDefinition>) => onChange({ ...node, fields: node.fields.map((field) => field.fieldId === fieldId ? { ...field, ...patch } : field) });
+  const updateClassificationLabel = (level: keyof ClassificationPath, language: 'zh' | 'en', value: string) => {
+    const current = node.classificationLabels?.[level] ?? { zh: String(node.path[level] ?? ''), en: '' };
+    onChange({
+      ...node,
+      classificationLabels: {
+        ...node.classificationLabels,
+        [level]: { ...current, [language]: value },
+      },
+    });
   };
+  const add = (scope: 'root' | 'tags' | 'extensions') => {
+    const base = 'NewField';
+    const key = scope === 'root' ? base : `${scope}.${base}`;
+    onChange({ ...node, fields: [...node.fields, { fieldId: uid('field'), key, scope, type: 'string', cardinality: 'single', input: 'text', labels: { zh: '新字段', en: '' }, description: { zh: '', en: '' } }] });
+  };
+  const renderScope = (scope: 'root' | 'tags' | 'extensions', title: string, detail: string) => {
+    const fields = effective.filter((field) => fieldScope(field) === scope && !(scope !== 'root' && (field.key === scope || field.key === `${scope}.`)));
+    return <section key={scope} aria-label={`${scope} 字段组`} className="rounded-lg border bg-slate-50 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div><h4 className="font-medium">{title}</h4><p className="text-xs text-slate-500">{detail}</p></div>
+        <button type="button" className="inline-flex items-center gap-1 rounded border bg-white px-2 py-1 text-sm" onClick={() => add(scope)}><Plus className="h-4 w-4" />添加字段</button>
+      </div>
+      {fields.length ? <div className="mt-2 space-y-2">{fields.map((field) => {
+        const isLocal = local.has(field.key);
+        return <FieldCard contractRevision={config.contractRevision} key={field.fieldId} field={field} local={isLocal} onUpdate={(patch) => update(field.fieldId, patch)} onDelete={() => onChange({ ...node, fields: node.fields.filter((item) => item.fieldId !== field.fieldId) })} onOverride={() => onChange({ ...node, fields: [...node.fields, { ...clone(field), fieldId: uid('field-override'), overrideOf: field.key }] })} />;
+      })}</div> : <p className="mt-2 text-xs text-slate-500">当前没有此字段组的已定义字段。</p>}
+    </section>;
+  };
+  return <section>
+    <div className="mb-2"><h3 className="font-semibold">分类标识与字段设置</h3><p className="text-xs text-slate-500">World 是引擎自动分配的必填系统字段。tags 与 extensions 是始终存在的可选字段组，不会再被伪造成名为 tags/extensions 的顶级文本字段；子分类可新增本地字段或建立继承覆盖。</p></div>
+    <section className="mb-3 rounded-lg border border-violet-200 bg-violet-50/50 p-3"><h4 className="font-medium">分类标识（路径代码与显示名称）</h4><p className="mt-1 text-xs text-slate-500">路径代码用于机器分类；中文/英文显示名称用于编辑器、选择框与工作流。例如 ROD／道路、ROD/NOM／普通。</p><div className="mt-2 grid gap-2 lg:grid-cols-2">{levels.filter((level) => Boolean(node.path[level])).map((level) => {
+      const label = node.classificationLabels?.[level] ?? { zh: String(node.path[level] ?? ''), en: '' };
+      return <div key={level} className="grid min-w-0 gap-2 rounded border bg-white p-2 sm:grid-cols-[7rem_minmax(0,1fr)_minmax(0,1fr)]"><label className="text-xs">代码<input disabled className="mt-1 w-full rounded border bg-slate-100 px-2 py-1" value={String(node.path[level] ?? '')} /></label><label className="min-w-0 text-xs">名称（zh）<input className="mt-1 w-full rounded border px-2 py-1" value={label.zh} onChange={(event) => updateClassificationLabel(level, 'zh', event.target.value)} /></label><label className="min-w-0 text-xs">名称（en）<input className="mt-1 w-full rounded border px-2 py-1" value={label.en} onChange={(event) => updateClassificationLabel(level, 'en', event.target.value)} /></label></div>;
+    })}</div></section>
+    <div className="space-y-3">{renderScope('root', '顶级字段', '直接写入要素根对象。')}{renderScope('tags', 'tags（可选字段组）', '写入 tags.xxx；字段组本身不可删除。')}{renderScope('extensions', 'extensions（可选字段组）', '写入 extensions.xxx；字段组本身不可删除。')}</div>
+  </section>;
 }
 
-function makeWorkflow(config: ConfigPackageV3): WorkflowDefinition | null {
-  const target = config.nodes.find((node) => !node.path.kind)?.path ?? config.nodes[0]?.path;
-  if (!target) return null;
-  const id = `workflow-${Date.now()}`;
-  return ensureClassificationControl(config, {
-    id,
-    label: { zh: '标准要素填卡', en: 'Standard feature workflow' },
-    target,
-    steps: [
-      { id: `${id}-actor`, kind: 'actor', label: { zh: '填写人', en: 'Actor' } },
-      { id: `${id}-form-1`, kind: 'form', label: { zh: '基本信息 1', en: 'Basic information 1' }, controls: [] },
-      { id: `${id}-tail`, kind: 'tagsExtensions', label: { zh: '标签与扩展', en: 'Tags and extensions' }, tagsExtensions: { tagsEnabled: true, extensionsEnabled: true } },
-      { id: `${id}-geometry`, kind: 'geometry', label: { zh: '绘制', en: 'Geometry' }, geometry: ['Point'] },
-    ],
-    assignments: [],
+function EngineEditor({ engine, config, onChange }: { engine: ConfigEngineSettings; config: ConfigPackageV3; onChange: (next: ConfigEngineSettings) => void }) {
+  const [geometry, setGeometry] = useState<GeometryKind>('Point');
+  const baseline = engine.interactionBaselines[geometry];
+  const updateState = (state: InteractionState, patch: Partial<typeof baseline[InteractionState]>) => onChange({ ...engine, interactionBaselines: { ...engine.interactionBaselines, [geometry]: { ...baseline, [state]: { ...baseline[state], ...patch } } } });
+  const contextView = engine.contextView ?? { minZoom: 6, activationRadiusPx: 70, retainRadiusPx: 120 };
+  return <details className="rounded border bg-slate-50 p-3">
+    <summary className="cursor-pointer font-medium">V3.2 全局引擎默认值</summary>
+    <div className="mt-1 flex flex-wrap items-center gap-2"><p className="mr-auto text-xs text-slate-600">World 永远由当前地图世界赋值。导航/编辑态不是渲染规则选择项；交互状态、点击容差、屏幕阈值，以及通用主结构/单元视角入口统一在此处定义。</p></div>
+    <div className="mt-2 grid gap-2 md:grid-cols-3">
+      <label className="text-xs">World 系统字段<input disabled className="mt-1 w-full rounded border bg-slate-100 px-2 py-1" value="World（活动世界自动赋值）" /></label>
+      <NumberField label="面最小屏幕面积 px²" value={engine.screenGateDefaults.polygonMinScreenAreaPx} min={0} onChange={(value) => onChange({ ...engine, screenGateDefaults: { ...engine.screenGateDefaults, polygonMinScreenAreaPx: value } })} />
+      <NumberField label="线最小屏幕长度 px" value={engine.screenGateDefaults.lineMinScreenLengthPx} min={0} onChange={(value) => onChange({ ...engine, screenGateDefaults: { ...engine.screenGateDefaults, lineMinScreenLengthPx: value } })} />
+    </div>
+    <fieldset className="mt-3 rounded border bg-white p-2 text-xs"><legend>共享 Pane 名称</legend><div className="grid gap-2 md:grid-cols-4">{Object.entries(engine.paneDefaults).map(([key,value]) => <label key={key}>{key}<input className="w-full rounded border px-2" value={value} onChange={event => onChange({ ...engine, paneDefaults: { ...engine.paneDefaults, [key]: event.target.value } })} /></label>)}</div></fieldset>
+    <details className="mt-3 rounded border bg-white p-2"><summary className="text-xs">{geometryLabel[geometry]}通用候选、密度与稳定性默认<ModuleHelp title={`${geometryLabel[geometry]}通用候选、密度与稳定性默认`} helpKey="全局扩展默认" /></summary><RenderRuleExtensionsEditor config={config} sourcePath={config.nodes.find(node => node.geometryType === geometry)?.path ?? { class: '' }} fields={['ID','Name']} geometry={geometry} rule={{ id: 'engine-default', extensions: engine.renderDefaults?.[geometry] }} onChange={rule => onChange({ ...engine, renderDefaults: { ...engine.renderDefaults, [geometry]: rule.extensions } })} /><ExtraRuleSettings rule={{ id: 'engine-default', extensions: engine.renderDefaults?.[geometry] }} onChange={rule => onChange({ ...engine, renderDefaults: { ...engine.renderDefaults, [geometry]: rule.extensions } })}  config={config} geometry={geometry} /></details>
+    <div className="mt-3 rounded border bg-white p-2">
+      <strong className="text-sm">通用包含关系视角</strong>
+      <p className="mt-1 text-xs text-slate-500">分类和关联字段在下方“包含关系绑定”中选择；这里仅定义进入/保持视角的全局方式。</p>
+      <div className="mt-2 grid gap-2 md:grid-cols-3">
+        <NumberField label="进入视角最小 Zoom" value={contextView.minZoom} min={0} max={8} onChange={(value) => onChange({ ...engine, contextView: { ...contextView, minZoom: value ?? 6 } })} />
+        <NumberField label="激活半径 px" value={contextView.activationRadiusPx} min={0} onChange={(value) => onChange({ ...engine, contextView: { ...contextView, activationRadiusPx: value ?? 0 } })} />
+        <NumberField label="保持半径 px" value={contextView.retainRadiusPx} min={0} onChange={(value) => onChange({ ...engine, contextView: { ...contextView, retainRadiusPx: value ?? 0 } })} />
+      </div>
+    </div>
+    <div className="mt-3 rounded border bg-white p-2">
+      <div className="flex flex-wrap items-center gap-3">
+        <strong className="text-sm">统一交互基准</strong>
+        <label className="text-xs">几何<select className="ml-1 rounded border px-2 py-1" value={geometry} onChange={(event) => setGeometry(event.target.value as GeometryKind)}>{geometries.map((item) => <option key={item} value={item}>{geometryLabel[item]}</option>)}</select></label>
+        <NumberField label="默认点击容差 px" value={baseline.hitTolerancePx} min={0} max={80} onChange={(value) => onChange({ ...engine, interactionBaselines: { ...engine.interactionBaselines, [geometry]: { ...baseline, hitTolerancePx: value ?? 0 } } })} />
+      </div>
+      <div className="mt-2 grid gap-2 md:grid-cols-2 2xl:grid-cols-5">
+        {interactionStates.map((state) => <fieldset key={state} className="rounded border p-2">
+          <legend className="px-1 text-xs">{interactionStateLabel[state]}</legend>
+          <label className="text-xs"><input type="checkbox" checked={baseline[state].enabled} onChange={(event) => updateState(state, { enabled: event.target.checked })} /> 启用</label>
+          <label className="mt-1 block text-xs">描边颜色<input className="mt-1 h-7 w-full" type="color" value={baseline[state].strokeColor} onChange={(event) => updateState(state, { strokeColor: event.target.value })} /></label>
+          <NumberField label="描边粗细" value={baseline[state].strokeWidth} min={0} step={0.5} onChange={(value) => updateState(state, { strokeWidth: value ?? 0 })} />
+          <OpacityField label="描边透明度" value={baseline[state].strokeOpacity} onChange={(value) => updateState(state, { strokeOpacity: value })} />
+          <label className="mt-1 block text-xs">填色颜色<input className="mt-1 h-7 w-full" type="color" value={baseline[state].fillColor ?? baseline[state].strokeColor} onChange={(event) => updateState(state, { fillColor: event.target.value })} /></label>
+          <OpacityField label="填色透明度" value={baseline[state].fillOpacity} onChange={(value) => updateState(state, { fillOpacity: value })} />
+          <NumberField label="zIndex 偏移" value={baseline[state].zIndexOffset} step={1} onChange={(value) => updateState(state, { zIndexOffset: value })} />
+          <NumberField label="Label 优先级" value={baseline[state].labelPriority} step={1} onChange={(value) => updateState(state, { labelPriority: value })} />
+          <label className="mt-1 block text-xs"><input type="checkbox" checked={baseline[state].forceShowLabel !== false} onChange={(event) => updateState(state, { forceShowLabel: event.target.checked })} /> 强制显示 Label</label>
+          <InteractionShapeSettings visual={baseline[state]} onChange={patch => updateState(state, patch)} />
+        </fieldset>)}
+      </div>
+    </div>
+  </details>;
+}
+
+function ContextBindingsEditor({ config, selected, onChange }: { config: ConfigPackageV3; selected: CategoryNode; onChange: (next: ConfigPackageV3) => void }) {
+  const bindings = config.contextBindings ?? [];
+  const related = bindings.filter((binding) => samePath(binding.host.classification, selected.path) || samePath(binding.member.classification, selected.path));
+  const endpointFields = (path: ClassificationPath) => allFieldKeys(config, path);
+  const create = () => {
+    const binding: ContextBinding = { id: uid('context'), label: { zh: '新的包含关系', en: 'New context binding' }, host: { classification: selected.path, referenceField: 'ID' }, member: { classification: { class: '' }, referenceField: '' }, enabled: false, profile: 'default' };
+    onChange({ ...config, contextBindings: [...bindings, binding] });
+  };
+  const update = (id: string, patch: Partial<ContextBinding>) => onChange({ ...config, contextBindings: bindings.map((binding) => binding.id === id ? { ...binding, ...patch } : binding) });
+  const selectEndpoint = (binding: ContextBinding, side: 'host' | 'member', nodeId: string) => {
+    const node = config.nodes.find((item) => item.nodeId === nodeId);
+    update(binding.id, { [side]: { classification: node?.path ?? { class: '' }, referenceField: '' } } as Partial<ContextBinding>);
+  };
+  return (
+    <section className="rounded border p-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-semibold">包含关系绑定</h3>
+          <p className="text-xs text-slate-500">任意主结构与任意附属/单元分类可互相绑定；不是 BUD/FLR 特例，也不属于任一 Zoom 渲染规则。</p>
+        </div>
+        <button type="button" className="inline-flex items-center gap-1 rounded border px-2 py-1 text-sm" onClick={create}><Plus className="h-4 w-4" />新建绑定</button>
+      </div>
+      {related.length ? (
+        <div className="mt-2 space-y-2">
+          {related.map((binding) => {
+            const memberFields = endpointFields(binding.member.classification);
+            return <div key={binding.id} className="rounded border bg-slate-50 p-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <input className="min-w-40 flex-1 rounded border px-2 py-1 text-sm" value={binding.label.zh} onChange={(event) => update(binding.id, { label: { zh: event.target.value, en: binding.label.en } })} />
+                <label className="text-xs"><input type="checkbox" checked={binding.enabled} onChange={(event) => update(binding.id, { enabled: event.target.checked })} /> 启用</label>
+                <label className="text-xs">成员显示<select className="ml-1 rounded border px-2 py-1" value={binding.profile} onChange={(event) => update(binding.id, { profile: event.target.value as ContextBinding['profile'] })}><option value="default">关联成员</option><option value="keep-host-context">保留主结构上下文</option><option value="show-active-member-only">仅当前成员</option></select></label>
+                <button type="button" className="text-xs text-rose-700" onClick={() => onChange({ ...config, contextBindings: bindings.filter((item) => item.id !== binding.id) })}>删除</button>
+              </div>
+              <div className="mt-2 grid gap-2 md:grid-cols-2">
+                {(['host', 'member'] as const).map((side) => {
+                  const endpoint = binding[side];
+                  const current = config.nodes.find((node) => samePath(node.path, endpoint.classification));
+                  return <fieldset key={side} className="rounded border bg-white p-2">
+                    <legend className="px-1 text-xs">{side === 'host' ? '主结构' : '附属/单元'}</legend>
+                    <label className="text-xs">分类<select className="mt-1 w-full rounded border px-2 py-1" value={current?.nodeId ?? ''} onChange={(event) => selectEndpoint(binding, side, event.target.value)}><option value="">选择分类</option>{config.nodes.map((node) => <option key={node.nodeId} value={node.nodeId}>{nodeLabel(node)}</option>)}</select></label>
+                    <label className="mt-1 block text-xs">引用字段<select className="mt-1 w-full rounded border px-2 py-1" value={endpoint.referenceField} onChange={(event) => update(binding.id, { [side]: { ...endpoint, referenceField: event.target.value } } as Partial<ContextBinding>)}><option value="">选择字段</option>{endpointFields(endpoint.classification).map((field) => <option key={field}>{field}</option>)}</select></label>
+                  </fieldset>;
+                })}
+              </div>
+              <label className="mt-2 block max-w-sm text-xs">附属/单元切换字段（可选）<select className="mt-1 w-full rounded border px-2 py-1" value={binding.memberSelectorField ?? ''} onChange={(event) => update(binding.id, { memberSelectorField: event.target.value || undefined })}><option value="">默认 ID</option>{memberFields.map((field) => <option key={field}>{field}</option>)}</select></label>
+            </div>;
+          })}
+        </div>
+      ) : <p className="mt-2 text-sm text-slate-500">当前分类尚未参与包含关系绑定。</p>}
+    </section>
+  );
+}
+
+function Report({ config: _config, records, report }: { config: ConfigPackageV3; records: MountedFeatureRecord[]; report: ReturnType<typeof validateConfigPackage> | null }) {
+  if (!report) return <section className="shrink-0 border-t bg-white px-4 py-2 text-xs text-slate-500">尚未核验。核验会按错误编码、字段/内容和受影响要素 ID 集分组显示。</section>;
+  const groups = new Map<string, typeof report.issues>();
+  report.issues.forEach((item) => { const key = `${item.severity}:${item.code}:${item.message}`; groups.set(key, [...(groups.get(key) ?? []), item]); });
+  return <details className="shrink-0 border-t bg-white px-4 py-2" open={!report.valid}><summary className={`cursor-pointer font-medium ${report.valid ? 'text-emerald-700' : 'text-rose-700'}`}>{report.valid ? '核验通过' : `发现 ${[...groups.values()].filter((items) => items.some((item) => item.severity === 'error')).length} 个问题组`} · 挂载记录 {records.length}</summary><div className="mt-2 max-h-48 space-y-2 overflow-auto">{[...groups.entries()].map(([key, items]) => { const affected = [...new Map(items.flatMap((item) => item.affectedFeatures ?? []).map((item) => [item.id, item])).values()]; return <div key={key} className={`rounded border px-3 py-2 text-xs ${items.some((item) => item.severity === 'error') ? 'border-rose-200 bg-rose-50 text-rose-900' : 'border-amber-200 bg-amber-50 text-amber-900'}`}><strong>{items[0].code}</strong> · {items[0].field ?? items[0].path} · {items[0].message}{affected.length ? <div className="mt-1">要素 ID：{affected.map((item) => `${item.id}${item.name ? `(${item.name})` : ''}`).join('、')}</div> : null}</div>; })}</div></details>;
+}
+
+export function ConfigStudio({ onClose, mountedRecords, initialTab }: { onClose: () => void; mountedRecords?: MountedFeatureRecord[]; initialTab?: StudioTab }) {
+  const [activeTab, setActiveTab] = useState<StudioTab>(() => initialTab ?? (new URLSearchParams(window.location.search).get('tab') === 'workflows' ? 'workflows' : 'features'));
+  const [workflowHasDraft, setWorkflowHasDraft] = useState(false);
+  const [savedConfig, setSavedConfig] = useState<ConfigPackageV3>(() => {
+    const stored = readLocalConfig();
+    return stored;
   });
-}
-
-function WorkflowEditor({ config, setConfig }: { config: ConfigPackageV3; setConfig: (config: ConfigPackageV3) => void }) {
-  const [workflowId, setWorkflowId] = useState(() => config.workflows[0]?.id ?? '');
-  const workflow = config.workflows.find((item) => item.id === workflowId) ?? config.workflows[0];
-  const updateWorkflow = (updater: (value: WorkflowDefinition) => WorkflowDefinition) => {
-    if (!workflow) return;
-    setConfig({ ...config, workflows: config.workflows.map((item) => item.id === workflow.id ? ensureClassificationControl(config, updater(item)) : item) });
-  };
-  const addWorkflow = () => {
-    const next = makeWorkflow(config);
-    if (!next) return;
-    setConfig({ ...config, workflows: [...config.workflows, next] });
-    setWorkflowId(next.id);
-  };
-  if (!workflow) return <button type="button" className="rounded border px-3 py-2" onClick={addWorkflow}>创建标准工作流</button>;
-  const updateStep = (id: string, patch: Partial<WorkflowStep>) => updateWorkflow((value) => ({ ...value, steps: value.steps.map((step) => step.id === id ? { ...step, ...patch } : step) }));
-  const forms = workflow.steps.filter((step) => step.kind === 'form');
-  const addPage = () => updateWorkflow((value) => {
-    const tailIndex = value.steps.findIndex((step) => step.kind === 'tagsExtensions');
-    const page: WorkflowStep = { id: `form-${Date.now()}`, kind: 'form', label: { zh: `基本信息 ${forms.length + 1}`, en: `Basic information ${forms.length + 1}` }, controls: [] };
-    return { ...value, steps: [...value.steps.slice(0, tailIndex), page, ...value.steps.slice(tailIndex)] };
-  });
-  const removePage = (step: WorkflowStep) => {
-    if (forms.length <= 1) return;
-    updateWorkflow((value) => ({ ...value, steps: value.steps.filter((item) => item.id !== step.id) }));
-  };
-  const addControl = (step: WorkflowStep) => updateStep(step.id, { controls: [...(step.controls ?? []), { id: `control-${Date.now()}`, slot: String.fromCharCode(65 + (step.controls?.filter((control) => !control.systemManaged).length ?? 0)), kind: 'text', columns: 1, label: { zh: '新输入项', en: 'New input' } }] });
-  const updateControl = (step: WorkflowStep, id: string, patch: Partial<WorkflowControl>) => updateStep(step.id, { controls: (step.controls ?? []).map((control) => control.id === id ? { ...control, ...patch } : control) });
-  const assignments = workflow.assignments ?? [];
-  const updateAssignment = (id: string, patch: Partial<WorkflowAssignment>) => updateWorkflow((value) => ({ ...value, assignments: (value.assignments ?? []).map((item) => item.id === id ? { ...item, ...patch } : item) }));
-  return <div className="space-y-3"><div className="flex flex-wrap gap-2"><select className="rounded border px-2 py-1.5" value={workflow.id} onChange={(event) => setWorkflowId(event.target.value)}>{config.workflows.map((item) => <option key={item.id} value={item.id}>{item.label.zh}</option>)}</select><button type="button" className="rounded border px-3 py-1.5" onClick={addWorkflow}>+ 新工作流</button></div><PathSelector config={config} label="工作流默认输出分类" value={workflow.target} onChange={(target) => updateWorkflow((value) => ({ ...value, target }))} /><p className="rounded bg-blue-50 p-2 text-xs text-blue-900">固定顺序：填写人 → 一个或多个基本信息页 → tags/extensions 尾部区 → 最终绘制页。表单控件仅输出槽位，字段写入只在下方组装区定义。</p>{workflow.steps.map((step) => <article key={step.id} className="rounded border p-3"><div className="flex items-center justify-between gap-2"><div className="font-medium">{step.label.zh} <span className="text-xs text-slate-500">{step.kind}</span></div>{step.kind === 'form' && forms.length > 1 ? <button type="button" className="text-xs text-rose-700" onClick={() => removePage(step)}>删除页</button> : null}</div>{step.kind === 'form' ? <div className="mt-2 space-y-2"><label className="block text-xs">页面标题<input className="mt-1 w-full rounded border px-2 py-1" value={step.label.zh} onChange={(event) => updateStep(step.id, { label: { ...step.label, zh: event.target.value } })} /></label>{(step.controls ?? []).map((control) => <div key={control.id} className="rounded border bg-slate-50 p-2"><div className="grid gap-2 md:grid-cols-[8rem_11rem_minmax(18rem,1fr)_auto]"><input className="rounded border px-2 py-1" disabled={control.systemManaged} value={control.slot ?? ''} placeholder="槽位 A" onChange={(event) => updateControl(step, control.id, { slot: event.target.value.toUpperCase() })} /><select className="rounded border px-2 py-1" disabled={control.systemManaged} value={control.kind} onChange={(event) => updateControl(step, control.id, { kind: event.target.value as WorkflowControl['kind'], ...(event.target.value === 'featureSearch' || event.target.value === 'coarseSearch' ? { search: undefined } : {}) })}>{['text', 'textarea', 'number', 'select', 'classificationPicker', 'featureSearch', 'coarseSearch', 'notice', 'json', 'runtimeValue', 'component'].map((kind) => <option key={kind}>{kind}</option>)}</select><input className="rounded border px-2 py-1" disabled={control.systemManaged} placeholder="新输入项" value={control.label.zh} onChange={(event) => updateControl(step, control.id, { label: { ...control.label, zh: event.target.value } })} /><button type="button" className="text-xs text-rose-700 disabled:text-slate-300" disabled={control.systemManaged} onClick={() => updateStep(step.id, { controls: (step.controls ?? []).filter((item) => item.id !== control.id) })}>删除</button></div>{control.systemManaged ? <p className="mt-2 text-xs text-violet-700">由工作流目标分类自动维护；其输出提供 Class/Kind/Skind/Skind2 系统变量。</p> : null}{control.kind === 'select' ? <label className="mt-2 block text-xs">选项（以逗号分隔）<input className="mt-1 w-full rounded border px-2 py-1" value={(control.options ?? []).join(', ')} onChange={(event) => updateControl(step, control.id, { options: event.target.value.split(',').map((item) => item.trim()).filter(Boolean) })} /></label> : null}{control.kind === 'featureSearch' || control.kind === 'coarseSearch' ? <SearchEditor config={config} control={control} onChange={(value) => updateControl(step, control.id, value)} /> : null}{control.kind === 'component' ? <label className="mt-2 block text-xs">受控工作流组件<select className="mt-1 w-full rounded border px-2 py-1" value={control.componentKey ?? ''} onChange={(event) => updateControl(step, control.id, { componentKey: event.target.value })}><option value="">选择组件块</option>{config.registries.workflowBlocks.map((item) => <option key={item.id}>{item.id}</option>)}</select></label> : null}</div>)}<button type="button" className="inline-flex items-center gap-1 rounded border px-2 py-1 text-xs" onClick={() => addControl(step)}><Plus className="h-3 w-3" />添加控件</button></div> : null}{step.kind === 'tagsExtensions' ? <div className="mt-2 flex gap-4 text-sm"><label><input type="checkbox" checked={step.tagsExtensions?.tagsEnabled !== false} onChange={(event) => updateStep(step.id, { tagsExtensions: { ...(step.tagsExtensions ?? { extensionsEnabled: true }), tagsEnabled: event.target.checked } })} /> 开放 tags</label><label><input type="checkbox" checked={step.tagsExtensions?.extensionsEnabled !== false} onChange={(event) => updateStep(step.id, { tagsExtensions: { ...(step.tagsExtensions ?? { tagsEnabled: true }), extensionsEnabled: event.target.checked } })} /> 开放 extensions</label></div> : null}{step.kind === 'geometry' ? <p className="mt-2 text-xs text-slate-600">最终绘制页固定在尾部，绘制类型：{step.geometry?.map((item) => geometryLabels[item]).join('、') ?? '未设置'}。</p> : null}</article>)}<button type="button" className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm" onClick={addPage}><Plus className="h-4 w-4" />添加基本信息页</button><section className="rounded border p-3"><h3 className="font-semibold">字段绑定与多段组装</h3><p className="mt-1 text-xs text-slate-500">只保留“目标字段/路径”和“值表达式”。可引用槽位 A、B、C…，以及系统变量 {systemTokens.join(' / ')}；例如 <code>ID=World+"_"+Class+"_"+A</code>。</p>{assignments.map((item) => <div key={item.id} className="mt-2 grid gap-2 md:grid-cols-2"><input className="rounded border px-2 py-1" placeholder="目标字段、tags.xxx 或 extensions.xxx" value={item.target} onChange={(event) => updateAssignment(item.id, { target: event.target.value })} /><div className="flex gap-2"><input className="min-w-0 flex-1 rounded border px-2 py-1" placeholder="值表达式" value={item.expression} onChange={(event) => updateAssignment(item.id, { expression: event.target.value })} /><button type="button" className="text-xs text-rose-700" onClick={() => updateWorkflow((value) => ({ ...value, assignments: (value.assignments ?? []).filter((entry) => entry.id !== item.id) }))}>删除</button></div></div>)}<button type="button" className="mt-2 inline-flex items-center gap-1 rounded border px-2 py-1 text-xs" onClick={() => updateWorkflow((value) => ({ ...value, assignments: [...(value.assignments ?? []), { id: `assignment-${Date.now()}`, target: 'ID', expression: 'A' }] }))}><Plus className="h-3 w-3" />添加组装行</button></section></div>;
-}
-
-function ZoomReporter({ onChange }: { onChange: (zoom: number) => void }) {
-  const map = useMapEvents({ zoomend: () => onChange(map.getZoom()) });
-  return null;
-}
-
-function PreviewTiles() {
-  const map = useMap();
-  useEffect(() => {
-    const layer = createDynmapTileLayer('zth', 'flat', { maxRetries: 1 });
-    layer.addTo(map);
-    return () => { layer.remove(); };
-  }, [map]);
-  return null;
-}
-
-function previewPriority(profile: GeometryProfile, zoom: number): number | null {
-  const rule = resolveZoomRule(profile, zoom);
-  if (!rule?.priority) return profile.label.collision.basePriority;
-  const metric = rule.priority.metric;
-  let contribution = 0;
-  if (metric) {
-    const base = metric.kind === 'area' ? 4800 : metric.kind === 'length' ? 150 : metric.kind === 'partCount' ? 3 : 1;
-    const raw = metric.divisor ? base / metric.divisor : base;
-    const rounded = metric.rounding === 'floor' ? Math.floor(raw) : metric.rounding === 'ceil' ? Math.ceil(raw) : metric.rounding === 'round' ? Math.round(raw) : raw;
-    contribution = rounded * metric.multiplier;
-    if (metric.min !== undefined) contribution = Math.max(metric.min, contribution);
-    if (metric.max !== undefined) contribution = Math.min(metric.max, contribution);
-  }
-  return (rule.priority.mode === 'add' ? profile.label.collision.basePriority : 0) + (rule.priority.base ?? 0) + contribution;
-}
-
-function PreviewCard({ node, config, geometry, zoom }: { node: CategoryNode; config: ConfigPackageV3; geometry: GeometryKind; zoom: number }) {
-  const profile = resolveGeometryProfile(config, node.path, geometry);
-  const card = node.card;
-  const name = classificationPathKey(node.path);
-  if (!profile) return null;
-  return <aside className="absolute bottom-3 left-3 z-[500] max-w-xs rounded-lg border border-slate-300 bg-white/95 p-3 text-xs shadow-lg"><div className="font-semibold">{name}</div><div className="mt-1 text-slate-500">正式规则预览 · {geometryLabels[geometry]} · Label 优先级 {previewPriority(profile, zoom) ?? '—'}</div>{card.mode === 'fields' ? <div className="mt-2 space-y-1">{card.items.filter((item) => item.visible).slice(0, 4).map((item) => <div key={item.id}><span className="text-slate-500">{item.label?.zh ?? item.source}</span>：{item.renderer === 'relationLink' ? `${item.relation?.targetClassification ? classificationPathKey(item.relation.targetClassification) : '未配置'} → ${item.relation?.targetDisplayField ?? '未配置'}` : item.renderer}</div>)}</div> : <div className="mt-2 rounded bg-slate-100 p-2">{card.mode === 'layout' ? `受控布局：${card.layoutId}` : `专用组件：${card.componentKey}`}</div>}</aside>;
-}
-
-function PreviewMap({ config, node, zoom, onZoom }: { config: ConfigPackageV3; node: CategoryNode; zoom: number; onZoom: (zoom: number) => void }) {
-  const profiles = geometryValues.map((geometry) => ({ geometry, profile: resolveGeometryProfile(config, node.path, geometry) })).filter((item): item is { geometry: GeometryKind; profile: GeometryProfile } => Boolean(item.profile));
-  const primary = profiles.find((item) => item.profile.enabled) ?? profiles[0];
-  const label = classificationPathKey(node.path);
-  const isFloor = node.containment?.enabled && node.containment.role === 'child';
-  const visible = (profile: GeometryProfile) => profile.enabled && resolveZoomRule(profile, zoom)?.representation !== 'hidden';
-  const opts = (profile: GeometryProfile) => ({ color: profile.color, weight: profile.style?.weight ?? 2, opacity: profile.style?.opacity ?? 0.9, fillOpacity: profile.style?.fillOpacity ?? 0.2, dashArray: profile.style?.dashArray });
-  return <div className="relative h-full min-h-[440px] overflow-hidden rounded-xl border border-slate-300"><LeafletMap center={[0, 0]} zoom={zoom} minZoom={0} maxZoom={8} crs={createDynmapCRS(ZTH_FLAT_CONFIG)} className="h-full w-full" attributionControl zoomControl dragging={false} touchZoom={false} doubleClickZoom={false} boxZoom={false} keyboard={false} scrollWheelZoom>
-    <PreviewTiles /><ZoomReporter onChange={onZoom} />
-    {isFloor ? <Polygon positions={[[-7.5, -8.6], [-1.8, -7.2], [-1.2, 7.7], [-7.9, 7.2]]} pathOptions={{ color: '#111827', weight: 2, fillOpacity: 0.13 }} /> : null}
-    {profiles.map(({ geometry, profile }) => visible(profile) ? <PreviewGeometry key={geometry} geometry={geometry} profile={profile} label={label} options={opts(profile)} representation={resolveZoomRule(profile, zoom)?.representation ?? 'geometry'} /> : null)}
-  </LeafletMap>{isFloor ? <div className="absolute right-3 top-3 z-[500] rounded-lg border bg-white/95 p-2 text-xs shadow"><div className="font-medium">楼层切换</div><div className="mt-1 flex gap-1"><button type="button" className="rounded bg-slate-800 px-2 py-1 text-white">主结构</button><button type="button" className="rounded border px-2 py-1">楼层 1</button></div></div> : null}{primary ? <PreviewCard config={config} node={node} geometry={primary.geometry} zoom={zoom} /> : null}</div>;
-}
-
-function PreviewGeometry({ geometry, profile, label, options, representation }: { geometry: GeometryKind; profile: GeometryProfile; label: string; options: { color: string; weight: number; opacity: number; fillOpacity: number; dashArray?: string }; representation: ZoomPriorityRule['representation'] }) {
-  const labelPoint: [number, number] = geometry === 'Point' || representation === 'point' ? [-4.4, 0] : geometry === 'LineString' ? [-4, 1] : [-5, -0.5];
-  const labelStyle = /^(BUD|STB)(?:\/|$)/.test(label) ? 'structure-label' : 'gm-outline';
-  const normalLabel = profile.label.visible ? <Marker position={labelPoint} interactive={false} icon={makeLabelDivIcon(labelStyle, label, { placement: 'near', interactive: false })} /> : null;
-  if (representation === 'point' || geometry === 'Point') return <><CircleMarker center={[-4.4, 0]} radius={9} pathOptions={{ color: options.color, fillColor: options.color, fillOpacity: 0.88, weight: options.weight }} />{normalLabel}</>;
-  if (geometry === 'LineString') return <><Polyline positions={[[-8, -9], [-5.5, -3], [-4, 1], [-2.2, 8]]} pathOptions={options} />{normalLabel}</>;
-  return <><Polygon positions={[[-5.3, -8], [-3.2, -1], [-4.1, 7], [-8.2, 5], [-8.8, -4]]} pathOptions={options} />{normalLabel}</>;
-}
-
-function Report({ config, records }: { config: ConfigPackageV3; records: MountedFeatureRecord[] }) {
-  const report = useMemo(() => validateConfigPackage(config, records), [config, records]);
-  const [open, setOpen] = useState<string | null>(null);
-  return <section className="border-t bg-white p-3"><div className="flex items-center justify-between gap-2 text-sm"><strong className={report.valid ? 'text-emerald-700' : 'text-rose-700'}>{report.valid ? '校验通过' : `发现 ${report.issues.length} 个问题组`}</strong><span className="text-right text-xs text-slate-500">配置 {report.summary?.configuration ?? 0} · 顺承 {report.summary?.parity ?? 0} · 挂载数据 {report.summary?.mountedData ?? 0} 组 / {report.summary?.affectedFeatures ?? 0} 要素</span></div><div className="mt-2 max-h-40 overflow-auto text-xs">{report.issues.map((item, index) => { const key = `${item.code}-${item.path}-${index}`; return <div key={key} className={`mb-1 rounded border p-2 ${item.severity === 'error' ? 'border-rose-100 bg-rose-50 text-rose-800' : 'border-amber-100 bg-amber-50 text-amber-800'}`}><button type="button" className="w-full text-left" onClick={() => setOpen(open === key ? null : key)}><b>{item.code}</b> · {item.field ?? item.path} · {item.count ?? 1} 项：{item.message}</button>{open === key && item.affectedFeatures?.length ? <ol className="mt-2 max-h-32 list-decimal overflow-auto pl-5 text-slate-700">{item.affectedFeatures.map((feature) => <li key={feature.id}><code>{feature.id}</code> · {feature.name}</li>)}</ol> : null}</div>; })}</div></section>;
-}
-
-export function ConfigStudio({ onClose, mountedRecords }: { onClose: () => void; mountedRecords?: MountedFeatureRecord[] }) {
-  const [config, setConfig] = useState<ConfigPackageV3>(() => createConfigPackageFromCurrentProject());
-  const [records] = useState<MountedFeatureRecord[]>(() => mountedRecords ?? readSessionRecords());
-  const [selectedNodeId, setSelectedNodeId] = useState(() => config.nodes[0]?.nodeId ?? '');
-  const [mode, setMode] = useState<StudioMode>('feature');
-  const [zoom, setZoom] = useState(2);
-  const [editorExpanded, setEditorExpanded] = useState(false);
-  const [message, setMessage] = useState('已载入 V1 完整顺承基准；编辑仅保存在本地会话。');
+  const [restoredSession]=useState(getStudioSessionSnapshot);
+  const [treeSession,setTreeSession]=useState<ClassTreeSession|null>(restoredSession?.tree??null);
+  const [treeReport,setTreeReport]=useState<ReturnType<typeof validateConfigPackage>|null>(null);
+  const [importConflict,setImportConflict]=useState<{artifact:CategoryArtifact;result:CategoryImportResult}|null>(null);
+  const [draftConfig, setDraftConfig] = useState<ConfigPackageV3 | null>(restoredSession?.draft??null);
+  const [selectedId, setSelectedId] = useState(restoredSession?.selectedId??'');
+  const [categoryHasDraft,setCategoryHasDraft]=useState(false);
+  const [editing, setEditing] = useState(restoredSession?.editing??false);
+  const [editorExpanded, setEditorExpanded] = useState(true);
+  const [revisionOpen, setRevisionOpen] = useState(false);
+  const [nextRevision, setNextRevision] = useState(2);
+  const [message, setMessage] = useState(() => { try { return sessionStorage.getItem('cairnmap-config-studio-recovery-issue') ?? '已加载 V1 真实字段的 V3.2 语义迁移包：显示、信息卡和标准工作流都可在本地继续编辑。'; } catch { return '已加载本地迁移包。'; } });
+  const [report, setReport] = useState<ReturnType<typeof validateConfigPackage> | null>(null);
+  const [scenario, setScenarioState] = useState<PreviewScenario>('singlePoint');
+  const setScenario = (value: string) => setScenarioState(value as PreviewScenario);
   const uploadRef = useRef<HTMLInputElement>(null);
-  const selected = config.nodes.find((node) => node.nodeId === selectedNodeId) ?? config.nodes[0];
-  const fields = useMemo(() => selected ? resolveEffectiveFields(config, selected.path) : [], [config, selected]);
-  const report = useMemo(() => validateConfigPackage(config, records), [config, records]);
-  if (!selected) return null;
-  const updateSelected = (updater: (node: CategoryNode) => CategoryNode) => setConfig((current) => updateNode(current, selected.nodeId, updater));
+  const records = useMemo(() => mountedRecords ?? readMountedRecords(), [mountedRecords]);
+  const config = draftConfig ?? treeSession?.staged ?? savedConfig;
+  const editingSnapshot=useRef<StudioEditingSession|null>(null);
+  editingSnapshot.current=editing||draftConfig||treeSession?{draft:draftConfig,tree:treeSession,selectedId,editing,baseline:savedConfig}:null;
+  useEffect(()=>{const timer=setTimeout(()=>void saveStudioEditingSession(editingSnapshot.current).catch(error=>setMessage(String(error))),300);const flush=()=>{void saveStudioEditingSession(editingSnapshot.current);};window.addEventListener('beforeunload',flush);return()=>{clearTimeout(timer);window.removeEventListener('beforeunload',flush);};},[draftConfig,treeSession,selectedId,editing]);
+  const selected = config.nodes.find((node) => node.nodeId === selectedId);
+  const setConfig = (next: ConfigPackageV3 | ((current: ConfigPackageV3) => ConfigPackageV3)) => {
+    const current = draftConfig ?? clone(treeSession?.staged??savedConfig);
+    const resolved = typeof next === 'function' ? (next as (value: ConfigPackageV3) => ConfigPackageV3)(current) : next;
+    setDraftConfig(resolved);
+    setEditing(true);
+    setReport(null);setTreeReport(null);
+  };
+  const switchTab = (next: StudioTab) => {
+    if (!canSwitchStudioTab(activeTab, next, { feature: draftConfig !== null || editing || categoryHasDraft || treeSession!==null, workflow: workflowHasDraft })) {
+      setMessage('请先保存或放弃当前草稿，再切换设计标签。');
+      return;
+    }
+    setActiveTab(next);
+    const target = new URL(window.location.href);
+    target.searchParams.set('workspace', 'config-studio');
+    target.searchParams.set('tab', next);
+    window.history.replaceState(null, '', target);
+  };
+  const saveWorkflowPackage = async (next: ConfigPackageV3): Promise<boolean> => {
+    const nextReport = validateConfigPackage(next, records);
+    setReport(nextReport);
+    if (!nextReport.valid) { setMessage('工作流保存被配置包核验阻断。'); return false; }
+    try {setSavedConfig(await persistActiveConfig(next,true)); setMessage('工作流已持久保存到当前活动配置。');return true;}catch(error){setMessage(String(error));return false;}
+  };
+
+  const readSelected = () => {
+    if (!selected) { setMessage('请先新建或选择一个分类。'); return; }
+    if (config.contractRevision < 9) {try{setDraftConfig(migrateConfigToR9(config));setEditing(true);setReport(null);setMessage('已建立 r9 迁移草稿，核验保存后生效。');}catch(error){setMessage(String(error));}return;}
+    if (!draftConfig) setDraftConfig(clone(treeSession?.staged??savedConfig));
+    setEditing(true); setReport(null); setMessage(`已读取 ${nodeLabel(selected)} 到本地草稿。`);
+  };
+  const validate = () => {
+    const next = validateConfigPackage(config, records);
+    setReport(next); setMessage(next.valid ? '核验通过：当前草稿可保存。' : `核验发现 ${next.issues.filter((item) => item.severity === 'error').length} 项阻断问题。`);
+  };
+  const save = async () => {
+    const next = validateConfigPackage(config, records);
+    setReport(next);
+    if(treeSession){const localErrors=next.issues.filter(issue=>issue.severity==='error'&&(issue.path.startsWith('nodes/'+selectedId)||issue.code==='native-contract-structure-invalid'));if(localErrors.length){setMessage('当前节点未通过核验，不能保存到暂存树。');return;}const nextTree={...treeSession,staged:config};await saveStudioEditingSession({draft:null,tree:nextTree,selectedId,editing:false,baseline:savedConfig});setTreeSession(nextTree);setDraftConfig(null);setEditing(false);setTreeReport(null);setMessage('已保存节点到暂存 Class 树；总配置尚未改变。');return;}
+    if (!next.valid) { setMessage('保存被阻断；请先处理问题组。'); return; }
+    if (!window.confirm('将当前 V3.2 草稿保存到浏览器本地配置。确定继续吗？')) return;
+    try {setSavedConfig(await persistActiveConfig(config,true));setDraftConfig(null);setEditing(false);setMessage('已保存本地活动配置，刷新后继续使用。');}catch(error){setMessage(String(error));}
+  };
+  const discard = async () => {await saveStudioEditingSession(treeSession?{draft:null,tree:treeSession,selectedId,editing:false,baseline:savedConfig}:null);setDraftConfig(null);setEditing(false);setReport(null);setMessage('已放弃未保存草稿。');};
+  const applyCategoryImport=(result:CategoryImportResult)=>{
+    if(treeSession&&result.classCode!==treeSession.classCode){setMessage('当前 Class 树模式不允许导入其他 Class。');return;}
+    if(result.kind==='classTree'){
+      const baseline=treeSession?.baseline??(savedConfig.contractRevision<9?migrateConfigToR9(savedConfig):savedConfig);
+      setTreeSession({classCode:result.classCode,baseline,staged:result.config,changes:result.changes});setDraftConfig(null);setEditing(false);setTreeReport(result.report);
+    }else{setDraftConfig(result.config);setEditing(true);}
+    setSelectedId(result.selectedId);setEditorExpanded(false);setReport(result.report);setImportConflict(null);setMessage(result.kind==='classTree'?'已进入 Class 树导入暂存模式；核验保存后才注入总配置。':'已读取单分类导入草稿，请核验保存。');
+  };
+  const importCategoryFile=async(file:File)=>{try{const artifact=await readCategoryArtifact(file);if(treeSession&&artifact.payload.classCode!==treeSession.classCode)throw Error('当前 Class 树模式不允许导入其他 Class。');const result=prepareCategoryImport(config,artifact);if(result.conflicts.length)setImportConflict({artifact,result});else applyCategoryImport(result);}catch(error){setMessage(String(error));}};
+  const validateTree=async()=>{if(!treeSession)return;try{const durable=await readDurableActiveConfig();const candidate=prepareClassTreeCommit(durable.config,treeSession.baseline,treeSession.staged,treeSession.classCode);const result=validateConfigPackage(candidate,records);setTreeReport(result);setReport(result);setMessage(result.valid?'Class 树总控核验通过，可以替换保存。':'Class 树仍有阻断问题。');}catch(error){setTreeReport(null);setMessage(String(error));}};
+  const saveTree=async()=>{if(!treeSession||editing||categoryHasDraft)return;try{const durable=await readDurableActiveConfig();const candidate=prepareClassTreeCommit(durable.config,treeSession.baseline,treeSession.staged,treeSession.classCode),result=validateConfigPackage(candidate,records);setTreeReport(result);if(!result.valid)return;setSavedConfig(await persistActiveConfig(candidate,true,durable));setTreeSession(null);setDraftConfig(null);setSelectedId('');setEditing(false);setReport(null);await saveStudioEditingSession(null);setMessage('Class 分类树已整体替换保存到总配置。');}catch(error){setMessage(String(error));}};
+  const discardTree=async()=>{await saveStudioEditingSession(null);setTreeSession(null);setDraftConfig(null);setSelectedId('');setEditing(false);setReport(null);setTreeReport(null);void saveStudioEditingSession(null);setMessage('已放弃整次 Class 树导入，原总配置保持。');};
+  const remigrateV1 = async () => {
+    if (!window.confirm('这会以当前 V1 工程重新生成 V3.2 迁移包，并覆盖当前本地草稿。继续吗？')) return;
+    const next = createConfigPackageFromCurrentProject();
+    try {setSavedConfig(await persistActiveConfig(next,true));}catch(error){setMessage(String(error));return;} setDraftConfig(null); setSelectedId(''); setEditing(false); setReport(null);
+    setMessage('已按当前 V1 真实字段重新生成 V3.2 迁移包。');
+  };
   const importPackage = async (file?: File) => {
+    if(treeSession){setMessage('请先保存或放弃 Class 树总控，再导入总包。');return;}
     if (!file) return;
     try {
       const next = await readConfigPackage(file);
-      setConfig(next);
-      setSelectedNodeId(next.nodes[0]?.nodeId ?? '');
-      setMessage(`已加载 ${next.packageId}（V3）。`);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : '读取配置包失败。');
-    }
+      if (!window.confirm('导入将替换当前本地 V3.2 配置。确定继续吗？')) return;
+      const importedReport = validateConfigPackage(next, records);
+      if (importedReport.issues.some(issue => issue.code === 'native-contract-structure-invalid')) { setReport(importedReport); setMessage('导入结构无效；已保存版本保持原样。请按问题路径修正文件后重新导入。'); return; }
+      if (!importedReport.valid) { setDraftConfig(next); setSelectedId(''); setEditing(true); setReport(importedReport); setMessage('已载入隔离草案；修正阻断问题前不能保存或启用。'); return; }
+      const saved=await persistActiveConfig(prepareConfigForActivation(next));setSavedConfig(saved); setDraftConfig(null); setSelectedId(''); setEditing(false); setReport(importedReport); setMessage(`已导入 ${saved.packageId} r${saved.revision}。${saved.revision!==next.revision?'原修订版已有不同历史内容，已使用新修订版并保留历史。':''}`);
+    } catch (error) { setMessage(error instanceof Error ? error.message : '配置包读取失败。'); }
   };
   const exportPackage = async () => {
-    if (!report.valid) {
-      setMessage(`校验阻断：${report.issues.filter((item) => item.severity === 'error').length} 个问题组。`);
-      return;
-    }
-    const blob = await buildConfigPackageArchive(config, report);
-    downloadConfigPackage(blob, config);
-    setMessage(`已下载 ${config.packageId}；线上更新仍需 Pipeline 授权导入。`);
+    if(treeSession){setMessage('Class 树模式仅允许内部分类导出；请先结束总控再导出总包。');return;}
+    const revision = Math.trunc(nextRevision);
+    if (!Number.isSafeInteger(revision) || revision <= savedConfig.revision) { setMessage(`修订版必须是大于 r${savedConfig.revision} 的正整数。`); return; }
+    const next = { ...savedConfig, revision };
+    const nextReport = validateConfigPackage(next, records);
+    setReport(nextReport);
+    if (!nextReport.valid) { setMessage('整包保存被核验阻断。'); return; }
+    const blob = await buildConfigPackageArchive(next, nextReport);
+    try {setSavedConfig(await persistActiveConfig(next));}catch(error){setMessage(String(error));return;} downloadConfigPackage(blob, next); setRevisionOpen(false); setMessage(`已下载 ${next.packageId} r${revision}。`);
   };
-  return <main className="fixed inset-0 z-[3000] flex h-screen flex-col overflow-hidden bg-slate-100 text-slate-800">
-    <header className="flex shrink-0 items-center gap-3 border-b bg-white px-5 py-3">
-      <SlidersHorizontal className="h-5 w-5 text-blue-600" />
-      <div className="min-w-0 flex-1">
-        <h1 className="font-bold">配置文件工作台</h1>
-        <p className="text-xs text-slate-500">{config.packageId} · V3 配置契约 · V1 顺承 {config.parity?.entries.filter((item) => item.status !== 'unsupported').length ?? 0}/{config.parity?.entries.length ?? 0} · 修订版只用于本地包排序和 Pipeline CAS 导入，不参与显示、碰撞或 Zoom 规则。</p>
-      </div>
-      <label className="hidden items-center gap-1 text-xs text-slate-600 lg:flex">包修订版
-        <input className="w-16 rounded border px-2 py-1" type="number" min="1" value={config.revision} onChange={(event) => setConfig((current) => ({ ...current, revision: Math.max(1, Math.trunc(Number(event.target.value) || 1)) }))} />
-      </label>
-      <button type="button" onClick={() => uploadRef.current?.click()} className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm"><FileUp className="h-4 w-4" />导入</button>
-      <button type="button" onClick={exportPackage} className="inline-flex items-center gap-1 rounded bg-emerald-600 px-3 py-1.5 text-sm text-white"><Download className="h-4 w-4" />校验并下载</button>
-      <button type="button" onClick={() => setEditorExpanded((value) => !value)} className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm"><>{editorExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}</>{editorExpanded ? '显示验证器' : '编辑器全屏'}</button>
-      <button type="button" onClick={onClose} className="rounded p-2 hover:bg-slate-100" aria-label="关闭工作台"><X className="h-5 w-5" /></button>
-      <input ref={uploadRef} className="hidden" type="file" accept=".zip,.json,application/json,application/zip" onChange={(event) => void importPackage(event.target.files?.[0])} />
-    </header>
-    <div className={`min-h-0 flex-1 grid grid-cols-1 gap-3 p-3 ${editorExpanded ? '' : 'xl:grid-cols-2'}`}>
-      {!editorExpanded ? <section className="min-h-[44vh] rounded-xl border bg-white p-3 xl:min-h-0">
-        <div className="mb-2 flex justify-between text-sm"><strong>显示规则验证器</strong><span>Zoom {zoom} · 背景瓦片 / 固定中心 / 仅可缩放</span></div>
-        <PreviewMap config={config} node={selected} zoom={zoom} onZoom={setZoom} />
-        <p className="mt-2 text-xs text-slate-500">预览没有临时挂载或编辑高亮态；它使用当前分类的已解析配置、正式坐标系和背景瓦片。附属结构会自动生成默认主结构与楼层切换状态。</p>
-      </section> : null}
-      <section className={`min-h-0 overflow-y-auto rounded-xl border bg-white p-4 ${editorExpanded ? 'col-span-full' : ''}`}>
-        <div className="mb-3 flex flex-wrap gap-2"><button type="button" onClick={() => setMode('feature')} className={`rounded px-3 py-1.5 text-sm ${mode === 'feature' ? 'bg-blue-600 text-white' : 'bg-slate-100'}`}>要素设计</button><button type="button" onClick={() => setMode('workflow')} className={`rounded px-3 py-1.5 text-sm ${mode === 'workflow' ? 'bg-blue-600 text-white' : 'bg-slate-100'}`}>工作流设计</button></div>
-        <div className="mb-3 rounded border bg-slate-50 p-2 text-xs text-slate-600">{message}</div>
-        {mode === 'workflow' ? <WorkflowEditor config={config} setConfig={setConfig} /> : <div className="space-y-5"><CategoryPathPicker config={config} selected={selected} onSelect={setSelectedNodeId} /><FieldEditor config={config} node={selected} onChange={(node) => setConfig((current) => updateNode(current, node.nodeId, () => node))} /><section><h3 className="mb-2 font-semibold">显示、交互与层级</h3><div className="grid gap-3 2xl:grid-cols-3">{geometryValues.map((geometry) => { const profile = selected.geometryProfiles[geometry] ?? defaultProfile(geometry); return <GeometryEditor key={geometry} geometry={geometry} profile={profile} onChange={(value) => updateSelected((node) => ({ ...node, geometryProfiles: { ...node.geometryProfiles, [geometry]: value } }))} />; })}</div></section><ContainmentEditor node={selected} fields={fields.map((field) => field.key)} onChange={(node) => setConfig((current) => updateNode(current, node.nodeId, () => node))} /><CardEditor config={config} node={selected} fields={fields.map((field) => field.key)} onChange={(node) => setConfig((current) => updateNode(current, node.nodeId, () => node))} /></div>}
-      </section>
-    </div>
-    <Report config={config} records={records} />
-  </main>;
+  const inheritedGeometry = selected ? geometries.find((geometry) => Boolean(resolveGeometryProfile(config, selected.path, geometry)?.enabled)) : undefined;
+  const geometry = selected?.geometryType ?? inheritedGeometry;
+  const effectiveProfile = selected && geometry ? resolveGeometryProfile(config, selected.path, geometry) : undefined;
+  const profile = selected && geometry ? selected.geometryProfiles[geometry] ?? (effectiveProfile ? { ...clone(effectiveProfile), zoomPriority: { rules: effectiveProfile.zoomPriority.rules.map(rule => ({ ...clone(rule), id: `${selected.nodeId}-${rule.id}` })) } } : editableGeometryProfile(geometry, config.contractRevision)) : undefined;
+  const compatibleScenarios = selected ? PREVIEW_SCENARIOS.filter((item) => previewScenarioCompatible(config, selected, item.id)) : [];
+  const activeScenario = compatibleScenarios.some((item) => item.id === scenario) ? scenario : compatibleScenarios[0]?.id;
+  const updateSelected = (updater: (node: CategoryNode) => CategoryNode) => selected && setConfig((current) => updateNode(current, selected.nodeId, updater));
+
+  return <main className="config-editor fixed inset-0 z-[3000] flex h-screen flex-col overflow-hidden bg-slate-100 text-slate-800"><header className="flex shrink-0 flex-wrap items-center gap-3 border-b bg-white px-5 py-3"><SlidersHorizontal className="h-5 w-5 text-violet-600" /><div className="min-w-0 flex-1"><h1 className="font-bold">配置文件工作台 · V3.2 原生渲染</h1><p className="text-xs text-slate-500">{savedConfig.packageId} · 配置 r{savedConfig.revision} · 契约 r{savedConfig.contractRevision} · World 自动归一化、原生渲染、信息卡和标准工作流均以可编辑 V3 配置承接。</p></div><button type="button" className="rounded border px-3 py-1.5 text-sm" disabled={Boolean(draftConfig) || workflowHasDraft || Boolean(treeSession)} onClick={remigrateV1}>从 V1 重新生成</button><button type="button" className="rounded border px-3 py-1.5 text-sm" disabled={Boolean(draftConfig) || workflowHasDraft || categoryHasDraft || Boolean(treeSession)} onClick={()=>void restoreApplicationDefault().then(()=>location.reload()).catch(error=>setMessage(String(error)))}>恢复应用默认配置</button><button type="button" className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm" disabled={Boolean(draftConfig)||Boolean(treeSession)||editing||categoryHasDraft||workflowHasDraft} onClick={() => uploadRef.current?.click()}><FileUp className="h-4 w-4" />导入</button><button type="button" className="inline-flex items-center gap-1 rounded bg-emerald-600 px-3 py-1.5 text-sm text-white" disabled={Boolean(draftConfig)||Boolean(treeSession)||categoryHasDraft||workflowHasDraft} onClick={() => { setNextRevision(savedConfig.revision + 1); setRevisionOpen(true); }}><Download className="h-4 w-4" />整包下载</button><button type="button" className="inline-flex items-center gap-1 rounded border px-3 py-1.5 text-sm" disabled={!selected} onClick={() => setEditorExpanded((value) => !value)}>{editorExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}{editorExpanded ? '显示验证器' : '编辑器全屏'}</button><button type="button" className="rounded p-2 hover:bg-slate-100" onClick={() => { if (draftConfig || workflowHasDraft || categoryHasDraft) { setMessage('请先保存或放弃当前草稿，再关闭工作台。'); return; } onClose(); }} aria-label="关闭"><X className="h-5 w-5" /></button><input ref={uploadRef} className="hidden" type="file" accept=".zip,.json,application/zip,application/json" onChange={(event) => void importPackage(event.target.files?.[0])} /></header>
+    <nav className="flex shrink-0 gap-2 border-b bg-white px-5 py-2" aria-label="设计工作区"><button type="button" role="tab" aria-selected={activeTab === 'features'} className={`rounded px-4 py-2 text-sm ${activeTab === 'features' ? 'bg-violet-600 text-white' : 'bg-slate-100'}`} onClick={() => switchTab('features')}>要素设计</button><button type="button" role="tab" aria-selected={activeTab === 'workflows'} className={`rounded px-4 py-2 text-sm ${activeTab === 'workflows' ? 'bg-violet-600 text-white' : 'bg-slate-100'}`} onClick={() => switchTab('workflows')}>工作流设计</button><span role="status" className="min-w-0 self-center text-xs text-slate-600">{message}</span></nav>
+    {activeTab === 'workflows' ? <div className="min-h-0 flex-1 overflow-hidden p-3"><WorkflowWorkbench config={savedConfig} records={records} onChange={saveWorkflowPackage} onDraftStateChange={setWorkflowHasDraft} /></div> : <div className={`grid min-h-0 flex-1 auto-rows-fr grid-cols-1 gap-3 overflow-hidden p-3 ${editorExpanded ? '' : 'xl:grid-cols-2'}`}>{selected && !editorExpanded ? <section className="flex h-full min-h-[40vh] min-w-0 flex-col overflow-hidden rounded-xl border bg-white p-3 xl:min-h-0"><div className="mb-2 flex shrink-0 items-center justify-between gap-2"><strong>显示规则验证器</strong>{activeScenario ? <label className="text-xs">样例状态<select className="ml-1 rounded border px-2 py-1" value={activeScenario} onChange={(event) => setScenario(event.target.value)}>{compatibleScenarios.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label> : null}</div>{selected && activeScenario ? <div className="h-full min-h-[300px] min-w-0 flex-1 overflow-hidden"><ConfigRuntimePreview config={config} node={selected} scenario={activeScenario} onRuntimeError={(error) => setMessage(`验证器错误：${error.message}`)} /></div> : <div className="flex h-full min-h-[300px] items-center justify-center rounded border border-dashed p-6 text-sm text-slate-500">先新建分类、选择几何类型并启用首条渲染规则。验证器会调用与主地图相同的 V3.2 RuleDrivenLayer；中心固定，允许滚轮缩放。</div>}</section> : null}
+      <section className={`min-h-0 overflow-y-auto rounded-xl border bg-white p-4 ${editorExpanded ? 'col-span-full' : ''}`}><div className="mb-3 rounded border bg-slate-50 p-2 text-xs text-slate-700">{message}</div><fieldset disabled={Boolean(treeSession)}><EngineEditor config={config} engine={config.engine ?? createV32EngineDefaults()} onChange={(engine) => setConfig({ ...config, engine })} /></fieldset><div className={treeSession?'rounded-lg border-2 border-violet-300 p-3':''} aria-label={treeSession?'Class 树隔离编辑容器':'分类管理容器'}>{treeSession?<section aria-label="Class 树导入总控" className="mt-4 space-y-2 rounded border-2 border-violet-400 bg-violet-50 p-3"><h2 className="font-semibold">Class 树导入总控 · {treeSession.classCode}</h2><p className="text-xs">内部保存只更新暂存树；总控保存替换总包中的整个同 Class 树。</p><div className="flex flex-wrap gap-2"><button type="button" disabled={editing||categoryHasDraft} className="rounded border bg-white px-3 py-1" onClick={validateTree}>核验整棵 Class 树</button><button type="button" disabled={editing||categoryHasDraft||!treeReport?.valid} className="rounded bg-violet-600 px-3 py-1 text-white disabled:bg-slate-300" onClick={()=>void saveTree()}>保存 Class 树到总配置</button><button type="button" className="rounded border bg-white px-3 py-1" onClick={discardTree}>放弃导入 Class 树</button></div><details><summary>注入差异</summary>{treeSession.changes.map((item,index)=><p key={index} className="text-xs">{item}</p>)}</details></section>:null}
+        <section className="mt-4 rounded border bg-slate-50 p-3"><h2 className="mb-3 font-semibold">要素分类定义及管理区</h2><CategoryPathPicker config={config} value={selected?.path??{class:''}} disabled={editing||categoryHasDraft} lockedClass={treeSession?.classCode} label="编辑分类" onChange={path=>{const node=config.nodes.find(item=>classificationPathKey(item.path)===classificationPathKey(path));setSelectedId(node?.nodeId??'');setEditorExpanded(!node);}}/><fieldset disabled={editing}><CategoryCreationPanel config={config} parent={selected} lockedClass={treeSession?.classCode} onDraftStateChange={setCategoryHasDraft} onCreate={(next,node)=>{setConfig(next);setSelectedId(node.nodeId);setEditorExpanded(false);setCategoryHasDraft(false);setMessage('新分类草稿已完成完整核验，请继续编辑或保存。');}}/></fieldset><CategoryFileControls config={treeSession?.staged??savedConfig} selectedId={selectedId} editing={editing||categoryHasDraft} onImport={file=>void importCategoryFile(file)}/></section>
+        {!selected ? <section className="mt-4 rounded border border-dashed p-4"><p>请选择一级 Class 或点击新增分类，再逐级选择需要编辑的分类。显示规则验证器默认关闭。</p><div className="mt-2 flex gap-2"><button type="button" disabled={!editing} onClick={validate}>核验全局草稿</button><button type="button" disabled={!editing||!report?.valid} onClick={save}>保存</button><button type="button" disabled={!editing} onClick={discard}>放弃草稿</button></div></section> : <div className="mt-4 space-y-4"><section className="rounded-lg border bg-slate-50 p-3"><div className="flex flex-wrap items-end gap-2"><button type="button" className="rounded border px-3 py-1.5 text-sm" onClick={readSelected}>{editing ? '已读取草稿' : '读取分类'}</button><button type="button" disabled={!editing} className="rounded border px-3 py-1.5 text-sm disabled:text-slate-300" onClick={validate}>核验</button><button type="button" disabled={!editing || (treeSession?Boolean(report?.issues.some(issue=>issue.severity==='error'&&issue.path.startsWith('nodes/'+selectedId)))||!report:!report?.valid)} className="inline-flex items-center gap-1 rounded bg-emerald-600 px-3 py-1.5 text-sm text-white disabled:bg-emerald-200" onClick={save}><Save className="h-4 w-4" />保存</button><button type="button" disabled={!editing} className="rounded border px-3 py-1.5 text-sm disabled:text-slate-300" onClick={discard}>放弃草稿</button></div><div className="mt-3 grid gap-2 md:grid-cols-4"><span className="rounded border bg-white px-2 py-1 text-sm">Class：{selected.path.class}</span><span className="rounded border bg-white px-2 py-1 text-sm">Kind：{selected.path.kind || '—'}</span><span className="rounded border bg-white px-2 py-1 text-sm">Skind：{selected.path.skind || '—'}</span><span className="rounded border bg-white px-2 py-1 text-sm">Skind2：{selected.path.skind2 || '—'}</span></div><div className="mt-3 flex flex-wrap items-center gap-4 rounded border bg-white p-2 text-sm"><strong>该层设置是否向下继承</strong>{(['fields', 'display', 'card'] as const).map((key) => <label key={key}><input disabled={!editing} type="checkbox" checked={selected.inheritDown?.[key] ?? true} onChange={(event) => updateSelected((node) => ({ ...node, inheritDown: { ...(node.inheritDown ?? { fields: true, display: true, card: true }), [key]: event.target.checked } }))} /> {key === 'fields' ? '字段' : key === 'display' ? '显示与交互（软继承）' : '信息卡'}</label>)}</div></section>
+          {editing ? <><FieldEditor config={config} node={selected} onChange={(node) => setConfig((current) => updateNode(current, node.nodeId, () => node))} /><section><h3 className="mb-2 font-semibold">显示、交互与层级</h3><p className="mb-2 text-xs text-slate-500">分类只能选择一种几何类型。父级未指定时，本级可以首次定义；若继承了父级，类型保持一致。</p><label className="block max-w-sm text-sm">几何类型<select className="ml-2 rounded border px-2 py-1" value={geometry ?? ''} onChange={(event) => { const next = event.target.value as GeometryKind; updateSelected((node) => ({ ...node, geometryType: next || undefined, geometryProfiles: next ? { [next]: node.geometryProfiles[next] ?? editableGeometryProfile(next, config.contractRevision) } : {} })); }}><option value="">暂不指定</option>{geometries.map((item) => <option key={item} value={item}>{geometryLabel[item]}</option>)}</select></label>{geometry && profile ? <div className="mt-2"><GeometryEditor config={config} path={selected.path} geometry={geometry} profile={profile} onChange={(next) => updateSelected((node) => ({ ...node, geometryType: geometry, geometryProfiles: { ...node.geometryProfiles, [geometry]: next } }))} /></div> : <p className="mt-2 rounded border border-dashed p-3 text-sm text-slate-500">暂不定义几何，允许先编辑父/子分类结构；总包核验时最终分类必须解析到明确几何类型。</p>}</section><fieldset disabled={Boolean(treeSession)}><ContextBindingsEditor config={config} selected={selected} onChange={setConfig} /></fieldset><V3CardEditor config={config} node={selected} onChange={(node) => setConfig((current) => updateNode(current, node.nodeId, () => node))} /></> : <p className="rounded border border-dashed p-5 text-sm text-slate-500">点击“读取分类”后才开启字段、渲染规则、信息卡、工作流与上下文绑定编辑。</p>}</div>}</div></section></div>}
+    <ConfigDialog open={Boolean(importConflict)} title="分类导入冲突" onClose={()=>setImportConflict(null)}>{importConflict?<><p className="text-sm">继续将按上游固定继承修正导入字段，并重映射冲突内部 ID；不修改父级。</p>{importConflict.result.conflicts.map((item,index)=><p key={index} className="text-xs text-rose-700">{item}</p>)}<button type="button" className="rounded bg-violet-600 px-3 py-1 text-white" onClick={()=>{try{applyCategoryImport(prepareCategoryImport(config,importConflict.artifact,true));}catch(error){setMessage(String(error));}}}>按上游约束修正后继续</button><button type="button" className="ml-2 rounded border px-3 py-1" onClick={()=>setImportConflict(null)}>取消导入</button></>:null}</ConfigDialog><Report config={config} records={records} report={report} />{revisionOpen ? <div className="fixed inset-0 z-[4000] flex items-center justify-center bg-slate-950/40 p-4"><form className="w-full max-w-md rounded-xl bg-white p-5 shadow-xl" onSubmit={(event) => { event.preventDefault(); void exportPackage(); }}><h2 className="font-semibold">保存并下载 V3.2 配置包</h2><p className="mt-1 text-sm text-slate-600">修订版只用于包版本控制，不参与 Zoom、zLevel 或动态优先级计算。</p><NumberField label="新修订版" value={nextRevision} min={savedConfig.revision + 1} onChange={(value) => setNextRevision(value ?? savedConfig.revision + 1)} /><div className="mt-4 flex justify-end gap-2"><button type="button" className="rounded border px-3 py-1.5" onClick={() => setRevisionOpen(false)}>取消</button><button type="submit" className="inline-flex items-center gap-1 rounded bg-emerald-600 px-3 py-1.5 text-white"><Save className="h-4 w-4" />保存并下载</button></div></form></div> : null}</main>;
 }
 
 export default ConfigStudio;

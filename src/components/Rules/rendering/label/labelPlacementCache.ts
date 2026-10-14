@@ -8,6 +8,7 @@
  */
 
 import type { LabelCandidateName } from '@/components/Rules/rendering/labelLayout';
+import type { LabelPlacement } from '@/components/Rules/rendering/labelStyles';
 
 export type LabelPlacementCacheKeyMode =
   | 'featureID'
@@ -18,8 +19,9 @@ export type LabelPlacementCacheKeyMode =
 export type LabelPlacementCacheInput = {
   id: string;
   featureUid?: string;
+  partIndex?: number;
   text: string;
-  placement: 'center' | 'near';
+  placement: LabelPlacement;
   zoom: number;
 
   collisionGroup?: string;
@@ -31,6 +33,10 @@ export type LabelPlacementCacheInput = {
   placementZoomBucketSize?: number;
   placementKeepPreviousCandidate?: boolean;
   placementKeepPreviousAnchor?: boolean;
+  placementInvalidateWhen?: string[];
+  worldId?: string;
+  displayMode?: string;
+  geometrySignature?: string;
 };
 
 export type ResolvedLabelPlacementCacheConfig = {
@@ -38,6 +44,7 @@ export type ResolvedLabelPlacementCacheConfig = {
   key: string;
   keepPreviousCandidate: boolean;
   keepPreviousAnchor: boolean;
+  invalidateWhen?: string[];
 };
 
 export type LabelPlacementCacheEntry = {
@@ -83,8 +90,10 @@ export function resolveLabelPlacementCacheConfig(
   const keepPreviousAnchor = input.placementKeepPreviousAnchor !== false;
   if (!keepPreviousCandidate && !keepPreviousAnchor) return undefined;
 
-  const featureKey = safeSegment(input.featureUid ?? input.id, input.id || 'label');
-  const textKey = safeSegment(cleanText(input.text), 'empty');
+  const featureKey = safeSegment(`${input.featureUid ?? input.id}${input.partIndex === undefined ? '' : `#part-${input.partIndex}`}`, input.id || 'label');
+  const invalidations = input.placementInvalidateWhen;
+  const include = (name: string) => invalidations === undefined || invalidations.includes(name);
+  const textKey = include('featureTextChanged') ? safeSegment(cleanText(input.text), 'empty') : 'stable';
   const placementKey = safeSegment(input.placement, 'placement');
   const groupKey = safeSegment(input.collisionGroup ?? input.groupKey, 'label');
   const mode = input.placementCacheKey ?? 'featureID+zoomBucket';
@@ -97,9 +106,7 @@ export function resolveLabelPlacementCacheConfig(
       key = `feature:${featureKey}|text:${textKey}|placement:${placementKey}|group:${groupKey}`;
       break;
     case 'featureID+mode':
-      // Display mode is not available inside labelLayout yet. Keep this stable
-      // but distinct from featureID so future mode-specific keys can be added.
-      key = `feature-mode:${featureKey}|mode:default|text:${textKey}|placement:${placementKey}|group:${groupKey}`;
+      key = `feature-mode:${featureKey}|mode:${safeSegment(input.displayMode, 'normal')}|text:${textKey}|placement:${placementKey}|group:${groupKey}`;
       break;
     case 'custom':
       key = `custom:${safeSegment(input.placementCacheCustomKey, featureKey)}|text:${textKey}|placement:${placementKey}|group:${groupKey}|z:${zoomKey}`;
@@ -110,16 +117,35 @@ export function resolveLabelPlacementCacheConfig(
       break;
   }
 
+  if (invalidations?.includes('zoomBucketChanged') && !key.includes('|z:')) key += `|z:${zoomKey}`;
+  if (include('worldChanged')) key += `|world:${safeSegment(input.worldId, 'default')}`;
+  if (include('modeChanged')) key += `|display:${safeSegment(input.displayMode, 'normal')}`;
+  if (include('featureGeometryChanged')) key += `|geometry:${safeSegment(input.geometrySignature, 'default')}`;
+
   return {
     enabled: true,
     key,
     keepPreviousCandidate,
     keepPreviousAnchor,
+    invalidateWhen: invalidations,
   };
 }
 
 export class LabelPlacementCache {
   private entries = new Map<string, LabelPlacementCacheEntry>();
+  private failures = new Map<string, number>();
+
+  noteFailure(config: ResolvedLabelPlacementCacheConfig | undefined, reason?: string): void {
+    if (!config?.enabled) return;
+    const count = (this.failures.get(config.key) ?? 0) + 1;
+    this.failures.set(config.key, count);
+    if (reason === 'viewport' && config.invalidateWhen?.includes('labelOutOfViewport') ||
+        count >= 3 && reason?.startsWith('collision') && config.invalidateWhen?.includes('collisionFailedRepeatedly')) {
+      this.entries.delete(config.key);
+      this.failures.delete(config.key);
+    }
+    if (this.failures.size > DEFAULT_MAX_CACHE_ENTRIES) this.failures.delete(this.failures.keys().next().value!);
+  }
 
   get(config: ResolvedLabelPlacementCacheConfig | undefined): LabelPlacementCacheEntry | undefined {
     if (!config?.enabled) return undefined;
@@ -131,6 +157,8 @@ export class LabelPlacementCache {
     value: Pick<LabelPlacementCacheEntry, 'anchorIndex' | 'candidateName'> & { anchorId?: string },
   ): void {
     if (!config?.enabled) return;
+
+    this.failures.delete(config.key);
 
     this.entries.set(config.key, {
       key: config.key,
@@ -148,6 +176,7 @@ export class LabelPlacementCache {
 
   clear(): void {
     this.entries.clear();
+    this.failures.clear();
   }
 
   size(): number {

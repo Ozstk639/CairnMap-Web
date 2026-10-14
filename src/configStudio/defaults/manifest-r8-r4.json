@@ -1,0 +1,10 @@
+{
+  "packageId": "cairnmap-config-v32-semantic",
+  "revision": 4,
+  "contractRevision": 8,
+  "sha256": "ffcf77938eb83ea7054ebde4bdbe42980c36cde73c4cad864af5e329a216a2f5",
+  "semanticFingerprint": "1f984c6fdbdabfdd5e854678ba6064444289fa4e3b6997dba37224d21b3f1b78",
+  "legacyDefaultFingerprints": [
+    "5546869a2f009c2b26c6c75b5741b01729f9ba36c5605a3da9961c1c9193e09d"
+  ]
+}

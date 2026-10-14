@@ -1,0 +1,108 @@
+{
+  "documentKind": "implementation_blueprint_not_importable_config",
+  "status": "proposal_for_user_review_not_implemented",
+  "supersededForImplementationBy": "RuntimeV32_Frontend_Runtime_Editor_Implementation_Plan_2026-10-09.json",
+  "date": "2026-10-09",
+  "requirementsSupplementDate": "2026-10-09",
+  "sourceHead": "b7b6e414538f3baee48ab3b3975988e90aa5363e",
+  "branch": "codex/cm-config-runtime-v32-migration-20261007",
+  "frozenV1": "0b82863d4fea3791f98917ba6d13f70e1f27eb15",
+  "remoteActionsAuthorized": false,
+  "recommendedContractRevision": 7,
+  "nextPackageRevisionExample": 3,
+  "runtime": {
+    "compileAt": "validated activation or a new valid editor preview snapshot",
+    "persistInMemory": ["classification and inheritance indexes", "shared compiled rule templates", "nine logical Zoom candidate buckets", "safe field readers and dependencies"],
+    "dynamic": ["feature and relation values", "world and context", "viewport projection", "collision and density", "interaction and resources"],
+    "cacheIdentity": "object identity/runtime epoch or content signature; never packageId/revision alone",
+    "cachePolicy": "bounded on-demand results; invalidate from data/context/resource/config dependencies; release unused world caches",
+    "unsafeCodeGeneration": false,
+    "transientMounts": {
+      "preserveCurrentWorldScopedMountOverrideDeleteRestoreSemantics": true,
+      "events": ["ria-temp-rule-sources-changed", "ria-temp-rule-overrides-changed", "ria-temp-rule-deletes-changed"],
+      "sameIdRecordChangesInvalidateDataDependentResults": true,
+      "updateSearchRelationsAndExistingNavigationIndexes": true,
+      "recompileUnchangedConfigOnMountChange": false
+    }
+  },
+  "ruleModel": {
+    "zoom": "required inclusive integer min/max in logical 0..8",
+    "fields": "optional controlled all/any/not group",
+    "fieldEligibility": {
+      "nonClassificationFieldsOnly": true,
+      "excludedCanonicalFields": ["Class", "Kind", "Skind", "Skind2"],
+      "excludedRecordAliases": ["SKind", "SKind2"],
+      "excludeMappingsAndAliasesOfClassificationFields": true,
+      "classifyBy": "normalized field identity and actual classification mapping, not display name or substring",
+      "enforceAt": ["field picker", "copy reference validation", "save/import validation", "compile entry"],
+      "nestedBooleanGroupsCannotBypass": true,
+      "ordinaryBusinessTagsAndExtensionsFieldsAllowed": true
+    },
+    "match": "zoom AND fields; absent fields means true",
+    "selection": "last matching complete rule in authored list",
+    "implicitCrossRuleStyleMerge": false,
+    "selectionUsesDisplayPriority": false,
+    "overlappingZoomAllowed": true,
+    "fieldGroupDepthProposal": 4,
+    "fieldLeavesProposal": 64
+  },
+  "copy": {
+    "defaultScope": "current classification and same geometry, including inherited rules",
+    "crossClassification": "same geometry with explicit reference compatibility validation",
+    "copy": ["representation", "style", "label", "geometryStack", "priority", "extensions", "inheritance/override intent"],
+    "exclude": ["source identity", "source matching Zoom", "source field conditions", "runtime caches/functions/bound record values"],
+    "preserveTargetConditions": true,
+    "modifyOrSplitSourceRule": false
+  },
+  "migration": {
+    "factoryR2RulesWithBranches": 3,
+    "factoryR2MaxBranches": 2,
+    "currentFactoryFieldKinds": ["fieldEquals", "fieldIn"],
+    "preserveOldCumulativeOverrideSemantics": true,
+    "combinationExpansionLimitProposal": 64,
+    "onNonEquivalentConversion": "keep original active native r6 package and produce isolated migration diagnostics; never silently drop behavior",
+    "retainNativeR5R6InputSupport": true,
+    "legacyComponentRendererFallback": false,
+    "legacyClassificationConditions": "normalize only when proven equivalent or contradictory to the owning classification path; otherwise retain active r6 with isolated diagnostics, never silently remove"
+  },
+  "categoryCreation": {
+    "defaultMode": "inherit current parent under existing independent field/display/card propagation switches",
+    "materializeInheritedDisplayGroupOnFirstLocalEdit": true,
+    "respectDisabledParentPropagation": true,
+    "alternativeMode": "prefill an independent snapshot of an effective compatible classification display rule group",
+    "compatibility": ["same geometry kind", "same allowMultipleParts", "same normalized anchor when multipart is enabled", "valid target ancestor constraints"],
+    "candidateOrder": ["same-parent same-depth siblings", "compatible current parent", "other compatible classifications"],
+    "rootSiblings": "other root classifications",
+    "copy": ["ordered complete display rules", "matching Zoom", "valid non-classification field conditions", "all authored rule content and inheritance/override intent"],
+    "newIdentities": ["nodeId", "all rule IDs"],
+    "preserveTarget": ["classification path and labels", "parent relationship", "geometry kind", "multipart and anchor settings", "geometry-level interaction triggers"],
+    "doNotCopyFromTemplate": ["field definitions", "card", "workflow definitions", "classification/context relationships", "runtime functions/caches/bound values"],
+    "sourceEditsAffectCopy": false,
+    "unresolvedReferences": "show located draft diagnostics and block save/activation until corrected; do not silently delete conditions or use Name/ID fallback",
+    "cancelOrDiscardLeavesNoPartialNode": true,
+    "retainUnsavedDraftTabGuard": true
+  },
+  "phases": [
+    { "id": "CR01", "topic": "baseline and actual Lab cold module entry" },
+    { "id": "CR02", "topic": "native r6 compiled templates indexes and dependencies" },
+    { "id": "CR03", "topic": "shared frame results viewport and interaction updates" },
+    { "id": "CR04", "topic": "r7 conditions selection validation and migration" },
+    { "id": "CR05", "topic": "independent rule and category creation, complete compatible template copy and sibling priority" },
+    { "id": "CR06", "topic": "advanced grouping ordered density and diamond help" },
+    { "id": "CR07", "topic": "independent parity performance and local delivery" }
+  ],
+  "acceptance": {
+    "commands": ["npm run verify:config-v32", "npm run build"],
+    "independentRenderCases": 1161,
+    "nativeWorkflowSubmissions": 34,
+    "externalOutputRecords": 7,
+    "additionalCases": ["reject classification condition aliases and mappings, including nested groups and direct JSON import", "inherit category settings without bypassing propagation switches", "compatible geometry/multipart/anchor templates and sibling priority", "category group retains Zoom/conditions/order but receives independent identities", "missing template references block save", "cancel/discard and unsaved tab guard", "real-app transient mount enable/disable/modify/override/delete/restore and world isolation"],
+    "performanceTargetsNotYetAchieved": {
+      "live463RecordWarmZoomScriptRatioToV1Max": 2,
+      "warmControlCardResponseP95Ms": 100,
+      "disabledHoverFullTreeOrWorldRefreshes": 0
+    },
+    "requireExpandedDataAndMemoryChecks": true,
+    "manualAndPromotion": "not completed by proposing this blueprint"
+  }
+}

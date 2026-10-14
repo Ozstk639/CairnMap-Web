@@ -1,0 +1,1376 @@
+{
+  "issues": [],
+  "sources": [
+    {
+      "nodeId": "class-bud",
+      "sourceRule": "v1-structure-hidden",
+      "newRules": [
+        "v1-structure-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-bud",
+      "sourceRule": "v1-structure-low-point",
+      "newRules": [
+        "v1-structure-low-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-bud",
+      "sourceRule": "v1-structure-high-geometry",
+      "newRules": [
+        "v1-structure-high-geometry--base"
+      ]
+    },
+    {
+      "nodeId": "class-bud-nom",
+      "sourceRule": "v1-structure-hidden",
+      "newRules": [
+        "v1-structure-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-bud-nom",
+      "sourceRule": "v1-structure-low-point",
+      "newRules": [
+        "v1-structure-low-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-bud-nom",
+      "sourceRule": "v1-structure-high-geometry",
+      "newRules": [
+        "v1-structure-high-geometry--base"
+      ]
+    },
+    {
+      "nodeId": "class-bud-spe",
+      "sourceRule": "v1-structure-hidden",
+      "newRules": [
+        "v1-structure-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-bud-spe",
+      "sourceRule": "v1-structure-low-point",
+      "newRules": [
+        "v1-structure-low-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-bud-spe",
+      "sourceRule": "v1-structure-high-geometry",
+      "newRules": [
+        "v1-structure-high-geometry--base"
+      ]
+    },
+    {
+      "nodeId": "class-bud-nom-nom",
+      "sourceRule": "v1-structure-hidden",
+      "newRules": [
+        "v1-structure-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-bud-nom-nom",
+      "sourceRule": "v1-structure-low-point",
+      "newRules": [
+        "v1-structure-low-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-bud-nom-nom",
+      "sourceRule": "v1-structure-high-geometry",
+      "newRules": [
+        "v1-structure-high-geometry--base"
+      ]
+    },
+    {
+      "nodeId": "class-bud-spe-spe",
+      "sourceRule": "v1-structure-hidden",
+      "newRules": [
+        "v1-structure-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-bud-spe-spe",
+      "sourceRule": "v1-structure-low-point",
+      "newRules": [
+        "v1-structure-low-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-bud-spe-spe",
+      "sourceRule": "v1-structure-high-geometry",
+      "newRules": [
+        "v1-structure-high-geometry--base"
+      ]
+    },
+    {
+      "nodeId": "class-flr",
+      "sourceRule": "v1-floor-member-hidden-before",
+      "newRules": [
+        "v1-floor-member-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-flr",
+      "sourceRule": "v1-floor-member",
+      "newRules": [
+        "v1-floor-member--base"
+      ]
+    },
+    {
+      "nodeId": "class-flr-nom",
+      "sourceRule": "v1-floor-member-hidden-before",
+      "newRules": [
+        "v1-floor-member-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-flr-nom",
+      "sourceRule": "v1-floor-member",
+      "newRules": [
+        "v1-floor-member--base"
+      ]
+    },
+    {
+      "nodeId": "class-flr-spe",
+      "sourceRule": "v1-floor-member-hidden-before",
+      "newRules": [
+        "v1-floor-member-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-flr-spe",
+      "sourceRule": "v1-floor-member",
+      "newRules": [
+        "v1-floor-member--base"
+      ]
+    },
+    {
+      "nodeId": "class-flr-nom-nom",
+      "sourceRule": "v1-floor-member-hidden-before",
+      "newRules": [
+        "v1-floor-member-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-flr-nom-nom",
+      "sourceRule": "v1-floor-member",
+      "newRules": [
+        "v1-floor-member--base"
+      ]
+    },
+    {
+      "nodeId": "class-flr-spe-spe",
+      "sourceRule": "v1-floor-member-hidden-before",
+      "newRules": [
+        "v1-floor-member-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-flr-spe-spe",
+      "sourceRule": "v1-floor-member",
+      "newRules": [
+        "v1-floor-member--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg",
+      "sourceRule": "v1-generic-surface-hidden-before",
+      "newRules": [
+        "v1-generic-surface-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg",
+      "sourceRule": "v1-generic-surface",
+      "newRules": [
+        "v1-generic-surface--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf",
+      "sourceRule": "v1-generic-surface-hidden-before",
+      "newRules": [
+        "v1-generic-surface-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf",
+      "sourceRule": "v1-generic-surface",
+      "newRules": [
+        "v1-generic-surface--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm",
+      "sourceRule": "v1-generic-surface-hidden-before",
+      "newRules": [
+        "v1-generic-surface-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm",
+      "sourceRule": "v1-generic-surface",
+      "newRules": [
+        "v1-generic-surface--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lad",
+      "sourceRule": "v1-isg-land-detail-hidden-before",
+      "newRules": [
+        "v1-isg-land-detail-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lad",
+      "sourceRule": "v1-isg-land-detail",
+      "newRules": [
+        "v1-isg-land-detail--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lis",
+      "sourceRule": "v1-isg-landform-hidden-before",
+      "newRules": [
+        "v1-isg-landform-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lis",
+      "sourceRule": "v1-isg-landform",
+      "newRules": [
+        "v1-isg-landform--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-wtb",
+      "sourceRule": "v1-isg-water-detail-hidden-before",
+      "newRules": [
+        "v1-isg-water-detail-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-wtb",
+      "sourceRule": "v1-isg-water-detail",
+      "newRules": [
+        "v1-isg-water-detail--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-dbz",
+      "sourceRule": "v1-isg-admin-unclassified",
+      "newRules": [
+        "v1-isg-admin-unclassified--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-plz",
+      "sourceRule": "v1-isg-admin-unclassified",
+      "newRules": [
+        "v1-isg-admin-unclassified--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lad-con",
+      "sourceRule": "v1-isg-land-continent",
+      "newRules": [
+        "v1-isg-land-continent--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lad-con",
+      "sourceRule": "v1-isg-land-continent-hidden-after",
+      "newRules": [
+        "v1-isg-land-continent-hidden-after--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lad-isd",
+      "sourceRule": "v1-isg-land-medium-hidden-before",
+      "newRules": [
+        "v1-isg-land-medium-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lad-isd",
+      "sourceRule": "v1-isg-land-medium",
+      "newRules": [
+        "v1-isg-land-medium--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lad-sbc",
+      "sourceRule": "v1-isg-land-detail-hidden-before",
+      "newRules": [
+        "v1-isg-land-detail-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lad-sbc",
+      "sourceRule": "v1-isg-land-detail",
+      "newRules": [
+        "v1-isg-land-detail--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lad-rgc",
+      "sourceRule": "v1-isg-land-detail-hidden-before",
+      "newRules": [
+        "v1-isg-land-detail-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lad-rgc",
+      "sourceRule": "v1-isg-land-detail",
+      "newRules": [
+        "v1-isg-land-detail--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lad-pen",
+      "sourceRule": "v1-isg-land-medium-hidden-before",
+      "newRules": [
+        "v1-isg-land-medium-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lad-pen",
+      "sourceRule": "v1-isg-land-medium",
+      "newRules": [
+        "v1-isg-land-medium--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lad-ist",
+      "sourceRule": "v1-isg-land-medium-hidden-before",
+      "newRules": [
+        "v1-isg-land-medium-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lad-ist",
+      "sourceRule": "v1-isg-land-medium",
+      "newRules": [
+        "v1-isg-land-medium--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lis-mtn",
+      "sourceRule": "v1-isg-landform-hidden-before",
+      "newRules": [
+        "v1-isg-landform-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lis-mtn",
+      "sourceRule": "v1-isg-landform",
+      "newRules": [
+        "v1-isg-landform--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lis-bsn",
+      "sourceRule": "v1-isg-landform-hidden-before",
+      "newRules": [
+        "v1-isg-landform-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lis-bsn",
+      "sourceRule": "v1-isg-landform",
+      "newRules": [
+        "v1-isg-landform--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lis-pln",
+      "sourceRule": "v1-isg-landform-hidden-before",
+      "newRules": [
+        "v1-isg-landform-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-lis-pln",
+      "sourceRule": "v1-isg-landform",
+      "newRules": [
+        "v1-isg-landform--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-wtb-sea",
+      "sourceRule": "v1-isg-water-sea",
+      "newRules": [
+        "v1-isg-water-sea--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-wtb-sea",
+      "sourceRule": "v1-isg-water-sea-hidden-after",
+      "newRules": [
+        "v1-isg-water-sea-hidden-after--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-wtb-lke",
+      "sourceRule": "v1-isg-water-detail-hidden-before",
+      "newRules": [
+        "v1-isg-water-detail-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-wtb-lke",
+      "sourceRule": "v1-isg-water-detail",
+      "newRules": [
+        "v1-isg-water-detail--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-wtb-str",
+      "sourceRule": "v1-isg-water-detail-hidden-before",
+      "newRules": [
+        "v1-isg-water-detail-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-wtb-str",
+      "sourceRule": "v1-isg-water-detail",
+      "newRules": [
+        "v1-isg-water-detail--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-wtb-est",
+      "sourceRule": "v1-isg-water-detail-hidden-before",
+      "newRules": [
+        "v1-isg-water-detail-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-ngf-wtb-est",
+      "sourceRule": "v1-isg-water-detail",
+      "newRules": [
+        "v1-isg-water-detail--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-dbz-l1",
+      "sourceRule": "v1-isg-admin-l1-hidden-before",
+      "newRules": [
+        "v1-isg-admin-l1-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-dbz-l1",
+      "sourceRule": "v1-isg-admin-l1",
+      "newRules": [
+        "v1-isg-admin-l1--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-dbz-l1",
+      "sourceRule": "v1-isg-admin-l1-hidden-after",
+      "newRules": [
+        "v1-isg-admin-l1-hidden-after--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-dbz-l2",
+      "sourceRule": "v1-isg-admin-l2-hidden-before",
+      "newRules": [
+        "v1-isg-admin-l2-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-dbz-l2",
+      "sourceRule": "v1-isg-admin-l2",
+      "newRules": [
+        "v1-isg-admin-l2--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-dbz-l2",
+      "sourceRule": "v1-isg-admin-l2-hidden-after",
+      "newRules": [
+        "v1-isg-admin-l2-hidden-after--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-dbz-l3",
+      "sourceRule": "v1-isg-admin-l3-hidden-before",
+      "newRules": [
+        "v1-isg-admin-l3-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-dbz-l3",
+      "sourceRule": "v1-isg-admin-l3",
+      "newRules": [
+        "v1-isg-admin-l3--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-plz-l1",
+      "sourceRule": "v1-isg-admin-l1-hidden-before",
+      "newRules": [
+        "v1-isg-admin-l1-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-plz-l1",
+      "sourceRule": "v1-isg-admin-l1",
+      "newRules": [
+        "v1-isg-admin-l1--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-plz-l1",
+      "sourceRule": "v1-isg-admin-l1-hidden-after",
+      "newRules": [
+        "v1-isg-admin-l1-hidden-after--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-plz-l2",
+      "sourceRule": "v1-isg-admin-l2-hidden-before",
+      "newRules": [
+        "v1-isg-admin-l2-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-plz-l2",
+      "sourceRule": "v1-isg-admin-l2",
+      "newRules": [
+        "v1-isg-admin-l2--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-plz-l2",
+      "sourceRule": "v1-isg-admin-l2-hidden-after",
+      "newRules": [
+        "v1-isg-admin-l2-hidden-after--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-plz-l3",
+      "sourceRule": "v1-isg-admin-l3-hidden-before",
+      "newRules": [
+        "v1-isg-admin-l3-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-plz-l3",
+      "sourceRule": "v1-isg-admin-l3",
+      "newRules": [
+        "v1-isg-admin-l3--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-plz-up",
+      "sourceRule": "v1-isg-admin-hidden",
+      "newRules": [
+        "v1-isg-admin-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-isg-adm-plz-uc",
+      "sourceRule": "v1-isg-admin-hidden",
+      "newRules": [
+        "v1-isg-admin-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-isl",
+      "sourceRule": "v1-generic-line",
+      "newRules": [
+        "v1-generic-line--base"
+      ]
+    },
+    {
+      "nodeId": "class-isl-ngf",
+      "sourceRule": "v1-generic-line",
+      "newRules": [
+        "v1-generic-line--base"
+      ]
+    },
+    {
+      "nodeId": "class-isl-adm",
+      "sourceRule": "v1-generic-line",
+      "newRules": [
+        "v1-generic-line--base"
+      ]
+    },
+    {
+      "nodeId": "class-isl-ngf-wtr",
+      "sourceRule": "v1-generic-line",
+      "newRules": [
+        "v1-generic-line--base"
+      ]
+    },
+    {
+      "nodeId": "class-isl-ngf-bod",
+      "sourceRule": "v1-generic-line",
+      "newRules": [
+        "v1-generic-line--base"
+      ]
+    },
+    {
+      "nodeId": "class-isl-adm-dbl",
+      "sourceRule": "v1-generic-line",
+      "newRules": [
+        "v1-generic-line--base"
+      ]
+    },
+    {
+      "nodeId": "class-isl-adm-pll",
+      "sourceRule": "v1-generic-line",
+      "newRules": [
+        "v1-generic-line--base"
+      ]
+    },
+    {
+      "nodeId": "class-isl-ngf-wtr-rvr",
+      "sourceRule": "v1-generic-line",
+      "newRules": [
+        "v1-generic-line--base"
+      ]
+    },
+    {
+      "nodeId": "class-isl-ngf-wtr-can",
+      "sourceRule": "v1-generic-line",
+      "newRules": [
+        "v1-generic-line--base"
+      ]
+    },
+    {
+      "nodeId": "class-isl-ngf-bod-bdy",
+      "sourceRule": "v1-generic-line",
+      "newRules": [
+        "v1-generic-line--base"
+      ]
+    },
+    {
+      "nodeId": "class-isl-ngf-bod-stc",
+      "sourceRule": "v1-generic-line",
+      "newRules": [
+        "v1-generic-line--base"
+      ]
+    },
+    {
+      "nodeId": "class-isl-adm-dbl-lbd",
+      "sourceRule": "v1-generic-line",
+      "newRules": [
+        "v1-generic-line--base"
+      ]
+    },
+    {
+      "nodeId": "class-isl-adm-pll-cbd",
+      "sourceRule": "v1-generic-line",
+      "newRules": [
+        "v1-generic-line--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp",
+      "sourceRule": "v1-generic-point-symbol",
+      "newRules": [
+        "v1-generic-point-symbol--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp",
+      "sourceRule": "v1-generic-point-label",
+      "newRules": [
+        "v1-generic-point-label--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-ngf",
+      "sourceRule": "v1-generic-point-symbol",
+      "newRules": [
+        "v1-generic-point-symbol--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-ngf",
+      "sourceRule": "v1-generic-point-label",
+      "newRules": [
+        "v1-generic-point-label--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-adm",
+      "sourceRule": "v1-generic-point-symbol",
+      "newRules": [
+        "v1-generic-point-symbol--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-adm",
+      "sourceRule": "v1-generic-point-label",
+      "newRules": [
+        "v1-generic-point-label--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-ngf-scp",
+      "sourceRule": "v1-generic-point-symbol",
+      "newRules": [
+        "v1-generic-point-symbol--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-ngf-scp",
+      "sourceRule": "v1-generic-point-label",
+      "newRules": [
+        "v1-generic-point-label--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-adm-dbp",
+      "sourceRule": "v1-generic-point-symbol",
+      "newRules": [
+        "v1-generic-point-symbol--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-adm-dbp",
+      "sourceRule": "v1-generic-point-label",
+      "newRules": [
+        "v1-generic-point-label--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-adm-plp",
+      "sourceRule": "v1-generic-point-symbol",
+      "newRules": [
+        "v1-generic-point-symbol--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-adm-plp",
+      "sourceRule": "v1-generic-point-label",
+      "newRules": [
+        "v1-generic-point-label--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-ngf-scp-spp",
+      "sourceRule": "v1-generic-point-symbol",
+      "newRules": [
+        "v1-generic-point-symbol--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-ngf-scp-spp",
+      "sourceRule": "v1-generic-point-label",
+      "newRules": [
+        "v1-generic-point-label--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-adm-dbp-lip",
+      "sourceRule": "v1-generic-point-symbol",
+      "newRules": [
+        "v1-generic-point-symbol--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-adm-dbp-lip",
+      "sourceRule": "v1-generic-point-label",
+      "newRules": [
+        "v1-generic-point-label--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-adm-plp-plp",
+      "sourceRule": "v1-generic-point-symbol",
+      "newRules": [
+        "v1-generic-point-symbol--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-adm-plp-plp",
+      "sourceRule": "v1-generic-point-label",
+      "newRules": [
+        "v1-generic-point-label--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-adm-plp-cop",
+      "sourceRule": "v1-generic-point-symbol",
+      "newRules": [
+        "v1-generic-point-symbol--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-adm-plp-cop",
+      "sourceRule": "v1-generic-point-label",
+      "newRules": [
+        "v1-generic-point-label--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-adm-dbp-shr",
+      "sourceRule": "v1-generic-point-symbol",
+      "newRules": [
+        "v1-generic-point-symbol--base"
+      ]
+    },
+    {
+      "nodeId": "class-isp-adm-dbp-shr",
+      "sourceRule": "v1-generic-point-label",
+      "newRules": [
+        "v1-generic-point-label--base"
+      ]
+    },
+    {
+      "nodeId": "class-pfb",
+      "sourceRule": "v1-platform-footprint-hidden-before",
+      "newRules": [
+        "v1-platform-footprint-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-pfb",
+      "sourceRule": "v1-platform-footprint",
+      "newRules": [
+        "v1-platform-footprint--base"
+      ]
+    },
+    {
+      "nodeId": "class-plf",
+      "sourceRule": "v1-platform-hidden",
+      "newRules": [
+        "v1-platform-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-plf",
+      "sourceRule": "v1-platform-high",
+      "newRules": [
+        "v1-platform-high--base",
+        "v1-platform-high--case-1"
+      ]
+    },
+    {
+      "nodeId": "class-rle",
+      "sourceRule": "v1-rle-dir3-geometry",
+      "newRules": [
+        "v1-rle-dir3-geometry--base"
+      ]
+    },
+    {
+      "nodeId": "class-rle",
+      "sourceRule": "v1-rle-dir3-pill",
+      "newRules": [
+        "v1-rle-dir3-pill--base",
+        "v1-rle-dir3-pill--case-1"
+      ]
+    },
+    {
+      "nodeId": "class-rle",
+      "sourceRule": "v1-rle-exclusive-high",
+      "newRules": [
+        "v1-rle-exclusive-high--base",
+        "v1-rle-exclusive-high--case-2",
+        "v1-rle-exclusive-high--case-1"
+      ]
+    },
+    {
+      "nodeId": "class-rod",
+      "sourceRule": "v1-road-hidden",
+      "newRules": [
+        "v1-road-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod",
+      "sourceRule": "v1-road-low",
+      "newRules": [
+        "v1-road-low--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod",
+      "sourceRule": "v1-road-high",
+      "newRules": [
+        "v1-road-high--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-nom",
+      "sourceRule": "v1-road-hidden",
+      "newRules": [
+        "v1-road-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-nom",
+      "sourceRule": "v1-road-low",
+      "newRules": [
+        "v1-road-low--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-nom",
+      "sourceRule": "v1-road-high",
+      "newRules": [
+        "v1-road-high--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-tuk",
+      "sourceRule": "v1-road-hidden",
+      "newRules": [
+        "v1-road-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-tuk",
+      "sourceRule": "v1-road-low",
+      "newRules": [
+        "v1-road-low--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-tuk",
+      "sourceRule": "v1-road-high",
+      "newRules": [
+        "v1-road-high--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-pri",
+      "sourceRule": "v1-road-hidden",
+      "newRules": [
+        "v1-road-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-pri",
+      "sourceRule": "v1-road-low",
+      "newRules": [
+        "v1-road-low--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-pri",
+      "sourceRule": "v1-road-high",
+      "newRules": [
+        "v1-road-high--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-sec",
+      "sourceRule": "v1-road-hidden",
+      "newRules": [
+        "v1-road-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-sec",
+      "sourceRule": "v1-road-low",
+      "newRules": [
+        "v1-road-low--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-sec",
+      "sourceRule": "v1-road-high",
+      "newRules": [
+        "v1-road-high--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-sed",
+      "sourceRule": "v1-road-hidden",
+      "newRules": [
+        "v1-road-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-sed",
+      "sourceRule": "v1-road-low",
+      "newRules": [
+        "v1-road-low--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-sed",
+      "sourceRule": "v1-road-high",
+      "newRules": [
+        "v1-road-high--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-res",
+      "sourceRule": "v1-road-hidden",
+      "newRules": [
+        "v1-road-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-res",
+      "sourceRule": "v1-road-low",
+      "newRules": [
+        "v1-road-low--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-res",
+      "sourceRule": "v1-road-high",
+      "newRules": [
+        "v1-road-high--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-svs",
+      "sourceRule": "v1-road-hidden",
+      "newRules": [
+        "v1-road-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-svs",
+      "sourceRule": "v1-road-low",
+      "newRules": [
+        "v1-road-low--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-svs",
+      "sourceRule": "v1-road-high",
+      "newRules": [
+        "v1-road-high--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-idr",
+      "sourceRule": "v1-road-hidden",
+      "newRules": [
+        "v1-road-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-idr",
+      "sourceRule": "v1-road-low",
+      "newRules": [
+        "v1-road-low--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-idr",
+      "sourceRule": "v1-road-high",
+      "newRules": [
+        "v1-road-high--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-spe",
+      "sourceRule": "v1-road-hidden",
+      "newRules": [
+        "v1-road-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-spe",
+      "sourceRule": "v1-road-low",
+      "newRules": [
+        "v1-road-low--base"
+      ]
+    },
+    {
+      "nodeId": "class-rod-spe",
+      "sourceRule": "v1-road-high",
+      "newRules": [
+        "v1-road-high--base"
+      ]
+    },
+    {
+      "nodeId": "class-sbp",
+      "sourceRule": "v1-station-building-icon",
+      "newRules": [
+        "v1-station-building-icon--base"
+      ]
+    },
+    {
+      "nodeId": "class-sbp",
+      "sourceRule": "v1-station-building-icon-label",
+      "newRules": [
+        "v1-station-building-icon-label--base"
+      ]
+    },
+    {
+      "nodeId": "class-sta",
+      "sourceRule": "v1-station-hidden",
+      "newRules": [
+        "v1-station-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-sta",
+      "sourceRule": "v1-station-normal",
+      "newRules": [
+        "v1-station-normal--base"
+      ]
+    },
+    {
+      "nodeId": "class-sta",
+      "sourceRule": "v1-station-platform-coincident",
+      "newRules": [
+        "v1-station-platform-coincident--base"
+      ]
+    },
+    {
+      "nodeId": "class-stb",
+      "sourceRule": "v1-structure-hidden",
+      "newRules": [
+        "v1-structure-hidden--base"
+      ]
+    },
+    {
+      "nodeId": "class-stb",
+      "sourceRule": "v1-structure-low-point",
+      "newRules": [
+        "v1-structure-low-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-stb",
+      "sourceRule": "v1-structure-high-geometry",
+      "newRules": [
+        "v1-structure-high-geometry--base"
+      ]
+    },
+    {
+      "nodeId": "class-stf",
+      "sourceRule": "v1-floor-member-hidden-before",
+      "newRules": [
+        "v1-floor-member-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-stf",
+      "sourceRule": "v1-floor-member",
+      "newRules": [
+        "v1-floor-member--base"
+      ]
+    },
+    {
+      "nodeId": "class-tpp",
+      "sourceRule": "v1-tpp-point-hidden-before",
+      "newRules": [
+        "v1-tpp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-tpp",
+      "sourceRule": "v1-tpp-point",
+      "newRules": [
+        "v1-tpp-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-tpp-nom",
+      "sourceRule": "v1-tpp-point-hidden-before",
+      "newRules": [
+        "v1-tpp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-tpp-nom",
+      "sourceRule": "v1-tpp-point",
+      "newRules": [
+        "v1-tpp-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-tpp-spe",
+      "sourceRule": "v1-tpp-point-hidden-before",
+      "newRules": [
+        "v1-tpp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-tpp-spe",
+      "sourceRule": "v1-tpp-point",
+      "newRules": [
+        "v1-tpp-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-tpp-nom-nom",
+      "sourceRule": "v1-tpp-point-hidden-before",
+      "newRules": [
+        "v1-tpp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-tpp-nom-nom",
+      "sourceRule": "v1-tpp-point",
+      "newRules": [
+        "v1-tpp-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-tpp-spe-spe",
+      "sourceRule": "v1-tpp-point-hidden-before",
+      "newRules": [
+        "v1-tpp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-tpp-spe-spe",
+      "sourceRule": "v1-tpp-point",
+      "newRules": [
+        "v1-tpp-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-trp",
+      "sourceRule": "v1-trp-point-hidden-before",
+      "newRules": [
+        "v1-trp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-trp",
+      "sourceRule": "v1-trp-point",
+      "newRules": [
+        "v1-trp-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-trp-nom",
+      "sourceRule": "v1-trp-point-hidden-before",
+      "newRules": [
+        "v1-trp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-trp-nom",
+      "sourceRule": "v1-trp-point",
+      "newRules": [
+        "v1-trp-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-trp-spe",
+      "sourceRule": "v1-trp-point-hidden-before",
+      "newRules": [
+        "v1-trp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-trp-spe",
+      "sourceRule": "v1-trp-point",
+      "newRules": [
+        "v1-trp-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-trp-nom-nom",
+      "sourceRule": "v1-trp-point-hidden-before",
+      "newRules": [
+        "v1-trp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-trp-nom-nom",
+      "sourceRule": "v1-trp-point",
+      "newRules": [
+        "v1-trp-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-trp-spe-spe",
+      "sourceRule": "v1-trp-point-hidden-before",
+      "newRules": [
+        "v1-trp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-trp-spe-spe",
+      "sourceRule": "v1-trp-point",
+      "newRules": [
+        "v1-trp-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-wrp",
+      "sourceRule": "v1-wrp-point-hidden-before",
+      "newRules": [
+        "v1-wrp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-wrp",
+      "sourceRule": "v1-wrp-point",
+      "newRules": [
+        "v1-wrp-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-wrp-nom",
+      "sourceRule": "v1-wrp-point-hidden-before",
+      "newRules": [
+        "v1-wrp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-wrp-nom",
+      "sourceRule": "v1-wrp-point",
+      "newRules": [
+        "v1-wrp-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-wrp-spe",
+      "sourceRule": "v1-wrp-point-hidden-before",
+      "newRules": [
+        "v1-wrp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-wrp-spe",
+      "sourceRule": "v1-wrp-point",
+      "newRules": [
+        "v1-wrp-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-wrp-nom-nom",
+      "sourceRule": "v1-wrp-point-hidden-before",
+      "newRules": [
+        "v1-wrp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-wrp-nom-nom",
+      "sourceRule": "v1-wrp-point",
+      "newRules": [
+        "v1-wrp-point--base"
+      ]
+    },
+    {
+      "nodeId": "class-wrp-spe-spe",
+      "sourceRule": "v1-wrp-point-hidden-before",
+      "newRules": [
+        "v1-wrp-point-hidden-before--base"
+      ]
+    },
+    {
+      "nodeId": "class-wrp-spe-spe",
+      "sourceRule": "v1-wrp-point",
+      "newRules": [
+        "v1-wrp-point--base"
+      ]
+    }
+  ],
+  "deterministicComparisons": 5130,
+  "evidence": "npm run test:render-r7; independent browser evidence recorded separately"
+}

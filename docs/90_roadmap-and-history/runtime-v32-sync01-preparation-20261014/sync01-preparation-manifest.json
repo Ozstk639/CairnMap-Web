@@ -1,0 +1,569 @@
+{
+  "schemaVersion": "cairnmap.sync01-preparation.v1",
+  "date": "2026-10-14",
+  "timezone": "Asia/Shanghai",
+  "status": "prepared-not-executed",
+  "blueprintVersion": "0.3",
+  "sourceCodeHead": "e81683c89ed1fe0a0153155932b02a76c7ad11d4",
+  "finalPublishHead": "to-be-fixed-after-document-commit",
+  "upstream": {
+    "repository": "Ozstk639/CairnMap-Web",
+    "localRemote": "upstream",
+    "base": "main",
+    "baseHead": "5447e117a86d01f833bea012c1e0c09440489ff6",
+    "proposedHeadBranch": "codex/cm-config-runtime-v32-migration-20261007",
+    "aheadCount": 75,
+    "behindCount": 0,
+    "remoteHeadExists": false,
+    "existingPullRequests": []
+  },
+  "downstream": {
+    "repository": "OpenRIAMap/OpenRIAMap-Cairn-Web",
+    "localRemote": "origin",
+    "base": "main",
+    "baseHead": "0f075e4c3075e1210c812f90932c8a47abb1fbc9",
+    "proposedBranch": "codex/ria-config-runtime-v32-integration-20261014",
+    "oldStudioTrackedFiles": 5
+  },
+  "gitHistory": {
+    "isShallow": true,
+    "availableMergeBase": null,
+    "inference": "No claim of unrelated history; use fixed-snapshot file inventory"
+  },
+  "verification": {
+    "nodeVersion": "v20.14.0",
+    "command": "npm run build",
+    "prebuild": "npm run verify:config-v32",
+    "verificationGroups": 38,
+    "result": "passed",
+    "log": "config-v32-build.log",
+    "warning": "existing chunk size and static/dynamic import warnings"
+  },
+  "defaultSeed": {
+    "path": "src/configStudio/defaults/r9-r5.config.json",
+    "packageId": "cairnmap-config-v32-semantic",
+    "contractRevision": 9,
+    "revision": 5,
+    "sha256": "999d4afee9e1bfe9daf86639d95e2dae721d6c887cef3771fb1afa0d79df816e",
+    "manifestSha256": "999d4afee9e1bfe9daf86639d95e2dae721d6c887cef3771fb1afa0d79df816e"
+  },
+  "exclusiveReplacementDirectories": [
+    "src/configStudio",
+    "src/components/Rules/configRuntime"
+  ],
+  "exclusiveSourceFiles": [
+    {
+      "path": "src/components/Rules/configRuntime/configPackageAdapter.ts",
+      "gitBlob": "d6419f3e8f5aa653021894f7dc27c4f82c516727",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/CategoryCreationPanel.tsx",
+      "gitBlob": "bbe2da2cfe6f267bfaadc9f943e88202297dfe00",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/CategoryFileControls.tsx",
+      "gitBlob": "e28b87fa0d35841cd105a66640ab2cdc0ff2b90d",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/CategoryPathPicker.tsx",
+      "gitBlob": "8f2442b2a7986326a83473797163a5ec67d91a2e",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/CollisionMetricEditor.tsx",
+      "gitBlob": "46a15b2db1aeba241852cfc8292875ffdbf2105e",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/ColorBindingEditor.tsx",
+      "gitBlob": "33af38786ed8bff9b59b84df72bdb7695e465ae6",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/ConfigBootstrap.tsx",
+      "gitBlob": "aac0da7a1d4e488455b68afa51823a18f0ae1a59",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/ConfigDialog.tsx",
+      "gitBlob": "1792e976fea3a1661e5889ad6c7f8000f74290b0",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/ConfigLab.tsx",
+      "gitBlob": "d362888dc64f5572334e6cbe5f11d4a5fb97ee77",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/ConfigRuntimePreview.tsx",
+      "gitBlob": "9c512249ae837e03d74a596b57768d63d4d492e1",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/ConfigStudio.tsx",
+      "gitBlob": "c397dc8c2ded9c1f9ed1111f0ebfe3143bb77678",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/DisplayPrioritySettings.tsx",
+      "gitBlob": "835fe78cde3fbee8e1abdea2a77927f2f61561d4",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/ExtraRuleSettings.tsx",
+      "gitBlob": "a822717e39b178756d714f301fb61cd08a0d0651",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/FieldAdvancedSettings.tsx",
+      "gitBlob": "31ab5d670b91f7c7b5cc0322c2a0eaf462663841",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/FieldPrefillDialog.tsx",
+      "gitBlob": "21e16bd0bfec68badfd9365665758f97ccbf35d8",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/GripOrderControls.tsx",
+      "gitBlob": "037fcb05955c9270140b8e1fbc56d24035124351",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/InteractionShapeSettings.tsx",
+      "gitBlob": "0af31ac0712e4076c0ff2621515a35f49d14fc8b",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/LabelPlacementSettings.tsx",
+      "gitBlob": "80740f1f1e2b3b24de2e5815746cd8aaf507dbde",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/ModuleHelp.tsx",
+      "gitBlob": "9c2debccc0db695862075ab26fc1ed41d5d89e65",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/NativeSymbolSettings.tsx",
+      "gitBlob": "3da609a61470a12e5d686ac708d02cd57b68d74d",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/NewCategoryPanel.tsx",
+      "gitBlob": "b90264d82ef58cbd3901cabb228fddad0a1ee27b",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/NewRenderRulePanel.tsx",
+      "gitBlob": "eefd9de5d7cbc75efb119630dbdf07d13a395b4e",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/OrderedDensityEditor.tsx",
+      "gitBlob": "04c388358d5f074e89c9fde05a936f513baef553",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/RenderFieldConditionsEditor.tsx",
+      "gitBlob": "0ed05d61ccbfca132492ad385f2909861096aa25",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/RenderFormulaEditor.tsx",
+      "gitBlob": "89adde02909c3bc740a808470b075e4539579954",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/RenderRuleExtensionsEditor.tsx",
+      "gitBlob": "3f644a1f7f5a4142e516f677084b68580cd29cb1",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/UnifiedRuleExtensions.tsx",
+      "gitBlob": "56fae00f3c6dd18a961fb2a522493283c7fcd23d",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/V3CardEditor.tsx",
+      "gitBlob": "22ebfaff198e4bf3f97c6e1fb620103c55d73c36",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/V3CardRenderer.ts",
+      "gitBlob": "c6f6e96cbc450d3d2b2ef36aeb94e58352f5e18e",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/V3WorkflowEditor.tsx",
+      "gitBlob": "24b8d422afce69de70fb5e7750d5707954ae8253",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/V3WorkflowRunner.tsx",
+      "gitBlob": "a357ef5b29fde574871558f0f3ec0d8f70ed17c9",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/ValueMapColorEditor.tsx",
+      "gitBlob": "5437410e2483aa626ff5cf4858cf3662e4a15a72",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/ValueOptionsEditor.tsx",
+      "gitBlob": "aed9f28571ae551006b7c263dc58c5dedb64e019",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/WorkflowAnnotationsInput.tsx",
+      "gitBlob": "6be45849282f6fa132984767202c8f2c989b25e9",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/WorkflowCategoryInput.tsx",
+      "gitBlob": "1f56a48fcb21d2e97e83dfd526f703697379e849",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/WorkflowControlSettings.tsx",
+      "gitBlob": "d4731a1e1b2e8e23435b8c1ab2b6ff2328ab2981",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/WorkflowDrawingSettings.tsx",
+      "gitBlob": "8b8450171b77dbcd43f61e498986141ffb3ece2c",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/WorkflowEditingSettings.tsx",
+      "gitBlob": "36d3b93fe51d1fe92bf9185a7ba3046a708f0b91",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/WorkflowExecutionSettings.tsx",
+      "gitBlob": "b2485a51eb1179ce1b66c716f727008ea0d423f5",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/WorkflowExpressionEditor.tsx",
+      "gitBlob": "586e4ad8412ed58408de563522101c3389c82bc6",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/WorkflowFieldImport.tsx",
+      "gitBlob": "50604a89c3e3720931f4a608122e8eec18e0c366",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/WorkflowOutputEditor.tsx",
+      "gitBlob": "a9b216e7b987b3ce20d5fae9a0a7268124dbbd2f",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/WorkflowPrefill.tsx",
+      "gitBlob": "5f5eb09c5d3d4abf3be5c06b5fb7a89150a8c0c2",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/WorkflowStudioPage.tsx",
+      "gitBlob": "4da1843ef4f3ed2bb09fd0f8458c1d4f0f413601",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/WorkflowValueConditionEditor.tsx",
+      "gitBlob": "ebbf53e6399b6edf7c5616467a6e4b1a29982a0c",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/WorkflowWorkbench.tsx",
+      "gitBlob": "b23b23f00a793f3aae6bf027930eb04a6d6d348a",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/categoryArtifact.ts",
+      "gitBlob": "ef073ffc14e1d0759486bf54a64458d1c5ca9e33",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/categoryInitialization.ts",
+      "gitBlob": "180a19fa3e533384717fea8713f0433c27f0dcbc",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/categoryTemplates.ts",
+      "gitBlob": "a5be9e9c4a443202c76eb568b1275c4c5f223608",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/configActivation.ts",
+      "gitBlob": "db255bfef7b092b2413b922d35cd0acb3cdc652f",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/configLabStorage.ts",
+      "gitBlob": "feb0a7bc46534bbc0b2c06e775185a686c0fcfd2",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/contract.ts",
+      "gitBlob": "94de03575829dead0359e19447430b31b8686a28",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/defaultConfigProvider.ts",
+      "gitBlob": "8eb07f28935e99116a23eee4c908f4a2c2aea35b",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/defaults/manifest-r8-r4.json",
+      "gitBlob": "6dc9e7dca8cb89763518a3118fa59802d336a03b",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/defaults/manifest.json",
+      "gitBlob": "5e749b44fac89981ccebfc0169b4d3fdcc454abf",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/defaults/r8-r4.config.json",
+      "gitBlob": "02a4d7cd3b6f153cdfa47af8a9de069b89c39e2f",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/defaults/r9-r5.config.json",
+      "gitBlob": "530a08752e88b119de818e5734f48af737a8a2b6",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/externalEditRegistry.ts",
+      "gitBlob": "655faa2d7cc432d662935dd95ac74a8ac6e94a2f",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/fieldMigration.ts",
+      "gitBlob": "ebb629f5e6f9f99d0957f6a9b6b08dd5f2a31423",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/fieldPrefillModel.ts",
+      "gitBlob": "f58d7b2cd29736ef3fc4fe91b776601a189a6130",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/fieldReuse.ts",
+      "gitBlob": "171dda3d7b67055866eadc7b3ae8064637fa0966",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/legacyProjectAdapter.ts",
+      "gitBlob": "dc07fcb6528849ec31cb695bb7f33b4d56655e6c",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/localization.ts",
+      "gitBlob": "be14935af31ce7f82dfd1c69332e43ec3c138440",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/native-contract-schema.generated.json",
+      "gitBlob": "2da746043c2125e6f5927cc6875782c5a336c452",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/nativeContractValidation.ts",
+      "gitBlob": "8ba16cec40556a8346d5b0c5f5f7e6bee95d1989",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/nativeFeatureImport.ts",
+      "gitBlob": "09a4b868e497a8e37f8d769ed410f35d0e60bc57",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/nativeWorkflowCommit.ts",
+      "gitBlob": "01dc901f7852bb8f6f8b3c849b5f52d3acd2f9aa",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/package.ts",
+      "gitBlob": "6cf7d270e24aa3e22bb5b59d9b2ca7984c80d655",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/r9Migration.ts",
+      "gitBlob": "1e8494dafa835595b39cde721807be4bf95e3dc4",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/railEditingTemplates.ts",
+      "gitBlob": "2a7f6a2c123463b7b06e970b3f1fb7739c1f2387",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/renderBooleanFormula.ts",
+      "gitBlob": "434e787550f480e2bc80552b797abe093266db88",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/renderRuleConditions.ts",
+      "gitBlob": "3e705f53a1fa9ddf6107e44774b0284d0facc6c3",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/renderRuleMigration.ts",
+      "gitBlob": "e5ea5128e269924b573541dba6bf7d0c5d7ea787",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/renderRuleTemplates.ts",
+      "gitBlob": "c75bf2c8123b981ae39d9dcada143e7bff5f337d",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/renderScalar.ts",
+      "gitBlob": "56d8a195c8ceca0398ab057e1d63127edcdcf792",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/runtime.ts",
+      "gitBlob": "652adfff0d33fe4f6dbdc076e908c0585b996537",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/studioSession.ts",
+      "gitBlob": "0eb99aaf14dbff01c6f2f1f096a46c8dffc7c8fa",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/trpExternalEditing.ts",
+      "gitBlob": "ae5cd88758152a5231363013e23749f3848a591d",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/types.ts",
+      "gitBlob": "21cc41f85831cfa3f24f1c8e8115bbb4774a1296",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/v1BehaviorBaseline.ts",
+      "gitBlob": "842966848387b71bff2a0133851f62212c77e168",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/v32Defaults.ts",
+      "gitBlob": "8390df3cfef095a9f844cc5def90129626ebc0c9",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/workflowAnnotations.ts",
+      "gitBlob": "2d2e5c07fed8c3075fbb8aed407884f0ea2d0e30",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/workflowDrawing.ts",
+      "gitBlob": "1edf9aec8020a0916ee52174d3260fbde2e6eb31",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/workflowDrawingMigration.ts",
+      "gitBlob": "be06ca34e5c9c4b7bdd602fbcf73fa08c6daa1ac",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/workflowEditCommit.ts",
+      "gitBlob": "b34befb648c1cbb384ed8f3b88f9136fb4dc9820",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/workflowEditing.ts",
+      "gitBlob": "7b46b7056317dff9706c1b145f8b4251f6f376fe",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/workflowExpression.ts",
+      "gitBlob": "03c7b42dea896dbbf281c90f1b8a3c7de468fa38",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/workflowFieldControl.ts",
+      "gitBlob": "181b75ed66ec37034a0b559d89fcce0d7655e68d",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/workflowFormMigration.ts",
+      "gitBlob": "13b72710802d897f931240b736320090dbc469fd",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/workflowRecord.ts",
+      "gitBlob": "5e56ab4eac79f91c9ead13265bccd812a33a9171",
+      "mode": "100644"
+    },
+    {
+      "path": "src/configStudio/workflowValues.ts",
+      "gitBlob": "af5c07dc516979111c8fd5bada90a2391ea5b19f",
+      "mode": "100644"
+    }
+  ],
+  "sharedSourceUpgradeCandidates": [
+    "src/App.tsx",
+    "src/components/Common/FeatureModuleLoadDialog.tsx",
+    "src/components/Map/MapContainer.tsx",
+    "src/components/Mapping/Editor/WorkflowStyleEditPanel.tsx",
+    "src/components/Mapping/Workflow/ExternalFeatureEditHost.tsx",
+    "src/components/Mapping/Workflow/NativeWorkflowEditPanel.tsx",
+    "src/components/Mapping/Workflow/NativeWorkflowHost.tsx",
+    "src/components/Mapping/Workflow/WorkflowHost.tsx",
+    "src/components/Mapping/core/MeasuringModule.tsx",
+    "src/components/Mapping/core/Mtools.tsx",
+    "src/components/Mapping/core/relayPackageSerializer.ts",
+    "src/components/Review/package/serializer.ts",
+    "src/components/Review/package/submissionTransport.ts",
+    "src/components/Rules/cardrules/cardEnhancements.ts",
+    "src/components/Rules/cardrules/fieldRules.ts",
+    "src/components/Rules/core/FeatureInteractionCard.tsx",
+    "src/components/Rules/core/RuleDrivenLayer.tsx",
+    "src/components/Rules/data/ruleDataSources.ts",
+    "src/components/Rules/rendering/display/displayTypes.ts",
+    "src/components/Rules/rendering/label/labelCollision.ts",
+    "src/components/Rules/rendering/label/labelDensity.ts",
+    "src/components/Rules/rendering/label/labelGlyphPathLayer.ts",
+    "src/components/Rules/rendering/label/labelLineTextStyle.ts",
+    "src/components/Rules/rendering/label/labelPlacementCache.ts",
+    "src/components/Rules/rendering/label/labelRuntimeStability.ts",
+    "src/components/Rules/rendering/label/labelTextPathLayer.ts",
+    "src/components/Rules/rendering/labelClickInteraction.ts",
+    "src/components/Rules/rendering/labelLayout.ts",
+    "src/components/Rules/rendering/labelPlacement.ts",
+    "src/components/Rules/rendering/labelStyles.ts",
+    "src/components/Rules/rendering/multipartLabels.ts",
+    "src/components/Rules/rendering/renderRules.ts",
+    "src/components/Rules/search/ruleSearchRegistry.ts",
+    "src/components/Settings/SettingsPanel.tsx",
+    "src/lib/DynmapTileLayer.ts",
+    "src/lib/SketchTileLayer.ts",
+    "src/lib/mapZoom.ts",
+    "src/store/featureModuleStore.ts",
+    "src/store/ruleDataStore.ts",
+    "src/styles/index.css"
+  ],
+  "packageAndInfrastructurePolicy": "merge required scripts/dependencies/lockfile/styles/CI/EOL while retaining downstream live functionality",
+  "publicationScope": "next execution A+B; push feature branch and create upstream PR; no direct main push, merge or deployment",
+  "workflow": [
+    "A upstream r9/r5 baseline PR",
+    "B downstream complete Studio/Lab replacement with shared dependency integration",
+    "C main blueprint implementation in downstream",
+    "D full return to upstream local-template environment"
+  ],
+  "notExecuted": [
+    "git push",
+    "PR creation",
+    "downstream worktree creation or overwrite",
+    "main merge",
+    "deployment",
+    "v0.1-v0.3 feature implementation"
+  ]
+}

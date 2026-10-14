@@ -1,0 +1,7456 @@
+{
+  "schemaVersion": "cairnmap.v1-v3-workflow-fixtures.v1",
+  "sourceWorkflows": [
+    {
+      "id": "rail-station-workflow",
+      "class": "STA",
+      "componentKey": "stationWorkflow",
+      "outputPaths": [],
+      "retainedExternal": true
+    },
+    {
+      "id": "rail-platform-workflow",
+      "class": "PLF",
+      "componentKey": "stationWorkflow",
+      "outputPaths": [],
+      "retainedExternal": true
+    },
+    {
+      "id": "rail-line-workflow",
+      "class": "RLE",
+      "componentKey": "railwayWorkflow",
+      "outputPaths": [],
+      "retainedExternal": true
+    },
+    {
+      "id": "rail-platform-boundary-workflow",
+      "class": "PFB",
+      "componentKey": "stationWorkflow",
+      "outputPaths": [],
+      "retainedExternal": true
+    },
+    {
+      "id": "rail-station-building-workflow",
+      "class": "STB",
+      "componentKey": "stationWorkflow",
+      "outputPaths": [],
+      "retainedExternal": true
+    },
+    {
+      "id": "rail-station-building-point-workflow",
+      "class": "SBP",
+      "componentKey": "stationWorkflow",
+      "outputPaths": [],
+      "retainedExternal": true
+    },
+    {
+      "id": "rail-station-building-floor-workflow",
+      "class": "STF",
+      "componentKey": "stationWorkflow",
+      "outputPaths": [],
+      "retainedExternal": true
+    },
+    {
+      "id": "road-workflow",
+      "class": "ROD",
+      "componentKey": "roadWorkflow",
+      "outputPaths": [],
+      "retainedExternal": false
+    },
+    {
+      "id": "teleport-workflow",
+      "class": "TPP",
+      "componentKey": "teleportPointWorkflow",
+      "outputPaths": [],
+      "retainedExternal": false
+    },
+    {
+      "id": "warp-workflow",
+      "class": "WRP",
+      "componentKey": "warpPointWorkflow",
+      "outputPaths": [],
+      "retainedExternal": false
+    },
+    {
+      "id": "trade-point-workflow",
+      "class": "TRP",
+      "componentKey": "tradePointWorkflow",
+      "outputPaths": [],
+      "retainedExternal": true
+    },
+    {
+      "id": "generic-point-workflow",
+      "class": "ISP",
+      "componentKey": "specialCulturalPointWorkflow",
+      "outputPaths": [],
+      "retainedExternal": false
+    },
+    {
+      "id": "generic-line-workflow",
+      "class": "ISL",
+      "componentKey": "settlementBoundaryLineWorkflow",
+      "outputPaths": [],
+      "retainedExternal": false
+    },
+    {
+      "id": "generic-polygon-workflow",
+      "class": "ISG",
+      "componentKey": "settlementBoundaryPlannedWorkflow",
+      "outputPaths": [],
+      "retainedExternal": false
+    },
+    {
+      "id": "building-workflow",
+      "class": "BUD",
+      "componentKey": "buildingWorkflow",
+      "outputPaths": [],
+      "retainedExternal": false
+    },
+    {
+      "id": "floor-workflow",
+      "class": "FLR",
+      "componentKey": "floorUnitWorkflow",
+      "outputPaths": [],
+      "retainedExternal": false
+    }
+  ],
+  "cases": [
+    {
+      "schemaKey": "isg_ngf_lad",
+      "classification": {
+        "class": "ISG",
+        "kind": "NGF",
+        "skind": "LAD",
+        "skind2": "CON"
+      },
+      "geometry": "Polygon",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZNGFLADCON_AB-1",
+        "Name": "sample",
+        "Kind": "NGF",
+        "SKind": "LAD",
+        "SKind2": "CON",
+        "tags": {
+          "nomenclator": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "ISG",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isg_ngf_lad-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isg_ngf_lad-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isg_ngf_lad-assignment-wiki-C",
+          "target": "extensions.link.wiki",
+          "expression": "C"
+        },
+        {
+          "id": "isg_ngf_lad-assignment-brief-D",
+          "target": "extensions.character.brief",
+          "expression": "D"
+        },
+        {
+          "id": "isg_ngf_lad-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,E)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isg_ngf_lad-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isg_ngf_lad-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lad-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lad-wiki-C",
+          "slot": "C",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lad-brief-D",
+          "slot": "D",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lad-abbr-E",
+          "slot": "E",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isg_ngf_lad",
+      "classification": {
+        "class": "ISG",
+        "kind": "NGF",
+        "skind": "LAD",
+        "skind2": "CON"
+      },
+      "geometry": "Polygon",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZNGFLADCON_AB-1",
+        "Name": "sample",
+        "Kind": "NGF",
+        "SKind": "LAD",
+        "SKind2": "CON",
+        "tags": {
+          "nomenclator": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "ISG",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isg_ngf_lad-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isg_ngf_lad-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isg_ngf_lad-assignment-wiki-C",
+          "target": "extensions.link.wiki",
+          "expression": "C"
+        },
+        {
+          "id": "isg_ngf_lad-assignment-brief-D",
+          "target": "extensions.character.brief",
+          "expression": "D"
+        },
+        {
+          "id": "isg_ngf_lad-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,E)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isg_ngf_lad-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isg_ngf_lad-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lad-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lad-wiki-C",
+          "slot": "C",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lad-brief-D",
+          "slot": "D",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lad-abbr-E",
+          "slot": "E",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isg_ngf_lis",
+      "classification": {
+        "class": "ISG",
+        "kind": "NGF",
+        "skind": "LIS",
+        "skind2": "BSN"
+      },
+      "geometry": "Polygon",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "Adm": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZNGFLISBSN_AB-1",
+        "Name": "sample",
+        "Kind": "NGF",
+        "SKind": "LIS",
+        "SKind2": "BSN",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "Adm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "ISG",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isg_ngf_lis-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isg_ngf_lis-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isg_ngf_lis-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isg_ngf_lis-assignment-Adm-D",
+          "target": "tags.Adm",
+          "expression": "D"
+        },
+        {
+          "id": "isg_ngf_lis-assignment-wiki-E",
+          "target": "extensions.link.wiki",
+          "expression": "E"
+        },
+        {
+          "id": "isg_ngf_lis-assignment-brief-F",
+          "target": "extensions.character.brief",
+          "expression": "F"
+        },
+        {
+          "id": "isg_ngf_lis-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,G)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isg_ngf_lis-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isg_ngf_lis-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lis-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lis-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lis-Adm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lis-wiki-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lis-brief-F",
+          "slot": "F",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lis-abbr-G",
+          "slot": "G",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isg_ngf_lis",
+      "classification": {
+        "class": "ISG",
+        "kind": "NGF",
+        "skind": "LIS",
+        "skind2": "BSN"
+      },
+      "geometry": "Polygon",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "Adm": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZNGFLISBSN_AB-1",
+        "Name": "sample",
+        "Kind": "NGF",
+        "SKind": "LIS",
+        "SKind2": "BSN",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "Adm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "ISG",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isg_ngf_lis-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isg_ngf_lis-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isg_ngf_lis-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isg_ngf_lis-assignment-Adm-D",
+          "target": "tags.Adm",
+          "expression": "D"
+        },
+        {
+          "id": "isg_ngf_lis-assignment-wiki-E",
+          "target": "extensions.link.wiki",
+          "expression": "E"
+        },
+        {
+          "id": "isg_ngf_lis-assignment-brief-F",
+          "target": "extensions.character.brief",
+          "expression": "F"
+        },
+        {
+          "id": "isg_ngf_lis-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,G)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isg_ngf_lis-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isg_ngf_lis-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lis-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lis-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lis-Adm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lis-wiki-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lis-brief-F",
+          "slot": "F",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_lis-abbr-G",
+          "slot": "G",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isg_ngf_wtb",
+      "classification": {
+        "class": "ISG",
+        "kind": "NGF",
+        "skind": "WTB",
+        "skind2": "EST"
+      },
+      "geometry": "Polygon",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZNGFWTBEST_AB-1",
+        "Name": "sample",
+        "Kind": "NGF",
+        "SKind": "WTB",
+        "SKind2": "EST",
+        "tags": {
+          "nomenclator": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "ISG",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isg_ngf_wtb-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isg_ngf_wtb-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isg_ngf_wtb-assignment-wiki-C",
+          "target": "extensions.link.wiki",
+          "expression": "C"
+        },
+        {
+          "id": "isg_ngf_wtb-assignment-brief-D",
+          "target": "extensions.character.brief",
+          "expression": "D"
+        },
+        {
+          "id": "isg_ngf_wtb-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,E)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isg_ngf_wtb-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isg_ngf_wtb-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_wtb-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_wtb-wiki-C",
+          "slot": "C",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_wtb-brief-D",
+          "slot": "D",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_wtb-abbr-E",
+          "slot": "E",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isg_ngf_wtb",
+      "classification": {
+        "class": "ISG",
+        "kind": "NGF",
+        "skind": "WTB",
+        "skind2": "EST"
+      },
+      "geometry": "Polygon",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZNGFWTBEST_AB-1",
+        "Name": "sample",
+        "Kind": "NGF",
+        "SKind": "WTB",
+        "SKind2": "EST",
+        "tags": {
+          "nomenclator": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "ISG",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isg_ngf_wtb-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isg_ngf_wtb-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isg_ngf_wtb-assignment-wiki-C",
+          "target": "extensions.link.wiki",
+          "expression": "C"
+        },
+        {
+          "id": "isg_ngf_wtb-assignment-brief-D",
+          "target": "extensions.character.brief",
+          "expression": "D"
+        },
+        {
+          "id": "isg_ngf_wtb-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,E)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isg_ngf_wtb-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isg_ngf_wtb-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_wtb-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_wtb-wiki-C",
+          "slot": "C",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_wtb-brief-D",
+          "slot": "D",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_ngf_wtb-abbr-E",
+          "slot": "E",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isg_adm_dbz",
+      "classification": {
+        "class": "ISG",
+        "kind": "ADM",
+        "skind": "DBZ",
+        "skind2": "L1"
+      },
+      "geometry": "Polygon",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "Pop": " sample ",
+        "GAdm": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZADMDBZL1_AB-1",
+        "Name": "sample",
+        "Kind": "ADM",
+        "SKind": "DBZ",
+        "SKind2": "L1",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample",
+          "GAdm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "ISG",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isg_adm_dbz-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-UAdm-D",
+          "target": "tags.UAdm",
+          "expression": "D"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-Pop-E",
+          "target": "tags.Pop",
+          "expression": "E"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-GAdm-F",
+          "target": "tags.GAdm",
+          "expression": "F"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-brief-H",
+          "target": "extensions.character.brief",
+          "expression": "H"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,I)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isg_adm_dbz-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isg_adm_dbz-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-UAdm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-Pop-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-GAdm-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-brief-H",
+          "slot": "H",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-abbr-I",
+          "slot": "I",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isg_adm_dbz",
+      "classification": {
+        "class": "ISG",
+        "kind": "ADM",
+        "skind": "DBZ",
+        "skind2": "L1"
+      },
+      "geometry": "Polygon",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "Pop": " sample ",
+        "GAdm": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZADMDBZL1_AB-1",
+        "Name": "sample",
+        "Kind": "ADM",
+        "SKind": "DBZ",
+        "SKind2": "L1",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample",
+          "GAdm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "ISG",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isg_adm_dbz-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-UAdm-D",
+          "target": "tags.UAdm",
+          "expression": "D"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-Pop-E",
+          "target": "tags.Pop",
+          "expression": "E"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-GAdm-F",
+          "target": "tags.GAdm",
+          "expression": "F"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-brief-H",
+          "target": "extensions.character.brief",
+          "expression": "H"
+        },
+        {
+          "id": "isg_adm_dbz-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,I)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isg_adm_dbz-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isg_adm_dbz-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-UAdm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-Pop-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-GAdm-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-brief-H",
+          "slot": "H",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_dbz-abbr-I",
+          "slot": "I",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isg_adm_plz",
+      "classification": {
+        "class": "ISG",
+        "kind": "ADM",
+        "skind": "PLZ",
+        "skind2": "L1"
+      },
+      "geometry": "Polygon",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "Pop": " sample ",
+        "GAdm": " sample ",
+        "YTime": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZADMPLZL1_AB-1",
+        "Name": "sample",
+        "Kind": "ADM",
+        "SKind": "PLZ",
+        "SKind2": "L1",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample",
+          "GAdm": "sample",
+          "YTime": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "ISG",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isg_adm_plz-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isg_adm_plz-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isg_adm_plz-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isg_adm_plz-assignment-UAdm-D",
+          "target": "tags.UAdm",
+          "expression": "D"
+        },
+        {
+          "id": "isg_adm_plz-assignment-Pop-E",
+          "target": "tags.Pop",
+          "expression": "E"
+        },
+        {
+          "id": "isg_adm_plz-assignment-GAdm-F",
+          "target": "tags.GAdm",
+          "expression": "F"
+        },
+        {
+          "id": "isg_adm_plz-assignment-YTime-G",
+          "target": "tags.YTime",
+          "expression": "G"
+        },
+        {
+          "id": "isg_adm_plz-assignment-wiki-H",
+          "target": "extensions.link.wiki",
+          "expression": "H"
+        },
+        {
+          "id": "isg_adm_plz-assignment-brief-I",
+          "target": "extensions.character.brief",
+          "expression": "I"
+        },
+        {
+          "id": "isg_adm_plz-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,J)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isg_adm_plz-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isg_adm_plz-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-UAdm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-Pop-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-GAdm-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-YTime-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-wiki-H",
+          "slot": "H",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-brief-I",
+          "slot": "I",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-abbr-J",
+          "slot": "J",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isg_adm_plz",
+      "classification": {
+        "class": "ISG",
+        "kind": "ADM",
+        "skind": "PLZ",
+        "skind2": "L1"
+      },
+      "geometry": "Polygon",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "Pop": " sample ",
+        "GAdm": " sample ",
+        "YTime": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZADMPLZL1_AB-1",
+        "Name": "sample",
+        "Kind": "ADM",
+        "SKind": "PLZ",
+        "SKind2": "L1",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample",
+          "GAdm": "sample",
+          "YTime": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "ISG",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isg_adm_plz-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isg_adm_plz-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isg_adm_plz-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isg_adm_plz-assignment-UAdm-D",
+          "target": "tags.UAdm",
+          "expression": "D"
+        },
+        {
+          "id": "isg_adm_plz-assignment-Pop-E",
+          "target": "tags.Pop",
+          "expression": "E"
+        },
+        {
+          "id": "isg_adm_plz-assignment-GAdm-F",
+          "target": "tags.GAdm",
+          "expression": "F"
+        },
+        {
+          "id": "isg_adm_plz-assignment-YTime-G",
+          "target": "tags.YTime",
+          "expression": "G"
+        },
+        {
+          "id": "isg_adm_plz-assignment-wiki-H",
+          "target": "extensions.link.wiki",
+          "expression": "H"
+        },
+        {
+          "id": "isg_adm_plz-assignment-brief-I",
+          "target": "extensions.character.brief",
+          "expression": "I"
+        },
+        {
+          "id": "isg_adm_plz-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,J)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isg_adm_plz-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isg_adm_plz-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-UAdm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-Pop-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-GAdm-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-YTime-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-wiki-H",
+          "slot": "H",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-brief-I",
+          "slot": "I",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isg_adm_plz-abbr-J",
+          "slot": "J",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isl_ngf_wtr",
+      "classification": {
+        "class": "ISL",
+        "kind": "NGF",
+        "skind": "WTR",
+        "skind2": "CAN"
+      },
+      "geometry": "LineString",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZNGFWTRCAN_AB-1",
+        "Name": "sample",
+        "Kind": "NGF",
+        "SKind": "WTR",
+        "SKind2": "CAN",
+        "tags": {
+          "nomenclator": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ],
+        "Type": "Polyline",
+        "Class": "ISL",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isl_ngf_wtr-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isl_ngf_wtr-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isl_ngf_wtr-assignment-wiki-C",
+          "target": "extensions.link.wiki",
+          "expression": "C"
+        },
+        {
+          "id": "isl_ngf_wtr-assignment-brief-D",
+          "target": "extensions.character.brief",
+          "expression": "D"
+        },
+        {
+          "id": "isl_ngf_wtr-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,E)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isl_ngf_wtr-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isl_ngf_wtr-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_wtr-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_wtr-wiki-C",
+          "slot": "C",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_wtr-brief-D",
+          "slot": "D",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_wtr-abbr-E",
+          "slot": "E",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isl_ngf_wtr",
+      "classification": {
+        "class": "ISL",
+        "kind": "NGF",
+        "skind": "WTR",
+        "skind2": "CAN"
+      },
+      "geometry": "LineString",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZNGFWTRCAN_AB-1",
+        "Name": "sample",
+        "Kind": "NGF",
+        "SKind": "WTR",
+        "SKind2": "CAN",
+        "tags": {
+          "nomenclator": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ],
+        "Type": "Polyline",
+        "Class": "ISL",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isl_ngf_wtr-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isl_ngf_wtr-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isl_ngf_wtr-assignment-wiki-C",
+          "target": "extensions.link.wiki",
+          "expression": "C"
+        },
+        {
+          "id": "isl_ngf_wtr-assignment-brief-D",
+          "target": "extensions.character.brief",
+          "expression": "D"
+        },
+        {
+          "id": "isl_ngf_wtr-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,E)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isl_ngf_wtr-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isl_ngf_wtr-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_wtr-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_wtr-wiki-C",
+          "slot": "C",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_wtr-brief-D",
+          "slot": "D",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_wtr-abbr-E",
+          "slot": "E",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isl_ngf_bod",
+      "classification": {
+        "class": "ISL",
+        "kind": "NGF",
+        "skind": "BOD",
+        "skind2": "BDY"
+      },
+      "geometry": "LineString",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "BNgf1": " sample ",
+        "BNgf2": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZNGFBODBDY_AB-1",
+        "Name": "sample",
+        "Kind": "NGF",
+        "SKind": "BOD",
+        "SKind2": "BDY",
+        "tags": {
+          "nomenclator": "sample",
+          "BNgf1": "sample",
+          "BNgf2": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ],
+        "Type": "Polyline",
+        "Class": "ISL",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isl_ngf_bod-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isl_ngf_bod-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isl_ngf_bod-assignment-BNgf1-C",
+          "target": "tags.BNgf1",
+          "expression": "C"
+        },
+        {
+          "id": "isl_ngf_bod-assignment-BNgf2-D",
+          "target": "tags.BNgf2",
+          "expression": "D"
+        },
+        {
+          "id": "isl_ngf_bod-assignment-wiki-E",
+          "target": "extensions.link.wiki",
+          "expression": "E"
+        },
+        {
+          "id": "isl_ngf_bod-assignment-brief-F",
+          "target": "extensions.character.brief",
+          "expression": "F"
+        },
+        {
+          "id": "isl_ngf_bod-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,G)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isl_ngf_bod-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isl_ngf_bod-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_bod-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_bod-BNgf1-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_bod-BNgf2-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_bod-wiki-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_bod-brief-F",
+          "slot": "F",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_bod-abbr-G",
+          "slot": "G",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isl_ngf_bod",
+      "classification": {
+        "class": "ISL",
+        "kind": "NGF",
+        "skind": "BOD",
+        "skind2": "BDY"
+      },
+      "geometry": "LineString",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "BNgf1": " sample ",
+        "BNgf2": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZNGFBODBDY_AB-1",
+        "Name": "sample",
+        "Kind": "NGF",
+        "SKind": "BOD",
+        "SKind2": "BDY",
+        "tags": {
+          "nomenclator": "sample",
+          "BNgf1": "sample",
+          "BNgf2": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ],
+        "Type": "Polyline",
+        "Class": "ISL",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isl_ngf_bod-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isl_ngf_bod-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isl_ngf_bod-assignment-BNgf1-C",
+          "target": "tags.BNgf1",
+          "expression": "C"
+        },
+        {
+          "id": "isl_ngf_bod-assignment-BNgf2-D",
+          "target": "tags.BNgf2",
+          "expression": "D"
+        },
+        {
+          "id": "isl_ngf_bod-assignment-wiki-E",
+          "target": "extensions.link.wiki",
+          "expression": "E"
+        },
+        {
+          "id": "isl_ngf_bod-assignment-brief-F",
+          "target": "extensions.character.brief",
+          "expression": "F"
+        },
+        {
+          "id": "isl_ngf_bod-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,G)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isl_ngf_bod-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isl_ngf_bod-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_bod-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_bod-BNgf1-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_bod-BNgf2-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_bod-wiki-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_bod-brief-F",
+          "slot": "F",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_ngf_bod-abbr-G",
+          "slot": "G",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isl_adm_dbl",
+      "classification": {
+        "class": "ISL",
+        "kind": "ADM",
+        "skind": "DBL",
+        "skind2": "LBD"
+      },
+      "geometry": "LineString",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "BAdm1": " sample ",
+        "BAdm2": " sample ",
+        "GAdm": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZADMDBLLBD_AB-1",
+        "Name": "sample",
+        "Kind": "ADM",
+        "SKind": "DBL",
+        "SKind2": "LBD",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "BAdm1": "sample",
+          "BAdm2": "sample",
+          "GAdm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ],
+        "Type": "Polyline",
+        "Class": "ISL",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isl_adm_dbl-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-BAdm1-D",
+          "target": "tags.BAdm1",
+          "expression": "D"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-BAdm2-E",
+          "target": "tags.BAdm2",
+          "expression": "E"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-GAdm-F",
+          "target": "tags.GAdm",
+          "expression": "F"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-brief-H",
+          "target": "extensions.character.brief",
+          "expression": "H"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,I)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isl_adm_dbl-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isl_adm_dbl-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-BAdm1-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-BAdm2-E",
+          "slot": "E",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-GAdm-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-brief-H",
+          "slot": "H",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-abbr-I",
+          "slot": "I",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isl_adm_dbl",
+      "classification": {
+        "class": "ISL",
+        "kind": "ADM",
+        "skind": "DBL",
+        "skind2": "LBD"
+      },
+      "geometry": "LineString",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "BAdm1": " sample ",
+        "BAdm2": " sample ",
+        "GAdm": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZADMDBLLBD_AB-1",
+        "Name": "sample",
+        "Kind": "ADM",
+        "SKind": "DBL",
+        "SKind2": "LBD",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "BAdm1": "sample",
+          "BAdm2": "sample",
+          "GAdm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ],
+        "Type": "Polyline",
+        "Class": "ISL",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isl_adm_dbl-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-BAdm1-D",
+          "target": "tags.BAdm1",
+          "expression": "D"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-BAdm2-E",
+          "target": "tags.BAdm2",
+          "expression": "E"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-GAdm-F",
+          "target": "tags.GAdm",
+          "expression": "F"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-brief-H",
+          "target": "extensions.character.brief",
+          "expression": "H"
+        },
+        {
+          "id": "isl_adm_dbl-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,I)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isl_adm_dbl-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isl_adm_dbl-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-BAdm1-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-BAdm2-E",
+          "slot": "E",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-GAdm-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-brief-H",
+          "slot": "H",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_dbl-abbr-I",
+          "slot": "I",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isl_adm_pll",
+      "classification": {
+        "class": "ISL",
+        "kind": "ADM",
+        "skind": "PLL",
+        "skind2": "CBD"
+      },
+      "geometry": "LineString",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "BAdm1": " sample ",
+        "BAdm2": " sample ",
+        "GAdm": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZADMPLLCBD_AB-1",
+        "Name": "sample",
+        "Kind": "ADM",
+        "SKind": "PLL",
+        "SKind2": "CBD",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "BAdm1": "sample",
+          "BAdm2": "sample",
+          "GAdm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ],
+        "Type": "Polyline",
+        "Class": "ISL",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isl_adm_pll-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isl_adm_pll-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isl_adm_pll-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isl_adm_pll-assignment-BAdm1-D",
+          "target": "tags.BAdm1",
+          "expression": "D"
+        },
+        {
+          "id": "isl_adm_pll-assignment-BAdm2-E",
+          "target": "tags.BAdm2",
+          "expression": "E"
+        },
+        {
+          "id": "isl_adm_pll-assignment-GAdm-F",
+          "target": "tags.GAdm",
+          "expression": "F"
+        },
+        {
+          "id": "isl_adm_pll-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "isl_adm_pll-assignment-brief-H",
+          "target": "extensions.character.brief",
+          "expression": "H"
+        },
+        {
+          "id": "isl_adm_pll-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,I)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isl_adm_pll-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isl_adm_pll-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-BAdm1-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-BAdm2-E",
+          "slot": "E",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-GAdm-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-brief-H",
+          "slot": "H",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-abbr-I",
+          "slot": "I",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isl_adm_pll",
+      "classification": {
+        "class": "ISL",
+        "kind": "ADM",
+        "skind": "PLL",
+        "skind2": "CBD"
+      },
+      "geometry": "LineString",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "BAdm1": " sample ",
+        "BAdm2": " sample ",
+        "GAdm": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZADMPLLCBD_AB-1",
+        "Name": "sample",
+        "Kind": "ADM",
+        "SKind": "PLL",
+        "SKind2": "CBD",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "BAdm1": "sample",
+          "BAdm2": "sample",
+          "GAdm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ],
+        "Type": "Polyline",
+        "Class": "ISL",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isl_adm_pll-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isl_adm_pll-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isl_adm_pll-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isl_adm_pll-assignment-BAdm1-D",
+          "target": "tags.BAdm1",
+          "expression": "D"
+        },
+        {
+          "id": "isl_adm_pll-assignment-BAdm2-E",
+          "target": "tags.BAdm2",
+          "expression": "E"
+        },
+        {
+          "id": "isl_adm_pll-assignment-GAdm-F",
+          "target": "tags.GAdm",
+          "expression": "F"
+        },
+        {
+          "id": "isl_adm_pll-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "isl_adm_pll-assignment-brief-H",
+          "target": "extensions.character.brief",
+          "expression": "H"
+        },
+        {
+          "id": "isl_adm_pll-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,I)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isl_adm_pll-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isl_adm_pll-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-BAdm1-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-BAdm2-E",
+          "slot": "E",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-GAdm-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-brief-H",
+          "slot": "H",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isl_adm_pll-abbr-I",
+          "slot": "I",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isp_ngf_scp",
+      "classification": {
+        "class": "ISP",
+        "kind": "NGF",
+        "skind": "SCP",
+        "skind2": "SPP"
+      },
+      "geometry": "Point",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "Pop": " sample ",
+        "event": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZNGFSCPSPP_AB-1",
+        "Name": "sample",
+        "Kind": "NGF",
+        "SKind": "SCP",
+        "SKind2": "SPP",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "character": {
+            "event": "sample",
+            "brief": "sample"
+          },
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ],
+        "Type": "Points",
+        "Class": "ISP",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isp_ngf_scp-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-UAdm-D",
+          "target": "tags.UAdm",
+          "expression": "D"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-Pop-E",
+          "target": "tags.Pop",
+          "expression": "E"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-event-F",
+          "target": "extensions.character.event",
+          "expression": "F"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-brief-H",
+          "target": "extensions.character.brief",
+          "expression": "H"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,I)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isp_ngf_scp-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isp_ngf_scp-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-UAdm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-Pop-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-event-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-brief-H",
+          "slot": "H",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-abbr-I",
+          "slot": "I",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isp_ngf_scp",
+      "classification": {
+        "class": "ISP",
+        "kind": "NGF",
+        "skind": "SCP",
+        "skind2": "SPP"
+      },
+      "geometry": "Point",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "Pop": " sample ",
+        "event": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZNGFSCPSPP_AB-1",
+        "Name": "sample",
+        "Kind": "NGF",
+        "SKind": "SCP",
+        "SKind2": "SPP",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "character": {
+            "event": "sample",
+            "brief": "sample"
+          },
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ],
+        "Type": "Points",
+        "Class": "ISP",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isp_ngf_scp-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-UAdm-D",
+          "target": "tags.UAdm",
+          "expression": "D"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-Pop-E",
+          "target": "tags.Pop",
+          "expression": "E"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-event-F",
+          "target": "extensions.character.event",
+          "expression": "F"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-brief-H",
+          "target": "extensions.character.brief",
+          "expression": "H"
+        },
+        {
+          "id": "isp_ngf_scp-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,I)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isp_ngf_scp-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isp_ngf_scp-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-UAdm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-Pop-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-event-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-brief-H",
+          "slot": "H",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_ngf_scp-abbr-I",
+          "slot": "I",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isp_adm_dbp",
+      "classification": {
+        "class": "ISP",
+        "kind": "ADM",
+        "skind": "DBP",
+        "skind2": "LIP"
+      },
+      "geometry": "Point",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "Pop": " sample ",
+        "event": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZADMDBPLIP_AB-1",
+        "Name": "sample",
+        "Kind": "ADM",
+        "SKind": "DBP",
+        "SKind2": "LIP",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "character": {
+            "event": "sample",
+            "brief": "sample"
+          },
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ],
+        "Type": "Points",
+        "Class": "ISP",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isp_adm_dbp-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-UAdm-D",
+          "target": "tags.UAdm",
+          "expression": "D"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-Pop-E",
+          "target": "tags.Pop",
+          "expression": "E"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-event-F",
+          "target": "extensions.character.event",
+          "expression": "F"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-brief-H",
+          "target": "extensions.character.brief",
+          "expression": "H"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,I)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isp_adm_dbp-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isp_adm_dbp-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-UAdm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-Pop-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-event-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-brief-H",
+          "slot": "H",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-abbr-I",
+          "slot": "I",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isp_adm_dbp",
+      "classification": {
+        "class": "ISP",
+        "kind": "ADM",
+        "skind": "DBP",
+        "skind2": "LIP"
+      },
+      "geometry": "Point",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "Pop": " sample ",
+        "event": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZADMDBPLIP_AB-1",
+        "Name": "sample",
+        "Kind": "ADM",
+        "SKind": "DBP",
+        "SKind2": "LIP",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "character": {
+            "event": "sample",
+            "brief": "sample"
+          },
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ],
+        "Type": "Points",
+        "Class": "ISP",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isp_adm_dbp-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-UAdm-D",
+          "target": "tags.UAdm",
+          "expression": "D"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-Pop-E",
+          "target": "tags.Pop",
+          "expression": "E"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-event-F",
+          "target": "extensions.character.event",
+          "expression": "F"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-brief-H",
+          "target": "extensions.character.brief",
+          "expression": "H"
+        },
+        {
+          "id": "isp_adm_dbp-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,I)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isp_adm_dbp-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isp_adm_dbp-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-UAdm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-Pop-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-event-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-brief-H",
+          "slot": "H",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_dbp-abbr-I",
+          "slot": "I",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isp_adm_plp",
+      "classification": {
+        "class": "ISP",
+        "kind": "ADM",
+        "skind": "PLP",
+        "skind2": "COP"
+      },
+      "geometry": "Point",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "Pop": " sample ",
+        "event": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZADMPLPCOP_AB-1",
+        "Name": "sample",
+        "Kind": "ADM",
+        "SKind": "PLP",
+        "SKind2": "COP",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "character": {
+            "event": "sample",
+            "brief": "sample"
+          },
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ],
+        "Type": "Points",
+        "Class": "ISP",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isp_adm_plp-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isp_adm_plp-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isp_adm_plp-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isp_adm_plp-assignment-UAdm-D",
+          "target": "tags.UAdm",
+          "expression": "D"
+        },
+        {
+          "id": "isp_adm_plp-assignment-Pop-E",
+          "target": "tags.Pop",
+          "expression": "E"
+        },
+        {
+          "id": "isp_adm_plp-assignment-event-F",
+          "target": "extensions.character.event",
+          "expression": "F"
+        },
+        {
+          "id": "isp_adm_plp-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "isp_adm_plp-assignment-brief-H",
+          "target": "extensions.character.brief",
+          "expression": "H"
+        },
+        {
+          "id": "isp_adm_plp-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,I)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isp_adm_plp-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isp_adm_plp-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-UAdm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-Pop-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-event-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-brief-H",
+          "slot": "H",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-abbr-I",
+          "slot": "I",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "isp_adm_plp",
+      "classification": {
+        "class": "ISP",
+        "kind": "ADM",
+        "skind": "PLP",
+        "skind2": "COP"
+      },
+      "geometry": "Point",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "Pop": " sample ",
+        "event": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZADMPLPCOP_AB-1",
+        "Name": "sample",
+        "Kind": "ADM",
+        "SKind": "PLP",
+        "SKind2": "COP",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "character": {
+            "event": "sample",
+            "brief": "sample"
+          },
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ],
+        "Type": "Points",
+        "Class": "ISP",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "isp_adm_plp-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "isp_adm_plp-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "isp_adm_plp-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "isp_adm_plp-assignment-UAdm-D",
+          "target": "tags.UAdm",
+          "expression": "D"
+        },
+        {
+          "id": "isp_adm_plp-assignment-Pop-E",
+          "target": "tags.Pop",
+          "expression": "E"
+        },
+        {
+          "id": "isp_adm_plp-assignment-event-F",
+          "target": "extensions.character.event",
+          "expression": "F"
+        },
+        {
+          "id": "isp_adm_plp-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "isp_adm_plp-assignment-brief-H",
+          "target": "extensions.character.brief",
+          "expression": "H"
+        },
+        {
+          "id": "isp_adm_plp-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Kind+Skind+Skind2,I)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "isp_adm_plp-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "isp_adm_plp-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-UAdm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-Pop-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-event-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-brief-H",
+          "slot": "H",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "isp_adm_plp-abbr-I",
+          "slot": "I",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "bud_building",
+      "classification": {
+        "class": "BUD",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "geometry": "Polygon",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "Adm": " sample ",
+        "Pop": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZBUD_AB-1",
+        "Name": "sample",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "Adm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "BUD",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "bud_building-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "bud_building-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "bud_building-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "bud_building-assignment-Adm-D",
+          "target": "tags.Adm",
+          "expression": "D"
+        },
+        {
+          "id": "bud_building-assignment-Pop-E",
+          "target": "tags.Pop",
+          "expression": "E"
+        },
+        {
+          "id": "bud_building-assignment-wiki-F",
+          "target": "extensions.link.wiki",
+          "expression": "F"
+        },
+        {
+          "id": "bud_building-assignment-brief-G",
+          "target": "extensions.character.brief",
+          "expression": "G"
+        },
+        {
+          "id": "bud_building-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Class,H,I)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "bud_building-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "bud_building-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "bud_building-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "bud_building-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "bud_building-Adm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "bud_building-Pop-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "bud_building-wiki-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "bud_building-brief-G",
+          "slot": "G",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "bud_building-catAbbr-H",
+          "slot": "H",
+          "kind": "text",
+          "valueNormalization": "abbr"
+        },
+        {
+          "id": "bud_building-abbr-I",
+          "slot": "I",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "bud_building",
+      "classification": {
+        "class": "BUD",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "geometry": "Polygon",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "Adm": " sample ",
+        "Pop": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZBUD_CAT_AB-1",
+        "Name": "sample",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "Adm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "BUD",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "bud_building-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "bud_building-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "bud_building-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "bud_building-assignment-Adm-D",
+          "target": "tags.Adm",
+          "expression": "D"
+        },
+        {
+          "id": "bud_building-assignment-Pop-E",
+          "target": "tags.Pop",
+          "expression": "E"
+        },
+        {
+          "id": "bud_building-assignment-wiki-F",
+          "target": "extensions.link.wiki",
+          "expression": "F"
+        },
+        {
+          "id": "bud_building-assignment-brief-G",
+          "target": "extensions.character.brief",
+          "expression": "G"
+        },
+        {
+          "id": "bud_building-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Class,H,I)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "bud_building-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "bud_building-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "bud_building-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "bud_building-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "bud_building-Adm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "bud_building-Pop-E",
+          "slot": "E",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "bud_building-wiki-F",
+          "slot": "F",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "bud_building-brief-G",
+          "slot": "G",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "bud_building-catAbbr-H",
+          "slot": "H",
+          "kind": "text",
+          "valueNormalization": "abbr"
+        },
+        {
+          "id": "bud_building-abbr-I",
+          "slot": "I",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "flr_unit",
+      "classification": {
+        "class": "FLR",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "geometry": "Polygon",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "BuildingID": " sample ",
+        "NofFloor": " sample ",
+        "Land": " sample ",
+        "Adm": " sample ",
+        "Pop": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZFLR_AB-1",
+        "Name": "sample",
+        "NofFloor": "sample",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "BuildingID": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "Adm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "FLR",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "flr_unit-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "flr_unit-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "flr_unit-assignment-BuildingID-C",
+          "target": "BuildingID",
+          "expression": "C"
+        },
+        {
+          "id": "flr_unit-assignment-NofFloor-D",
+          "target": "NofFloor",
+          "expression": "D"
+        },
+        {
+          "id": "flr_unit-assignment-Land-E",
+          "target": "tags.Land",
+          "expression": "E"
+        },
+        {
+          "id": "flr_unit-assignment-Adm-F",
+          "target": "tags.Adm",
+          "expression": "F"
+        },
+        {
+          "id": "flr_unit-assignment-Pop-G",
+          "target": "tags.Pop",
+          "expression": "G"
+        },
+        {
+          "id": "flr_unit-assignment-wiki-H",
+          "target": "extensions.link.wiki",
+          "expression": "H"
+        },
+        {
+          "id": "flr_unit-assignment-brief-I",
+          "target": "extensions.character.brief",
+          "expression": "I"
+        },
+        {
+          "id": "flr_unit-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Class,J,K)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "flr_unit-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "flr_unit-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-BuildingID-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "BUD"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-NofFloor-D",
+          "slot": "D",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-Land-E",
+          "slot": "E",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-Adm-F",
+          "slot": "F",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-Pop-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-wiki-H",
+          "slot": "H",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-brief-I",
+          "slot": "I",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-catAbbr-J",
+          "slot": "J",
+          "kind": "text",
+          "valueNormalization": "abbr"
+        },
+        {
+          "id": "flr_unit-abbr-K",
+          "slot": "K",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "flr_unit",
+      "classification": {
+        "class": "FLR",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "geometry": "Polygon",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "BuildingID": " sample ",
+        "NofFloor": " sample ",
+        "Land": " sample ",
+        "Adm": " sample ",
+        "Pop": " sample ",
+        "wiki": " sample ",
+        "brief": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZFLR_CAT_AB-1",
+        "Name": "sample",
+        "NofFloor": "sample",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "BuildingID": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "Adm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ],
+        "Type": "Polygon",
+        "Class": "FLR",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "flr_unit-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "flr_unit-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "flr_unit-assignment-BuildingID-C",
+          "target": "BuildingID",
+          "expression": "C"
+        },
+        {
+          "id": "flr_unit-assignment-NofFloor-D",
+          "target": "NofFloor",
+          "expression": "D"
+        },
+        {
+          "id": "flr_unit-assignment-Land-E",
+          "target": "tags.Land",
+          "expression": "E"
+        },
+        {
+          "id": "flr_unit-assignment-Adm-F",
+          "target": "tags.Adm",
+          "expression": "F"
+        },
+        {
+          "id": "flr_unit-assignment-Pop-G",
+          "target": "tags.Pop",
+          "expression": "G"
+        },
+        {
+          "id": "flr_unit-assignment-wiki-H",
+          "target": "extensions.link.wiki",
+          "expression": "H"
+        },
+        {
+          "id": "flr_unit-assignment-brief-I",
+          "target": "extensions.character.brief",
+          "expression": "I"
+        },
+        {
+          "id": "flr_unit-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Class,J,K)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "flr_unit-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "flr_unit-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-BuildingID-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "BUD"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-NofFloor-D",
+          "slot": "D",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-Land-E",
+          "slot": "E",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-Adm-F",
+          "slot": "F",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-Pop-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-wiki-H",
+          "slot": "H",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-brief-I",
+          "slot": "I",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "flr_unit-catAbbr-J",
+          "slot": "J",
+          "kind": "text",
+          "valueNormalization": "abbr"
+        },
+        {
+          "id": "flr_unit-abbr-K",
+          "slot": "K",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        }
+      ]
+    },
+    {
+      "schemaKey": "rod_road",
+      "classification": {
+        "class": "ROD",
+        "kind": "IDR"
+      },
+      "geometry": "LineString",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "UAdmG": " sample ",
+        "Level": 2,
+        "Oneway": true,
+        "Enter": true,
+        "Exit": true,
+        "SelfJunction": true,
+        "Speed": 2,
+        "wiki": " sample ",
+        "brief": " sample ",
+        "ConnectL": [],
+        "Blacklist": [],
+        "Mode": []
+      },
+      "expectedRecord": {
+        "ID": "ZROD_AB-1",
+        "Name": "sample",
+        "Kind": "IDR",
+        "Level": 2,
+        "Oneway": true,
+        "Enter": true,
+        "Exit": true,
+        "SelfJunction": true,
+        "Speed": 2,
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "UAdmG": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ],
+        "Type": "Polyline",
+        "Class": "ROD",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "rod_road-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "rod_road-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "rod_road-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "rod_road-assignment-UAdm-D",
+          "target": "tags.UAdm",
+          "expression": "D"
+        },
+        {
+          "id": "rod_road-assignment-UAdmG-E",
+          "target": "tags.UAdmG",
+          "expression": "E"
+        },
+        {
+          "id": "rod_road-assignment-Level-F",
+          "target": "Level",
+          "expression": "F"
+        },
+        {
+          "id": "rod_road-assignment-Oneway-G",
+          "target": "Oneway",
+          "expression": "G"
+        },
+        {
+          "id": "rod_road-assignment-Enter-H",
+          "target": "Enter",
+          "expression": "H"
+        },
+        {
+          "id": "rod_road-assignment-Exit-I",
+          "target": "Exit",
+          "expression": "I"
+        },
+        {
+          "id": "rod_road-assignment-SelfJunction-J",
+          "target": "SelfJunction",
+          "expression": "J"
+        },
+        {
+          "id": "rod_road-assignment-Speed-K",
+          "target": "Speed",
+          "expression": "K"
+        },
+        {
+          "id": "rod_road-assignment-wiki-L",
+          "target": "extensions.link.wiki",
+          "expression": "L"
+        },
+        {
+          "id": "rod_road-assignment-brief-M",
+          "target": "extensions.character.brief",
+          "expression": "M"
+        },
+        {
+          "id": "rod_road-assignment-ConnectL-P",
+          "target": "ConnectL",
+          "expression": "P"
+        },
+        {
+          "id": "rod_road-assignment-Blacklist-Q",
+          "target": "Blacklist",
+          "expression": "Q"
+        },
+        {
+          "id": "rod_road-assignment-Mode-R",
+          "target": "Mode",
+          "expression": "R"
+        },
+        {
+          "id": "rod_road-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Class,N,O)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "rod_road-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "rod_road-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "rod_road-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "rod_road-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "rod_road-UAdm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "rod_road-UAdmG-E",
+          "slot": "E",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "rod_road-Level-F",
+          "slot": "F",
+          "kind": "number",
+          "required": true,
+          "valueNormalization": "number"
+        },
+        {
+          "id": "rod_road-Oneway-G",
+          "slot": "G",
+          "kind": "toggle",
+          "required": true,
+          "valueNormalization": "none"
+        },
+        {
+          "id": "rod_road-Enter-H",
+          "slot": "H",
+          "kind": "toggle",
+          "valueNormalization": "none"
+        },
+        {
+          "id": "rod_road-Exit-I",
+          "slot": "I",
+          "kind": "toggle",
+          "valueNormalization": "none"
+        },
+        {
+          "id": "rod_road-SelfJunction-J",
+          "slot": "J",
+          "kind": "toggle",
+          "valueNormalization": "none"
+        },
+        {
+          "id": "rod_road-Speed-K",
+          "slot": "K",
+          "kind": "number",
+          "valueNormalization": "number"
+        },
+        {
+          "id": "rod_road-wiki-L",
+          "slot": "L",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "rod_road-brief-M",
+          "slot": "M",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "rod_road-catAbbr-N",
+          "slot": "N",
+          "kind": "text",
+          "valueNormalization": "abbr"
+        },
+        {
+          "id": "rod_road-abbr-O",
+          "slot": "O",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        },
+        {
+          "id": "rod_road-ConnectL-P",
+          "slot": "P",
+          "kind": "group",
+          "group": {
+            "optional": true,
+            "addLabel": {
+              "zh": "添加显式连接关系（ConnectL，可选）",
+              "en": ""
+            },
+            "itemFields": [
+              {
+                "key": "mode",
+                "label": {
+                  "zh": "连接方式",
+                  "en": ""
+                },
+                "kind": "select",
+                "required": true,
+                "options": [
+                  {
+                    "value": "endpoint",
+                    "label": {
+                      "zh": "端点",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "value": "middle",
+                    "label": {
+                      "zh": "中段",
+                      "en": ""
+                    }
+                  }
+                ],
+                "defaultValue": "endpoint"
+              },
+              {
+                "key": "tgt",
+                "label": {
+                  "zh": "目标道路ID",
+                  "en": ""
+                },
+                "kind": "featureSearch",
+                "required": true,
+                "placeholder": "检索道路（Name/ID），选择后写入ID",
+                "search": {
+                  "target": {
+                    "class": "ROD"
+                  },
+                  "queryFields": [
+                    "ID",
+                    "Name"
+                  ],
+                  "displayTemplate": "{{ID}} ({{Name}})",
+                  "returnField": "ID",
+                  "matcher": "contains",
+                  "minQueryLength": 1,
+                  "maxResults": 30,
+                  "debounceMs": 180,
+                  "cacheScope": "world"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "rod_road-Blacklist-Q",
+          "slot": "Q",
+          "kind": "group",
+          "group": {
+            "optional": true,
+            "addLabel": {
+              "zh": "添加黑名单（Blacklist，可选）",
+              "en": ""
+            },
+            "itemFields": [
+              {
+                "key": "tgt",
+                "label": {
+                  "zh": "目标道路ID",
+                  "en": ""
+                },
+                "kind": "featureSearch",
+                "required": true,
+                "placeholder": "检索道路（Name/ID），选择后写入ID",
+                "search": {
+                  "target": {
+                    "class": "ROD"
+                  },
+                  "queryFields": [
+                    "ID",
+                    "Name"
+                  ],
+                  "displayTemplate": "{{ID}} ({{Name}})",
+                  "returnField": "ID",
+                  "matcher": "contains",
+                  "minQueryLength": 1,
+                  "maxResults": 30,
+                  "debounceMs": 180,
+                  "cacheScope": "world"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "rod_road-Mode-R",
+          "slot": "R",
+          "kind": "group",
+          "group": {
+            "optional": true,
+            "addLabel": {
+              "zh": "添加允许的出行方式（Mode，可选）",
+              "en": ""
+            },
+            "itemFields": [
+              {
+                "key": "code",
+                "label": {
+                  "zh": "出行方式编码",
+                  "en": ""
+                },
+                "kind": "text",
+                "required": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "schemaKey": "rod_road",
+      "classification": {
+        "class": "ROD",
+        "kind": "IDR"
+      },
+      "geometry": "LineString",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "nomenclator": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "UAdmG": " sample ",
+        "Level": 2,
+        "Oneway": true,
+        "Enter": true,
+        "Exit": true,
+        "SelfJunction": true,
+        "Speed": 2,
+        "wiki": " sample ",
+        "brief": " sample ",
+        "ConnectL": [
+          {
+            "mode": "endpoint",
+            "tgt": "tgt-fixture"
+          }
+        ],
+        "Blacklist": [
+          {
+            "tgt": "tgt-fixture"
+          }
+        ],
+        "Mode": [
+          {
+            "code": "code-fixture"
+          }
+        ]
+      },
+      "expectedRecord": {
+        "ID": "ZROD_CAT_AB-1",
+        "Name": "sample",
+        "Kind": "IDR",
+        "Level": 2,
+        "Oneway": true,
+        "Enter": true,
+        "Exit": true,
+        "SelfJunction": true,
+        "Speed": 2,
+        "ConnectL": [
+          {
+            "mode": "endpoint",
+            "tgt": "tgt-fixture"
+          }
+        ],
+        "Blacklist": [
+          {
+            "tgt": "tgt-fixture"
+          }
+        ],
+        "Mode": [
+          {
+            "code": "code-fixture"
+          }
+        ],
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "UAdmG": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ],
+        "Type": "Polyline",
+        "Class": "ROD",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "rod_road-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "rod_road-assignment-nomenclator-B",
+          "target": "tags.nomenclator",
+          "expression": "B"
+        },
+        {
+          "id": "rod_road-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "rod_road-assignment-UAdm-D",
+          "target": "tags.UAdm",
+          "expression": "D"
+        },
+        {
+          "id": "rod_road-assignment-UAdmG-E",
+          "target": "tags.UAdmG",
+          "expression": "E"
+        },
+        {
+          "id": "rod_road-assignment-Level-F",
+          "target": "Level",
+          "expression": "F"
+        },
+        {
+          "id": "rod_road-assignment-Oneway-G",
+          "target": "Oneway",
+          "expression": "G"
+        },
+        {
+          "id": "rod_road-assignment-Enter-H",
+          "target": "Enter",
+          "expression": "H"
+        },
+        {
+          "id": "rod_road-assignment-Exit-I",
+          "target": "Exit",
+          "expression": "I"
+        },
+        {
+          "id": "rod_road-assignment-SelfJunction-J",
+          "target": "SelfJunction",
+          "expression": "J"
+        },
+        {
+          "id": "rod_road-assignment-Speed-K",
+          "target": "Speed",
+          "expression": "K"
+        },
+        {
+          "id": "rod_road-assignment-wiki-L",
+          "target": "extensions.link.wiki",
+          "expression": "L"
+        },
+        {
+          "id": "rod_road-assignment-brief-M",
+          "target": "extensions.character.brief",
+          "expression": "M"
+        },
+        {
+          "id": "rod_road-assignment-ConnectL-P",
+          "target": "ConnectL",
+          "expression": "P"
+        },
+        {
+          "id": "rod_road-assignment-Blacklist-Q",
+          "target": "Blacklist",
+          "expression": "Q"
+        },
+        {
+          "id": "rod_road-assignment-Mode-R",
+          "target": "Mode",
+          "expression": "R"
+        },
+        {
+          "id": "rod_road-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Class,N,O)"
+        }
+      ],
+      "controls": [
+        {
+          "id": "rod_road-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "rod_road-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "rod_road-nomenclator-B",
+          "slot": "B",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "rod_road-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "rod_road-UAdm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "rod_road-UAdmG-E",
+          "slot": "E",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "rod_road-Level-F",
+          "slot": "F",
+          "kind": "number",
+          "required": true,
+          "valueNormalization": "number"
+        },
+        {
+          "id": "rod_road-Oneway-G",
+          "slot": "G",
+          "kind": "toggle",
+          "required": true,
+          "valueNormalization": "none"
+        },
+        {
+          "id": "rod_road-Enter-H",
+          "slot": "H",
+          "kind": "toggle",
+          "valueNormalization": "none"
+        },
+        {
+          "id": "rod_road-Exit-I",
+          "slot": "I",
+          "kind": "toggle",
+          "valueNormalization": "none"
+        },
+        {
+          "id": "rod_road-SelfJunction-J",
+          "slot": "J",
+          "kind": "toggle",
+          "valueNormalization": "none"
+        },
+        {
+          "id": "rod_road-Speed-K",
+          "slot": "K",
+          "kind": "number",
+          "valueNormalization": "number"
+        },
+        {
+          "id": "rod_road-wiki-L",
+          "slot": "L",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "rod_road-brief-M",
+          "slot": "M",
+          "kind": "textarea",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "rod_road-catAbbr-N",
+          "slot": "N",
+          "kind": "text",
+          "valueNormalization": "abbr"
+        },
+        {
+          "id": "rod_road-abbr-O",
+          "slot": "O",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        },
+        {
+          "id": "rod_road-ConnectL-P",
+          "slot": "P",
+          "kind": "group",
+          "group": {
+            "optional": true,
+            "addLabel": {
+              "zh": "添加显式连接关系（ConnectL，可选）",
+              "en": ""
+            },
+            "itemFields": [
+              {
+                "key": "mode",
+                "label": {
+                  "zh": "连接方式",
+                  "en": ""
+                },
+                "kind": "select",
+                "required": true,
+                "options": [
+                  {
+                    "value": "endpoint",
+                    "label": {
+                      "zh": "端点",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "value": "middle",
+                    "label": {
+                      "zh": "中段",
+                      "en": ""
+                    }
+                  }
+                ],
+                "defaultValue": "endpoint"
+              },
+              {
+                "key": "tgt",
+                "label": {
+                  "zh": "目标道路ID",
+                  "en": ""
+                },
+                "kind": "featureSearch",
+                "required": true,
+                "placeholder": "检索道路（Name/ID），选择后写入ID",
+                "search": {
+                  "target": {
+                    "class": "ROD"
+                  },
+                  "queryFields": [
+                    "ID",
+                    "Name"
+                  ],
+                  "displayTemplate": "{{ID}} ({{Name}})",
+                  "returnField": "ID",
+                  "matcher": "contains",
+                  "minQueryLength": 1,
+                  "maxResults": 30,
+                  "debounceMs": 180,
+                  "cacheScope": "world"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "rod_road-Blacklist-Q",
+          "slot": "Q",
+          "kind": "group",
+          "group": {
+            "optional": true,
+            "addLabel": {
+              "zh": "添加黑名单（Blacklist，可选）",
+              "en": ""
+            },
+            "itemFields": [
+              {
+                "key": "tgt",
+                "label": {
+                  "zh": "目标道路ID",
+                  "en": ""
+                },
+                "kind": "featureSearch",
+                "required": true,
+                "placeholder": "检索道路（Name/ID），选择后写入ID",
+                "search": {
+                  "target": {
+                    "class": "ROD"
+                  },
+                  "queryFields": [
+                    "ID",
+                    "Name"
+                  ],
+                  "displayTemplate": "{{ID}} ({{Name}})",
+                  "returnField": "ID",
+                  "matcher": "contains",
+                  "minQueryLength": 1,
+                  "maxResults": 30,
+                  "debounceMs": 180,
+                  "cacheScope": "world"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "rod_road-Mode-R",
+          "slot": "R",
+          "kind": "group",
+          "group": {
+            "optional": true,
+            "addLabel": {
+              "zh": "添加允许的出行方式（Mode，可选）",
+              "en": ""
+            },
+            "itemFields": [
+              {
+                "key": "code",
+                "label": {
+                  "zh": "出行方式编码",
+                  "en": ""
+                },
+                "kind": "text",
+                "required": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "schemaKey": "tpp_teleport",
+      "classification": {
+        "class": "TPP",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "geometry": "Point",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "Name": " sample ",
+        "hub": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "UAdmG": " sample ",
+        "TGTWarp": " sample ",
+        "wiki": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZTPPNOMNOM_AB-1",
+        "Name": "sample",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "hub": "sample",
+        "TGTWarp": "sample",
+        "tags": {
+          "Land": "sample",
+          "UAdm": "sample",
+          "UAdmG": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ],
+        "Type": "Points",
+        "Class": "TPP",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "tpp_teleport-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "tpp_teleport-assignment-hub-B",
+          "target": "hub",
+          "expression": "B"
+        },
+        {
+          "id": "tpp_teleport-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "tpp_teleport-assignment-UAdm-D",
+          "target": "tags.UAdm",
+          "expression": "D"
+        },
+        {
+          "id": "tpp_teleport-assignment-UAdmG-E",
+          "target": "tags.UAdmG",
+          "expression": "E"
+        },
+        {
+          "id": "tpp_teleport-assignment-TGTWarp-F",
+          "target": "TGTWarp",
+          "expression": "F"
+        },
+        {
+          "id": "tpp_teleport-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "tpp_teleport-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Class+Kind+Skind,H)"
+        },
+        {
+          "id": "tpp_teleport-source-elevation-input",
+          "target": "elevation",
+          "expression": "SOURCE_ELEVATION"
+        },
+        {
+          "id": "tpp_teleport-source-elevation-capture",
+          "target": "elevation",
+          "expression": "SOURCE_POINT_Y",
+          "when": {
+            "token": "SOURCE_POINT_Y",
+            "operator": "present"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-y-default",
+          "target": "TGTcoordinate.y",
+          "expression": "-64",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-x",
+          "target": "TGTcoordinate.x",
+          "expression": "TARGET_POINT_X",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-z",
+          "target": "TGTcoordinate.z",
+          "expression": "TARGET_POINT_Z",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-y-input",
+          "target": "TGTcoordinate.y",
+          "expression": "TARGET_ELEVATION",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-elevation-input",
+          "target": "TGTelevation",
+          "expression": "TARGET_ELEVATION",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-y-capture",
+          "target": "TGTcoordinate.y",
+          "expression": "TARGET_POINT_Y",
+          "when": {
+            "token": "TARGET_POINT_Y",
+            "operator": "present"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-elevation-capture",
+          "target": "TGTelevation",
+          "expression": "TARGET_POINT_Y",
+          "when": {
+            "token": "TARGET_POINT_Y",
+            "operator": "present"
+          }
+        }
+      ],
+      "controls": [
+        {
+          "id": "tpp_teleport-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "tpp_teleport-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "tpp_teleport-hub-B",
+          "slot": "B",
+          "kind": "text",
+          "defaultValue": "",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "tpp_teleport-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "tpp_teleport-UAdm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "tpp_teleport-UAdmG-E",
+          "slot": "E",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "tpp_teleport-TGTWarp-F",
+          "slot": "F",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "WRP"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "tpp_teleport-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "tpp_teleport-abbr-H",
+          "slot": "H",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        },
+        {
+          "id": "tpp_teleport-elevation",
+          "slot": "SOURCE_ELEVATION",
+          "kind": "number"
+        },
+        {
+          "id": "tpp_teleport-target-elevation",
+          "slot": "TARGET_ELEVATION",
+          "kind": "number"
+        }
+      ]
+    },
+    {
+      "schemaKey": "tpp_teleport",
+      "classification": {
+        "class": "TPP",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "geometry": "Point",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "Name": " sample ",
+        "hub": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "UAdmG": " sample ",
+        "TGTWarp": " sample ",
+        "wiki": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZTPPNOMNOM_AB-1",
+        "Name": "sample",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "hub": "sample",
+        "TGTWarp": "sample",
+        "tags": {
+          "Land": "sample",
+          "UAdm": "sample",
+          "UAdmG": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ],
+        "Type": "Points",
+        "Class": "TPP",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "tpp_teleport-assignment-Name-A",
+          "target": "Name",
+          "expression": "A"
+        },
+        {
+          "id": "tpp_teleport-assignment-hub-B",
+          "target": "hub",
+          "expression": "B"
+        },
+        {
+          "id": "tpp_teleport-assignment-Land-C",
+          "target": "tags.Land",
+          "expression": "C"
+        },
+        {
+          "id": "tpp_teleport-assignment-UAdm-D",
+          "target": "tags.UAdm",
+          "expression": "D"
+        },
+        {
+          "id": "tpp_teleport-assignment-UAdmG-E",
+          "target": "tags.UAdmG",
+          "expression": "E"
+        },
+        {
+          "id": "tpp_teleport-assignment-TGTWarp-F",
+          "target": "TGTWarp",
+          "expression": "F"
+        },
+        {
+          "id": "tpp_teleport-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "tpp_teleport-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Class+Kind+Skind,H)"
+        },
+        {
+          "id": "tpp_teleport-source-elevation-input",
+          "target": "elevation",
+          "expression": "SOURCE_ELEVATION"
+        },
+        {
+          "id": "tpp_teleport-source-elevation-capture",
+          "target": "elevation",
+          "expression": "SOURCE_POINT_Y",
+          "when": {
+            "token": "SOURCE_POINT_Y",
+            "operator": "present"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-y-default",
+          "target": "TGTcoordinate.y",
+          "expression": "-64",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-x",
+          "target": "TGTcoordinate.x",
+          "expression": "TARGET_POINT_X",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-z",
+          "target": "TGTcoordinate.z",
+          "expression": "TARGET_POINT_Z",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-y-input",
+          "target": "TGTcoordinate.y",
+          "expression": "TARGET_ELEVATION",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-elevation-input",
+          "target": "TGTelevation",
+          "expression": "TARGET_ELEVATION",
+          "when": {
+            "token": "F",
+            "operator": "empty"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-y-capture",
+          "target": "TGTcoordinate.y",
+          "expression": "TARGET_POINT_Y",
+          "when": {
+            "token": "TARGET_POINT_Y",
+            "operator": "present"
+          }
+        },
+        {
+          "id": "tpp_teleport-target-elevation-capture",
+          "target": "TGTelevation",
+          "expression": "TARGET_POINT_Y",
+          "when": {
+            "token": "TARGET_POINT_Y",
+            "operator": "present"
+          }
+        }
+      ],
+      "controls": [
+        {
+          "id": "tpp_teleport-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "tpp_teleport-Name-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "tpp_teleport-hub-B",
+          "slot": "B",
+          "kind": "text",
+          "defaultValue": "",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "tpp_teleport-Land-C",
+          "slot": "C",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "tpp_teleport-UAdm-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "tpp_teleport-UAdmG-E",
+          "slot": "E",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "tpp_teleport-TGTWarp-F",
+          "slot": "F",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "WRP"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "tpp_teleport-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "tpp_teleport-abbr-H",
+          "slot": "H",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        },
+        {
+          "id": "tpp_teleport-elevation",
+          "slot": "SOURCE_ELEVATION",
+          "kind": "number"
+        },
+        {
+          "id": "tpp_teleport-target-elevation",
+          "slot": "TARGET_ELEVATION",
+          "kind": "number"
+        }
+      ]
+    },
+    {
+      "schemaKey": "wrp_warp",
+      "classification": {
+        "class": "WRP",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "geometry": "Point",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": "",
+        "WRPointI2D": " sample ",
+        "Name": " sample ",
+        "hub": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "UAdmG": " sample ",
+        "wiki": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZWRPNOMNOM_AB-1",
+        "WRPointI2D": "sample",
+        "Name": "sample",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "hub": "sample",
+        "tags": {
+          "Land": "sample",
+          "UAdm": "sample",
+          "UAdmG": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ],
+        "Type": "Points",
+        "Class": "WRP",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "wrp_warp-assignment-WRPointI2D-A",
+          "target": "WRPointI2D",
+          "expression": "A"
+        },
+        {
+          "id": "wrp_warp-assignment-Name-B",
+          "target": "Name",
+          "expression": "B"
+        },
+        {
+          "id": "wrp_warp-assignment-hub-C",
+          "target": "hub",
+          "expression": "C"
+        },
+        {
+          "id": "wrp_warp-assignment-Land-D",
+          "target": "tags.Land",
+          "expression": "D"
+        },
+        {
+          "id": "wrp_warp-assignment-UAdm-E",
+          "target": "tags.UAdm",
+          "expression": "E"
+        },
+        {
+          "id": "wrp_warp-assignment-UAdmG-F",
+          "target": "tags.UAdmG",
+          "expression": "F"
+        },
+        {
+          "id": "wrp_warp-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "wrp_warp-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Class+Kind+Skind,H)"
+        },
+        {
+          "id": "wrp_warp-source-elevation-input",
+          "target": "elevation",
+          "expression": "SOURCE_ELEVATION"
+        },
+        {
+          "id": "wrp_warp-source-elevation-capture",
+          "target": "elevation",
+          "expression": "SOURCE_POINT_Y",
+          "when": {
+            "token": "SOURCE_POINT_Y",
+            "operator": "present"
+          }
+        }
+      ],
+      "controls": [
+        {
+          "id": "wrp_warp-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "wrp_warp-WRPointI2D-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "wrp_warp-Name-B",
+          "slot": "B",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "wrp_warp-hub-C",
+          "slot": "C",
+          "kind": "text",
+          "defaultValue": "",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "wrp_warp-Land-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "wrp_warp-UAdm-E",
+          "slot": "E",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "wrp_warp-UAdmG-F",
+          "slot": "F",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "wrp_warp-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "wrp_warp-abbr-H",
+          "slot": "H",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        },
+        {
+          "id": "wrp_warp-elevation",
+          "slot": "SOURCE_ELEVATION",
+          "kind": "number"
+        }
+      ]
+    },
+    {
+      "schemaKey": "wrp_warp",
+      "classification": {
+        "class": "WRP",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "geometry": "Point",
+      "inputs": {
+        "abbr": " A B中-1 ",
+        "catAbbr": " CAT ",
+        "WRPointI2D": " sample ",
+        "Name": " sample ",
+        "hub": " sample ",
+        "Land": " sample ",
+        "UAdm": " sample ",
+        "UAdmG": " sample ",
+        "wiki": " sample "
+      },
+      "expectedRecord": {
+        "ID": "ZWRPNOMNOM_AB-1",
+        "WRPointI2D": "sample",
+        "Name": "sample",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "hub": "sample",
+        "tags": {
+          "Land": "sample",
+          "UAdm": "sample",
+          "UAdmG": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ],
+        "Type": "Points",
+        "Class": "WRP",
+        "World": "zth",
+        "CreateTime": "20261007",
+        "CreateBy": "fixture-user"
+      },
+      "assignments": [
+        {
+          "id": "wrp_warp-assignment-WRPointI2D-A",
+          "target": "WRPointI2D",
+          "expression": "A"
+        },
+        {
+          "id": "wrp_warp-assignment-Name-B",
+          "target": "Name",
+          "expression": "B"
+        },
+        {
+          "id": "wrp_warp-assignment-hub-C",
+          "target": "hub",
+          "expression": "C"
+        },
+        {
+          "id": "wrp_warp-assignment-Land-D",
+          "target": "tags.Land",
+          "expression": "D"
+        },
+        {
+          "id": "wrp_warp-assignment-UAdm-E",
+          "target": "tags.UAdm",
+          "expression": "E"
+        },
+        {
+          "id": "wrp_warp-assignment-UAdmG-F",
+          "target": "tags.UAdmG",
+          "expression": "F"
+        },
+        {
+          "id": "wrp_warp-assignment-wiki-G",
+          "target": "extensions.link.wiki",
+          "expression": "G"
+        },
+        {
+          "id": "wrp_warp-assignment-id",
+          "target": "ID",
+          "expression": "join(\"_\",WorldPrefix+Class+Kind+Skind,H)"
+        },
+        {
+          "id": "wrp_warp-source-elevation-input",
+          "target": "elevation",
+          "expression": "SOURCE_ELEVATION"
+        },
+        {
+          "id": "wrp_warp-source-elevation-capture",
+          "target": "elevation",
+          "expression": "SOURCE_POINT_Y",
+          "when": {
+            "token": "SOURCE_POINT_Y",
+            "operator": "present"
+          }
+        }
+      ],
+      "controls": [
+        {
+          "id": "wrp_warp-classification",
+          "kind": "classificationPicker",
+          "required": true
+        },
+        {
+          "id": "wrp_warp-WRPointI2D-A",
+          "slot": "A",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "wrp_warp-Name-B",
+          "slot": "B",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "wrp_warp-hub-C",
+          "slot": "C",
+          "kind": "text",
+          "defaultValue": "",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "wrp_warp-Land-D",
+          "slot": "D",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "NGF"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "wrp_warp-UAdm-E",
+          "slot": "E",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "wrp_warp-UAdmG-F",
+          "slot": "F",
+          "kind": "featureSearch",
+          "search": {
+            "target": {
+              "class": "ISG",
+              "kind": "ADM"
+            },
+            "queryFields": [
+              "ID",
+              "Name"
+            ],
+            "displayTemplate": "{{ID}} ({{Name}})",
+            "returnField": "ID",
+            "matcher": "contains",
+            "minQueryLength": 1,
+            "maxResults": 30,
+            "debounceMs": 180,
+            "cacheScope": "world"
+          },
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "wrp_warp-wiki-G",
+          "slot": "G",
+          "kind": "text",
+          "valueNormalization": "trim"
+        },
+        {
+          "id": "wrp_warp-abbr-H",
+          "slot": "H",
+          "kind": "text",
+          "required": true,
+          "valueNormalization": "abbr"
+        },
+        {
+          "id": "wrp_warp-elevation",
+          "slot": "SOURCE_ELEVATION",
+          "kind": "number"
+        }
+      ]
+    }
+  ]
+}

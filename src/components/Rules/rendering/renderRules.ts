@@ -3,7 +3,7 @@ import type { FeatureStore } from '@/components/Rules/data/featureStore';
 import type { LabelDeclutterConfig } from '@/components/Rules/rendering/labelLayout';
 
 
-import type { LabelStyleKey } from '@/components/Rules/rendering/labelStyles';
+import type { LabelPlacement, LabelStyleKey } from '@/components/Rules/rendering/labelStyles';
 import type { LabelClickPlan } from '@/components/Rules/rendering/labelClickInteraction';
 import type { FeatureDisplayRuleDraft } from '@/components/Rules/rendering/display/displayTypes';
 import { FEATURE_RENDER_RULES } from '@/components/Rules/rendering/featureRenderRules';
@@ -38,12 +38,17 @@ export type FloorViewConfig = {
 
 export type RenderContext = {
   worldId: string;
+  /** Data epoch includes transient mounts, overrides and deletion/restoration. */
+  dataVersion?: number;
   leafletZoom: number;
   zoomLevel: ZoomLevel;
   inFloorView: boolean;
 
   /** 当前激活建筑 uid（楼层视角使用） */
   activeBuildingUid: string | null;
+
+  /** Active generic V3.2 host/member relation. Undefined for immutable V1. */
+  activeContextBindingId?: string | null;
 
   /** 当前选中楼层（使用 floorSelectorField，例如 NofFloor 值） */
   activeFloorSelector: string | null;
@@ -55,11 +60,14 @@ export type RenderContext = {
 export type LabelPlan = {
   enabled: boolean;
   textFrom?: string | ((r: FeatureRecord, ctx: RenderContext, store: FeatureStore) => string);
-  placement: 'center' | 'near';
+  placement: LabelPlacement;
   minLevel?: ZoomLevel;
 
   /** 可选：label 垂直上移（px），用于点位 label 更靠上 */
   offsetY?: number;
+  offsetX?: number;
+  candidatePlacement?: 'relativeToPlacement' | 'aroundAnchor';
+  screenOffsets?: boolean;
 
   /** 如果你已实现“中心点+label”，这里可保留 */
   withDot?: boolean;
@@ -108,6 +116,19 @@ export type PointSymbolPlan =
       iconUrlFrom?: string;
       iconSize?: [number, number];
       iconAnchor?: [number, number];
+
+      /** 可选：指定点所在 pane */
+      pane?: string;
+
+      /** 可选：Marker 内部排序（只影响 marker 之间，不影响线/面） */
+      zIndexOffset?: number;
+    }
+  | {
+      /** Config V3.2 的规则化点符号。圆形仍使用 circleMarker；其余形状使用 SVG marker。 */
+      kind: 'shape';
+      shape: 'square' | 'triangle' | 'regular4' | 'regular5' | 'regular6';
+      radius?: number;
+      style?: L.CircleMarkerOptions;
 
       /** 可选：指定点所在 pane */
       pane?: string;
@@ -333,18 +354,7 @@ export function buildFeatureMeta(featureInfo: any, cls: string, type: GeoType, s
 // zoom 映射（与你现有“leafletZoom(-3..5) ↔ level(0..8)”接口兼容）
 // ------------------------------
 
-/**
- * 将 Leaflet zoom（允许负数）映射到整数 ZoomLevel。
- *
- * 说明：
- * - 这里按你的“9 级整数缩放：level(0..8) ↔ leafletZoom(-3..5)”约定。
- * - 若你后续改映射，只需要改这里一处。
- */
-export function toZoomLevel(leafletZoom: number): ZoomLevel {
-  // level = leafletZoom + 3, clamp to 0..8
-  const lvl = Math.round(leafletZoom + 3);
-  return Math.max(0, Math.min(8, lvl));
-}
+export { toZoomLevel, toLeafletZoom } from '@/lib/mapZoom';
 export const RENDER_RULES: RenderRule[] = FEATURE_RENDER_RULES;
 
 

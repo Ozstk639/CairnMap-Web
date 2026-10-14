@@ -1,0 +1,448 @@
+{
+  "checks": [
+    "RLE: actual original backfill, ID first, typed inputs/repeat groups and full replacement record equal frozen V1 edit result",
+    "STA: actual original backfill, ID first, typed inputs/repeat groups and full replacement record equal frozen V1 edit result",
+    "PLF: actual original backfill, ID first, typed inputs/repeat groups and full replacement record equal frozen V1 edit result",
+    "PFB: actual original backfill, ID first, typed inputs/repeat groups and full replacement record equal frozen V1 edit result",
+    "STB: actual original backfill, ID first, typed inputs/repeat groups and full replacement record equal frozen V1 edit result",
+    "SBP: actual original backfill, ID first, typed inputs/repeat groups and full replacement record equal frozen V1 edit result",
+    "STF: actual original backfill, ID first, typed inputs/repeat groups and full replacement record equal frozen V1 edit result",
+    "actual RLE direction reversal updates original line coordinates and swaps the new editor endpoint slots together",
+    "all seven edit-only plans are absent from actual quick-mapping options and never selected as capture defaults"
+  ],
+  "updatedRecords": [
+    {
+      "ID": "ZRLE_EDIT",
+      "Name": "V1 edited RLE",
+      "bureau": "RIA",
+      "line": "01",
+      "color": "#123456",
+      "direction": 0,
+      "startplf": "ZPLF_B",
+      "endplf": "ZPLF_A",
+      "CoordL": [
+        [
+          [
+            70,
+            -64,
+            38
+          ],
+          [
+            20,
+            -64,
+            13
+          ]
+        ]
+      ],
+      "Type": "Polyline",
+      "Class": "RLE",
+      "World": 0,
+      "CreateTime": "20261007",
+      "CreateBy": "original-creator",
+      "opaque": {
+        "zero": 0,
+        "no": false,
+        "empty": [],
+        "nothing": null
+      },
+      "tags": {
+        "audit": "keep"
+      },
+      "extensions": {
+        "link": {
+          "wiki": "https://example.invalid/v1"
+        },
+        "character": {
+          "brief": "V1 brief"
+        },
+        "foreign": {
+          "zero": 0,
+          "no": false,
+          "list": [
+            {
+              "a": 0,
+              "b": false
+            }
+          ]
+        }
+      },
+      "ModifityBy": "editing-user",
+      "ModifityTime": "20261012"
+    },
+    {
+      "ID": "ZSTA_EDIT",
+      "Name": "V1 edited STA",
+      "STBuilding": "ZSTB_A",
+      "elevation": 0,
+      "platforms": [
+        {
+          "ID": "ZPLF_A"
+        },
+        {
+          "ID": "ZPLF_B"
+        }
+      ],
+      "CoordP": [
+        [
+          20,
+          0,
+          13
+        ]
+      ],
+      "Type": "Points",
+      "Class": "STA",
+      "World": 0,
+      "CreateTime": "20261007",
+      "CreateBy": "original-creator",
+      "opaque": {
+        "zero": 0,
+        "no": false,
+        "empty": [],
+        "nothing": null
+      },
+      "tags": {
+        "audit": "keep"
+      },
+      "extensions": {
+        "link": {
+          "wiki": "https://example.invalid/v1"
+        },
+        "character": {
+          "brief": "V1 brief"
+        },
+        "foreign": {
+          "zero": 0,
+          "no": false,
+          "list": [
+            {
+              "a": 0,
+              "b": false
+            }
+          ]
+        }
+      },
+      "ModifityBy": "editing-user",
+      "ModifityTime": "20261012"
+    },
+    {
+      "ID": "ZPLF_EDIT",
+      "Name": "V1 edited PLF",
+      "elevation": 0,
+      "Situation": false,
+      "Connect": false,
+      "lines": [
+        {
+          "ID": "ZRLE_A",
+          "stationCode": 0,
+          "stationDistance": 0,
+          "Avaliable": false,
+          "Overtaking": false,
+          "getin": false,
+          "getout": false,
+          "NextOT": false
+        }
+      ],
+      "CoordP": [
+        [
+          20,
+          0,
+          13
+        ]
+      ],
+      "Type": "Points",
+      "Class": "PLF",
+      "World": 0,
+      "CreateTime": "20261007",
+      "CreateBy": "original-creator",
+      "opaque": {
+        "zero": 0,
+        "no": false,
+        "empty": [],
+        "nothing": null
+      },
+      "tags": {
+        "audit": "keep"
+      },
+      "extensions": {
+        "link": {
+          "wiki": "https://example.invalid/v1"
+        },
+        "character": {
+          "brief": "V1 brief"
+        },
+        "foreign": {
+          "zero": 0,
+          "no": false,
+          "list": [
+            {
+              "a": 0,
+              "b": false
+            }
+          ]
+        }
+      },
+      "ModifityBy": "editing-user",
+      "ModifityTime": "20261012"
+    },
+    {
+      "ID": "ZPFB_EDIT",
+      "Name": "V1 edited PFB",
+      "LineID": "ZRLE_A",
+      "elevation": 0,
+      "height": 0,
+      "CoordG": [
+        [
+          [
+            [
+              20,
+              -64,
+              13
+            ],
+            [
+              70,
+              -64,
+              13
+            ],
+            [
+              70,
+              -64,
+              38
+            ],
+            [
+              20,
+              -64,
+              38
+            ]
+          ]
+        ]
+      ],
+      "Type": "Polygon",
+      "Class": "PFB",
+      "World": 0,
+      "CreateTime": "20261007",
+      "CreateBy": "original-creator",
+      "opaque": {
+        "zero": 0,
+        "no": false,
+        "empty": [],
+        "nothing": null
+      },
+      "tags": {
+        "audit": "keep"
+      },
+      "extensions": {
+        "link": {
+          "wiki": "https://example.invalid/v1"
+        },
+        "character": {
+          "brief": "V1 brief"
+        },
+        "foreign": {
+          "zero": 0,
+          "no": false,
+          "list": [
+            {
+              "a": 0,
+              "b": false
+            }
+          ]
+        }
+      },
+      "ModifityBy": "editing-user",
+      "ModifityTime": "20261012"
+    },
+    {
+      "ID": "ZSTB_EDIT",
+      "Name": "V1 edited STB",
+      "elevation": 0,
+      "height": 0,
+      "Floors": [
+        {
+          "ID": "ZSTF_A",
+          "Group": "0"
+        }
+      ],
+      "CoordG": [
+        [
+          [
+            [
+              20,
+              -64,
+              13
+            ],
+            [
+              70,
+              -64,
+              13
+            ],
+            [
+              70,
+              -64,
+              38
+            ],
+            [
+              20,
+              -64,
+              38
+            ]
+          ]
+        ]
+      ],
+      "Type": "Polygon",
+      "Class": "STB",
+      "World": 0,
+      "CreateTime": "20261007",
+      "CreateBy": "original-creator",
+      "opaque": {
+        "zero": 0,
+        "no": false,
+        "empty": [],
+        "nothing": null
+      },
+      "tags": {
+        "audit": "keep"
+      },
+      "extensions": {
+        "link": {
+          "wiki": "https://example.invalid/v1"
+        },
+        "character": {
+          "brief": "V1 brief"
+        },
+        "foreign": {
+          "zero": 0,
+          "no": false,
+          "list": [
+            {
+              "a": 0,
+              "b": false
+            }
+          ]
+        }
+      },
+      "ModifityBy": "editing-user",
+      "ModifityTime": "20261012"
+    },
+    {
+      "ID": "ZSBP_EDIT",
+      "Name": "V1 edited SBP",
+      "elevation": 0,
+      "stations": [
+        {
+          "ID": "ZSTA_A"
+        }
+      ],
+      "CoordP": [
+        [
+          20,
+          0,
+          13
+        ]
+      ],
+      "Type": "Points",
+      "Class": "SBP",
+      "World": 0,
+      "CreateTime": "20261007",
+      "CreateBy": "original-creator",
+      "opaque": {
+        "zero": 0,
+        "no": false,
+        "empty": [],
+        "nothing": null
+      },
+      "tags": {
+        "audit": "keep"
+      },
+      "extensions": {
+        "link": {
+          "wiki": "https://example.invalid/v1"
+        },
+        "character": {
+          "brief": "V1 brief"
+        },
+        "foreign": {
+          "zero": 0,
+          "no": false,
+          "list": [
+            {
+              "a": 0,
+              "b": false
+            }
+          ]
+        }
+      },
+      "ModifityBy": "editing-user",
+      "ModifityTime": "20261012"
+    },
+    {
+      "ID": "ZSTF_EDIT",
+      "Name": "V1 edited STF",
+      "NofFloor": "0",
+      "staBuildingID": "ZSTB_A",
+      "Situation": "Enable",
+      "elevation": 0,
+      "height": 0,
+      "CoordG": [
+        [
+          [
+            [
+              20,
+              -64,
+              13
+            ],
+            [
+              70,
+              -64,
+              13
+            ],
+            [
+              70,
+              -64,
+              38
+            ],
+            [
+              20,
+              -64,
+              38
+            ]
+          ]
+        ]
+      ],
+      "Type": "Polygon",
+      "Class": "STF",
+      "World": 0,
+      "CreateTime": "20261007",
+      "CreateBy": "original-creator",
+      "opaque": {
+        "zero": 0,
+        "no": false,
+        "empty": [],
+        "nothing": null
+      },
+      "tags": {
+        "audit": "keep"
+      },
+      "extensions": {
+        "link": {
+          "wiki": "https://example.invalid/v1"
+        },
+        "character": {
+          "brief": "V1 brief"
+        },
+        "foreign": {
+          "zero": 0,
+          "no": false,
+          "list": [
+            {
+              "a": 0,
+              "b": false
+            }
+          ]
+        }
+      },
+      "ModifityBy": "editing-user",
+      "ModifityTime": "20261012"
+    }
+  ],
+  "runtimeErrors": []
+}

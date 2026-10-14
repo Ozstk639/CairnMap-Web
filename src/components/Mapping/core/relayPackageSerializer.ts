@@ -65,7 +65,10 @@ function safeFilename(name: string): string {
 }
 
 function packageNameFor(operator: string, worldId: string, timestamp = new Date()): string {
-  const compact = timestamp.toISOString().replace(/[-:.TZ]/g, '').slice(0, 14);
+  // ISO timestamps contain only the digits we need plus separators.  Keeping
+  // the digits directly avoids a Tailwind scanner false-positive for the old
+  // character-class literal (which it treated as a CSS arbitrary value).
+  const compact = timestamp.toISOString().replace(/\D/g, '').slice(0, 14);
   const safe = (value: string, fallback: string) => String(value || fallback).replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 48) || fallback;
   return `RelayPackage_${safe(operator, 'operator')}_${safe(worldId, 'world')}_${compact}.zip`;
 }

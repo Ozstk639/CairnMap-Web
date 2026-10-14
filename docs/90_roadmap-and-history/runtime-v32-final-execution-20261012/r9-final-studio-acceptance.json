@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "initial Class is empty; validator is unmounted; removed global option panel is absent",
+    "four-level path chooses only direct children, permits parent editing and clears lower levels after changing Class",
+    "field-local value rows retain input focus, use grip order and keep blank English",
+    "calculator inserts a double-clicked field at the caret and preserves undo/redo",
+    "fixed annotations move by grip, remain nondeletable and workflow drafts block tab switches"
+  ],
+  "runtimeErrors": []
+}

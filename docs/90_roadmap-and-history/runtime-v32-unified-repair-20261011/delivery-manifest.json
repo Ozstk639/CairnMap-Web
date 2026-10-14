@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "cairnmap.v32-local-delivery.v3",
+  "candidateSourceHead": "b975f399bd2a5c55848a7837145ca56e4d8cc230",
+  "branch": "codex/cm-config-runtime-v32-migration-20261007",
+  "frozenV1": "0b82863d4fea3791f98917ba6d13f70e1f27eb15",
+  "verifiedFrozenSourceFiles": 520,
+  "frozenInventorySha256": "cffbedc185785af90ce4fef1936d6aaab59021d2e653a05db8090e90de3f4347",
+  "packageId": "cairnmap-config-v32-semantic",
+  "contractRevision": 8,
+  "packageRevision": 4,
+  "nodes": 95,
+  "composedWorkflows": 17,
+  "externalWorkflows": 3,
+  "jsonZipRoundTrip": true,
+  "validationErrors": 0,
+  "files": [
+    {
+      "path": "CairnMap_V32_FieldReuse_Drawing_r4.config.json",
+      "sha256": "ffcf77938eb83ea7054ebde4bdbe42980c36cde73c4cad864af5e329a216a2f5",
+      "bytes": 3346868
+    },
+    {
+      "path": "CairnMap_V32_FieldReuse_Drawing_r4.zip",
+      "sha256": "c74015c9d203d88c04fd5d7820216d254282fc4f9e0a6d80c11ba567283c5958",
+      "bytes": 49994
+    }
+  ],
+  "promotion": "local implementation; user manual acceptance pending; no push/PR/main/RIA update"
+}

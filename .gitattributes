@@ -72,3 +72,11 @@ package-lock.json text
 *.xls binary
 *.xlsx binary
 *.zip binary
+
+# Published config resources have byte hashes; checkout must preserve UTF-8 LF.
+src/configStudio/defaults/*.json text eol=lf
+docs/90_roadmap-and-history/runtime-v32-final-execution-20261012/*.config.json text eol=lf
+docs/90_roadmap-and-history/runtime-v32-final-execution-20261012/r9-r5-delivery-manifest.json text eol=lf
+
+# Historical blueprints carry byte hashes; preserve their original line endings.
+docs/90_roadmap-and-history/RuntimeV32_Incremental_Revision_Blueprint_v*_History_*.md -text

@@ -1,0 +1,11 @@
+{
+  "checks": [
+    "actual ZIP enters locked Class container; inner save only updates staged tree; saved main tree retains removed child until outer save",
+    "refresh restores staged tree and selection; unfinished outer transaction blocks tab switch",
+    "outer Save atomically replaces the Class tree, removes omitted old child and preserves inner edits",
+    "outer discard restores the complete saved main package instead of applying staged content",
+    "actual single-node ZIP shows a blocking conflict modal; cancel preserves main; accept uses upstream fixed field and saves without changing parent",
+    "durable save transaction rejects a stale expected package after another completed save"
+  ],
+  "runtimeErrors": []
+}

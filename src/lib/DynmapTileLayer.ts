@@ -1,3 +1,4 @@
+import { TILE_ZOOM_BOUNDS } from './mapZoom';
 /**
  * Dynmap 瓦片图层
  * 基于 LiveAtlas 的 DynmapTileLayer.ts 实现
@@ -278,10 +279,10 @@ export function createDynmapTileLayer(
     // Dynmap 默认 mapzoomin=2（超采样）
     extraZoomLevels: 2,
     // maxZoom = mapzoomin(2) + mapzoomout(3)
-    maxZoom: 5,
+    ...TILE_ZOOM_BOUNDS,
     // maxNativeZoom = mapzoomout（超过该级别只做前端放大）
-    maxNativeZoom: 3,
-    minZoom: 0,
+
+
     nightAndDay: false,
     isNight: true,
     // 设置属性

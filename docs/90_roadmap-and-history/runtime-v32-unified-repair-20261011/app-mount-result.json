@@ -1,0 +1,32 @@
+{
+  "checks": [
+    "actual App -> Lab -> lazy tool -> composed Runner -> drawing click -> complete commit",
+    "actual global mount and enabled true/false/true refresh the native labels and search data",
+    "real pointer on the mounted label opens its actual native feature card",
+    "actual delete selection and removal recover the mounted record",
+    "actual world switch closes measuring, unmounts original-world sources and prevents label leakage"
+  ],
+  "record": {
+    "World": "zth",
+    "Class": "WRP",
+    "Kind": "NOM",
+    "SKind": "NOM",
+    "ID": "ZWRPNOMNOM_BP10_UI",
+    "WRPointI2D": "BP10",
+    "Name": "BP10UI",
+    "hub": "",
+    "CreateBy": "bp10-ui-user",
+    "CreateTime": "20261011",
+    "Type": "Points",
+    "CoordP": [
+      [
+        15,
+        -64,
+        17
+      ]
+    ]
+  },
+  "scope": "actual App and tool UI; field/geometry/same-ID protocol matrix recorded separately",
+  "alerts": [],
+  "runtimeErrors": []
+}

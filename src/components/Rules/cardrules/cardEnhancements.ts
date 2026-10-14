@@ -109,7 +109,12 @@ function chipsRow(items: LineChipItem[], usedPaths: string[] = []): CardRow {
   return { label: '包含线路', value: chips, usedPaths };
 }
 
-function platformLineChips(feature: FeatureRecord, railIndex?: RailNewIndex | null): CardRow {
+/**
+ * These row builders are intentionally exported for the V3 declarative card
+ * renderer.  They are shared relation-index primitives, not specialised card
+ * layouts: any V3 card may opt into one by choosing `lineChips`.
+ */
+export function buildPlatformLineChipsRow(feature: FeatureRecord, railIndex?: RailNewIndex | null): CardRow {
   const fi: any = feature?.featureInfo ?? {};
   const plfId = normalize(feature?.meta?.idValue ?? fi?.ID ?? fi?.platformId);
   const lineRefs: Array<{ id: string; flags?: Record<string, boolean> }> = [];
@@ -149,12 +154,12 @@ function platformLineChips(feature: FeatureRecord, railIndex?: RailNewIndex | nu
   return chipsRow(mergeUpDownSameColorLines(rawItems), ['lines', 'Lines', 'LINES']);
 }
 
-function stationLineChips(feature: FeatureRecord, railIndex?: RailNewIndex | null): CardRow {
+export function buildStationLineChipsRow(feature: FeatureRecord, railIndex?: RailNewIndex | null): CardRow {
   const stationId = normalize(feature?.meta?.idValue);
   return chipsRow(uniqueLinesFromStationIds(stationId ? [stationId] : [], railIndex), []);
 }
 
-function stationBuildingLineChips(feature: FeatureRecord, railIndex?: RailNewIndex | null): CardRow {
+export function buildStationBuildingLineChipsRow(feature: FeatureRecord, railIndex?: RailNewIndex | null): CardRow {
   const buildingId = normalize(feature?.meta?.idValue);
   const stationIds = buildingId && railIndex?.buildingToStations.get(buildingId)
     ? Array.from(railIndex.buildingToStations.get(buildingId)!)
@@ -176,14 +181,14 @@ export function buildCardEnhancement(
   ctx: CardRegistryContext,
   railIndex?: RailNewIndex | null,
 ): CardRow[] {
-  if (key === 'platformLineChips') return [platformLineChips(ctx.feature, railIndex)];
-  if (key === 'stationLineChips') return [stationLineChips(ctx.feature, railIndex)];
+  if (key === 'platformLineChips') return [buildPlatformLineChipsRow(ctx.feature, railIndex)];
+  if (key === 'stationLineChips') return [buildStationLineChipsRow(ctx.feature, railIndex)];
   if (key === 'stationBuildingLineChips') {
     const fi: any = ctx.featureInfo ?? {};
     const height = ensureKnown(fi?.height ?? fi?.Height);
     return [
       { label: '高度', value: height, usedPaths: ['height', 'Height'] },
-      stationBuildingLineChips(ctx.feature, railIndex),
+      buildStationBuildingLineChipsRow(ctx.feature, railIndex),
     ];
   }
   if (key === 'railColorChip') return [railColorChip(ctx)];

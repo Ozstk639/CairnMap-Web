@@ -1,0 +1,16 @@
+{
+  "checks": [
+    "real IndexedDB refuses invalid activation and same-revision content replacement",
+    "same Runner and input survive desktop/narrow-screen layout switches",
+    "running workflow holds original package/workflow snapshot",
+    "world changes suspend submission and restore the original-world form",
+    "advanced field/collision/priority/anchor editors are mounted in the active Studio"
+  ],
+  "storage": {
+    "conflictRejected": true,
+    "invalidRejected": true,
+    "latestUnchanged": true,
+    "historySaved": true
+  },
+  "errors": []
+}

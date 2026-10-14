@@ -1,0 +1,1730 @@
+{
+  "cases": [
+    {
+      "schemaKey": "isg_ngf_lad",
+      "classification": {
+        "class": "ISG",
+        "kind": "NGF",
+        "skind": "LAD",
+        "skind2": "CON"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "ISG",
+        "Kind": "NGF",
+        "SKind": "LAD",
+        "SKind2": "CON",
+        "ID": "ZNGFLADCON_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polygon",
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isg_ngf_lad",
+      "classification": {
+        "class": "ISG",
+        "kind": "NGF",
+        "skind": "LAD",
+        "skind2": "CON"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "ISG",
+        "Kind": "NGF",
+        "SKind": "LAD",
+        "SKind2": "CON",
+        "ID": "ZNGFLADCON_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polygon",
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isg_ngf_lis",
+      "classification": {
+        "class": "ISG",
+        "kind": "NGF",
+        "skind": "LIS",
+        "skind2": "BSN"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "ISG",
+        "Kind": "NGF",
+        "SKind": "LIS",
+        "SKind2": "BSN",
+        "ID": "ZNGFLISBSN_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "Adm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polygon",
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isg_ngf_lis",
+      "classification": {
+        "class": "ISG",
+        "kind": "NGF",
+        "skind": "LIS",
+        "skind2": "BSN"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "ISG",
+        "Kind": "NGF",
+        "SKind": "LIS",
+        "SKind2": "BSN",
+        "ID": "ZNGFLISBSN_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "Adm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polygon",
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isg_ngf_wtb",
+      "classification": {
+        "class": "ISG",
+        "kind": "NGF",
+        "skind": "WTB",
+        "skind2": "EST"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "ISG",
+        "Kind": "NGF",
+        "SKind": "WTB",
+        "SKind2": "EST",
+        "ID": "ZNGFWTBEST_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polygon",
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isg_ngf_wtb",
+      "classification": {
+        "class": "ISG",
+        "kind": "NGF",
+        "skind": "WTB",
+        "skind2": "EST"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "ISG",
+        "Kind": "NGF",
+        "SKind": "WTB",
+        "SKind2": "EST",
+        "ID": "ZNGFWTBEST_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polygon",
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isg_adm_dbz",
+      "classification": {
+        "class": "ISG",
+        "kind": "ADM",
+        "skind": "DBZ",
+        "skind2": "L1"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "ISG",
+        "Kind": "ADM",
+        "SKind": "DBZ",
+        "SKind2": "L1",
+        "ID": "ZADMDBZL1_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample",
+          "GAdm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polygon",
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isg_adm_dbz",
+      "classification": {
+        "class": "ISG",
+        "kind": "ADM",
+        "skind": "DBZ",
+        "skind2": "L1"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "ISG",
+        "Kind": "ADM",
+        "SKind": "DBZ",
+        "SKind2": "L1",
+        "ID": "ZADMDBZL1_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample",
+          "GAdm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polygon",
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isg_adm_plz",
+      "classification": {
+        "class": "ISG",
+        "kind": "ADM",
+        "skind": "PLZ",
+        "skind2": "L1"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "ISG",
+        "Kind": "ADM",
+        "SKind": "PLZ",
+        "SKind2": "L1",
+        "ID": "ZADMPLZL1_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample",
+          "GAdm": "sample",
+          "YTime": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polygon",
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isg_adm_plz",
+      "classification": {
+        "class": "ISG",
+        "kind": "ADM",
+        "skind": "PLZ",
+        "skind2": "L1"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "ISG",
+        "Kind": "ADM",
+        "SKind": "PLZ",
+        "SKind2": "L1",
+        "ID": "ZADMPLZL1_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample",
+          "GAdm": "sample",
+          "YTime": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polygon",
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isl_ngf_wtr",
+      "classification": {
+        "class": "ISL",
+        "kind": "NGF",
+        "skind": "WTR",
+        "skind2": "CAN"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "ISL",
+        "Kind": "NGF",
+        "SKind": "WTR",
+        "SKind2": "CAN",
+        "ID": "ZNGFWTRCAN_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polyline",
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isl_ngf_wtr",
+      "classification": {
+        "class": "ISL",
+        "kind": "NGF",
+        "skind": "WTR",
+        "skind2": "CAN"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "ISL",
+        "Kind": "NGF",
+        "SKind": "WTR",
+        "SKind2": "CAN",
+        "ID": "ZNGFWTRCAN_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polyline",
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isl_ngf_bod",
+      "classification": {
+        "class": "ISL",
+        "kind": "NGF",
+        "skind": "BOD",
+        "skind2": "BDY"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "ISL",
+        "Kind": "NGF",
+        "SKind": "BOD",
+        "SKind2": "BDY",
+        "ID": "ZNGFBODBDY_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "BNgf1": "sample",
+          "BNgf2": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polyline",
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isl_ngf_bod",
+      "classification": {
+        "class": "ISL",
+        "kind": "NGF",
+        "skind": "BOD",
+        "skind2": "BDY"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "ISL",
+        "Kind": "NGF",
+        "SKind": "BOD",
+        "SKind2": "BDY",
+        "ID": "ZNGFBODBDY_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "BNgf1": "sample",
+          "BNgf2": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polyline",
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isl_adm_dbl",
+      "classification": {
+        "class": "ISL",
+        "kind": "ADM",
+        "skind": "DBL",
+        "skind2": "LBD"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "ISL",
+        "Kind": "ADM",
+        "SKind": "DBL",
+        "SKind2": "LBD",
+        "ID": "ZADMDBLLBD_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "BAdm1": "sample",
+          "BAdm2": "sample",
+          "GAdm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polyline",
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isl_adm_dbl",
+      "classification": {
+        "class": "ISL",
+        "kind": "ADM",
+        "skind": "DBL",
+        "skind2": "LBD"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "ISL",
+        "Kind": "ADM",
+        "SKind": "DBL",
+        "SKind2": "LBD",
+        "ID": "ZADMDBLLBD_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "BAdm1": "sample",
+          "BAdm2": "sample",
+          "GAdm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polyline",
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isl_adm_pll",
+      "classification": {
+        "class": "ISL",
+        "kind": "ADM",
+        "skind": "PLL",
+        "skind2": "CBD"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "ISL",
+        "Kind": "ADM",
+        "SKind": "PLL",
+        "SKind2": "CBD",
+        "ID": "ZADMPLLCBD_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "BAdm1": "sample",
+          "BAdm2": "sample",
+          "GAdm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polyline",
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isl_adm_pll",
+      "classification": {
+        "class": "ISL",
+        "kind": "ADM",
+        "skind": "PLL",
+        "skind2": "CBD"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "ISL",
+        "Kind": "ADM",
+        "SKind": "PLL",
+        "SKind2": "CBD",
+        "ID": "ZADMPLLCBD_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "BAdm1": "sample",
+          "BAdm2": "sample",
+          "GAdm": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polyline",
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isp_ngf_scp",
+      "classification": {
+        "class": "ISP",
+        "kind": "NGF",
+        "skind": "SCP",
+        "skind2": "SPP"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "ISP",
+        "Kind": "NGF",
+        "SKind": "SCP",
+        "SKind2": "SPP",
+        "ID": "ZNGFSCPSPP_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "character": {
+            "event": "sample",
+            "brief": "sample"
+          },
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Points",
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isp_ngf_scp",
+      "classification": {
+        "class": "ISP",
+        "kind": "NGF",
+        "skind": "SCP",
+        "skind2": "SPP"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "ISP",
+        "Kind": "NGF",
+        "SKind": "SCP",
+        "SKind2": "SPP",
+        "ID": "ZNGFSCPSPP_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "character": {
+            "event": "sample",
+            "brief": "sample"
+          },
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Points",
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isp_adm_dbp",
+      "classification": {
+        "class": "ISP",
+        "kind": "ADM",
+        "skind": "DBP",
+        "skind2": "LIP"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "ISP",
+        "Kind": "ADM",
+        "SKind": "DBP",
+        "SKind2": "LIP",
+        "ID": "ZADMDBPLIP_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "character": {
+            "event": "sample",
+            "brief": "sample"
+          },
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Points",
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isp_adm_dbp",
+      "classification": {
+        "class": "ISP",
+        "kind": "ADM",
+        "skind": "DBP",
+        "skind2": "LIP"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "ISP",
+        "Kind": "ADM",
+        "SKind": "DBP",
+        "SKind2": "LIP",
+        "ID": "ZADMDBPLIP_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "character": {
+            "event": "sample",
+            "brief": "sample"
+          },
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Points",
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isp_adm_plp",
+      "classification": {
+        "class": "ISP",
+        "kind": "ADM",
+        "skind": "PLP",
+        "skind2": "COP"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "ISP",
+        "Kind": "ADM",
+        "SKind": "PLP",
+        "SKind2": "COP",
+        "ID": "ZADMPLPCOP_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "character": {
+            "event": "sample",
+            "brief": "sample"
+          },
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Points",
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "isp_adm_plp",
+      "classification": {
+        "class": "ISP",
+        "kind": "ADM",
+        "skind": "PLP",
+        "skind2": "COP"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "ISP",
+        "Kind": "ADM",
+        "SKind": "PLP",
+        "SKind2": "COP",
+        "ID": "ZADMPLPCOP_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "character": {
+            "event": "sample",
+            "brief": "sample"
+          },
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Points",
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "bud_building",
+      "classification": {
+        "class": "BUD",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "BUD",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "ID": "ZBUD_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "Adm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polygon",
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "bud_building",
+      "classification": {
+        "class": "BUD",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "BUD",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "ID": "ZBUD_CAT_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "Adm": "sample",
+          "Pop": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polygon",
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "flr_unit",
+      "classification": {
+        "class": "FLR",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "FLR",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "ID": "ZFLR_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "Adm": "sample",
+          "Pop": "sample"
+        },
+        "BuildingID": "sample",
+        "NofFloor": "sample",
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polygon",
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "flr_unit",
+      "classification": {
+        "class": "FLR",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "FLR",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "ID": "ZFLR_CAT_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "Adm": "sample",
+          "Pop": "sample"
+        },
+        "BuildingID": "sample",
+        "NofFloor": "sample",
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polygon",
+        "CoordG": [
+          [
+            [
+              [
+                0,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                0
+              ],
+              [
+                20,
+                -64,
+                20
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "rod_road",
+      "classification": {
+        "class": "ROD",
+        "kind": "IDR"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "ROD",
+        "Kind": "IDR",
+        "ID": "ZROD_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "UAdmG": "sample"
+        },
+        "Level": 2,
+        "Oneway": true,
+        "Enter": true,
+        "Exit": true,
+        "SelfJunction": true,
+        "Speed": 2,
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polyline",
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "rod_road",
+      "classification": {
+        "class": "ROD",
+        "kind": "IDR"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "ROD",
+        "Kind": "IDR",
+        "ID": "ZROD_CAT_AB-1",
+        "Name": "sample",
+        "tags": {
+          "nomenclator": "sample",
+          "Land": "sample",
+          "UAdm": "sample",
+          "UAdmG": "sample"
+        },
+        "Level": 2,
+        "Oneway": true,
+        "Enter": true,
+        "Exit": true,
+        "SelfJunction": true,
+        "Speed": 2,
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          },
+          "character": {
+            "brief": "sample"
+          }
+        },
+        "ConnectL": [
+          {
+            "mode": "endpoint",
+            "tgt": "tgt-fixture"
+          }
+        ],
+        "Blacklist": [
+          {
+            "tgt": "tgt-fixture"
+          }
+        ],
+        "Mode": [
+          {
+            "code": "code-fixture"
+          }
+        ],
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Polyline",
+        "CoordL": [
+          [
+            [
+              0,
+              -64,
+              0
+            ],
+            [
+              20,
+              -64,
+              10
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "tpp_teleport",
+      "classification": {
+        "class": "TPP",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "TPP",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "ID": "ZTPPNOMNOM_AB-1",
+        "Name": "sample",
+        "hub": "sample",
+        "tags": {
+          "Land": "sample",
+          "UAdm": "sample",
+          "UAdmG": "sample"
+        },
+        "TGTWarp": "sample",
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Points",
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "tpp_teleport",
+      "classification": {
+        "class": "TPP",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "TPP",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "ID": "ZTPPNOMNOM_AB-1",
+        "Name": "sample",
+        "hub": "sample",
+        "tags": {
+          "Land": "sample",
+          "UAdm": "sample",
+          "UAdmG": "sample"
+        },
+        "TGTWarp": "sample",
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Points",
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "wrp_warp",
+      "classification": {
+        "class": "WRP",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "inputVariant": 0,
+      "record": {
+        "World": "zth",
+        "Class": "WRP",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "ID": "ZWRPNOMNOM_AB-1",
+        "WRPointI2D": "sample",
+        "Name": "sample",
+        "hub": "sample",
+        "tags": {
+          "Land": "sample",
+          "UAdm": "sample",
+          "UAdmG": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Points",
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "schemaKey": "wrp_warp",
+      "classification": {
+        "class": "WRP",
+        "kind": "NOM",
+        "skind": "NOM"
+      },
+      "inputVariant": 1,
+      "record": {
+        "World": "zth",
+        "Class": "WRP",
+        "Kind": "NOM",
+        "SKind": "NOM",
+        "ID": "ZWRPNOMNOM_AB-1",
+        "WRPointI2D": "sample",
+        "Name": "sample",
+        "hub": "sample",
+        "tags": {
+          "Land": "sample",
+          "UAdm": "sample",
+          "UAdmG": "sample"
+        },
+        "extensions": {
+          "link": {
+            "wiki": "sample"
+          }
+        },
+        "CreateBy": "fixture-user",
+        "CreateTime": "20261007",
+        "Type": "Points",
+        "CoordP": [
+          [
+            0,
+            -64,
+            0
+          ]
+        ]
+      }
+    }
+  ],
+  "errors": [],
+  "sourceSha": "0b82863d4fea3791f98917ba6d13f70e1f27eb15",
+  "expected": "frozen schema final-record fixtures",
+  "actual": "published r9/r5 production MeasuringModule + native Runner + real map clicks; direct save without adoption"
+}
